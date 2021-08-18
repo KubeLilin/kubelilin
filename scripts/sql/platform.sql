@@ -74,7 +74,7 @@ CREATE TABLE `sgr_tenant_user` (
 /*   DatabaseName = sgr_platform   */
 /*   TableName = tenant_user_role   */
 /******************************************/
-CREATE TABLE `tenant_user_role` (
+CREATE TABLE `sgr_tenant_user_role` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL COMMENT '用户id',
   `role_id` bigint(20) NOT NULL COMMENT '角色id',
