@@ -14,7 +14,7 @@ CREATE TABLE `sgr_sys_menu` (
   `createtion_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `un_c_code` (`context_code`) USING BTREE
+  UNIQUE KEY `un_c_code` (`menu_code`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='菜单'
 ;
 
