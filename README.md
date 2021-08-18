@@ -1,1 +1,0 @@
-# sgr-platform-api
