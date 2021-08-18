@@ -4,12 +4,12 @@
   "avatar": "",
   "version": "3.1.0",
   "createdTime": "2021-8-18 15:29:27",
-  "updatedTime": "2021-8-18 15:30:44",
+  "updatedTime": "2021-8-18 16:09:34",
   "dbConns": [],
   "profile": {
     "default": {
       "db": "MYSQL",
-      "dbConn": "",
+      "dbConn": "AAF005A1-8DCB-482E-8047-717A32F94A65",
       "entityInitFields": [
         {
           "defKey": "REVISION",
@@ -198,7 +198,1233 @@
       }
     ]
   },
-  "entities": [],
+  "entities": [
+    {
+      "rowNo": 0,
+      "defKey": "sgr_sys_menu",
+      "defName": "菜单",
+      "comment": "",
+      "properties": {},
+      "fields": [
+        {
+          "rowNo": 1,
+          "defKey": "id",
+          "defName": "",
+          "comment": null,
+          "domain": "",
+          "type": "BIGINT UNSIGNED",
+          "len": 21,
+          "scale": null,
+          "primaryKey": true,
+          "notNull": true,
+          "autoIncrement": true,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "BIGINT UNSIGNED(21)",
+          "primaryKeyName": "√",
+          "notNullName": "√",
+          "autoIncrementName": "√",
+          "refDict": ""
+        },
+        {
+          "rowNo": 2,
+          "defKey": "tenant_id",
+          "defName": "租户",
+          "comment": "",
+          "domain": "",
+          "type": "BIGINT",
+          "len": 20,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "BIGINT(20)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 3,
+          "defKey": "menu_code",
+          "defName": "编码",
+          "comment": "",
+          "domain": "",
+          "type": "VARCHAR",
+          "len": 100,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "VARCHAR(100)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 4,
+          "defKey": "menu_name",
+          "defName": "目录名称",
+          "comment": "",
+          "domain": "",
+          "type": "VARCHAR",
+          "len": 50,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "VARCHAR(50)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 5,
+          "defKey": "is_root",
+          "defName": "是否是根目录",
+          "comment": "",
+          "domain": "",
+          "type": "TINYINT",
+          "len": 4,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": "'0'",
+          "hideInGraph": false,
+          "typeFullName": "TINYINT(4)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 6,
+          "defKey": "parent_id",
+          "defName": "父层级id",
+          "comment": "",
+          "domain": "",
+          "type": "BIGINT",
+          "len": 20,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": "'0'",
+          "hideInGraph": false,
+          "typeFullName": "BIGINT(20)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 7,
+          "defKey": "sort",
+          "defName": "权重",
+          "comment": "正序排序",
+          "domain": "",
+          "type": "INT",
+          "len": 11,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": "'0'",
+          "hideInGraph": false,
+          "typeFullName": "INT(11)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 8,
+          "defKey": "status",
+          "defName": "状态",
+          "comment": "",
+          "domain": "",
+          "type": "TINYINT",
+          "len": 4,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": "'0'",
+          "hideInGraph": false,
+          "typeFullName": "TINYINT(4)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 9,
+          "defKey": "createtion_time",
+          "defName": "",
+          "comment": null,
+          "domain": "",
+          "type": "DATETIME",
+          "len": 19,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "'CURRENT_TIMESTAMP'",
+          "hideInGraph": false,
+          "typeFullName": "DATETIME(19)",
+          "primaryKeyName": "",
+          "notNullName": "",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 10,
+          "defKey": "update_time",
+          "defName": "",
+          "comment": null,
+          "domain": "",
+          "type": "DATETIME",
+          "len": 19,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "DATETIME(19)",
+          "primaryKeyName": "",
+          "notNullName": "",
+          "autoIncrementName": "",
+          "refDict": ""
+        }
+      ],
+      "indexes": [
+        {
+          "defKey": "PRIMARY",
+          "unique": true,
+          "defName": null,
+          "comment": "",
+          "fields": [
+            {
+              "ascOrDesc": "A",
+              "fieldDefKey": "id"
+            }
+          ]
+        },
+        {
+          "defKey": "un_c_code",
+          "unique": true,
+          "defName": null,
+          "comment": "",
+          "fields": [
+            {
+              "ascOrDesc": "A",
+              "fieldDefKey": "menu_code"
+            }
+          ]
+        }
+      ],
+      "headers": [
+        {
+          "refKey": "hideInGraph",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "defKey",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "defName",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "primaryKey",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "notNull",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "autoIncrement",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "domain",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "type",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "len",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "scale",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "comment",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "refDict",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "defaultValue",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "isStandard",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "uiHint",
+          "hideInGraph": true
+        }
+      ]
+    },
+    {
+      "rowNo": 0,
+      "defKey": "sgr_tenant",
+      "defName": "租户",
+      "comment": "",
+      "properties": {},
+      "fields": [
+        {
+          "rowNo": 1,
+          "defKey": "id",
+          "defName": "",
+          "comment": null,
+          "domain": "",
+          "type": "BIGINT UNSIGNED",
+          "len": 21,
+          "scale": null,
+          "primaryKey": true,
+          "notNull": true,
+          "autoIncrement": true,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "BIGINT UNSIGNED(21)",
+          "primaryKeyName": "√",
+          "notNullName": "√",
+          "autoIncrementName": "√",
+          "refDict": ""
+        },
+        {
+          "rowNo": 2,
+          "defKey": "t_name",
+          "defName": "租户名称",
+          "comment": "",
+          "domain": "",
+          "type": "VARCHAR",
+          "len": 50,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "VARCHAR(50)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 3,
+          "defKey": "t_code",
+          "defName": "租户编码",
+          "comment": "",
+          "domain": "",
+          "type": "VARCHAR",
+          "len": 16,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "VARCHAR(16)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 4,
+          "defKey": "status",
+          "defName": "状态",
+          "comment": "",
+          "domain": "",
+          "type": "TINYINT",
+          "len": 4,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": "'0'",
+          "hideInGraph": false,
+          "typeFullName": "TINYINT(4)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 5,
+          "defKey": "creation_time",
+          "defName": "创建时间",
+          "comment": "",
+          "domain": "",
+          "type": "DATETIME",
+          "len": 19,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "DATETIME(19)",
+          "primaryKeyName": "",
+          "notNullName": "",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 6,
+          "defKey": "update_time",
+          "defName": "修改时间",
+          "comment": "",
+          "domain": "",
+          "type": "DATETIME",
+          "len": 19,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "DATETIME(19)",
+          "primaryKeyName": "",
+          "notNullName": "",
+          "autoIncrementName": "",
+          "refDict": ""
+        }
+      ],
+      "indexes": [
+        {
+          "defKey": "PRIMARY",
+          "unique": true,
+          "defName": null,
+          "comment": "",
+          "fields": [
+            {
+              "ascOrDesc": "A",
+              "fieldDefKey": "id"
+            }
+          ]
+        },
+        {
+          "defKey": "un_code",
+          "unique": true,
+          "defName": null,
+          "comment": "",
+          "fields": [
+            {
+              "ascOrDesc": "A",
+              "fieldDefKey": "t_code"
+            }
+          ]
+        }
+      ],
+      "headers": [
+        {
+          "refKey": "hideInGraph",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "defKey",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "defName",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "primaryKey",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "notNull",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "autoIncrement",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "domain",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "type",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "len",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "scale",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "comment",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "refDict",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "defaultValue",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "isStandard",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "uiHint",
+          "hideInGraph": true
+        }
+      ]
+    },
+    {
+      "rowNo": 0,
+      "defKey": "sgr_tenant_role",
+      "defName": "租户角色",
+      "comment": "",
+      "properties": {},
+      "fields": [
+        {
+          "rowNo": 1,
+          "defKey": "id",
+          "defName": "",
+          "comment": null,
+          "domain": "",
+          "type": "BIGINT UNSIGNED",
+          "len": 21,
+          "scale": null,
+          "primaryKey": true,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "BIGINT UNSIGNED(21)",
+          "primaryKeyName": "√",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 2,
+          "defKey": "role_code",
+          "defName": "角色编码",
+          "comment": "",
+          "domain": "",
+          "type": "VARCHAR",
+          "len": 30,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "VARCHAR(30)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 3,
+          "defKey": "role_name",
+          "defName": "角色名称",
+          "comment": "",
+          "domain": "",
+          "type": "VARCHAR",
+          "len": 50,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "VARCHAR(50)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 4,
+          "defKey": "status",
+          "defName": "状态",
+          "comment": "",
+          "domain": "",
+          "type": "TINYINT",
+          "len": 4,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": "'0'",
+          "hideInGraph": false,
+          "typeFullName": "TINYINT(4)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 5,
+          "defKey": "tenant_id",
+          "defName": "租户",
+          "comment": "",
+          "domain": "",
+          "type": "BIGINT",
+          "len": 20,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "BIGINT(20)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 6,
+          "defKey": "createtion_time",
+          "defName": "",
+          "comment": null,
+          "domain": "",
+          "type": "DATETIME",
+          "len": 19,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "'CURRENT_TIMESTAMP'",
+          "hideInGraph": false,
+          "typeFullName": "DATETIME(19)",
+          "primaryKeyName": "",
+          "notNullName": "",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 7,
+          "defKey": "update_time",
+          "defName": "",
+          "comment": null,
+          "domain": "",
+          "type": "DATETIME",
+          "len": 19,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "DATETIME(19)",
+          "primaryKeyName": "",
+          "notNullName": "",
+          "autoIncrementName": "",
+          "refDict": ""
+        }
+      ],
+      "indexes": [
+        {
+          "defKey": "PRIMARY",
+          "unique": true,
+          "defName": null,
+          "comment": "",
+          "fields": [
+            {
+              "ascOrDesc": "A",
+              "fieldDefKey": "id"
+            }
+          ]
+        },
+        {
+          "defKey": "un_role_code_name",
+          "unique": true,
+          "defName": null,
+          "comment": "",
+          "fields": [
+            {
+              "ascOrDesc": "A",
+              "fieldDefKey": "role_code"
+            },
+            {
+              "ascOrDesc": "A",
+              "fieldDefKey": "role_name"
+            }
+          ]
+        }
+      ],
+      "headers": [
+        {
+          "refKey": "hideInGraph",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "defKey",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "defName",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "primaryKey",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "notNull",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "autoIncrement",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "domain",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "type",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "len",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "scale",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "comment",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "refDict",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "defaultValue",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "isStandard",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "uiHint",
+          "hideInGraph": true
+        }
+      ]
+    },
+    {
+      "rowNo": 0,
+      "defKey": "sgr_tenant_user",
+      "defName": "用户信息",
+      "comment": "",
+      "properties": {},
+      "fields": [
+        {
+          "rowNo": 1,
+          "defKey": "id",
+          "defName": "",
+          "comment": null,
+          "domain": "",
+          "type": "BIGINT UNSIGNED",
+          "len": 21,
+          "scale": null,
+          "primaryKey": true,
+          "notNull": true,
+          "autoIncrement": true,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "BIGINT UNSIGNED(21)",
+          "primaryKeyName": "√",
+          "notNullName": "√",
+          "autoIncrementName": "√",
+          "refDict": ""
+        },
+        {
+          "rowNo": 2,
+          "defKey": "tenant_id",
+          "defName": "租户",
+          "comment": "",
+          "domain": "",
+          "type": "BIGINT",
+          "len": 20,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "BIGINT(20)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 3,
+          "defKey": "user_name",
+          "defName": "用户名",
+          "comment": "",
+          "domain": "",
+          "type": "VARCHAR",
+          "len": 50,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "VARCHAR(50)",
+          "primaryKeyName": "",
+          "notNullName": "",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 4,
+          "defKey": "account",
+          "defName": "账号",
+          "comment": "",
+          "domain": "",
+          "type": "VARCHAR",
+          "len": 50,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "VARCHAR(50)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 5,
+          "defKey": "password",
+          "defName": "密码",
+          "comment": "",
+          "domain": "",
+          "type": "VARCHAR",
+          "len": 255,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "VARCHAR(255)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 6,
+          "defKey": "mobile",
+          "defName": "手机",
+          "comment": "",
+          "domain": "",
+          "type": "VARCHAR",
+          "len": 10,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "VARCHAR(10)",
+          "primaryKeyName": "",
+          "notNullName": "",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 7,
+          "defKey": "email",
+          "defName": "邮箱",
+          "comment": "",
+          "domain": "",
+          "type": "VARCHAR",
+          "len": 50,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "VARCHAR(50)",
+          "primaryKeyName": "",
+          "notNullName": "",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 8,
+          "defKey": "status",
+          "defName": "状态",
+          "comment": "",
+          "domain": "",
+          "type": "TINYINT",
+          "len": 4,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": "'0'",
+          "hideInGraph": false,
+          "typeFullName": "TINYINT(4)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 9,
+          "defKey": "createtion_time",
+          "defName": "",
+          "comment": null,
+          "domain": "",
+          "type": "DATETIME",
+          "len": 19,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "'CURRENT_TIMESTAMP'",
+          "hideInGraph": false,
+          "typeFullName": "DATETIME(19)",
+          "primaryKeyName": "",
+          "notNullName": "",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 10,
+          "defKey": "update_time",
+          "defName": "",
+          "comment": null,
+          "domain": "",
+          "type": "DATETIME",
+          "len": 19,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "DATETIME(19)",
+          "primaryKeyName": "",
+          "notNullName": "",
+          "autoIncrementName": "",
+          "refDict": ""
+        }
+      ],
+      "indexes": [
+        {
+          "defKey": "PRIMARY",
+          "unique": true,
+          "defName": null,
+          "comment": "",
+          "fields": [
+            {
+              "ascOrDesc": "A",
+              "fieldDefKey": "id"
+            }
+          ]
+        }
+      ],
+      "headers": [
+        {
+          "refKey": "hideInGraph",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "defKey",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "defName",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "primaryKey",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "notNull",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "autoIncrement",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "domain",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "type",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "len",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "scale",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "comment",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "refDict",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "defaultValue",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "isStandard",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "uiHint",
+          "hideInGraph": true
+        }
+      ]
+    },
+    {
+      "rowNo": 0,
+      "defKey": "sgr_tenant_user_role",
+      "defName": "用户角色",
+      "comment": "",
+      "properties": {},
+      "fields": [
+        {
+          "rowNo": 1,
+          "defKey": "id",
+          "defName": "",
+          "comment": null,
+          "domain": "",
+          "type": "BIGINT UNSIGNED",
+          "len": 21,
+          "scale": null,
+          "primaryKey": true,
+          "notNull": true,
+          "autoIncrement": true,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "BIGINT UNSIGNED(21)",
+          "primaryKeyName": "√",
+          "notNullName": "√",
+          "autoIncrementName": "√",
+          "refDict": ""
+        },
+        {
+          "rowNo": 2,
+          "defKey": "user_id",
+          "defName": "用户id",
+          "comment": "",
+          "domain": "",
+          "type": "BIGINT",
+          "len": 20,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "BIGINT(20)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 3,
+          "defKey": "role_id",
+          "defName": "角色id",
+          "comment": "",
+          "domain": "",
+          "type": "BIGINT",
+          "len": 20,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "BIGINT(20)",
+          "primaryKeyName": "",
+          "notNullName": "√",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 4,
+          "defKey": "creation_time",
+          "defName": "",
+          "comment": null,
+          "domain": "",
+          "type": "DATETIME",
+          "len": 19,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "'CURRENT_TIMESTAMP'",
+          "hideInGraph": false,
+          "typeFullName": "DATETIME(19)",
+          "primaryKeyName": "",
+          "notNullName": "",
+          "autoIncrementName": "",
+          "refDict": ""
+        },
+        {
+          "rowNo": 5,
+          "defKey": "update_time",
+          "defName": "",
+          "comment": null,
+          "domain": "",
+          "type": "DATETIME",
+          "len": 19,
+          "scale": null,
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": null,
+          "hideInGraph": false,
+          "typeFullName": "DATETIME(19)",
+          "primaryKeyName": "",
+          "notNullName": "",
+          "autoIncrementName": "",
+          "refDict": ""
+        }
+      ],
+      "indexes": [
+        {
+          "defKey": "PRIMARY",
+          "unique": true,
+          "defName": null,
+          "comment": "",
+          "fields": [
+            {
+              "ascOrDesc": "A",
+              "fieldDefKey": "id"
+            }
+          ]
+        }
+      ],
+      "headers": [
+        {
+          "refKey": "hideInGraph",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "defKey",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "defName",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "primaryKey",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "notNull",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "autoIncrement",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "domain",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "type",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "len",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "scale",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "comment",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "refDict",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "defaultValue",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "isStandard",
+          "hideInGraph": false
+        },
+        {
+          "refKey": "uiHint",
+          "hideInGraph": true
+        }
+      ]
+    }
+  ],
   "views": [],
   "dicts": [],
   "viewGroups": [],
@@ -329,6 +1555,20 @@
       "len": "900",
       "scale": "",
       "uiHint": {}
+    }
+  ],
+  "dbConn": [
+    {
+      "defKey": "AAF005A1-8DCB-482E-8047-717A32F94A65",
+      "defName": "test",
+      "type": "",
+      "properties": {
+        "driver_class_name": "com.mysql.cj.jdbc.Driver",
+        "url": "jdbc:mysql://cdb-amqub3mo.bj.tencentcdb.com:10042/sgr_paas?characterEncoding=UTF-8&useSSL=false&useUnicode=true&serverTimezone=UTC",
+        "password": "1234abcd",
+        "username": "root",
+        "customer_driver": ""
+      }
     }
   ]
 }
