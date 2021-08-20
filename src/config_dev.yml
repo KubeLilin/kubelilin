@@ -1,0 +1,54 @@
+yoyogo:
+  application:
+    name: sgr_platform_api
+    metadata: "develop"
+    server:
+      type: "fasthttp"
+      address: ":8080"
+      max_request_size: 2096157
+      mvc:
+        template: "v1/{controller}/{action}"
+      cors:
+        allow_origins: ["*"]
+        allow_methods: ["POST","GET","PUT", "PATCH"]
+        allow_credentials: true
+  cloud:
+    discovery:
+      cache:
+        ttl: 30     # seconds
+      strategy: "round-robin"    # round-robin  , weight-time ,  random
+      type: "nacos"
+      metadata:
+        url: "120.53.133.30"
+        port: 80
+        namespace: "2fd38432-a05f-4554-bf59-15f247409bd0"
+        group: "DEFAULT_GROUP"
+        cluster: ""
+        configserver:
+          dataId: "sgr_platform_api"
+        auth:
+          enable: true
+          username: "nacos"
+          password: "nacos"
+          endpoint: ""
+          regionId: ""
+          accessKey: ""
+          secretKey: ""
+          openKMS: false
+  datasource:
+    pool:
+      init_cap: 2
+      max_cap: 5
+      idle_timeout: 5
+    db:
+      name: db1
+      type: mysql
+      url: tcp(cdb-amqub3mo.bj.tencentcdb.com:10042)/yoyoBlog?charset=utf8&parseTime=True
+      username: root
+      password: 1234abcd
+      debug: true
+    redis:
+      name: reids1
+      url: 62.234.6.120:31379
+      password:
+      db: 0
