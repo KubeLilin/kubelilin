@@ -13,4 +13,6 @@ go get -u -v github.com/xxjwxc/gormt@master
 ```
 
 # 输出目录
+```bash
 ../../src/domain/database/models/
+```
