@@ -2,6 +2,8 @@ package main
 
 import (
 	nacosConfig "github.com/yoyofx/yoyogo/pkg/configuration/nacos"
+	_ "github.com/yoyofx/yoyogo/pkg/datasources/mysql"
+	_ "github.com/yoyofx/yoyogo/pkg/datasources/redis"
 	"github.com/yoyofx/yoyogo/pkg/servicediscovery/nacos"
 	"github.com/yoyofx/yoyogo/web"
 	"github.com/yoyofx/yoyogo/web/middlewares"
