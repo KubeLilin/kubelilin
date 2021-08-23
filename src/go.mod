@@ -8,7 +8,9 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/yoyofxteam/dependencyinjection v1.0.1
 	github.com/yoyofxteam/reflectx v0.2.3
-	gorm.io/gorm v1.21.11
+	gorm.io/gorm v1.21.13
 	github.com/jinzhu/copier v0.3.2
 	github.com/yoyofxteam/nacos-viper-remote v0.4.0
 )
+
+replace gorm.io/gorm v1.21.13 => github.com/go-gorm/gorm v1.21.13

@@ -9,7 +9,7 @@ go get -u -v github.com/xxjwxc/gormt@master
 # 执行
 在tools/db/ 目录执行如下命令：
 ```bash
-./gormt -g=false
+gormt -g=false
 ```
 
 # 输出目录
