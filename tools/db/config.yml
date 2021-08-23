@@ -1,0 +1,30 @@
+base:
+    is_dev: true
+db_info:
+    host: cdb-amqub3mo.bj.tencentcdb.com
+    port: 10042
+    username: root
+    password: 1234abcd
+    database: sgr_paas
+    type: 0
+out_dir: ../../src/domain/database/models/
+url_tag: json
+language: 中 文
+db_tag: gorm
+simple: true
+is_web_tag: false
+is_web_tag_pk_hidden: false
+is_foreign_key: true
+is_out_sql: false
+is_out_func: true
+is_gui: true
+is_table_name: false
+is_null_to_point: false
+table_prefix: ""
+self_type_define: {}
+out_file_name: ""
+web_tag_type: 0
+table_names: ""
+is_column_name: true
+is_out_file_by_table_name: false
+
