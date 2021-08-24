@@ -16,3 +16,6 @@ gormt -g=false
 ```bash
 ../../src/domain/database/models/
 ```
+
+# gorm 文档
+https://gorm.io/zh_CN/docs/sql_builder.html
