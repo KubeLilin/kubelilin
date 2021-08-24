@@ -1,5 +1,5 @@
 base:
-    is_dev: true
+    is_dev: false
 db_info:
     host: cdb-amqub3mo.bj.tencentcdb.com
     port: 10042
@@ -11,14 +11,14 @@ out_dir: ../../src/domain/database/models/
 url_tag: json
 language: 中 文
 db_tag: gorm
-simple: true
+simple: false
 is_web_tag: false
 is_web_tag_pk_hidden: false
 is_foreign_key: true
 is_out_sql: false
-is_out_func: true
+is_out_func: false
 is_gui: true
-is_table_name: false
+is_table_name: true
 is_null_to_point: false
 table_prefix: ""
 self_type_define: {}
