@@ -7,6 +7,7 @@ ENV GO111MODULE=on \
     GOARCH=amd64 \
     GOPROXY=https://goproxy.cn,direct
 
+
 WORKDIR /publish
 
 COPY . .
@@ -36,5 +37,10 @@ COPY --from=builder /publish/app /
 
 COPY --from=builder /publish/*.yml /
 
+ENV TINI_VERSION v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-static /tini
+RUN chmod +x /tini
+ENTRYPOINT ["/tini", "--"]
+
 # Run
-ENTRYPOINT ["/app"]
+CMD ["/app"]
