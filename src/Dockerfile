@@ -14,13 +14,13 @@ COPY . .
 RUN go build -ldflags="-s -w" -o app .
 
 # 最终容器
-FROM scratch:latest as production
+FROM scratch as production
 
-COPY --from=build /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+COPY --from=builder /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
-COPY --from=build /publish/app /
+COPY --from=builder /publish/app /
 
-COPY --from=build /publish/*.yml /
+COPY --from=builder /publish/*.yml /
 
 # Run
 CMD ["/app"]
