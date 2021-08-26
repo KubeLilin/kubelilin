@@ -4,6 +4,7 @@ import (
 	"github.com/yoyofx/yoyogo/abstractions"
 	"github.com/yoyofx/yoyogo/pkg/configuration"
 	"github.com/yoyofxteam/dependencyinjection"
+	"sgr/domain/business/tenant"
 	"sgr/domain/conf"
 )
 
@@ -17,6 +18,7 @@ func init() {
 			//serviceCollection.AddSingleton(........)
 
 			// 加载配置文件对象
+			serviceCollection.AddTransient(tenant.NewTenantService)
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
 
 		})

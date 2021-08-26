@@ -19,4 +19,5 @@ func ConfigureApi(builder router.IRouterBuilder) {
 func ConfigureMvc(builder *mvc.ControllerBuilder) {
 	//builder.AddFilter("/v1/user/info", &contollers.TestActionFilter{})
 	builder.AddController(controllers.NewDemoController)
+	builder.AddController(controllers.NewTenantController)
 }

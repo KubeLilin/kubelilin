@@ -11,7 +11,7 @@ CREATE TABLE `sgr_sys_menu` (
   `parent_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '父层级id',
   `sort` int(11) NOT NULL DEFAULT '0' COMMENT '权重，正序排序',
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态',
-  `createtion_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `creation_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `un_c_code` (`menu_code`) USING BTREE
