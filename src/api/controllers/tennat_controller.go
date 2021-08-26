@@ -4,7 +4,6 @@ import (
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"sgr/domain/business/tenant"
 	"sgr/domain/database/models"
-	"time"
 )
 
 type TenantController struct {
@@ -12,20 +11,31 @@ type TenantController struct {
 	Service *tenant.TenantService
 }
 
-type SgrTentDTO struct {
-	ID           uint64
-	TName        string     `json:"tName"`
-	TCode        string     `json:"tCode"`  // 租户编码
-	Status       int8       `json:"status"` // 状态
-	CreationTime *time.Time // 创建时间
-	UpdateTime   *time.Time
+type TenantRequest struct {
+	mvc.RequestBody
+	//properties
+	ID     uint64 `json:"id"`
+	TName  string `json:"name"`
+	TCode  string `json:"code"`   // 租户编码
+	Status int8   `json:"status"` // 状态
 }
 
 func NewTenantController(service *tenant.TenantService) *TenantController {
 	return &TenantController{Service: service}
 }
 
-func (controller TenantController) PostCreateTenant(tenant SgrTentDTO) mvc.ApiResult {
+/*
+	PostCreate Create tenant
+	URL: http://localhost:8080/v1/tenant/create
+	BODY:
+	{
+		"id":0,
+		"name":"曹操爱吃",
+		"code":"666",
+		"status":0
+	}
+*/
+func (controller TenantController) PostCreate(tenant *TenantRequest) mvc.ApiResult {
 	res := controller.Service.CreateTenant(&models.SgrTenant{
 		TName:  tenant.TName,
 		TCode:  tenant.TCode,
@@ -34,7 +44,7 @@ func (controller TenantController) PostCreateTenant(tenant SgrTentDTO) mvc.ApiRe
 	return mvc.ApiResult{Data: res}
 }
 
-func (controller TenantController) PostUpdateTenant(tenant SgrTentDTO) mvc.ApiResult {
+func (controller TenantController) PostUpdate(tenant *TenantRequest) mvc.ApiResult {
 	res := controller.Service.UpdateTenant(&models.SgrTenant{
 		TName:  tenant.TName,
 		TCode:  tenant.TCode,

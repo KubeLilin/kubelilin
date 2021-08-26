@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"gorm.io/gorm"
 	dbmodels "sgr/domain/database/models"
@@ -30,7 +29,7 @@ func (controller DemoController) GetTestSQL() mvc.ApiResult {
 	// get db object and then take a tenant manager
 	adminTenant := dbmodels.SgrTenant{}
 	// get tenant by manager and then that by get from id
-	_ = controller.db.WithContext(context.Background()).Model(dbmodels.SgrTenant{}).Where("`id` = ?", 1).Find(&adminTenant).Error
+	_ = controller.db.Debug().Model(dbmodels.SgrTenant{}).Where("`id` = ?", 1).Find(&adminTenant).Error
 
 	// return tenant to response
 	return controller.OK(adminTenant)
