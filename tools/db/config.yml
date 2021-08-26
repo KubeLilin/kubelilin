@@ -21,7 +21,9 @@ is_gui: true
 is_table_name: true
 is_null_to_point: false
 table_prefix: ""
-self_type_define: {}
+self_type_define:
+    datetime: "*time.Time"
+    date: "*time.Time"
 out_file_name: ""
 web_tag_type: 0
 table_names: ""
