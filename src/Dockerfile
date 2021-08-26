@@ -16,7 +16,7 @@ RUN go build -ldflags="-s -w" -o app .
 # 最终容器
 FROM scratch as production
 
-COPY --from=builder /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+#COPY --from=builder /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 COPY --from=builder /publish/app /
 
