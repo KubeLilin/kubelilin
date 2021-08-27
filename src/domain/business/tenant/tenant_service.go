@@ -3,7 +3,9 @@ package tenant
 import (
 	"fmt"
 	"gorm.io/gorm"
+	"sgr/api/dto"
 	"sgr/domain/database/models"
+	"sgr/pkg/page"
 )
 
 type TenantService struct {
@@ -13,8 +15,6 @@ type TenantService struct {
 func NewTenantService(db *gorm.DB) *TenantService {
 	return &TenantService{db: db}
 }
-
-var dsn = "user:pass@tcp(49.232.153.51:3306)/sgr_platform?charset=utf8mb4&parseTime=True&loc=Local"
 
 func (ts *TenantService) CreateTenant(tenant *models.SgrTenant) *models.SgrTenant {
 	res := ts.db.Create(tenant)
@@ -28,7 +28,28 @@ func (ts *TenantService) UpdateTenant(tenant *models.SgrTenant) *models.SgrTenan
 	return tenant
 }
 
-func (ts *TenantService) ChangeStatus(id int64, status bool) int64 {
+func (ts *TenantService) ChangeStatus(id uint64, status int8) int64 {
 	res := ts.db.Model(&models.SgrTenant{}).Where("id=?", id).Update(models.SgrTenantColumns.Status, status)
 	return res.RowsAffected
+}
+
+func (ts *TenantService) QueryTenantList(request *dto.TenantRequest) *page.Page {
+	data := &[]models.SgrTenant{}
+	ts.db.Model(&models.SgrTenant{}).Where(&models.SgrTenant{
+		TName:  request.TName,
+		TCode:  request.TCode,
+		Status: request.Status,
+	}).Offset(request.OffSet()).Limit(request.PageSize).Find(data)
+	var count int64
+	ts.db.Model(&models.SgrTenant{}).Where(&models.SgrTenant{
+		TName:  request.TName,
+		TCode:  request.TCode,
+		Status: request.Status,
+	}).Count(&count)
+	return &page.Page{
+		Data:      data,
+		Total:     count,
+		PageIndex: request.PageIndex,
+		PageSize:  request.PageSize,
+	}
 }
