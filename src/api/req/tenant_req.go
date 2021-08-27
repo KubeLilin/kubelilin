@@ -1,4 +1,4 @@
-package dto
+package req
 
 import (
 	"github.com/yoyofx/yoyogo/web/mvc"

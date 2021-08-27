@@ -3,7 +3,7 @@ package tenant
 import (
 	"fmt"
 	"gorm.io/gorm"
-	"sgr/api/dto"
+	"sgr/api/req"
 	"sgr/domain/database/models"
 	"sgr/pkg/page"
 )
@@ -33,7 +33,7 @@ func (ts *TenantService) ChangeStatus(id uint64, status int8) int64 {
 	return res.RowsAffected
 }
 
-func (ts *TenantService) QueryTenantList(request *dto.TenantRequest) *page.Page {
+func (ts *TenantService) QueryTenantList(request *req.TenantRequest) *page.Page {
 	data := &[]models.SgrTenant{}
 	ts.db.Model(&models.SgrTenant{}).Where(&models.SgrTenant{
 		TName:  request.TName,
