@@ -1,7 +1,7 @@
 cd ../src
 
-docker rmi sgr-api
+docker rmi yoyofx/sgr-api:v0.1.0
 
-docker build -t sgr-api .
+docker build -t yoyofx/sgr-api:v0.1.0 .
 
-docker run --rm -p 8080:8080 sgr-api
+docker run --rm -p 8080:8080 yoyofx/sgr-api:v0.1.0
