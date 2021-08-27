@@ -7,20 +7,20 @@ ENV GO111MODULE=on \
     GOARCH=amd64 \
     GOPROXY=https://goproxy.cn,direct
 
+
 WORKDIR /publish
 
 COPY . .
 
 RUN go build -ldflags="-s -w" -o app .
 
-# 最终容器
-FROM scratch:latest as production
 
-COPY --from=build /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+# 最终容器, 基础镜像alpine 中包含 tini
+FROM yoyofx/tini:1.0-alpine as production
 
-COPY --from=build /publish/app /
+COPY --from=builder /publish/app /
 
-COPY --from=build /publish/*.yml /
+COPY --from=builder /publish/*.yml /
 
 # Run
 CMD ["/app"]
