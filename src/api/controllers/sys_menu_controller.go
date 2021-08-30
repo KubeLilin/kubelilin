@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/jinzhu/copier"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"sgr/api/req"
@@ -10,10 +11,21 @@ import (
 
 type SysMenuController struct {
 	mvc.ApiController
-	service tenant.SysMenuService
+	service *tenant.SysMenuService
 }
 
-func (c *SysMenuController) CreateMenu(menu *models.SgrSysMenu) mvc.ApiResult {
+func NewSysMenuController(service *tenant.SysMenuService) *SysMenuController {
+	return &SysMenuController{
+		service: service,
+	}
+}
+
+func (c *SysMenuController) CreateMenu(req *req.SysMenuReq) mvc.ApiResult {
+	var menu = &models.SgrSysMenu{}
+	err := copier.Copy(menu, req)
+	if err != nil {
+		panic(err)
+	}
 	success, res := c.service.CreateMenu(menu)
 	return mvc.ApiResult{
 		Success: success,
@@ -22,7 +34,12 @@ func (c *SysMenuController) CreateMenu(menu *models.SgrSysMenu) mvc.ApiResult {
 	}
 }
 
-func (c *SysMenuController) UpdateMenu(menu *models.SgrSysMenu) mvc.ApiResult {
+func (c *SysMenuController) UpdateMenu(req *req.SysMenuReq) mvc.ApiResult {
+	var menu = &models.SgrSysMenu{}
+	err := copier.Copy(menu, req)
+	if err != nil {
+		panic(err)
+	}
 	success, res := c.service.UpdateMenu(menu)
 	return mvc.ApiResult{
 		Success: success,
@@ -31,12 +48,25 @@ func (c *SysMenuController) UpdateMenu(menu *models.SgrSysMenu) mvc.ApiResult {
 	}
 }
 
-func (c *SysMenuController) DeleteMenu(menu *models.SgrSysMenu) mvc.ApiResult {
+func (c *SysMenuController) DeleteMenu(req *req.SysMenuReq) mvc.ApiResult {
+	var menu = &models.SgrSysMenu{}
+	err := copier.Copy(menu, req)
+	if err != nil {
+		panic(err)
+	}
 	res := c.service.DelMenu(menu)
 	return mvc.ApiResult{
 		Success: res,
 		Data:    res,
 		Message: "删除成功",
+	}
+}
+
+func (c *SysMenuController) GetMenuTree() mvc.ApiResult {
+	data := c.service.MenuTree()
+	return mvc.ApiResult{
+		Data:    data,
+		Success: true,
 	}
 }
 
