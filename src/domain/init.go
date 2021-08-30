@@ -19,6 +19,7 @@ func init() {
 
 			// 加载配置文件对象
 			serviceCollection.AddTransient(tenant.NewTenantService)
+			serviceCollection.AddTransient(tenant.NewSysMenuService)
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
 
 		})
