@@ -54,8 +54,6 @@ func (controller TenantController) PostStatus(tenant *req.TenantRequest) mvc.Api
 
 func (controller TenantController) GetTenantList(ctx *context.HttpContext) mvc.ApiResult {
 	var tenantRequest = &req.TenantRequest{}
-	fmt.Println(ctx.Input.QueryStrings())
-
 	err := ctx.BindWithUri(tenantRequest)
 	if err != nil {
 		panic(err)

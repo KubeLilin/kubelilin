@@ -31,10 +31,10 @@ func (sms *SysMenuService) DelMenu(menu *models.SgrSysMenu) bool {
 	return res.RowsAffected > 0
 }
 
-func (sms *SysMenuService) QueryMenuList(menuReq req.SysMenuReq) *page.Page {
+func (sms *SysMenuService) QueryMenuList(menuReq *req.SysMenuReq) *page.Page {
 	data := &[]models.SgrSysMenu{}
 	params := &models.SgrSysMenu{}
-	err := copier.Copy(&menuReq, params)
+	err := copier.Copy(menuReq, params)
 	if err != nil {
 		panic(err)
 	}
