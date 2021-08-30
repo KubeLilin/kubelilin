@@ -6,6 +6,7 @@ import (
 	_ "github.com/yoyofx/yoyogo/pkg/datasources/redis"
 	"github.com/yoyofx/yoyogo/pkg/servicediscovery/nacos"
 	"github.com/yoyofx/yoyogo/web"
+	"github.com/yoyofx/yoyogo/web/actionresult/extension"
 	"github.com/yoyofx/yoyogo/web/middlewares"
 	"github.com/yoyofxteam/dependencyinjection"
 	"sgr/api"
@@ -19,6 +20,7 @@ func main() {
 	web.NewWebHostBuilder().
 		UseConfiguration(config).
 		Configure(func(app *web.ApplicationBuilder) {
+			app.SetJsonSerializer(extension.CamelJson())
 			app.UseEndpoints(api.ConfigureApi) // 在 api/init.go 中定义 api or mvc 路由
 			app.UseMvc(api.ConfigureMvc)
 			// add http middlewares

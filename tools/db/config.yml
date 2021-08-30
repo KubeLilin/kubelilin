@@ -1,5 +1,5 @@
 base:
-    is_dev: false
+    is_dev: true
 db_info:
     host: cdb-amqub3mo.bj.tencentcdb.com
     port: 10042
@@ -12,18 +12,18 @@ url_tag: json
 language: 中 文
 db_tag: gorm
 simple: false
-is_web_tag: false
+is_web_tag: true
 is_web_tag_pk_hidden: false
-is_foreign_key: true
+is_foreign_key: false
 is_out_sql: false
 is_out_func: false
 is_gui: true
 is_table_name: true
-is_null_to_point: false
+is_null_to_point: true
 table_prefix: ""
 self_type_define:
-    datetime: "*time.Time"
-    date: "*time.Time"
+    date: '*time.Time'
+    datetime: '*time.Time'
 out_file_name: ""
 web_tag_type: 0
 table_names: ""
