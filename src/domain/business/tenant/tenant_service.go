@@ -2,6 +2,7 @@ package tenant
 
 import (
 	"fmt"
+	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 	"sgr/api/req"
 	"sgr/domain/database/models"
@@ -34,22 +35,11 @@ func (ts *TenantService) ChangeStatus(id uint64, status int8) int64 {
 }
 
 func (ts *TenantService) QueryTenantList(request *req.TenantRequest) *page.Page {
-	data := &[]models.SgrTenant{}
-	ts.db.Model(&models.SgrTenant{}).Where(&models.SgrTenant{
-		TName:  request.TName,
-		TCode:  request.TCode,
-		Status: request.Status,
-	}).Offset(request.OffSet()).Limit(request.PageSize).Find(data)
-	var count int64
-	ts.db.Model(&models.SgrTenant{}).Where(&models.SgrTenant{
-		TName:  request.TName,
-		TCode:  request.TCode,
-		Status: request.Status,
-	}).Count(&count)
-	return &page.Page{
-		Data:      data,
-		Total:     count,
-		PageIndex: request.PageIndex,
-		PageSize:  request.PageSize,
+	params := &models.SgrTenant{}
+	err := copier.Copy(params, request)
+	if err != nil {
+		panic(err)
 	}
+	condition := ts.db.Model(&models.SgrTenant{}).Where(params)
+	return page.StartPage(condition, request.PageIndex, request.PageSize).DoSelect(&[]models.SgrTenant{})
 }

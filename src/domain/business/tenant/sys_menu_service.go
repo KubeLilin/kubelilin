@@ -33,16 +33,12 @@ func (sms *SysMenuService) DelMenu(menu *models.SgrSysMenu) bool {
 
 func (sms *SysMenuService) QueryMenuList(menuReq req.SysMenuReq) *page.Page {
 	data := &[]models.SgrSysMenu{}
-	var count int64
-	condition := &models.SgrSysMenu{}
-	copier.Copy(&menuReq, condition)
-	sms.db.Model(&models.SgrSysMenu{}).Where(condition).Offset(menuReq.OffSet()).Limit(menuReq.PageSize)
-	sms.db.Model(&models.SgrSysMenu{}).Where(condition).Count(&count)
-	return &page.Page{
-		PageIndex: menuReq.PageIndex,
-		PageSize:  menuReq.PageSize,
-		Total:     count,
-		Data:      data,
+	params := &models.SgrSysMenu{}
+	err := copier.Copy(&menuReq, params)
+	if err != nil {
+		panic(err)
 	}
+	condition := sms.db.Model(&models.SgrSysMenu{}).Where(params)
+	return page.StartPage(condition, menuReq.PageIndex, menuReq.PageSize).DoSelect(data)
 
 }

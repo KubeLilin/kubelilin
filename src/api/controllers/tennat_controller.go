@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/yoyofx/yoyogo/web/binding"
+	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"sgr/api/req"
@@ -52,12 +52,15 @@ func (controller TenantController) PostStatus(tenant *req.TenantRequest) mvc.Api
 	return mvc.ApiResult{Data: res}
 }
 
-func (controller TenantController) GetTenantList(ctx *context.HttpContext)mvc.ApiResult {
+func (controller TenantController) GetTenantList(ctx *context.HttpContext) mvc.ApiResult {
 	var tenantRequest = &req.TenantRequest{}
-	err := ctx.BindWith(tenantRequest, binding.Form)
+	fmt.Println(ctx.Input.QueryStrings())
+
+	err := ctx.BindWithUri(tenantRequest)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(tenantRequest.TName)
 	res := controller.Service.QueryTenantList(tenantRequest)
 	return controller.OK(res)
 }
