@@ -9,7 +9,7 @@ type SgrSysMenu struct {
 	MenuCode     string     `gorm:"unique;column:menu_code;type:varchar(100);not null" json:"menuCode"`  // 编码
 	MenuName     string     `gorm:"column:menu_name;type:varchar(50);not null" json:"menuName"`          // 目录名称
 	IsRoot       int8       `gorm:"column:is_root;type:tinyint(3);not null;default:0" json:"isRoot"`     // 是否是根目录
-	ParentID     int64      `gorm:"column:parent_id;type:bigint(20);not null;default:0" json:"parentId"` // 父层级id
+	ParentID     uint64     `gorm:"column:parent_id;type:bigint(20);not null;default:0" json:"parentId"` // 父层级id
 	Sort         int        `gorm:"column:sort;type:int(11);not null;default:0" json:"sort"`             // 权重，正序排序
 	Status       int8       `gorm:"column:status;type:tinyint(4);not null;default:0" json:"status"`      // 状态
 	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;default:CURRENT_TIMESTAMP" json:"creationTime"`

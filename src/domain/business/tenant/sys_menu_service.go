@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 	"sgr/api/req"
 	"sgr/domain/database/models"
+	"sgr/domain/dto"
 	"sgr/pkg/page"
 )
 
@@ -40,5 +41,55 @@ func (sms *SysMenuService) QueryMenuList(menuReq *req.SysMenuReq) *page.Page {
 	}
 	condition := sms.db.Model(&models.SgrSysMenu{}).Where(params)
 	return page.StartPage(condition, menuReq.PageIndex, menuReq.PageSize).DoSelect(data)
+}
 
+func (sms *SysMenuService) MenuTree() *[]dto.SysMenuTreeDTO {
+	/*var userMenuList []string
+	sms.db.Model(&models.SgrTenantRole{}).Select("Mnu").Where()*/
+	var dataMenuList = &[]models.SgrSysMenu{}
+	//sms.db.Model(&models.SgrSysMenu{}).Where(" menu_code IN ",userMenuList).Find(dataMenuList)
+	sms.db.Model(&models.SgrSysMenu{}).Find(dataMenuList)
+	var menuList = []dto.SysMenuTreeDTO{}
+	for _, ele := range *dataMenuList {
+		if ele.IsRoot == 1 {
+			rootMenu := dto.SysMenuTreeDTO{
+				ID:       ele.ID,
+				TenantID: ele.TenantID,
+				MenuCode: ele.MenuCode,
+				MenuName: ele.MenuName,
+				IsRoot:   ele.IsRoot,
+				Sort:     ele.Sort,
+				ParentID: ele.ParentID,
+				Status:   ele.Status,
+			}
+			rootMenu.ChildrenMenu = Recursion(rootMenu, dataMenuList)
+			menuList = append(menuList, rootMenu)
+		}
+	}
+	return &menuList
+}
+
+func Recursion(parentMenu dto.SysMenuTreeDTO, sourceData *[]models.SgrSysMenu) *[]dto.SysMenuTreeDTO {
+	var targetData []dto.SysMenuTreeDTO
+	for _, ele := range *sourceData {
+		if ele.ParentID == parentMenu.ID {
+			childMenu := dto.SysMenuTreeDTO{
+				ID:       ele.ID,
+				TenantID: ele.TenantID,
+				MenuCode: ele.MenuCode,
+				MenuName: ele.MenuName,
+				IsRoot:   ele.IsRoot,
+				Sort:     ele.Sort,
+				ParentID: ele.ParentID,
+				Status:   ele.Status,
+			}
+			for _, y := range *sourceData {
+				if y.ParentID == childMenu.ID {
+					childMenu.ChildrenMenu = Recursion(childMenu, sourceData)
+				}
+			}
+			targetData = append(targetData, childMenu)
+		}
+	}
+	return &targetData
 }
