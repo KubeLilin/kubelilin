@@ -18,6 +18,7 @@ func init() {
 			//serviceCollection.AddSingleton(........)
 
 			// 加载配置文件对象
+			serviceCollection.AddTransient(tenant.NewUser)
 			serviceCollection.AddTransient(tenant.NewTenantService)
 			serviceCollection.AddTransient(tenant.NewSysMenuService)
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)

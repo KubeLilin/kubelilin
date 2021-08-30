@@ -20,4 +20,6 @@ func ConfigureMvc(builder *mvc.ControllerBuilder) {
 	//builder.AddFilter("/v1/user/info", &contollers.TestActionFilter{})
 	builder.AddController(controllers.NewDemoController)
 	builder.AddController(controllers.NewTenantController)
+	builder.AddController(controllers.NewSysMenuController)
+	builder.AddController(controllers.NewUserController)
 }

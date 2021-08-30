@@ -10,7 +10,11 @@ import (
 
 type SysMenuController struct {
 	mvc.ApiController
-	service tenant.SysMenuService
+	service *tenant.SysMenuService
+}
+
+func NewSysMenuController(service *tenant.SysMenuService) *SysMenuController {
+	return &SysMenuController{service: service}
 }
 
 func (c *SysMenuController) CreateMenu(menu *models.SgrSysMenu) mvc.ApiResult {

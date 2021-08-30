@@ -10,8 +10,8 @@ type Page struct {
 }
 
 type PageRequest struct {
-	PageIndex int `json:"pageIndex"`
-	PageSize  int `json:"pageSize"`
+	PageIndex int `json:"pageIndex" uri:"pageIndex"`
+	PageSize  int `json:"pageSize" uri:"pageSize"`
 }
 
 func (pg PageRequest) OffSet() int {
