@@ -16,6 +16,15 @@ func NewUser(db *gorm.DB) *UserService {
 	return &UserService{db: db}
 }
 
+func (user *UserService) GetById(id int64) *dbmodels.SgrTenantUser {
+	var tenantUser *dbmodels.SgrTenantUser
+	res := user.db.First(&tenantUser, "id = ? AND status = ?", id, 1)
+	if res.Error != nil {
+		return nil
+	}
+	return tenantUser
+}
+
 func (user *UserService) Register(newUser *dbmodels.SgrTenantUser) bool {
 	res := user.db.Create(newUser)
 	return res.RowsAffected > 0

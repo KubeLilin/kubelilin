@@ -18,6 +18,20 @@ func NewUserController(service *tenant.UserService) *UserController {
 	return &UserController{Service: service}
 }
 
+func (user *UserController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
+	strId := ctx.Input.QueryDefault("id", "")
+	userId, err := strconv.ParseInt(strId, 10, 32)
+	if err != nil {
+		user.Fail(err.Error())
+	}
+	userInfo := user.Service.GetById(userId)
+	return mvc.ApiResult{
+		Success: userInfo != nil,
+		Message: "获取用户信息",
+		Data:    userInfo,
+	}
+}
+
 func (user *UserController) PostRegister(ctx *context.HttpContext) mvc.ApiResult {
 	var registerUser *dbmodels.SgrTenantUser
 	_ = ctx.Bind(&registerUser)
@@ -39,7 +53,7 @@ func (user *UserController) PostUpdate(modifyUser *dbmodels.SgrTenantUser) mvc.A
 }
 
 func (user *UserController) DeleteUnRegister(ctx *context.HttpContext) mvc.ApiResult {
-	idStr := ctx.Input.Query("id")
+	idStr := ctx.Input.QueryDefault("id", "")
 	userId, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		panic(err)
