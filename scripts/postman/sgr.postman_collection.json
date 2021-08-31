@@ -14,7 +14,7 @@
 				{
 					"name": "用户注册接口",
 					"request": {
-						"url": "http://localhost:8080/v1/user/register",
+						"url": "{{baseurl}}/v1/user/register",
 						"method": "POST",
 						"header": [
 							{
@@ -25,7 +25,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"tenantId\":1,\n\t\"userName\":\"xx\",\n\t\"account\":\"xx\",\n\t\"password\":\"123456\",\n\t\"mobile\":\"\",\n\t\"email\":\"xx@hotmail.com\"\n}"
+							"raw": "{\n\t\"tenantId\":1,\n\t\"userName\":\"xx1\",\n\t\"account\":\"xx1\",\n\t\"password\":\"123456\",\n\t\"mobile\":\"\",\n\t\"email\":\"xx1@hotmail.com\"\n}"
 						},
 						"description": ""
 					},
@@ -35,12 +35,10 @@
 					"name": "获取用户列表接口",
 					"request": {
 						"url": {
-							"raw": "http://localhost:8080/v1/user/list?tenantId=1&pageIndex=1&pageSize=10",
-							"protocol": "http",
+							"raw": "{{baseurl}}/v1/user/list?tenantId=1&pageIndex=1&pageSize=10",
 							"host": [
-								"localhost"
+								"{{baseurl}}"
 							],
-							"port": "8080",
 							"path": [
 								"v1",
 								"user",
@@ -79,12 +77,10 @@
 					"name": "删除用户接口",
 					"request": {
 						"url": {
-							"raw": "http://localhost:8080/v1/user/unregister?id=2",
-							"protocol": "http",
+							"raw": "{{baseurl}}/v1/user/unregister?id=3",
 							"host": [
-								"localhost"
+								"{{baseurl}}"
 							],
-							"port": "8080",
 							"path": [
 								"v1",
 								"user",
@@ -93,7 +89,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "2",
+									"value": "3",
 									"equals": true,
 									"description": ""
 								}
@@ -120,12 +116,11 @@
 					"name": "获取用户信息接口byID",
 					"request": {
 						"url": {
-							"raw": "http://localhost:8080/v1/user/info?id=2",
+							"raw": "http://{{baseurl}}/v1/user/info?id=2",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{baseurl}}"
 							],
-							"port": "8080",
 							"path": [
 								"v1",
 								"user",
