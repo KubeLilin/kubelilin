@@ -116,8 +116,7 @@
 					"name": "获取用户信息接口byID",
 					"request": {
 						"url": {
-							"raw": "http://{{baseurl}}/v1/user/info?id=2",
-							"protocol": "http",
+							"raw": "{{baseurl}}/v1/user/info?id=1",
 							"host": [
 								"{{baseurl}}"
 							],
@@ -129,7 +128,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "2",
+									"value": "1",
 									"equals": true,
 									"description": ""
 								}
