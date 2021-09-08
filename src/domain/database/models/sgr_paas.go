@@ -2,16 +2,48 @@ package models
 
 import "time"
 
+// SgrRoleMenuMap 角色菜单权限影射
+type SgrRoleMenuMap struct {
+	ID           int64      `gorm:"primaryKey;column:id;type:bigint(20);not null" json:"id"`
+	RoleID       uint64     `gorm:"column:role_id;type:bigint(20) unsigned;not null" json:"roleId"`
+	MenuID       uint64     `gorm:"column:menu_id;type:bigint(20) unsigned;not null" json:"menuId"`
+	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;default:CURRENT_TIMESTAMP" json:"creationTime"`
+	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime;default:CURRENT_TIMESTAMP" json:"updateTime"`
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *SgrRoleMenuMap) TableName() string {
+	return "sgr_role_menu_map"
+}
+
+// SgrRoleMenuMapColumns get sql column name.获取数据库列名
+var SgrRoleMenuMapColumns = struct {
+	ID           string
+	RoleID       string
+	MenuID       string
+	CreationTime string
+	UpdateTime   string
+}{
+	ID:           "id",
+	RoleID:       "role_id",
+	MenuID:       "menu_id",
+	CreationTime: "creation_time",
+	UpdateTime:   "update_time",
+}
+
 // SgrSysMenu 菜单
 type SgrSysMenu struct {
 	ID           uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`
-	TenantID     int64      `gorm:"column:tenant_id;type:bigint(11);not null" json:"tenantId"`           // 租户
-	MenuCode     string     `gorm:"unique;column:menu_code;type:varchar(100);not null" json:"menuCode"`  // 编码
-	MenuName     string     `gorm:"column:menu_name;type:varchar(50);not null" json:"menuName"`          // 目录名称
-	IsRoot       int8       `gorm:"column:is_root;type:tinyint(3);not null;default:0" json:"isRoot"`     // 是否是根目录
-	ParentID     uint64     `gorm:"column:parent_id;type:bigint(20);not null;default:0" json:"parentId"` // 父层级id
-	Sort         int        `gorm:"column:sort;type:int(11);not null;default:0" json:"sort"`             // 权重，正序排序
-	Status       int8       `gorm:"column:status;type:tinyint(4);not null;default:0" json:"status"`      // 状态
+	TenantID     int64      `gorm:"column:tenant_id;type:bigint(11);not null" json:"tenantId"`                    // 租户
+	MenuCode     string     `gorm:"unique;column:menu_code;type:varchar(100);not null" json:"menuCode"`           // 编码
+	MenuName     string     `gorm:"column:menu_name;type:varchar(50);not null" json:"menuName"`                   // 目录名称
+	Icon         string     `gorm:"column:icon;type:varchar(50)" json:"icon"`                                     // 图标
+	Path         string     `gorm:"column:path;type:varchar(100);not null" json:"path"`                           // 路由路径
+	Component    string     `gorm:"column:component;type:varchar(100)" json:"component"`                          // react组件路径
+	IsRoot       int8       `gorm:"column:is_root;type:tinyint(3);not null;default:0" json:"isRoot"`              // 是否是根目录
+	ParentID     uint64     `gorm:"column:parent_id;type:bigint(20) unsigned;not null;default:0" json:"parentId"` // 父层级id
+	Sort         int        `gorm:"column:sort;type:int(11);not null;default:0" json:"sort"`                      // 权重，正序排序
+	Status       int8       `gorm:"column:status;type:tinyint(4);not null;default:0" json:"status"`               // 状态
 	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;default:CURRENT_TIMESTAMP" json:"creationTime"`
 	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
 }
@@ -27,6 +59,9 @@ var SgrSysMenuColumns = struct {
 	TenantID     string
 	MenuCode     string
 	MenuName     string
+	Icon         string
+	Path         string
+	Component    string
 	IsRoot       string
 	ParentID     string
 	Sort         string
@@ -38,6 +73,9 @@ var SgrSysMenuColumns = struct {
 	TenantID:     "tenant_id",
 	MenuCode:     "menu_code",
 	MenuName:     "menu_name",
+	Icon:         "icon",
+	Path:         "path",
+	Component:    "component",
 	IsRoot:       "is_root",
 	ParentID:     "parent_id",
 	Sort:         "sort",
@@ -120,7 +158,7 @@ type SgrTenantUser struct {
 	UserName     string     `gorm:"column:user_name;type:varchar(50)" json:"userName"`              // 用户名
 	Account      string     `gorm:"column:account;type:varchar(50);not null" json:"account"`        // 账号
 	Password     string     `gorm:"column:password;type:varchar(255);not null" json:"password"`     // 密码
-	Mobile       string     `gorm:"column:mobile;type:varchar(10)" json:"mobile"`                   // 手机
+	Mobile       string     `gorm:"column:mobile;type:varchar(20)" json:"mobile"`                   // 手机
 	Email        string     `gorm:"column:email;type:varchar(50)" json:"email"`                     // 邮箱
 	Status       int8       `gorm:"column:status;type:tinyint(3);not null;default:0" json:"status"` // 状态
 	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;default:CURRENT_TIMESTAMP" json:"creationTime"`
