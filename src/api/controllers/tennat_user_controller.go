@@ -18,17 +18,18 @@ func NewUserController(service *tenant.UserService) *UserController {
 	return &UserController{Service: service}
 }
 
-func (user *UserController) PostLogin(loginRequest *req.LoginRequest) req.LoginResult {
+func (user *UserController) PostLogin(ctx *context.HttpContext, loginRequest *req.LoginRequest) mvc.ApiResult {
 	if loginRequest.UserName == "" || loginRequest.Password == "" {
-		return req.LoginResult{Status: "no username or password"}
+		ctx.Output.SetStatus(401)
+		return user.Fail("no username or password")
 	}
 	queryUser := user.Service.GetUserByNameAndPassword(loginRequest.UserName, loginRequest.Password)
 
 	if queryUser == nil {
-		return req.LoginResult{Status: "can not find user be"}
+		return user.Fail("can not find user be")
 	}
 
-	return req.LoginResult{Status: "ok", UserId: queryUser.ID, LoginType: loginRequest.LoginType, Authority: "admin"}
+	return user.OK(req.LoginResult{Status: "ok", UserId: queryUser.ID, LoginType: loginRequest.LoginType, Authority: "admin"})
 }
 
 func (user *UserController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
