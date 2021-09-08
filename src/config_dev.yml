@@ -10,7 +10,7 @@ yoyogo:
         template: "v1/{controller}/{action}"
       cors:
         allow_origins: ["*"]
-        allow_methods: ["POST","GET","PUT", "PATCH"]
+        allow_methods: ["*"]
         allow_credentials: true
   cloud:
     discovery:

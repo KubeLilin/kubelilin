@@ -25,6 +25,15 @@ func (user *UserService) GetById(id int64) *dbmodels.SgrTenantUser {
 	return tenantUser
 }
 
+func (user *UserService) GetUserByNameAndPassword(name string, password string) *dbmodels.SgrTenantUser {
+	var tenantUser *dbmodels.SgrTenantUser
+	res := user.db.First(&tenantUser, "user_name = ? AND  password = ? AND  status = ?", name, password, 1)
+	if res.Error != nil {
+		return nil
+	}
+	return tenantUser
+}
+
 func (user *UserService) Register(newUser *dbmodels.SgrTenantUser) bool {
 	res := user.db.Create(newUser)
 	return res.RowsAffected > 0

@@ -18,17 +18,49 @@ func NewUserController(service *tenant.UserService) *UserController {
 	return &UserController{Service: service}
 }
 
+func (user *UserController) PostLogin(loginRequest *req.LoginRequest) req.LoginResult {
+	if loginRequest.UserName == "" || loginRequest.Password == "" {
+		return req.LoginResult{Status: "no username or password"}
+	}
+	queryUser := user.Service.GetUserByNameAndPassword(loginRequest.UserName, loginRequest.Password)
+
+	if queryUser == nil {
+		return req.LoginResult{Status: "can not find user be"}
+	}
+
+	return req.LoginResult{Status: "ok", UserId: queryUser.ID, LoginType: loginRequest.LoginType, Authority: "admin"}
+}
+
 func (user *UserController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
 	strId := ctx.Input.QueryDefault("id", "")
 	userId, err := strconv.ParseInt(strId, 10, 32)
 	if err != nil {
-		user.Fail(err.Error())
+		return user.Fail(err.Error())
 	}
 	userInfo := user.Service.GetById(userId)
+	if userInfo == nil {
+		return user.Fail("fail")
+	}
+
 	return mvc.ApiResult{
 		Success: userInfo != nil,
 		Message: "获取用户信息",
-		Data:    userInfo,
+		Data: req.UserInfoResponse{
+			Name:        userInfo.UserName,
+			Avatar:      "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png",
+			Userid:      strconv.FormatUint(userInfo.ID, 10),
+			Email:       userInfo.Email,
+			Signature:   "",
+			Title:       "",
+			Group:       strconv.FormatInt(userInfo.TenantID, 10),
+			Tags:        nil,
+			NotifyCount: 0,
+			UnreadCount: 0,
+			Country:     "china",
+			Access:      "-",
+			Address:     "-",
+			Phone:       userInfo.Mobile,
+		},
 	}
 }
 
