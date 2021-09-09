@@ -297,6 +297,11 @@ const menuList = `[
                 "redirect": "/account/center"
             },
             {
+                "component": "./account/manage",
+                "name": "manage",
+                "path": "/account/manage"
+            },
+            {
                 "component": "./account/center",
                 "icon": "smile",
                 "name": "center",
