@@ -86,6 +86,7 @@ const menuList = `[
             },
             {
                 "component": "./user/register",
+                "layout": false,
                 "icon": "smile",
                 "name": "register",
                 "path": "/user/register"
@@ -310,7 +311,7 @@ const menuList = `[
         ]
     },
     {
-        
+        "hideInMenu": true,
         "icon": "highlight",
         "name": "editor",
         "path": "/editor",
