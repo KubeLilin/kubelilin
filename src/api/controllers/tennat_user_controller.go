@@ -26,7 +26,7 @@ func (user *UserController) PostLogin(ctx *context.HttpContext, loginRequest *re
 	queryUser := user.Service.GetUserByNameAndPassword(loginRequest.UserName, loginRequest.Password)
 
 	if queryUser == nil {
-		return user.Fail("can not find user be")
+		return mvc.ApiResult{Success: true, Message: "can not find user be", Data: req.LoginResult{Status: "false"}}
 	}
 
 	return user.OK(req.LoginResult{Status: "ok", UserId: queryUser.ID, LoginType: loginRequest.LoginType, Authority: "admin"})
