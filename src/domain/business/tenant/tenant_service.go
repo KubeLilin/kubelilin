@@ -41,5 +41,5 @@ func (ts *TenantService) QueryTenantList(request *req.TenantRequest) *page.Page 
 		panic(err)
 	}
 	condition := ts.db.Model(&models.SgrTenant{}).Where(params)
-	return page.StartPage(condition, request.PageIndex, request.PageSize).DoSelect(&[]models.SgrTenant{})
+	return page.StartPage(condition, request.PageIndex, request.PageSize).DoFind(&[]models.SgrTenant{})
 }

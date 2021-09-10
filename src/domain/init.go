@@ -22,6 +22,7 @@ func init() {
 			serviceCollection.AddTransient(tenant.NewTenantService)
 			serviceCollection.AddTransient(tenant.NewSysMenuService)
 			serviceCollection.AddTransient(tenant.NewTenantRoleService)
+			serviceCollection.AddTransient(tenant.NewUserRoleService)
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
 
 		})

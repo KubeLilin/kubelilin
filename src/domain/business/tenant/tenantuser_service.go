@@ -71,5 +71,5 @@ func (user *UserService) QueryUserList(request *req.QueryUserRequest) *page.Page
 		condition.Where("email LIKE ?", request.Email+"%")
 	}
 
-	return page.StartPage(condition, request.PageIndex, request.PageSize).DoSelect(&[]dbmodels.SgrTenantUser{})
+	return page.StartPage(condition, request.PageIndex, request.PageSize).DoFind(&[]dbmodels.SgrTenantUser{})
 }

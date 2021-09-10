@@ -42,5 +42,5 @@ func (trs *TenantRoleService) QueryTenantRoleList(req *req.TenantRoleReq) *page.
 	var params = models.SgrTenantRole{}
 	copier.Copy(params, req)
 	condition := trs.db.Model(&models.SgrTenantRole{}).Where(params)
-	return page.StartPage(condition, req.PageIndex, req.PageSize).DoSelect(data)
+	return page.StartPage(condition, req.PageIndex, req.PageSize).DoFind(data)
 }

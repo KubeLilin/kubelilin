@@ -40,7 +40,7 @@ func (sms *SysMenuService) QueryMenuList(menuReq *req.SysMenuReq) *page.Page {
 		panic(err)
 	}
 	condition := sms.db.Model(&models.SgrSysMenu{}).Where(params)
-	return page.StartPage(condition, menuReq.PageIndex, menuReq.PageSize).DoSelect(data)
+	return page.StartPage(condition, menuReq.PageIndex, menuReq.PageSize).DoFind(data)
 }
 
 func (sms *SysMenuService) MenuTree() *[]dto.SysMenuTreeDTO {

@@ -37,10 +37,22 @@ func StartPage(db *gorm.DB, pageIndex, pageSize int) *PageHelper {
 /**
 执行分页进行赋值
 */
-func (ph *PageHelper) DoSelect(data interface{}) *Page {
+func (ph *PageHelper) DoFind(data interface{}) *Page {
 	var count int64
-	ph.db.Offset(ph.pageInfo.OffSet()).Limit(ph.pageInfo.PageSize).Find(data)
 	ph.db.Count(&count)
+	ph.db.Offset(ph.pageInfo.OffSet()).Limit(ph.pageInfo.PageSize).Find(data)
+	return &Page{
+		Data:      data,
+		Total:     count,
+		PageIndex: ph.pageInfo.PageIndex,
+		PageSize:  ph.pageInfo.PageSize,
+	}
+}
+
+func (ph *PageHelper) DoScan(data interface{}) *Page {
+	var count int64
+	ph.db.Count(&count)
+	ph.db.Offset(ph.pageInfo.OffSet()).Limit(ph.pageInfo.PageSize).Scan(data)
 	return &Page{
 		Data:      data,
 		Total:     count,
