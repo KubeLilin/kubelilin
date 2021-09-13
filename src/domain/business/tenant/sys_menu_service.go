@@ -27,8 +27,8 @@ func (sms *SysMenuService) UpdateMenu(menu *models.SgrSysMenu) (bool, *models.Sg
 	return res.RowsAffected > 0, menu
 }
 
-func (sms *SysMenuService) DelMenu(menu *models.SgrSysMenu) bool {
-	res := sms.db.Delete(menu)
+func (sms *SysMenuService) DelMenu(id int64) bool {
+	res := sms.db.Delete(&models.SgrSysMenu{}, id)
 	return res.RowsAffected > 0
 }
 

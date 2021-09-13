@@ -6,6 +6,7 @@ import (
 	"sgr/api/req"
 	"sgr/domain/business/tenant"
 	"sgr/domain/database/models"
+	"strconv"
 )
 
 type SysMenuController struct {
@@ -17,7 +18,13 @@ func NewSysMenuController(service *tenant.SysMenuService) *SysMenuController {
 	return &SysMenuController{service: service}
 }
 
-func (c *SysMenuController) CreateMenu(menu *models.SgrSysMenu) mvc.ApiResult {
+func (c *SysMenuController) CreateMenu(ctx *context.HttpContext) mvc.ApiResult {
+	var menu *models.SgrSysMenu
+	err := ctx.Bind(&menu)
+	if err != nil {
+		return c.Fail(err.Error())
+	}
+
 	success, res := c.service.CreateMenu(menu)
 	return mvc.ApiResult{
 		Success: success,
@@ -26,7 +33,12 @@ func (c *SysMenuController) CreateMenu(menu *models.SgrSysMenu) mvc.ApiResult {
 	}
 }
 
-func (c *SysMenuController) UpdateMenu(menu *models.SgrSysMenu) mvc.ApiResult {
+func (c *SysMenuController) UpdateMenu(ctx *context.HttpContext) mvc.ApiResult {
+	var menu *models.SgrSysMenu
+	err := ctx.Bind(&menu)
+	if err != nil {
+		return c.Fail(err.Error())
+	}
 	success, res := c.service.UpdateMenu(menu)
 	return mvc.ApiResult{
 		Success: success,
@@ -35,8 +47,10 @@ func (c *SysMenuController) UpdateMenu(menu *models.SgrSysMenu) mvc.ApiResult {
 	}
 }
 
-func (c *SysMenuController) DeleteMenu(menu *models.SgrSysMenu) mvc.ApiResult {
-	res := c.service.DelMenu(menu)
+func (c *SysMenuController) DeleteMenu(ctx *context.HttpContext) mvc.ApiResult {
+	strId := ctx.Input.Query("id")
+	id, _ := strconv.ParseInt(strId, 10, 64)
+	res := c.service.DelMenu(id)
 	return mvc.ApiResult{
 		Success: res,
 		Data:    res,
