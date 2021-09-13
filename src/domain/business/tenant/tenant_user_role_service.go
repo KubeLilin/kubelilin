@@ -51,7 +51,7 @@ func (urs *TenantUserRoleService) DeleteUserRole(id string) bool {
 func (urs *TenantUserRoleService) QueryUserRole(req req.UserRoleReq) (error, *page.Page) {
 	var resData []res.UserRoleRes
 	urs.db.Raw("select t1.id,t1.role_id,t1.user_id,t2.role_name from sgr_tenant_user_role as t1 inner join "+
-		"sgr_tenant_role as t2 on t1.role_id=t2.id where t1.user_id=? ", req.UserID).Scan(resData)
+		"sgr_tenant_role as t2 on t1.role_id=t2.id where t1.user_id=? ", req.UserID).Scan(&resData)
 	return nil, &page.Page{
 		Data: resData,
 	} //page.StartPage(condition, req.PageIndex, req.PageSize).DoScan(resData)
