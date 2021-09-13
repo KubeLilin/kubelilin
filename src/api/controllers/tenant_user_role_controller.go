@@ -46,6 +46,6 @@ func (c *TenantUserRoleController) GetUserRole(ctx *context.HttpContext) mvc.Api
 	return mvc.ApiResult{
 		Success: err == nil,
 		Data:    res,
-		Message: err.Error(),
+		Message: "666",
 	}
 }
