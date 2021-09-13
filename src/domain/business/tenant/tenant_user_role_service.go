@@ -10,17 +10,17 @@ import (
 	"sgr/pkg/page"
 )
 
-type UserRoleService struct {
+type TenantUserRoleService struct {
 	db *gorm.DB
 }
 
-func NewUserRoleService(db *gorm.DB) *UserRoleService {
-	return &UserRoleService{
+func NewTenantUserRoleService(db *gorm.DB) *TenantUserRoleService {
+	return &TenantUserRoleService{
 		db: db,
 	}
 }
 
-func (urs *UserRoleService) CreateUserRole(req *req.UserRoleListReq) (bool, *[]models.SgrTenantUserRole) {
+func (urs *TenantUserRoleService) CreateUserRole(req *req.UserRoleListReq) (bool, *[]models.SgrTenantUserRole) {
 	fmt.Println(req)
 	var userRoleData = make([]models.SgrTenantUserRole, 0)
 	if req == nil {
@@ -43,14 +43,16 @@ func (urs *UserRoleService) CreateUserRole(req *req.UserRoleListReq) (bool, *[]m
 	return true, &userRoleData
 }
 
-func (urs *UserRoleService) DeleteUserRole(id string) bool {
+func (urs *TenantUserRoleService) DeleteUserRole(id string) bool {
 	res := urs.db.Model(&models.SgrTenantUserRole{}).Delete(&models.SgrTenantUserRole{}, id)
 	return res.RowsAffected > 0
 }
 
-func (urs *UserRoleService) QueryUserRole(req req.UserRoleReq) *page.Page {
-	var resData = []res.UserRoleRes{}
-	condition := urs.db.Raw("select t1.id,t1.role_id,t1.user_id,t2.role_name from sgr_tenant_user_role as t1 inner join"+
-		"sgr_tenant_role as t2 on t1.role_id=t2.role_id where t1.user_id=? ", req.UserID)
-	return page.StartPage(condition, req.PageIndex, req.PageSize).DoScan(resData)
+func (urs *TenantUserRoleService) QueryUserRole(req req.UserRoleReq) (error, *page.Page) {
+	var resData []res.UserRoleRes
+	urs.db.Raw("select t1.id,t1.role_id,t1.user_id,t2.role_name from sgr_tenant_user_role as t1 inner join "+
+		"sgr_tenant_role as t2 on t1.role_id=t2.id where t1.user_id=? ", req.UserID).Scan(resData)
+	return nil, &page.Page{
+		Data: resData,
+	} //page.StartPage(condition, req.PageIndex, req.PageSize).DoScan(resData)
 }

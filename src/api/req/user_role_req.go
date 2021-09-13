@@ -7,8 +7,8 @@ import (
 
 type UserRoleReq struct {
 	ID     string `json:"id" uri:"id"`
-	UserID string `json:"userId" uri:"userId"`
-	RoleID string `json:"roleId" uri:"roleId"`
+	UserID int64  `json:"userId" uri:"userId"`
+	RoleID int64  `json:"roleId" uri:"roleId"`
 	page.PageRequest
 }
 

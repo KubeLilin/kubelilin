@@ -49,11 +49,11 @@ func (ph *PageHelper) DoFind(data interface{}) *Page {
 	}
 }
 
-func (ph *PageHelper) DoScan(data interface{}) *Page {
+func (ph *PageHelper) DoScan(data interface{}) (error, *Page) {
 	var count int64
 	ph.db.Count(&count)
-	ph.db.Offset(ph.pageInfo.OffSet()).Limit(ph.pageInfo.PageSize).Scan(data)
-	return &Page{
+	res := ph.db.Offset(ph.pageInfo.OffSet()).Limit(ph.pageInfo.PageSize).Scan(data)
+	return res.Error, &Page{
 		Data:      data,
 		Total:     count,
 		PageIndex: ph.pageInfo.PageIndex,

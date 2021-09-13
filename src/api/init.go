@@ -23,5 +23,5 @@ func ConfigureMvc(builder *mvc.ControllerBuilder) {
 	builder.AddController(controllers.NewSysMenuController)
 	builder.AddController(controllers.NewUserController)
 	builder.AddController(controllers.NewTenantRoleController)
-	builder.AddController(controllers.NewUserRoleController)
+	builder.AddController(controllers.NewTenantUserRoleController)
 }
