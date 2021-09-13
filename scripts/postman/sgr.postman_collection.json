@@ -1,39 +1,46 @@
 {
-	"variables": [],
 	"info": {
+		"_postman_id": "a96c5b1d-3535-4885-9f0c-705a517af1b3",
 		"name": "sgr",
-		"_postman_id": "6c676d37-8936-6109-ac37-0db033411f22",
-		"description": "",
-		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "tenant_user",
-			"description": "",
+			"name": "租户&用户管理",
 			"item": [
 				{
 					"name": "用户注册接口",
 					"request": {
-						"url": "{{baseurl}}/v1/user/register",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"tenantId\":1,\n\t\"userName\":\"xx1\",\n\t\"account\":\"xx1\",\n\t\"password\":\"123456\",\n\t\"mobile\":\"\",\n\t\"email\":\"xx1@hotmail.com\"\n}"
 						},
-						"description": ""
+						"url": {
+							"raw": "{{baseurl}}/v1/user/register",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"user",
+								"register"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "获取用户列表接口",
 					"request": {
+						"method": "GET",
+						"header": [],
 						"url": {
 							"raw": "{{baseurl}}/v1/user/list?tenantId=1&pageIndex=1&pageSize=10",
 							"host": [
@@ -47,35 +54,35 @@
 							"query": [
 								{
 									"key": "tenantId",
-									"value": "1",
-									"equals": true,
-									"description": ""
+									"value": "1"
 								},
 								{
 									"key": "pageIndex",
-									"value": "1",
-									"equals": true,
-									"description": ""
+									"value": "1"
 								},
 								{
 									"key": "pageSize",
-									"value": "10",
-									"equals": true,
-									"description": ""
+									"value": "10"
 								}
-							],
-							"variable": []
-						},
-						"method": "GET",
-						"header": [],
-						"body": {},
-						"description": ""
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "删除用户接口",
 					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"id\":0,\n\t\"name\":\"爱吃222\",\n\t\"code\":\"caichi222\",\n\t\"status\":1\n}"
+						},
 						"url": {
 							"raw": "{{baseurl}}/v1/user/unregister?id=3",
 							"host": [
@@ -89,32 +96,18 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "3",
-									"equals": true,
-									"description": ""
+									"value": "3"
 								}
-							],
-							"variable": []
-						},
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"id\":0,\n\t\"name\":\"爱吃222\",\n\t\"code\":\"caichi222\",\n\t\"status\":1\n}"
-						},
-						"description": ""
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "获取用户信息接口byID",
 					"request": {
+						"method": "GET",
+						"header": [],
 						"url": {
 							"raw": "{{baseurl}}/v1/user/info?id=1",
 							"host": [
@@ -128,17 +121,351 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "1",
-									"equals": true,
-									"description": ""
+									"value": "1"
 								}
-							],
-							"variable": []
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "租户&用户角色管理",
+			"item": [
+				{
+					"name": "用户角色关联",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userRoleList\":[{\n        \"userId\":1,\n        \"roleId\":1\n    }]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
+						"url": {
+							"raw": "{{baseurl}}/v1/tenantuserrole/userrole",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"tenantuserrole",
+								"userrole"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "新建租户角色",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roleCode\":\"10010\",\n    \"roleName\":\"第二个角色\",\n    \"status\":1,\n    \"tenantId\":1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/v1/tenantrole/tenantrole",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"tenantrole",
+								"tenantrole"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取用户角色列表",
+					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {},
-						"description": ""
+						"url": {
+							"raw": "{{baseurl}}/v1/tenantuserrole/userrole?userId=1&pageIndex=1&pageSize=10",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"tenantuserrole",
+								"userrole"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "1"
+								},
+								{
+									"key": "pageIndex",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "删除用户角色",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/v1/tenantuserrole/userrole?id=1",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"tenantuserrole",
+								"userrole"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "删除租户角色",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/v1/tenantrole/tenantrole?id=2",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"tenantrole",
+								"tenantrole"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "更新租户角色",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 2,\n    \"roleCode\":\"10010\",\n    \"roleName\":\"第二个角色2\",\n    \"status\":1,\n    \"tenantId\":1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/v1/tenantrole/tenantrole",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"tenantrole",
+								"tenantrole"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取租户角色列表",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/v1/tenantrole/tenantrolelist?pageIndex=0&pageSize=10",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"tenantrole",
+								"tenantrolelist"
+							],
+							"query": [
+								{
+									"key": "pageIndex",
+									"value": "0"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "系统菜单管理",
+			"item": [
+				{
+					"name": "菜单查询",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/v1/sysmenu/menulist?pageIndex=1&pageSize=10",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"sysmenu",
+								"menulist"
+							],
+							"query": [
+								{
+									"key": "pageIndex",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "用户登录(权限)获取菜单",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/v1/sysmenu/querylist?userid=1",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"sysmenu",
+								"querylist"
+							],
+							"query": [
+								{
+									"key": "userid",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "删除菜单",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/v1/sysmenu/menu?id=1",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"sysmenu",
+								"menu"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "创建菜单",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"id\":1,\n\"tenantId\":1,\n\"menuCode\": \"001\",\n\"menuName\": \"hao1\",\n\"icon\": \"\",\n\"path\": \"\" ,\n\"component\": \"\",\n\"isRoot\": 1,\n\"parentId\": 0,\n\"sort\": 0,\n\"status\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/v1/sysmenu/createmenu",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"sysmenu",
+								"createmenu"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "更新菜单",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"id\":1,\n\"tenantId\":1,\n\"menuCode\": \"001\",\n\"menuName\": \"hao2\",\n\"icon\": \"\",\n\"path\": \"\" ,\n\"component\": \"\",\n\"isRoot\": 1,\n\"parentId\": 0,\n\"sort\": 0,\n\"status\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/v1/sysmenu/updatemenu",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"sysmenu",
+								"updatemenu"
+							]
+						}
 					},
 					"response": []
 				}
