@@ -7,6 +7,7 @@ import (
 	"sgr/domain/business/tenant"
 	dbmodels "sgr/domain/database/models"
 	"strconv"
+	"time"
 )
 
 type UserController struct {
@@ -69,11 +70,21 @@ func (user *UserController) PostRegister(ctx *context.HttpContext) mvc.ApiResult
 	var registerUser *dbmodels.SgrTenantUser
 	_ = ctx.Bind(&registerUser)
 
-	registerUser.Status = 1
-	ok := user.Service.Register(registerUser)
+	ok := false
+	retMessage := "注册成功"
+	exitsUser := user.Service.GetUserByName(registerUser.UserName)
+	if exitsUser == nil {
+		t := time.Now()
+		registerUser.Status = 1
+		registerUser.CreationTime = &t
+		registerUser.UpdateTime = &t
+		ok = user.Service.Register(registerUser)
+	} else {
+		retMessage = "注册失败"
+	}
 	return mvc.ApiResult{
 		Success: ok,
-		Message: "注册成功",
+		Message: retMessage,
 	}
 }
 
@@ -96,6 +107,18 @@ func (user *UserController) DeleteUnRegister(ctx *context.HttpContext) mvc.ApiRe
 	return mvc.ApiResult{
 		Success: ok,
 		Message: "删除成功",
+	}
+}
+
+func (user *UserController) PutStatus(ctx *context.HttpContext) mvc.ApiResult {
+	idStr := ctx.Input.QueryDefault("id", "")
+	statusStr := ctx.Input.QueryDefault("status", "")
+	userId, _ := strconv.ParseInt(idStr, 10, 32)
+	status, _ := strconv.Atoi(statusStr)
+
+	ok := user.Service.SetStatus(userId, status)
+	return mvc.ApiResult{
+		Success: ok,
 	}
 }
 

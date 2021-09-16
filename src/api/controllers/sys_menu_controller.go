@@ -307,25 +307,9 @@ const menuList = `[
         "path": "/account",
         "routes": [
             {
-                "path": "/account",
-                "redirect": "/account/center"
-            },
-            {
                 "component": "./account/manage",
                 "name": "manage",
                 "path": "/account/manage"
-            },
-            {
-                "component": "./account/center",
-                "icon": "smile",
-                "name": "center",
-                "path": "/account/center"
-            },
-            {
-                "component": "./account/settings",
-                "icon": "smile",
-                "name": "settings",
-                "path": "/account/settings"
             }
         ]
     },

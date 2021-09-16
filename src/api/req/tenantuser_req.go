@@ -12,7 +12,7 @@ type QueryUserRequest struct {
 	UserName string `json:"userName" uri:"userName"`
 	Mobile   string `json:"mobile" uri:"mobile"`
 	Email    string `json:"email" uri:"email"`
-
+	Status   *int8  `json:"status" uri:"status"` // 状态
 	*page.PageRequest
 }
 
