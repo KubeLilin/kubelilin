@@ -1,6 +1,11 @@
 package page
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+	"gorm.io/gorm"
+	"strconv"
+	"strings"
+)
 
 type Page struct {
 	PageIndex int
@@ -49,11 +54,29 @@ func (ph *PageHelper) DoFind(data interface{}) *Page {
 	}
 }
 
-func (ph *PageHelper) DoScan(data interface{}) (error, *Page) {
+func (ph *PageHelper) DoScan(data interface{}, sql string, values ...interface{}) (error, *Page) {
 	var count int64
-	ph.db.Count(&count)
-	res := ph.db.Offset(ph.pageInfo.OffSet()).Limit(ph.pageInfo.PageSize).Scan(data)
-	return res.Error, &Page{
+	var countSql string
+	var dataSql string
+	var err error
+	countSql = "select count(0) from (" + sql + ") as c1"
+	var sb strings.Builder
+	sb.WriteString(sql)
+	sb.WriteString(" limit ")
+	sb.WriteString(strconv.Itoa(ph.pageInfo.OffSet()))
+	sb.WriteString(",")
+	sb.WriteString(strconv.Itoa(ph.pageInfo.PageSize))
+	dataSql = sb.String()
+	fmt.Println(dataSql)
+	countRes := ph.db.Raw(countSql, values).Scan(&count)
+	dataRes := ph.db.Raw(dataSql, values).Scan(data)
+	if countRes.Error != nil {
+		err = countRes.Error
+	}
+	if dataRes.Error != nil {
+		err = dataRes.Error
+	}
+	return err, &Page{
 		Data:      data,
 		Total:     count,
 		PageIndex: ph.pageInfo.PageIndex,
