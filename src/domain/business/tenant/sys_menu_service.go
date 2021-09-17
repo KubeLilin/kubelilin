@@ -44,31 +44,31 @@ func (sms *SysMenuService) QueryMenuList(menuReq *req.SysMenuReq) *page.Page {
 }
 
 func (sms *SysMenuService) MenuTree(userId string) *[]dto.SysMenuTreeDTO {
-	var menuList = []dto.SysMenuTreeDTO{}
-	var userRoleList = []models.SgrTenantUserRole{}
+	var menuList []dto.SysMenuTreeDTO
+	var userRoleList []models.SgrTenantUserRole
 	//查询用户角色
 	sms.db.Model(&models.SgrTenantUserRole{}).Where("user_id=?", userId).Find(&userRoleList)
 	if len(userRoleList) == 0 {
 		return &menuList
 	}
 	//查询角色对应的菜单
-	var roleIdArr = []int64{}
+	var roleIdArr []int64
 	for _, x := range userRoleList {
 		roleIdArr = append(roleIdArr, x.RoleID)
 	}
-	var roleMenuMap = []models.SgrRoleMenuMap{}
-	sms.db.Model(&models.SgrRoleMenuMap{}).Where("role_id in ?", roleIdArr).Find(roleMenuMap)
+	var roleMenuMap []models.SgrRoleMenuMap
+	sms.db.Model(&models.SgrRoleMenuMap{}).Where("role_id in ?", roleIdArr).Find(&roleMenuMap)
 	if len(roleMenuMap) == 0 {
 		return &menuList
 	}
 	//查询菜单列表进行匹配
-	var userMenuArr = []uint64{}
+	var userMenuArr []uint64
 	for _, x := range roleMenuMap {
 		userMenuArr = append(userMenuArr, x.MenuID)
 	}
-	var dataMenuList = &[]models.SgrSysMenu{}
-	sms.db.Model(&models.SgrSysMenu{}).Where(" id IN ", userMenuArr).Find(dataMenuList)
-	for _, ele := range *dataMenuList {
+	var dataMenuList []models.SgrSysMenu
+	sms.db.Model(&models.SgrSysMenu{}).Where(" id IN ?", userMenuArr).Find(&dataMenuList)
+	for _, ele := range dataMenuList {
 		if ele.IsRoot == 1 {
 			rootMenu := dto.SysMenuTreeDTO{
 				ID:       ele.ID,
@@ -80,7 +80,7 @@ func (sms *SysMenuService) MenuTree(userId string) *[]dto.SysMenuTreeDTO {
 				ParentID: ele.ParentID,
 				Status:   ele.Status,
 			}
-			rootMenu.ChildrenMenu = Recursion(rootMenu, dataMenuList)
+			rootMenu.ChildrenMenu = Recursion(rootMenu, &dataMenuList)
 			menuList = append(menuList, rootMenu)
 		}
 	}
