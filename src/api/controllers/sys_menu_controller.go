@@ -26,10 +26,14 @@ func (c *SysMenuController) CreateMenu(ctx *context.HttpContext) mvc.ApiResult {
 	}
 
 	success, res := c.service.CreateMenu(menu)
+	msg := "添加成功"
+	if !success {
+		msg = "添加失败"
+	}
 	return mvc.ApiResult{
 		Success: success,
 		Data:    res,
-		Message: "添加成功",
+		Message: msg,
 	}
 }
 
@@ -69,6 +73,17 @@ func (c *SysMenuController) GetMenuList(ctx *context.HttpContext) mvc.ApiResult 
 		Success: res != nil,
 		Data:    res,
 		Message: "查询成功",
+	}
+}
+
+func (c *SysMenuController) GetUserMenuTree(ctx *context.HttpContext) mvc.ApiResult {
+	var userId string
+	userId = ctx.Input.Param("userId")
+	menuTree := c.service.MenuTree(userId)
+	return mvc.ApiResult{
+		Success: true,
+		Message: "查询成功",
+		Data:    menuTree,
 	}
 }
 

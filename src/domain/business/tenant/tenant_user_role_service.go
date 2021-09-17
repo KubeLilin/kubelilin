@@ -1,7 +1,6 @@
 package tenant
 
 import (
-	"fmt"
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 	"sgr/api/req"
@@ -21,7 +20,6 @@ func NewTenantUserRoleService(db *gorm.DB) *TenantUserRoleService {
 }
 
 func (urs *TenantUserRoleService) CreateUserRole(req *req.UserRoleListReq) (bool, *[]models.SgrTenantUserRole) {
-	fmt.Println(req)
 	var userRoleData = make([]models.SgrTenantUserRole, 0)
 	if req == nil {
 		return false, nil
