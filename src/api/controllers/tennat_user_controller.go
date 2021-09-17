@@ -88,7 +88,11 @@ func (user *UserController) PostRegister(ctx *context.HttpContext) mvc.ApiResult
 	}
 }
 
-func (user *UserController) PostUpdate(modifyUser *dbmodels.SgrTenantUser) mvc.ApiResult {
+func (user *UserController) PostUpdate(ctx *context.HttpContext) mvc.ApiResult {
+	var modifyUser *dbmodels.SgrTenantUser
+	_ = ctx.Bind(&modifyUser)
+	t := time.Now()
+	modifyUser.UpdateTime = &t
 	ok := user.Service.Update(modifyUser)
 	return mvc.ApiResult{
 		Success: ok,
