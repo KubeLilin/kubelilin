@@ -32,6 +32,9 @@ type (
 		Status    string `json:"status"`
 		LoginType string `json:"type"`
 		Authority string `json:"currentAuthority"`
+
+		Token   string `json:"token"`
+		Expires int64  `json:"expires"`
 	}
 )
 

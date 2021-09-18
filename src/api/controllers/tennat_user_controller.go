@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"github.com/yoyofx/yoyogo/abstractions"
+	"github.com/yoyofx/yoyogo/utils/jwt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"sgr/api/req"
@@ -13,10 +15,21 @@ import (
 type UserController struct {
 	mvc.ApiController
 	Service *tenant.UserService
+	config  struct {
+		secretKey string
+		expires   int
+	}
 }
 
-func NewUserController(service *tenant.UserService) *UserController {
-	return &UserController{Service: service}
+func NewUserController(configuration abstractions.IConfiguration, service *tenant.UserService) *UserController {
+	secretKey, _ := configuration.Get("yoyogo.application.server.jwt.secret").(string)
+	expires, _ := configuration.Get("yoyogo.application.server.jwt.expires").(int)
+
+	return &UserController{Service: service,
+		config: struct {
+			secretKey string
+			expires   int
+		}{secretKey: secretKey, expires: expires}}
 }
 
 func (user *UserController) PostLogin(ctx *context.HttpContext, loginRequest *req.LoginRequest) mvc.ApiResult {
@@ -30,7 +43,11 @@ func (user *UserController) PostLogin(ctx *context.HttpContext, loginRequest *re
 		return mvc.ApiResult{Success: true, Message: "can not find user be", Data: req.LoginResult{Status: "false"}}
 	}
 
-	return user.OK(req.LoginResult{Status: "ok", UserId: queryUser.ID, LoginType: loginRequest.LoginType, Authority: "admin"})
+	exp := time.Now().Add(time.Duration(user.config.expires) * time.Second)
+
+	token, expires := jwt.CreateToken([]byte(user.config.secretKey), queryUser.UserName, uint(queryUser.ID), exp.Unix())
+
+	return user.OK(req.LoginResult{Status: "ok", UserId: queryUser.ID, LoginType: loginRequest.LoginType, Authority: "admin", Token: token, Expires: expires})
 }
 
 func (user *UserController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
