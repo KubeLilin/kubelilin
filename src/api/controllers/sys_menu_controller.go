@@ -87,6 +87,20 @@ func (c *SysMenuController) GetUserMenuTree(ctx *context.HttpContext) mvc.ApiRes
 	}
 }
 
+func (c *SysMenuController) GetRoleMenuList(ctx *context.HttpContext) mvc.ApiResult {
+	var strRoleId string
+	strRoleId = ctx.Input.QueryDefault("roleId", "")
+	if strRoleId == "" {
+		return c.Fail("role id is null")
+	}
+
+	roleId, err := strconv.ParseInt(strRoleId, 10, 64)
+	if err != nil {
+		return c.Fail("role id format is error")
+	}
+	return c.OK(c.service.GetRoleMenuIdList(roleId))
+}
+
 // GetMenuByUser 返回路由信息接口
 func (c *SysMenuController) GetQueryList(ctx *context.HttpContext) mvc.ApiResult {
 	return c.OK(menuList)

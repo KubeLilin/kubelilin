@@ -119,3 +119,10 @@ func Recursion(parentMenu dto.SysMenuTreeDTO, sourceData *[]models.SgrSysMenu) *
 	}
 	return &targetData
 }
+
+func (sms *SysMenuService) GetRoleMenuIdList(roleId int64) []int64 {
+	sql := "SELECT sm.id FROM  sgr_role_menu_map rmm INNER JOIN `sgr_sys_menu` sm on rmm.`menu_id` = sm.`id` WHERE rmm.role_id = ?"
+	var menuIdList []int64
+	sms.db.Raw(sql, roleId).Scan(&menuIdList)
+	return menuIdList
+}
