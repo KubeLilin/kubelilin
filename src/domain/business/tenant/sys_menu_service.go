@@ -7,6 +7,7 @@ import (
 	"sgr/domain/database/models"
 	"sgr/domain/dto"
 	"sgr/pkg/page"
+	"sort"
 )
 
 type SysMenuService struct {
@@ -43,8 +44,8 @@ func (sms *SysMenuService) QueryMenuList(menuReq *req.SysMenuReq) *page.Page {
 	return page.StartPage(condition, menuReq.PageIndex, menuReq.PageSize).DoFind(data)
 }
 
-func (sms *SysMenuService) MenuTree(userId string) *[]dto.SysMenuTreeDTO {
-	var menuList []dto.SysMenuTreeDTO
+func (sms *SysMenuService) MenuTree(userId string) *[]dto.SysMenuRoutes {
+	var menuList []dto.SysMenuRoutes
 	var userRoleList []models.SgrTenantUserRole
 	//查询用户角色
 	sms.db.Model(&models.SgrTenantUserRole{}).Where("user_id=?", userId).Find(&userRoleList)
@@ -78,45 +79,46 @@ func (sms *SysMenuService) MenuTree(userId string) *[]dto.SysMenuTreeDTO {
 
 	for _, ele := range dataMenuList {
 		if ele.IsRoot == 1 {
-			rootMenu := dto.SysMenuTreeDTO{
-				ID:       ele.ID,
-				TenantID: ele.TenantID,
-				MenuCode: ele.MenuCode,
-				MenuName: ele.MenuName,
-				IsRoot:   ele.IsRoot,
-				Sort:     ele.Sort,
-				ParentID: ele.ParentID,
-				Status:   ele.Status,
+			rootMenu := dto.SysMenuRoutes{
+				ID:        ele.ID,
+				Component: ele.Component,
+				Icon:      ele.Icon,
+				Path:      ele.Path,
+				Layout:    false,
+				Sort:      ele.Sort,
+				Name:      ele.MenuName,
 			}
-			rootMenu.ChildrenMenu = Recursion(rootMenu, &dataMenuList)
+			rootMenu.Routes = Recursion(rootMenu, &dataMenuList)
 			menuList = append(menuList, rootMenu)
 		}
 	}
 	return &menuList
 }
 
-func Recursion(parentMenu dto.SysMenuTreeDTO, sourceData *[]models.SgrSysMenu) *[]dto.SysMenuTreeDTO {
-	var targetData []dto.SysMenuTreeDTO
+func Recursion(parentMenu dto.SysMenuRoutes, sourceData *[]models.SgrSysMenu) *[]dto.SysMenuRoutes {
+	var targetData []dto.SysMenuRoutes
 	for _, ele := range *sourceData {
 		if ele.ParentID == parentMenu.ID {
-			childMenu := dto.SysMenuTreeDTO{
-				ID:       ele.ID,
-				TenantID: ele.TenantID,
-				MenuCode: ele.MenuCode,
-				MenuName: ele.MenuName,
-				IsRoot:   ele.IsRoot,
-				Sort:     ele.Sort,
-				ParentID: ele.ParentID,
-				Status:   ele.Status,
+			childMenu := dto.SysMenuRoutes{
+				ID:        ele.ID,
+				Component: ele.Component,
+				Icon:      ele.Icon,
+				Path:      ele.Path,
+				Layout:    false,
+				Sort:      ele.Sort,
+				Name:      ele.MenuName,
 			}
 			for _, y := range *sourceData {
 				if y.ParentID == childMenu.ID {
-					childMenu.ChildrenMenu = Recursion(childMenu, sourceData)
+					childMenu.Routes = Recursion(childMenu, sourceData)
 				}
 			}
 			targetData = append(targetData, childMenu)
 		}
 	}
+	sort.SliceStable(targetData, func(i, j int) bool {
+		return targetData[i].Sort < targetData[j].Sort
+	})
 	return &targetData
 }
 
