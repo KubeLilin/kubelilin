@@ -330,6 +330,11 @@ const menuList = `[
 			  "component": "./account/role",
 			  "name": "role",
 			  "path": "/account/role"
+			},
+			{
+			  "component": "./account/tenant",
+			  "name": "tenant",
+			  "path": "/account/tenant"
 			}
         ]
     },
