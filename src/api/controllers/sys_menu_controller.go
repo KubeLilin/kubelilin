@@ -325,9 +325,15 @@ const menuList = `[
                 "component": "./account/manage",
                 "name": "manage",
                 "path": "/account/manage"
-            }
+            },
+			{
+			  "component": "./account/role",
+			  "name": "role",
+			  "path": "/account/role"
+			}
         ]
     },
+
     {
         "hideInMenu": true,
         "icon": "highlight",

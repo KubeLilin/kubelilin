@@ -37,10 +37,13 @@ func (trs *TenantRoleService) DeleteTenantRole(id string) bool {
 	return res.RowsAffected > 0
 }
 
-func (trs *TenantRoleService) QueryTenantRoleList(req *req.TenantRoleReq) *page.Page {
+func (trs *TenantRoleService) QueryTenantRoleList(keyword string, pageIndex int, pageSize int) *page.Page {
 	var data = &[]models.SgrTenantRole{}
-	var params = models.SgrTenantRole{}
-	copier.Copy(params, req)
-	condition := trs.db.Model(&models.SgrTenantRole{}).Where(params)
-	return page.StartPage(condition, req.PageIndex, req.PageSize).DoFind(data)
+
+	condition := trs.db.Model(&models.SgrTenantRole{})
+	if keyword != "" {
+		condition.Where("role_name like ?", "%"+keyword+"%")
+	}
+
+	return page.StartPage(condition, pageIndex, pageSize).DoFind(data)
 }

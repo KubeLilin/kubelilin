@@ -14,6 +14,7 @@ func ConfigureApi(builder router.IRouterBuilder) {
 	endpoints.UsePrometheus(builder)
 	endpoints.UseViz(builder)
 	endpoints.UseRouteInfo(builder)
+	endpoints.UseJwt(builder)
 }
 
 func ConfigureMvc(builder *mvc.ControllerBuilder) {

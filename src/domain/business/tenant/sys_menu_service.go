@@ -52,15 +52,18 @@ func (sms *SysMenuService) MenuTree(userId string) *[]dto.SysMenuRoutes {
 	if len(userRoleList) == 0 {
 		return &menuList
 	}
+
 	//查询角色对应的菜单
 	var roleIdArr []int64
 	for _, x := range userRoleList {
 		roleIdArr = append(roleIdArr, x.RoleID)
 	}
 	var roleMenuMap []models.SgrRoleMenuMap
-	sms.db.Model(&models.SgrRoleMenuMap{}).Where("role_id in ?", roleIdArr).Find(&roleMenuMap)
-	if len(roleMenuMap) == 0 {
-		return &menuList
+	if userId != "" {
+		sms.db.Model(&models.SgrRoleMenuMap{}).Where("role_id in ?", roleIdArr).Find(&roleMenuMap)
+		if len(roleMenuMap) == 0 {
+			return &menuList
+		}
 	}
 	//查询菜单列表进行匹配
 	var userMenuArr []uint64
@@ -68,7 +71,12 @@ func (sms *SysMenuService) MenuTree(userId string) *[]dto.SysMenuRoutes {
 		userMenuArr = append(userMenuArr, x.MenuID)
 	}
 	var dataMenuList []models.SgrSysMenu
-	sms.db.Model(&models.SgrSysMenu{}).Where(" id IN ?", userMenuArr).Find(&dataMenuList)
+	db := sms.db.Model(&models.SgrSysMenu{})
+	if userId != "" {
+		db.Where(" id IN ?", userMenuArr)
+	}
+	db.Find(&dataMenuList)
+
 	for _, ele := range dataMenuList {
 		if ele.IsRoot == 1 {
 			rootMenu := dto.SysMenuRoutes{

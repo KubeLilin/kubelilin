@@ -21,11 +21,12 @@ func main() {
 		UseConfiguration(config).
 		Configure(func(app *web.ApplicationBuilder) {
 			// add http middlewares
+
 			app.UseMiddleware(middlewares.NewCORS())
 			app.SetJsonSerializer(extension.CamelJson())
 			app.UseEndpoints(api.ConfigureApi) // 在 api/init.go 中定义 api or mvc 路由
 			app.UseMvc(api.ConfigureMvc)
-
+			//app.UseMiddleware(middlewares.NewJwt())
 			// and more ...
 		}).
 		ConfigureServices(func(container *dependencyinjection.ServiceCollection) {

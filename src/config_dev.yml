@@ -12,6 +12,15 @@ yoyogo:
         allow_origins: ["*"]
         allow_methods: ["*"]
         allow_credentials: true
+      jwt:
+        header: "Authorization"
+        secret: "12391JdeOW^%$#@"
+        prefix: "Bearer"
+        expires: 3600
+        enable: true
+        skip_path: [
+          "/v1/user/login"
+        ]
   cloud:
     discovery:
       cache:

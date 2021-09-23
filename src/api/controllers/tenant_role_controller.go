@@ -5,6 +5,7 @@ import (
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"sgr/api/req"
 	"sgr/domain/business/tenant"
+	"strconv"
 )
 
 type TenantRoleController struct {
@@ -44,8 +45,14 @@ func (c *TenantRoleController) DeleteTenantRole(ctx *context.HttpContext) mvc.Ap
 	}
 }
 
-func (c *TenantRoleController) GetTenantRoleList(req *req.TenantRoleReq) mvc.ApiResult {
-	res := c.service.QueryTenantRoleList(req)
+func (c *TenantRoleController) GetTenantRoleList(ctx *context.HttpContext) mvc.ApiResult {
+	keyword := ctx.Input.QueryDefault("keyword", "")
+	strPageIndex := ctx.Input.QueryDefault("pageIndex", "")
+	strPageSize := ctx.Input.QueryDefault("pageSize", "")
+	pageIndex, _ := strconv.Atoi(strPageIndex)
+	pageSize, _ := strconv.Atoi(strPageSize)
+
+	res := c.service.QueryTenantRoleList(keyword, pageIndex, pageSize)
 	return mvc.ApiResult{
 		Success: res != nil,
 		Data:    res,
