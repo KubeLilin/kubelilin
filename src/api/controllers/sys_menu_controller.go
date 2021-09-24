@@ -101,7 +101,9 @@ func (c *SysMenuController) GetRoleMenuList(ctx *context.HttpContext) mvc.ApiRes
 	return c.OK(c.service.GetRoleMenuIdList(roleId))
 }
 
-// GetMenuByUser 返回路由信息接口
+// GetQueryList
+// 目前返回值是字符串，最终 以对象形式输出，c.OK(menuList: []dto.SysMenuRoutes)
+// 前端在 app.tsx/layout.menu 中修改对应菜单显示。
 func (c *SysMenuController) GetQueryList(ctx *context.HttpContext) mvc.ApiResult {
 	return c.OK(menuList)
 }
@@ -141,7 +143,7 @@ const menuList = `[
     },
     {
         "icon": "dashboard",
-        "name": "dashboard",
+        "name": "仪表盘",
         "path": "/dashboard",
         "routes": [
             {
