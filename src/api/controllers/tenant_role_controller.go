@@ -46,13 +46,15 @@ func (c *TenantRoleController) DeleteTenantRole(ctx *context.HttpContext) mvc.Ap
 }
 
 func (c *TenantRoleController) GetTenantRoleList(ctx *context.HttpContext) mvc.ApiResult {
-	keyword := ctx.Input.QueryDefault("keyword", "")
+	roleId := ctx.Input.QueryDefault("keyword", "")
+	strTenantId := ctx.Input.QueryDefault("tenantId", "")
 	strPageIndex := ctx.Input.QueryDefault("pageIndex", "")
 	strPageSize := ctx.Input.QueryDefault("pageSize", "")
 	pageIndex, _ := strconv.Atoi(strPageIndex)
 	pageSize, _ := strconv.Atoi(strPageSize)
+	tenantId, _ := strconv.Atoi(strTenantId)
 
-	res := c.service.QueryTenantRoleList(keyword, pageIndex, pageSize)
+	res := c.service.QueryTenantRoleList(roleId, tenantId, pageIndex, pageSize)
 	return mvc.ApiResult{
 		Success: res != nil,
 		Data:    res,

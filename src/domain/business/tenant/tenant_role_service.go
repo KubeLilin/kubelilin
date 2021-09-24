@@ -33,16 +33,19 @@ func (trs *TenantRoleService) UpdateTenantRole(req *req.TenantRoleReq) (bool, *m
 }
 
 func (trs *TenantRoleService) DeleteTenantRole(id string) bool {
-	res := trs.db.Delete(&models.SgrTenantRole{}, id)
+	res := trs.db.Model(&models.SgrTenantRole{}).Where("id = ?", id).Update(models.SgrTenantRoleColumns.Status, 0)
 	return res.RowsAffected > 0
 }
 
-func (trs *TenantRoleService) QueryTenantRoleList(keyword string, pageIndex int, pageSize int) *page.Page {
+func (trs *TenantRoleService) QueryTenantRoleList(roleId string, tenantId int, pageIndex int, pageSize int) *page.Page {
 	var data = &[]models.SgrTenantRole{}
 
 	condition := trs.db.Model(&models.SgrTenantRole{})
-	if keyword != "" {
-		condition.Where("role_name like ?", "%"+keyword+"%")
+	if roleId != "" {
+		condition.Where("role_name like ?", "%"+roleId+"%")
+	}
+	if tenantId > 0 {
+		condition.Where("tenant_id = ?", tenantId)
 	}
 
 	return page.StartPage(condition, pageIndex, pageSize).DoFind(data)
