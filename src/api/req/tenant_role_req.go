@@ -12,6 +12,5 @@ type TenantRoleReq struct {
 	RoleName string `json:"roleName" uri:"roleName"` // 角色名称
 	Status   int8   `json:"status" uri:"status"`     // 状态
 	TenantID int64  `json:"tenantId" uri:"tenantId"`
-	KeyWord  string `json:"keyword" uri:"keyword"` //
 	page.PageRequest
 }
