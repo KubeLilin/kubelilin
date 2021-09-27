@@ -16,12 +16,12 @@ type SysMenuTreeDTO struct {
 }
 
 type SysMenuRoutes struct {
-	ID        uint64 `json:"id"`
-	Name      string
-	Path      string
-	Component string
-	Icon      string
-	Routes    *[]SysMenuRoutes
-	Layout    bool
-	Sort      int
+	ID        uint64           `json:"id"`
+	Name      string           `json:"name"`
+	Path      string           `json:"path"`
+	Component string           `json:"component"`
+	Icon      string           `json:"icon"`
+	Routes    *[]SysMenuRoutes `json:"routes"`
+	Layout    bool             `json:"layout"`
+	Sort      int              `json:"sort"`
 }
