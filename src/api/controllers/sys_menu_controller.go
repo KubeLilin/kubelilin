@@ -7,7 +7,9 @@ import (
 	"sgr/api/req"
 	"sgr/domain/business/tenant"
 	"sgr/domain/database/models"
+	"sgr/domain/dto"
 	"strconv"
+	"time"
 )
 
 type SysMenuController struct {
@@ -19,36 +21,52 @@ func NewSysMenuController(service *tenant.SysMenuService) *SysMenuController {
 	return &SysMenuController{service: service}
 }
 
-func (c *SysMenuController) CreateMenu(ctx *context.HttpContext) mvc.ApiResult {
-	var menu *models.SgrSysMenu
-	err := ctx.Bind(&menu)
+func (c *SysMenuController) PostCreateOrUpdateMenu(ctx *context.HttpContext) mvc.ApiResult {
+	var menuDto *dto.SysMenuRoutes
+	err := ctx.Bind(&menuDto)
 	if err != nil {
 		return c.Fail(err.Error())
 	}
+	exitsPathMenu := c.service.GetByPath(menuDto.Name)
+	if exitsPathMenu != nil {
+		return c.Fail("已存在路由信息!")
+	}
 
-	success, res := c.service.CreateMenu(menu)
-	msg := "添加成功"
-	if !success {
-		msg = "添加失败"
-	}
-	return mvc.ApiResult{
-		Success: success,
-		Data:    res,
-		Message: msg,
-	}
-}
+	t := time.Now()
+	menu := c.service.GetById(menuDto.ID)
+	if menu == nil {
+		// create
+		menu = &models.SgrSysMenu{}
+		menu.CreationTime = &t
+		menu.UpdateTime = &t
+		menu.Status = 1
+		menu.ParentID = menuDto.ParentID
+		menu.MenuName = menuDto.Name
+		menu.Path = menuDto.Path
+		menu.Component = "." + menuDto.Path
+		menu.Icon = menuDto.Icon
+		menu.Sort = menuDto.Sort
+		menu.IsRoot = menuDto.IsRoot
+		success, res := c.service.CreateMenu(menu)
+		return mvc.ApiResult{
+			Success: success,
+			Data:    res,
+		}
 
-func (c *SysMenuController) UpdateMenu(ctx *context.HttpContext) mvc.ApiResult {
-	var menu *models.SgrSysMenu
-	err := ctx.Bind(&menu)
-	if err != nil {
-		return c.Fail(err.Error())
-	}
-	success, res := c.service.UpdateMenu(menu)
-	return mvc.ApiResult{
-		Success: success,
-		Data:    res,
-		Message: "修改成功",
+	} else {
+		// update
+		menu.UpdateTime = &t
+		menu.MenuName = menuDto.Name
+		menu.Path = menuDto.Path
+		menu.Component = "." + menuDto.Path
+		menu.Icon = menuDto.Icon
+		menu.Sort = menuDto.Sort
+		menu.Status = 1
+		success, res := c.service.UpdateMenu(menu)
+		return mvc.ApiResult{
+			Success: success,
+			Data:    res,
+		}
 	}
 }
 

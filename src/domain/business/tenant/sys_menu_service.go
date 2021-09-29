@@ -28,6 +28,24 @@ func (sms *SysMenuService) UpdateMenu(menu *models.SgrSysMenu) (bool, *models.Sg
 	return res.RowsAffected > 0, menu
 }
 
+func (sms *SysMenuService) GetById(id uint64) *models.SgrSysMenu {
+	var menu *models.SgrSysMenu
+	res := sms.db.First(&menu, "id = ?", id)
+	if res.Error != nil {
+		return nil
+	}
+	return menu
+}
+
+func (sms *SysMenuService) GetByPath(path string) *models.SgrSysMenu {
+	var menu *models.SgrSysMenu
+	res := sms.db.First(&menu, "path = ?", path)
+	if res.Error != nil {
+		return nil
+	}
+	return menu
+}
+
 func (sms *SysMenuService) DelMenu(id int64) bool {
 	res := sms.db.Delete(&models.SgrSysMenu{}, id)
 	return res.RowsAffected > 0
@@ -48,8 +66,12 @@ func (sms *SysMenuService) MenuTree(userId string) *[]dto.SysMenuRoutes {
 	var menuList []dto.SysMenuRoutes
 	var userRoleList []models.SgrTenantUserRole
 	//查询用户角色
-	sms.db.Model(&models.SgrTenantUserRole{}).Where("user_id=?", userId).Find(&userRoleList)
-	if len(userRoleList) == 0 {
+	queryUser := sms.db.Model(&models.SgrTenantUserRole{})
+	if userId != "" {
+		queryUser.Where("user_id=?", userId)
+	}
+	queryUser.Find(&userRoleList)
+	if userRoleList == nil || len(userRoleList) == 0 {
 		return &menuList
 	}
 
@@ -87,6 +109,7 @@ func (sms *SysMenuService) MenuTree(userId string) *[]dto.SysMenuRoutes {
 				Layout:    false,
 				Sort:      ele.Sort,
 				Name:      ele.MenuName,
+				ParentID:  ele.ParentID,
 			}
 			rootMenu.Routes = Recursion(rootMenu, &dataMenuList)
 			menuList = append(menuList, rootMenu)
@@ -107,6 +130,7 @@ func Recursion(parentMenu dto.SysMenuRoutes, sourceData *[]models.SgrSysMenu) *[
 				Layout:    false,
 				Sort:      ele.Sort,
 				Name:      ele.MenuName,
+				ParentID:  ele.ParentID,
 			}
 			for _, y := range *sourceData {
 				if y.ParentID == childMenu.ID {

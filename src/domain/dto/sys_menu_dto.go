@@ -22,6 +22,8 @@ type SysMenuRoutes struct {
 	Component string           `json:"component"`
 	Icon      string           `json:"icon"`
 	Routes    *[]SysMenuRoutes `json:"routes"`
+	ParentID  uint64           `json:"parentId"`
 	Layout    bool             `json:"layout"`
 	Sort      int              `json:"sort"`
+	IsRoot    int8             `json:"isRoot"`
 }
