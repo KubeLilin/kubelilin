@@ -13,22 +13,19 @@ import (
 )
 
 func NewClientSet(path string) (*kubernetes.Clientset, error) {
-	var kubeConfig *string
+	var kubeConfig string
 	if path == "" {
 		if home := homedir.HomeDir(); home != "" {
 			// 如果没有输入kube config参数，就用默认路径~/.kube/config
-			kubeConfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kube config file")
-		} else {
-			// 如果取不到当前用户的家目录，就没办法设置kube config的默认目录了，只能从入参中取
-			kubeConfig = flag.String("kubeconfig", "", "absolute path to the kube config file")
+			kubeConfig = filepath.Join(home, ".kube", "config")
+			flag.Parse()
 		}
-		flag.Parse()
 	} else {
-		*kubeConfig = path
+		kubeConfig = path
 	}
 
 	// 从本机加载kube config配置文件，因此第一个参数为空字符串
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeConfig)
+	config, err := clientcmd.BuildConfigFromFlags("", kubeConfig)
 	// kube config加载失败就直接退出了
 	if err != nil {
 		panic(err.Error())
