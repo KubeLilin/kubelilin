@@ -30,25 +30,26 @@ func NewTenantController(service *tenant.TenantService) *TenantController {
 	}
 */
 func (controller TenantController) PostCreate(tenant *req.TenantRequest) mvc.ApiResult {
+	fmt.Println(tenant)
 	res := controller.Service.CreateTenant(&models.SgrTenant{
 		TName:  tenant.TName,
 		TCode:  tenant.TCode,
-		Status: tenant.Status,
+		Status: *tenant.Status,
 	})
-	return mvc.ApiResult{Data: res}
+	return mvc.ApiResult{Data: res, Success: res.ID != 0, Message: "添加成功"}
 }
 
 func (controller TenantController) PostUpdate(tenant *req.TenantRequest) mvc.ApiResult {
 	res := controller.Service.UpdateTenant(&models.SgrTenant{
 		TName:  tenant.TName,
 		TCode:  tenant.TCode,
-		Status: tenant.Status,
+		Status: *tenant.Status,
 	})
 	return mvc.ApiResult{Data: res}
 }
 
 func (controller TenantController) PostStatus(tenant *req.TenantRequest) mvc.ApiResult {
-	res := controller.Service.ChangeStatus(tenant.ID, tenant.Status)
+	res := controller.Service.ChangeStatus(tenant.ID, *tenant.Status)
 	return mvc.ApiResult{Data: res}
 }
 
@@ -58,7 +59,7 @@ func (controller TenantController) GetTenantList(ctx *context.HttpContext) mvc.A
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(tenantRequest.TName)
+	fmt.Println(tenantRequest)
 	res := controller.Service.QueryTenantList(tenantRequest)
 	return controller.OK(res)
 }

@@ -6,12 +6,12 @@ import (
 )
 
 type TenantRequest struct {
-	mvc.RequestBody
+	*mvc.RequestBody
 	//properties
 	ID     uint64 `json:"id"`
-	TName  string `json:"tName"`
-	TCode  string `json:"tCode"`  // 租户编码
-	Status int8   `json:"status"` // 状态
+	TName  string `json:"tName uri:"tName"`
+	TCode  string `json:"tCode" uri:"tCode"`   // 租户编码
+	Status *int8  `json:"status" uri:"status"` // 状态
 
 	page.PageRequest
 }
