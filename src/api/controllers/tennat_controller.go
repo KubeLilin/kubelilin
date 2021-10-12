@@ -36,7 +36,7 @@ func (controller TenantController) PostCreate(tenant *req.TenantRequest) mvc.Api
 		TCode:  tenant.TCode,
 		Status: *tenant.Status,
 	})
-	return mvc.ApiResult{Data: res, Success: res.ID != 0, Message: "添加成功"}
+	return mvc.ApiResult{Data: res, Success: res, Message: ""}
 }
 
 func (controller TenantController) PostUpdate(tenant *req.TenantRequest) mvc.ApiResult {

@@ -17,10 +17,15 @@ func NewTenantService(db *gorm.DB) *TenantService {
 	return &TenantService{db: db}
 }
 
-func (ts *TenantService) CreateTenant(tenant *models.SgrTenant) *models.SgrTenant {
-	res := ts.db.Create(tenant)
-	fmt.Printf("插入条数：%d", res.RowsAffected)
-	return tenant
+func (ts *TenantService) CreateTenant(tenant *models.SgrTenant) bool {
+	t1 := models.SgrTenant{}
+	res := ts.db.Model(models.SgrTenant{}).Where("t_code = ?", tenant.TCode).First(&t1)
+	if t1.ID > 0 {
+		// create 重复 Code
+		return false
+	}
+	res = ts.db.Create(tenant)
+	return res.RowsAffected > 0
 }
 
 func (ts *TenantService) UpdateTenant(tenant *models.SgrTenant) *models.SgrTenant {
