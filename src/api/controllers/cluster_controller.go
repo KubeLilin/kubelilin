@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	contextv1 "context"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"gorm.io/gorm"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sgr/domain/business/kubernetes"
 )
 
@@ -40,4 +42,11 @@ func (controller ClusterController) GetNamespaces(ctx *context.HttpContext) mvc.
 	}
 	namespaces := kubernetes.GetAllNamespaces(client)
 	return controller.OK(namespaces)
+}
+
+func (controller ClusterController) GetDeployments(ctx *context.HttpContext) mvc.ApiResult {
+	emptyOptions := v1.ListOptions{}
+	client, _ := kubernetes.NewClientSet("")
+	list, _ := client.AppsV1().Deployments("yoyogo").List(contextv1.TODO(), emptyOptions)
+	return controller.OK(list.Items)
 }
