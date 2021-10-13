@@ -50,7 +50,7 @@ func (controller TenantController) PostUpdate(tenant *req.TenantRequest) mvc.Api
 
 func (controller TenantController) PostStatus(tenant *req.TenantRequest) mvc.ApiResult {
 	res := controller.Service.ChangeStatus(tenant.ID, *tenant.Status)
-	return mvc.ApiResult{Data: res}
+	return mvc.ApiResult{Data: res, Success: res != 0}
 }
 
 func (controller TenantController) GetTenantList(ctx *context.HttpContext) mvc.ApiResult {
