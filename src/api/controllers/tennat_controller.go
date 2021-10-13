@@ -36,7 +36,13 @@ func (controller TenantController) PostCreate(tenant *req.TenantRequest) mvc.Api
 		TCode:  tenant.TCode,
 		Status: *tenant.Status,
 	})
-	return mvc.ApiResult{Data: res, Success: res, Message: ""}
+
+	errorMessage := ""
+	if !res {
+		errorMessage = "error.message.tenant.notuser"
+	}
+
+	return mvc.ApiResult{Data: res, Success: res, Message: errorMessage}
 }
 
 func (controller TenantController) PostUpdate(tenant *req.TenantRequest) mvc.ApiResult {
