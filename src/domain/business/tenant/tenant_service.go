@@ -34,10 +34,14 @@ func (ts *TenantService) UpdateTenant(tenant *models.SgrTenant) *models.SgrTenan
 	return tenant
 }
 
-func (ts *TenantService) ChangeStatus(id uint64, status int8) int64 {
+func (ts *TenantService) ChangeStatus(id uint64, status int8) bool {
+	if status == 1 {
+		status = 2
+	} else {
+		status = 1
+	}
 	res := ts.db.Model(&models.SgrTenant{}).Where("id=?", id).Update(models.SgrTenantColumns.Status, status)
-
-	return res.RowsAffected
+	return res.Error == nil
 }
 
 func (ts *TenantService) QueryTenantList(request *req.TenantRequest) *page.Page {
