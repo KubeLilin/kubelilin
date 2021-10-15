@@ -50,3 +50,10 @@ func (controller ClusterController) GetDeployments(ctx *context.HttpContext) mvc
 	list, _ := client.AppsV1().Deployments("yoyogo").List(contextv1.TODO(), emptyOptions)
 	return controller.OK(list.Items)
 }
+
+func (controller ClusterController) GetNodes(ctx *context.HttpContext) mvc.ApiResult {
+	emptyOptions := v1.ListOptions{}
+	client, _ := kubernetes.NewClientSet("")
+	list, _ := client.CoreV1().Nodes().List(contextv1.TODO(), emptyOptions)
+	return controller.OK(list.Items)
+}
