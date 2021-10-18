@@ -53,7 +53,8 @@ func (controller ClusterController) GetDeployments(ctx *context.HttpContext) mvc
 
 func (controller ClusterController) GetNodes(ctx *context.HttpContext) mvc.ApiResult {
 	emptyOptions := v1.ListOptions{}
-	client, _ := kubernetes.NewClientSet("")
+
+	client, _ := kubernetes.NewClientSet("/Users/yoyofx/Downloads/k8sconfig")
 	list, _ := client.CoreV1().Nodes().List(contextv1.TODO(), emptyOptions)
 	return controller.OK(list.Items)
 }

@@ -20,3 +20,19 @@ type Namespace struct {
 	Status string        `json:"status"`
 	Age    time.Duration `json:"age"`
 }
+
+type Node struct {
+	Uid                     string     `json:"uid"`
+	Name                    string     `json:"name"`
+	PodCIDR                 string     `json:"podCIDR"`
+	InternalIP              string     `json:"internalIP"`
+	ExternalIP              string     `json:"externalIP"`
+	HostName                string     `json:"hostName"`
+	Capacity                NodeStatus `json:"capacity"`
+	Allocatable             NodeStatus `json:"allocatable"`
+	OSImage                 string     `json:"osImage"`
+	ContainerRuntimeVersion string     `json:"containerRuntimeVersion"`
+	KubeletVersion          string     `json:"kubeletVersion"`
+	OperatingSystem         string     `json:"operatingSystem"`
+	Architecture            string     `json:"architecture"`
+}
