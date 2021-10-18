@@ -133,3 +133,31 @@ func GetNodeList(client *kubernetes.Clientset) []dto.Node {
 	}
 	return nodeList
 }
+
+func GetDeploymentList(client *kubernetes.Clientset, namespace string) []dto.Deployment {
+	emptyOptions := metav1.ListOptions{}
+	var deploymentList []dto.Deployment
+	list, _ := client.AppsV1().Deployments(namespace).List(context.TODO(), emptyOptions)
+
+	for _, deploy := range list.Items {
+		item := dto.Deployment{
+			Name:                deploy.Name,
+			Namespace:           deploy.Namespace,
+			Labels:              deploy.Labels,
+			Replicas:            deploy.Status.Replicas,
+			AvailableReplicas:   deploy.Status.AvailableReplicas,
+			UpdatedReplicas:     deploy.Status.UpdatedReplicas,
+			ReadyReplicas:       deploy.Status.ReadyReplicas,
+			UnavailableReplicas: deploy.Status.UnavailableReplicas,
+		}
+		if len(deploy.Spec.Template.Spec.Containers) > 0 {
+			item.Image = deploy.Spec.Template.Spec.Containers[0].Image
+			item.RequestCPU = deploy.Spec.Template.Spec.Containers[0].Resources.Requests.Cpu().AsApproximateFloat64()
+			item.RequestMemory = deploy.Spec.Template.Spec.Containers[0].Resources.Requests.Memory().AsApproximateFloat64()
+			item.LimitsCPU = deploy.Spec.Template.Spec.Containers[0].Resources.Limits.Cpu().AsApproximateFloat64()
+			item.LimitsMemory = deploy.Spec.Template.Spec.Containers[0].Resources.Limits.Memory().AsApproximateFloat64()
+		}
+		deploymentList = append(deploymentList, item)
+	}
+	return deploymentList
+}

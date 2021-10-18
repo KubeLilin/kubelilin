@@ -1,10 +1,8 @@
 package controllers
 
 import (
-	contextv1 "context"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sgr/api/req"
 	"sgr/domain/business/kubernetes"
 	"strconv"
@@ -52,9 +50,8 @@ func (controller ClusterController) GetDeployments(ctx *context.HttpContext) mvc
 	cid, _ := strconv.Atoi(strCid)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
 
-	emptyOptions := v1.ListOptions{}
-	list, _ := client.AppsV1().Deployments(namespace).List(contextv1.TODO(), emptyOptions)
-	return controller.OK(list.Items)
+	list := kubernetes.GetDeploymentList(client, namespace)
+	return controller.OK(list)
 }
 
 func (controller ClusterController) GetNodes(ctx *context.HttpContext) mvc.ApiResult {
