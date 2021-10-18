@@ -3,7 +3,8 @@ package kubernetes
 import (
 	"context"
 	"flag"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"fmt"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
@@ -28,14 +29,29 @@ func NewClientSet(path string) (*kubernetes.Clientset, error) {
 	config, err := clientcmd.BuildConfigFromFlags("", kubeConfig)
 	// kube config加载失败就直接退出了
 	if err != nil {
-		panic(err.Error())
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	}
 
 	return kubernetes.NewForConfig(config)
 }
 
-func GetPodList(client *kubernetes.Clientset, namespace string) []dto.Pod {
-	emptyOptions := v1.ListOptions{}
+func NewClientSetWithFileContent(fileContent string) (*kubernetes.Clientset, error) {
+	config, err := clientcmd.RESTConfigFromKubeConfig([]byte(fileContent))
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	return kubernetes.NewForConfig(config)
+}
+
+func GetPodList(client *kubernetes.Clientset, namespace string, app string) []dto.Pod {
+	emptyOptions := metav1.ListOptions{}
+
+	if app != "" {
+		emptyOptions.LabelSelector = "k8s-app=" + app
+	}
+
 	list, _ := client.CoreV1().Pods(namespace).List(context.TODO(), emptyOptions)
 
 	var podList []dto.Pod
@@ -69,7 +85,7 @@ func GetPodList(client *kubernetes.Clientset, namespace string) []dto.Pod {
 }
 
 func GetAllNamespaces(client *kubernetes.Clientset) []dto.Namespace {
-	emptyOptions := v1.ListOptions{}
+	emptyOptions := metav1.ListOptions{}
 	list, _ := client.CoreV1().Namespaces().List(context.TODO(), emptyOptions)
 	var namespaceList []dto.Namespace
 	for _, ns := range list.Items {
@@ -80,4 +96,40 @@ func GetAllNamespaces(client *kubernetes.Clientset) []dto.Namespace {
 		namespaceList = append(namespaceList, info)
 	}
 	return namespaceList
+}
+
+func GetNodeList(client *kubernetes.Clientset) []dto.Node {
+	emptyOptions := metav1.ListOptions{}
+	list, _ := client.CoreV1().Nodes().List(context.TODO(), emptyOptions)
+	var nodeList []dto.Node
+	for _, nd := range list.Items {
+		var address []dto.NodeAddress
+		for _, addr := range nd.Status.Addresses {
+			address = append(address, dto.NodeAddress{Type: string(addr.Type), Address: addr.Address})
+		}
+		node := dto.Node{
+			Uid:       string(nd.UID),
+			Name:      nd.Name,
+			PodCIDR:   nd.Spec.PodCIDR,
+			Addresses: address,
+			Capacity: dto.NodeStatus{
+				CPU:    nd.Status.Capacity.Cpu().AsApproximateFloat64(),
+				Memory: nd.Status.Capacity.Memory().AsApproximateFloat64(),
+				Pods:   nd.Status.Capacity.Pods().Size(),
+			},
+			Allocatable: dto.NodeStatus{
+				CPU:    nd.Status.Allocatable.Cpu().AsApproximateFloat64(),
+				Memory: nd.Status.Allocatable.Memory().AsApproximateFloat64(),
+				Pods:   nd.Status.Allocatable.Pods().Size(),
+			},
+			OSImage:                 nd.Status.NodeInfo.OSImage,
+			ContainerRuntimeVersion: nd.Status.NodeInfo.ContainerRuntimeVersion,
+			KubeletVersion:          nd.Status.NodeInfo.KubeletVersion,
+			OperatingSystem:         nd.Status.NodeInfo.OperatingSystem,
+			Architecture:            nd.Status.NodeInfo.Architecture,
+		}
+
+		nodeList = append(nodeList, node)
+	}
+	return nodeList
 }

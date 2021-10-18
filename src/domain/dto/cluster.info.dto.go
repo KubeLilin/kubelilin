@@ -2,6 +2,16 @@ package dto
 
 import "time"
 
+type ClusterInfo struct {
+	ID           uint64 `json:"id"`           // ID
+	TenantID     *int64 `json:"tenantId"`     // 租户ID
+	Name         string `json:"name"`         // 集群名称
+	Version      string `json:"version"`      // k8s 版本号
+	Distribution string `json:"distribution"` // 来源
+	Sort         *int   `json:"sort"`         // 排序
+	Status       int8   `json:"status"`       // 状态
+}
+
 type Pod struct {
 	Namespace   string        `json:"namespace"`
 	PodName     string        `json:"name"`
@@ -22,17 +32,15 @@ type Namespace struct {
 }
 
 type Node struct {
-	Uid                     string     `json:"uid"`
-	Name                    string     `json:"name"`
-	PodCIDR                 string     `json:"podCIDR"`
-	InternalIP              string     `json:"internalIP"`
-	ExternalIP              string     `json:"externalIP"`
-	HostName                string     `json:"hostName"`
-	Capacity                NodeStatus `json:"capacity"`
-	Allocatable             NodeStatus `json:"allocatable"`
-	OSImage                 string     `json:"osImage"`
-	ContainerRuntimeVersion string     `json:"containerRuntimeVersion"`
-	KubeletVersion          string     `json:"kubeletVersion"`
-	OperatingSystem         string     `json:"operatingSystem"`
-	Architecture            string     `json:"architecture"`
+	Uid                     string        `json:"uid"`
+	Name                    string        `json:"name"`
+	PodCIDR                 string        `json:"podCIDR"`
+	Addresses               []NodeAddress `json:"addresses"`
+	Capacity                NodeStatus    `json:"capacity"`
+	Allocatable             NodeStatus    `json:"allocatable"`
+	OSImage                 string        `json:"osImage"`
+	ContainerRuntimeVersion string        `json:"containerRuntimeVersion"`
+	KubeletVersion          string        `json:"kubeletVersion"`
+	OperatingSystem         string        `json:"operatingSystem"`
+	Architecture            string        `json:"architecture"`
 }

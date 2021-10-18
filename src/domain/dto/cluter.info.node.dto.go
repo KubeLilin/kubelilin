@@ -1,7 +1,12 @@
 package dto
 
 type NodeStatus struct {
-	CPU    string `json:"cpu"`
-	Memory string `json:"memory"`
-	Pods   int    `json:"pods"`
+	CPU    float64 `json:"cpu"`
+	Memory float64 `json:"memory"`
+	Pods   int     `json:"pods"`
+}
+
+type NodeAddress struct {
+	Type    string `json:"type"`
+	Address string `json:"address"`
 }

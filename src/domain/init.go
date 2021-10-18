@@ -4,6 +4,7 @@ import (
 	"github.com/yoyofx/yoyogo/abstractions"
 	"github.com/yoyofx/yoyogo/pkg/configuration"
 	"github.com/yoyofxteam/dependencyinjection"
+	"sgr/domain/business/kubernetes"
 	"sgr/domain/business/tenant"
 	"sgr/domain/conf"
 )
@@ -24,6 +25,9 @@ func init() {
 			serviceCollection.AddTransient(tenant.NewTenantRoleService)
 			serviceCollection.AddTransient(tenant.NewTenantUserRoleService)
 			serviceCollection.AddTransient(tenant.NewRoleMenuService)
+
+			serviceCollection.AddTransient(kubernetes.NewClusterService)
+
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
 
 		})
