@@ -1,0 +1,3 @@
+CREATE DATABASE IF NOT EXISTS sgr_pass
+     DEFAULT CHARACTER SET utf8
+     DEFAULT COLLATE utf8_general_ci;
