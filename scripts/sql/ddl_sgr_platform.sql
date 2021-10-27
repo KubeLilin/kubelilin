@@ -1,3 +1,23 @@
+DROP TABLE IF EXISTS `sgr_code_application_language` ;
+
+CREATE TABLE `sgr_code_application_language` (
+                                                 `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+                                                 `code` varchar(8) DEFAULT NULL,
+                                                 `name` varchar(50) NOT NULL,
+                                                 `sort` smallint(5) unsigned NOT NULL DEFAULT '0',
+                                                 PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='字典-应用开发语言';
+
+DROP TABLE IF EXISTS `sgr_code_application_level` ;
+
+CREATE TABLE `sgr_code_application_level` (
+                                              `id` smallint(10) unsigned NOT NULL AUTO_INCREMENT,
+                                              `code` varchar(8) DEFAULT NULL,
+                                              `name` varchar(50) NOT NULL,
+                                              `sort` smallint(5) unsigned NOT NULL DEFAULT '0',
+                                              PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='字典-应用级别';
+
 DROP TABLE IF EXISTS `sgr_role_menu_map` ;
 
 CREATE TABLE `sgr_role_menu_map` (
@@ -41,6 +61,23 @@ CREATE TABLE `sgr_tenant` (
                               UNIQUE KEY `un_code` (`t_code`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COMMENT='租户';
 
+DROP TABLE IF EXISTS `sgr_tenant_application` ;
+
+CREATE TABLE `sgr_tenant_application` (
+                                          `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                                          `name` varchar(50) NOT NULL COMMENT '集群应用名称(英文唯一)',
+                                          `nickname` varchar(50) NOT NULL COMMENT '应用中文名称',
+                                          `remarks` varchar(200) NOT NULL COMMENT '集群应用备注',
+                                          `git` varchar(500) NOT NULL COMMENT '集群应用绑定的git地址',
+                                          `imagehub` varchar(500) NOT NULL COMMENT '集群应用绑定镜像仓库地址',
+                                          `level` smallint(6) unsigned NOT NULL COMMENT '应用级别',
+                                          `language` smallint(5) unsigned NOT NULL COMMENT '开发语言',
+                                          `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态',
+                                          `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                          `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                          PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='集群应用';
+
 DROP TABLE IF EXISTS `sgr_tenant_cluster` ;
 
 CREATE TABLE `sgr_tenant_cluster` (
@@ -57,6 +94,21 @@ CREATE TABLE `sgr_tenant_cluster` (
                                       `update_time` datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
                                       PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='集群信息';
+
+DROP TABLE IF EXISTS `sgr_tenant_deployments` ;
+
+CREATE TABLE `sgr_tenant_deployments` (
+                                          `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                                          `name` varchar(50) NOT NULL COMMENT '部署名称(英文唯一)',
+                                          `nickname` varchar(50) NOT NULL COMMENT '部署中文名称',
+                                          `cluster_id` bigint(20) unsigned NOT NULL COMMENT '集群ID',
+                                          `namespace_id` bigint(20) unsigned NOT NULL COMMENT '命名空间ID',
+                                          `app_id` bigint(20) unsigned NOT NULL COMMENT '应用ID',
+                                          `status` tinyint(3) unsigned NOT NULL DEFAULT '1' COMMENT '状态',
+                                          `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                          `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                          PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='集群部署';
 
 DROP TABLE IF EXISTS `sgr_tenant_namespace` ;
 
