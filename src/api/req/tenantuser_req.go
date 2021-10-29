@@ -1,8 +1,12 @@
 package req
 
 import (
+	"fmt"
+	"github.com/yoyofx/yoyogo/utils/jwt"
+	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"sgr/pkg/page"
+	"strconv"
 )
 
 type QueryUserRequest struct {
@@ -57,3 +61,32 @@ type (
 		Phone       string        `json:"phone"`
 	}
 )
+
+type JwtCustomClaims struct {
+	jwt.StandardClaims
+
+	// addition
+	Uid      uint  `json:"uid"`
+	TenantId int64 `json:"tenantId"`
+	Admin    bool  `json:"admin"`
+}
+
+type UserInfo struct {
+	UserId   int64
+	TenantID int64
+}
+
+func GetUserInfo(ctx *context.HttpContext) *UserInfo {
+	mappings := ctx.GetItem("userinfo")
+	maps := mappings.(map[string]interface{})
+
+	if maps != nil {
+		uid, _ := strconv.ParseInt(fmt.Sprintf("%v", maps["uid"]), 10, 64)
+		tid, _ := strconv.ParseInt(fmt.Sprintf("%v", maps["tenantId"]), 10, 64)
+		return &UserInfo{
+			UserId:   uid,
+			TenantID: tid,
+		}
+	}
+	return nil
+}

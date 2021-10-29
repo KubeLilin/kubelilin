@@ -45,9 +45,18 @@ func (user *UserController) PostLogin(ctx *context.HttpContext, loginRequest *re
 
 	exp := time.Now().Add(time.Duration(user.config.expires) * time.Second)
 
-	token, expires := jwt.CreateToken([]byte(user.config.secretKey), queryUser.UserName, uint(queryUser.ID), exp.Unix())
+	claims := &req.JwtCustomClaims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: exp.Unix(),
+			Issuer:    queryUser.UserName,
+		},
+		Uid:      uint(queryUser.ID),
+		TenantId: queryUser.TenantID,
+	}
 
-	return user.OK(req.LoginResult{Status: "ok", UserId: queryUser.ID, LoginType: loginRequest.LoginType, Authority: "admin", Token: token, Expires: expires})
+	token, _ := jwt.CreateCustomToken([]byte(user.config.secretKey), claims)
+
+	return user.OK(req.LoginResult{Status: "ok", UserId: queryUser.ID, LoginType: loginRequest.LoginType, Authority: "admin", Token: token, Expires: exp.Unix()})
 }
 
 func (user *UserController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {

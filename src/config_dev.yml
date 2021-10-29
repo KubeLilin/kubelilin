@@ -52,9 +52,9 @@ yoyogo:
     db:
       name: db1
       type: mysql
-      url: tcp(cdb-amqub3mo.bj.tencentcdb.com:10042)/sgr_paas?charset=utf8&parseTime=True
-      username: root
-      password: 1234abcd
+      url: tcp(49.232.153.51:3306)/sgr_paas?charset=utf8&parseTime=True
+      username: sgr_dev
+      password: A.jiheMA?2
       debug: true
     redis:
       name: reids1

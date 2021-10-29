@@ -9,8 +9,8 @@ require (
 	github.com/yoyofxteam/dependencyinjection v1.0.1
 	gorm.io/driver/mysql v1.1.1
 	gorm.io/gorm v1.21.11
-	k8s.io/apimachinery v0.20.0
-	k8s.io/client-go v0.20.0
+	k8s.io/apimachinery v0.22.0
+	k8s.io/client-go v0.22.0
 
 )
 

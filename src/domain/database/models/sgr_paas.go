@@ -4,7 +4,7 @@ import "time"
 
 // SgrRoleMenuMap 角色菜单权限影射
 type SgrRoleMenuMap struct {
-	ID           int64      `gorm:"primaryKey;column:id;type:bigint(20);not null" json:"id"`
+	ID           uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`
 	RoleID       uint64     `gorm:"column:role_id;type:bigint(20) unsigned;not null" json:"roleId"`
 	MenuID       uint64     `gorm:"column:menu_id;type:bigint(20) unsigned;not null" json:"menuId"`
 	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;default:CURRENT_TIMESTAMP" json:"creationTime"`
@@ -35,7 +35,7 @@ var SgrRoleMenuMapColumns = struct {
 type SgrSysMenu struct {
 	ID           uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`
 	TenantID     int64      `gorm:"column:tenant_id;type:bigint(11);not null" json:"tenantId"`                    // 租户
-	MenuCode     string     `gorm:"unique;column:menu_code;type:varchar(100);not null" json:"menuCode"`           // 编码
+	MenuCode     string     `gorm:"column:menu_code;type:varchar(100);not null" json:"menuCode"`                  // 编码
 	MenuName     string     `gorm:"column:menu_name;type:varchar(50);not null" json:"menuName"`                   // 目录名称
 	Icon         string     `gorm:"column:icon;type:varchar(50)" json:"icon"`                                     // 图标
 	Path         string     `gorm:"column:path;type:varchar(100);not null" json:"path"`                           // 路由路径
@@ -116,11 +116,56 @@ var SgrTenantColumns = struct {
 	UpdateTime:   "update_time",
 }
 
+// SgrTenantCluster [...]
+type SgrTenantCluster struct {
+	ID           uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"` // ID
+	TenantID     *int64     `gorm:"column:tenant_id;type:bigint(20)" json:"tenantId"`                 // 租户ID
+	Name         string     `gorm:"column:name;type:varchar(50);not null" json:"name"`                // 集群名称
+	Version      string     `gorm:"column:version;type:varchar(50)" json:"version"`                   // k8s 版本号
+	Distribution string     `gorm:"column:distribution;type:varchar(30)" json:"distribution"`         // 来源
+	Config       string     `gorm:"column:config;type:text;not null" json:"-"`                        // k8s config text
+	Sort         *int       `gorm:"column:sort;type:int(11)" json:"sort"`                             // 排序
+	Status       int8       `gorm:"column:status;type:tinyint(4);not null" json:"status"`             // 状态
+	CreateTime   *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"`      // 创建时间
+	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime;not null" json:"updateTime"`      // 更新时间
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *SgrTenantCluster) TableName() string {
+	return "sgr_tenant_cluster"
+}
+
+// SgrTenantClusterColumns get sql column name.获取数据库列名
+var SgrTenantClusterColumns = struct {
+	ID           string
+	TenantID     string
+	Name         string
+	Version      string
+	Distribution string
+	Config       string
+	Sort         string
+	Status       string
+	CreateTime   string
+	UpdateTime   string
+}{
+	ID:           "id",
+	TenantID:     "tenant_id",
+	Name:         "name",
+	Version:      "version",
+	Distribution: "distribution",
+	Config:       "config",
+	Sort:         "sort",
+	Status:       "status",
+	CreateTime:   "create_time",
+	UpdateTime:   "update_time",
+}
+
 // SgrTenantRole 租户角色
 type SgrTenantRole struct {
 	ID           uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`
 	RoleCode     string     `gorm:"uniqueIndex:un_role_code_name;column:role_code;type:varchar(30);not null" json:"roleCode"` // 角色编码
 	RoleName     string     `gorm:"uniqueIndex:un_role_code_name;column:role_name;type:varchar(50);not null" json:"roleName"` // 角色名称
+	Description  string     `gorm:"column:description;type:varchar(50)" json:"description"`                                   // 角色描述
 	Status       int8       `gorm:"column:status;type:tinyint(3);not null;default:0" json:"status"`                           // 状态
 	TenantID     int64      `gorm:"column:tenant_id;type:bigint(11);not null" json:"tenantId"`                                // 租户
 	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;default:CURRENT_TIMESTAMP" json:"creationTime"`
@@ -137,6 +182,7 @@ var SgrTenantRoleColumns = struct {
 	ID           string
 	RoleCode     string
 	RoleName     string
+	Description  string
 	Status       string
 	TenantID     string
 	CreationTime string
@@ -145,6 +191,7 @@ var SgrTenantRoleColumns = struct {
 	ID:           "id",
 	RoleCode:     "role_code",
 	RoleName:     "role_name",
+	Description:  "description",
 	Status:       "status",
 	TenantID:     "tenant_id",
 	CreationTime: "creation_time",
