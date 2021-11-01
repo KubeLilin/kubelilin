@@ -19,13 +19,39 @@ func NewTenantService(db *gorm.DB) *TenantService {
 
 func (ts *TenantService) CreateTenant(tenant *models.SgrTenant) bool {
 	t1 := models.SgrTenant{}
-	res := ts.db.Model(models.SgrTenant{}).Where("t_code = ?", tenant.TCode).First(&t1)
+	ts.db.Model(models.SgrTenant{}).Where("t_code = ?", tenant.TCode).First(&t1)
 	if t1.ID > 0 {
 		// create 重复 Code
 		return false
 	}
-	res = ts.db.Create(tenant)
-	return res.RowsAffected > 0
+	err := ts.db.Transaction(func(tx *gorm.DB) error {
+		//创建租户
+		dbRes := ts.db.Create(tenant)
+		if dbRes.Error != nil {
+			return dbRes.Error
+		}
+		//创建第一个用户
+		tenantAdmin := &models.SgrTenantUser{
+			TenantID: tenant.ID,
+			Account:  tenant.TCode + "admin",
+			UserName: tenant.TName + "Administrator",
+			Password: "123456",
+		}
+		if err := ts.db.Create(tenantAdmin).Error; err != nil {
+			return err
+		}
+		//给用户分配权限 先鸽了哪天想写了再写
+		userRole:=&models.SgrTenantUserRole{
+			UserID: tenantAdmin.ID,
+			RoleID: 1,
+		}
+		if err := ts.db.Create(userRole).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	return err == nil
 }
 
 func (ts *TenantService) UpdateTenant(tenant *models.SgrTenant) *models.SgrTenant {

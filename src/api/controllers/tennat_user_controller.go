@@ -80,7 +80,7 @@ func (user *UserController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
 			Email:       userInfo.Email,
 			Signature:   "",
 			Title:       "",
-			Group:       strconv.FormatInt(userInfo.TenantID, 10),
+			Group:       strconv.FormatUint(userInfo.TenantID, 10),
 			Tags:        nil,
 			NotifyCount: 0,
 			UnreadCount: 0,

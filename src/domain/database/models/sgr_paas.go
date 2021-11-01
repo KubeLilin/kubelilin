@@ -201,7 +201,7 @@ var SgrTenantRoleColumns = struct {
 // SgrTenantUser 用户信息
 type SgrTenantUser struct {
 	ID           uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`
-	TenantID     int64      `gorm:"column:tenant_id;type:bigint(11);not null" json:"tenantId"`      // 租户
+	TenantID     uint64      `gorm:"column:tenant_id;type:bigint(11);not null" json:"tenantId"`      // 租户
 	UserName     string     `gorm:"column:user_name;type:varchar(50)" json:"userName"`              // 用户名
 	Account      string     `gorm:"column:account;type:varchar(50);not null" json:"account"`        // 账号
 	Password     string     `gorm:"column:password;type:varchar(255);not null" json:"password"`     // 密码
@@ -245,7 +245,7 @@ var SgrTenantUserColumns = struct {
 // SgrTenantUserRole 用户角色
 type SgrTenantUserRole struct {
 	ID           uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`
-	UserID       int64      `gorm:"column:user_id;type:bigint(20);not null" json:"userId"` // 用户id
+	UserID       uint64      `gorm:"column:user_id;type:bigint(20);not null" json:"userId"` // 用户id
 	RoleID       int64      `gorm:"column:role_id;type:bigint(20);not null" json:"roleId"` // 角色id
 	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;default:CURRENT_TIMESTAMP" json:"creationTime"`
 	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
