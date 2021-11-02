@@ -125,7 +125,7 @@ func (c *SysMenuController) GetRoleMenuList(ctx *context.HttpContext) mvc.ApiRes
 // 前端在 app.tsx/layout.menu 中修改对应菜单显示。
 func (c *SysMenuController) GetQueryList(ctx *context.HttpContext) mvc.ApiResult {
 	var userId string
-	userId = ctx.Input.Param("userId")
+	userId = ctx.Input.QueryDefault("id", "")
 	menuTree := c.service.MenuTree(userId)
 	bytes, err := json.Marshal(menuTree)
 	if err != nil {
