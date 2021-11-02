@@ -8,6 +8,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sgr/domain/database/models"
 	"sgr/domain/dto"
+	"time"
 )
 
 type ClusterService struct {
@@ -50,13 +51,17 @@ func (cluster *ClusterService) ImportK8sConfig(configStr, clusterName string, te
 		return nil, err
 	}
 	fmt.Println(versionInfo)
+	t := time.Now()
 	clusterData := &models.SgrTenantCluster{
-		TenantID: tenantId,
-		Name:     clusterName,
-		Nickname: clusterName,
-		Version:  versionInfo.GitVersion,
-		Config:   configStr,
+		TenantID:   tenantId,
+		Name:       clusterName,
+		Nickname:   clusterName,
+		Version:    versionInfo.GitVersion,
+		Config:     configStr,
+		Status:     1,
+		CreateTime: &t,
+		UpdateTime: &t,
 	}
-	cluster.db.Model(&models.SgrTenantCluster{}).Create(clusterData)
-	return clusterData, nil
+	err = cluster.db.Model(&models.SgrTenantCluster{}).Create(clusterData).Error
+	return clusterData, err
 }
