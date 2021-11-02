@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"io/ioutil"
@@ -72,13 +71,20 @@ func (controller ClusterController) GetList(ctx *context.HttpContext) mvc.ApiRes
 	return controller.OK(tenantList)
 }
 
-func (controller ClusterController) PostClusterByConfig(req *req.ImportClusterReq) {
-	configFile, err := req.File.Open()
+func (controller ClusterController) PostClusterByConfig(ctx *context.HttpContext, req *req.ImportClusterReq) mvc.ApiResult {
+	// 这块 用 req 就是获取不到 不知道为什么！！！！
+	_, k8sFile, err := ctx.Input.FormFile("file1")
 	if err != nil {
-		panic(err)
+		return controller.Fail(err.Error())
 	}
-	content, err := ioutil.ReadAll(configFile)
-	fmt.Println(content)
-	controller.clusterService.ImportK8sConfig(string(content), req.NickName, req.TenantId)
 
+	configFile, _ := k8sFile.Open()
+	content, _ := ioutil.ReadAll(configFile)
+
+	config, err := controller.clusterService.ImportK8sConfig(string(content), req.NickName, req.TenantId)
+	if err != nil {
+		return controller.OK(config)
+	}
+
+	return controller.Fail(err.Error())
 }
