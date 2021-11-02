@@ -82,7 +82,7 @@ func (controller ClusterController) PostClusterByConfig(ctx *context.HttpContext
 	content, _ := ioutil.ReadAll(configFile)
 	// 这里导入得判断下唯一性 name + tenantid
 	config, err := controller.clusterService.ImportK8sConfig(string(content), req.NickName, req.TenantId)
-	if err != nil {
+	if err == nil {
 		return controller.OK(config)
 	}
 
