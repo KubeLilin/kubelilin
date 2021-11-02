@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
+	"io/ioutil"
 	"sgr/api/req"
 	"sgr/domain/business/kubernetes"
 	"strconv"
@@ -68,4 +70,15 @@ func (controller ClusterController) GetList(ctx *context.HttpContext) mvc.ApiRes
 	userInfo := req.GetUserInfo(ctx)
 	tenantList, _ := controller.clusterService.GetClustersByTenant(userInfo.TenantID)
 	return controller.OK(tenantList)
+}
+
+func (controller ClusterController) PostClusterByConfig(req *req.ImportClusterReq) {
+	configFile, err := req.File.Open()
+	if err != nil {
+		panic(err)
+	}
+	content, err := ioutil.ReadAll(configFile)
+	fmt.Println(content)
+	controller.clusterService.ImportK8sConfig(string(content), req.NickName, req.TenantId)
+
 }

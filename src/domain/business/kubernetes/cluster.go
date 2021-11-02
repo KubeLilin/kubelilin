@@ -1,6 +1,8 @@
 package kubernetes
 
 import (
+	"errors"
+	"fmt"
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 	"k8s.io/client-go/kubernetes"
@@ -32,4 +34,29 @@ func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId int64, clu
 	var data models.SgrTenantCluster
 	cluster.db.Model(&models.SgrTenantCluster{}).Where("tenant_id = ? AND id = ?", tenantId, clusterId).First(&data)
 	return NewClientSetWithFileContent(data.Config)
+}
+
+func (cluster *ClusterService) ImportK8sConfig(configStr, clusterName string, tenantId uint64) (res *models.SgrTenantCluster, err error) {
+	//调用k8s获取集群描述信息
+	if len(configStr) == 0 {
+		return nil, errors.New("config can not be empty")
+	}
+	client, err := NewClientSetWithFileContent(configStr)
+	if err != nil {
+		return nil, err
+	}
+	versionInfo, err := client.Discovery().ServerVersion()
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(versionInfo)
+	clusterData := &models.SgrTenantCluster{
+		TenantID: tenantId,
+		Name:     clusterName,
+		Nickname: clusterName,
+		Version:  versionInfo.GitVersion,
+		Config:   configStr,
+	}
+	cluster.db.Model(&models.SgrTenantCluster{}).Create(clusterData)
+	return clusterData, nil
 }
