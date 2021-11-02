@@ -51,7 +51,7 @@ func (user *UserController) PostLogin(ctx *context.HttpContext, loginRequest *re
 			Issuer:    queryUser.UserName,
 		},
 		Uid:      uint(queryUser.ID),
-		TenantId: queryUser.TenantID,
+		TenantId: int64(queryUser.TenantID),
 	}
 
 	token, _ := jwt.CreateCustomToken([]byte(user.config.secretKey), claims)
