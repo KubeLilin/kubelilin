@@ -41,6 +41,19 @@ SGR cloud native backend .
    2. 容器列表, POD -> Container
 
 
+# 流水线
+流水线（应用级） 一个流水线可以有多个应用
+1. 编译过程BUILD：
+-  git pull (应用中保存的git)
+-  编译环境 (java 、go 、 nodejs) + 命令行
+-  docker build xxxxxx .
+-  docker push  (  "hub.yoyogo.run/" + "{应用名+部署环境名+}" + ":build.number"  )
+
+2. 部署DEPLOY
+-  部署 k8s Deployment (应用+部署环境 确定)
+-  生成 k8s service (应用+部署环境 确定)
+-  网关绑定 apixsix admin api ,添加默认路由并绑定 k8s service name
+
 
 --------
 服务治理：（不在本期范围）
