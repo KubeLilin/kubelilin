@@ -2,13 +2,15 @@ package kubernetes
 
 import (
 	"errors"
-	"fmt"
 	"github.com/jinzhu/copier"
+	"github.com/spf13/viper"
 	"gorm.io/gorm"
+	"io/ioutil"
 	"k8s.io/client-go/kubernetes"
+	"mime/multipart"
 	"sgr/domain/database/models"
 	"sgr/domain/dto"
-	"time"
+	"strings"
 )
 
 type ClusterService struct {
@@ -37,11 +39,23 @@ func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId int64, clu
 	return NewClientSetWithFileContent(data.Config)
 }
 
-func (cluster *ClusterService) ImportK8sConfig(configStr, clusterName string, tenantId uint64) (res *models.SgrTenantCluster, err error) {
-	//调用k8s获取集群描述信息
+func (cluster *ClusterService) ImportK8sConfig(configFile multipart.File, clusterName string, tenantId uint64) (res *models.SgrTenantCluster, err error) {
+	//读取配置文件
+	defer configFile.Close()
+	content, _ := ioutil.ReadAll(configFile)
+	var configStr = string(content)
+	configV := viper.New()
+	configV.SetConfigType("yaml")
+	configV.ReadConfig(strings.NewReader(configStr))
+	clusters := configV.Get("clusters").([]interface{})
+	if len(clusters) == 0 {
+		return nil, errors.New("config file must contain more than one cluster configuration points")
+	}
+	clusterConfig := clusters[0].(map[interface{}]interface{})
 	if len(configStr) == 0 {
 		return nil, errors.New("config can not be empty")
 	}
+	//调用k8s获取集群描述信息
 	client, err := NewClientSetWithFileContent(configStr)
 	if err != nil {
 		return nil, err
@@ -50,17 +64,13 @@ func (cluster *ClusterService) ImportK8sConfig(configStr, clusterName string, te
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(versionInfo)
-	t := time.Now()
 	clusterData := &models.SgrTenantCluster{
-		TenantID:   tenantId,
-		Name:       clusterName,
-		Nickname:   clusterName,
-		Version:    versionInfo.GitVersion,
-		Config:     configStr,
-		Status:     1,
-		CreateTime: &t,
-		UpdateTime: &t,
+		TenantID: tenantId,
+		Name:     clusterConfig["name"].(string),
+		Nickname: clusterName,
+		Version:  versionInfo.GitVersion,
+		Config:   configStr,
+		Status:   1,
 	}
 	err = cluster.db.Model(&models.SgrTenantCluster{}).Create(clusterData).Error
 	return clusterData, err

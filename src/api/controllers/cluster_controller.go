@@ -3,7 +3,6 @@ package controllers
 import (
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"io/ioutil"
 	"sgr/api/req"
 	"sgr/domain/business/kubernetes"
 	"strconv"
@@ -77,11 +76,10 @@ func (controller ClusterController) PostClusterByConfig(ctx *context.HttpContext
 	if err != nil {
 		return controller.Fail(err.Error())
 	}
-
 	configFile, _ := k8sFile.Open()
-	content, _ := ioutil.ReadAll(configFile)
+
 	// 这里导入得判断下唯一性 name + tenantid
-	config, err := controller.clusterService.ImportK8sConfig(string(content), req.NickName, req.TenantId)
+	config, err := controller.clusterService.ImportK8sConfig(configFile, req.NickName, req.TenantId)
 	if err == nil {
 		return controller.OK(config)
 	}
