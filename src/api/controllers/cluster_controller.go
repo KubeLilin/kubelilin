@@ -66,8 +66,8 @@ func (controller ClusterController) GetNodes(ctx *context.HttpContext) mvc.ApiRe
 
 func (controller ClusterController) GetList(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
-	tenantList, _ := controller.clusterService.GetClustersByTenant(userInfo.TenantID)
-	return controller.OK(tenantList)
+	tenantClusterList, _ := controller.clusterService.GetClustersByTenant(userInfo.TenantID)
+	return controller.OK(tenantClusterList)
 }
 
 func (controller ClusterController) PostClusterByConfig(ctx *context.HttpContext, req *req.ImportClusterReq) mvc.ApiResult {
