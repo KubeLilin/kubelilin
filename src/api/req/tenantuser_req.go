@@ -5,6 +5,7 @@ import (
 	"github.com/yoyofx/yoyogo/utils/jwt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
+	"sgr/pkg/global"
 	"sgr/pkg/page"
 	"strconv"
 )
@@ -77,16 +78,21 @@ type UserInfo struct {
 }
 
 func GetUserInfo(ctx *context.HttpContext) *UserInfo {
-	mappings := ctx.GetItem("userinfo")
-	maps := mappings.(map[string]interface{})
-
-	if maps != nil {
-		uid, _ := strconv.ParseInt(fmt.Sprintf("%v", maps["uid"]), 10, 64)
-		tid, _ := strconv.ParseInt(fmt.Sprintf("%v", maps["tenantId"]), 10, 64)
-		return &UserInfo{
-			UserId:   uid,
-			TenantID: tid,
-		}
+	defaultUserInfo := &UserInfo{
+		UserId:   0,
+		TenantID: 0,
 	}
-	return nil
+	mappings := ctx.GetItem("userinfo")
+
+	if mappings != nil {
+		maps := mappings.(map[string]interface{})
+		defaultUserInfo.UserId, _ = strconv.ParseInt(fmt.Sprintf("%v", maps["uid"]), 10, 64)
+		defaultUserInfo.TenantID, _ = strconv.ParseInt(fmt.Sprintf("%v", maps["tenantId"]), 10, 64)
+		return defaultUserInfo
+	} else {
+		global.GlobalLogger.Error("Not found user info by Jwt claims !")
+		global.GlobalLogger.Error("Can't get user info! Please turn on JWT Authentication At yoyogo.application.server.jwt.enabled=true with config file, and restart. So that is need to login again ! ")
+	}
+
+	return defaultUserInfo
 }

@@ -17,10 +17,9 @@ yoyogo:
         secret: "12391JdeOW^%$#@"
         prefix: "Bearer"
         expires: 3600
-        enable: false
+        enable: true
         skip_path: [
           "/v1/user/login",
-          "/v1/cluster/clusterbyconifg"
         ]
   cloud:
     discovery:

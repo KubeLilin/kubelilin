@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/yoyofx/yoyogo/abstractions/xlog"
 	nacosConfig "github.com/yoyofx/yoyogo/pkg/configuration/nacos"
 	_ "github.com/yoyofx/yoyogo/pkg/datasources/mysql"
 	_ "github.com/yoyofx/yoyogo/pkg/datasources/redis"
@@ -11,9 +12,12 @@ import (
 	"github.com/yoyofxteam/dependencyinjection"
 	"sgr/api"
 	_ "sgr/domain"
+	"sgr/pkg/global"
 )
 
 func main() {
+	global.GlobalLogger = xlog.GetXLogger("global")
+
 	// 加载 nacos 远程配置
 	config := nacosConfig.RemoteConfig("config")
 
@@ -21,7 +25,6 @@ func main() {
 		UseConfiguration(config).
 		Configure(func(app *web.ApplicationBuilder) {
 			// add http middlewares
-
 			app.UseMiddleware(middlewares.NewCORS())
 			app.SetJsonSerializer(extension.CamelJson())
 			app.UseEndpoints(api.ConfigureApi) // 在 api/init.go 中定义 api or mvc 路由

@@ -41,6 +41,7 @@ func NewClientSetWithFileContent(fileContent string) (*kubernetes.Clientset, err
 	config, err := clientcmd.RESTConfigFromKubeConfig([]byte(fileContent))
 	if err != nil {
 		fmt.Println(err.Error())
+		return nil, err
 	}
 	return kubernetes.NewForConfig(config)
 }
