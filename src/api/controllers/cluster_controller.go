@@ -20,13 +20,14 @@ func NewClusterController(clusterService *kubernetes.ClusterService) *ClusterCon
 func (controller ClusterController) GetPods(ctx *context.HttpContext) mvc.ApiResult {
 	namespace := ctx.Input.QueryDefault("namespace", "")
 	k8sapp := ctx.Input.QueryDefault("app", "")
+	k8snode := ctx.Input.QueryDefault("node", "")
 
 	userInfo := req.GetUserInfo(ctx)
 	strCid := ctx.Input.QueryDefault("cid", "0")
 	cid, _ := strconv.Atoi(strCid)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
 
-	podList := kubernetes.GetPodList(client, namespace, k8sapp)
+	podList := kubernetes.GetPodList(client, namespace, k8snode, k8sapp)
 
 	return controller.OK(podList)
 }

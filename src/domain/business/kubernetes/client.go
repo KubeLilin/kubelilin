@@ -46,11 +46,14 @@ func NewClientSetWithFileContent(fileContent string) (*kubernetes.Clientset, err
 	return kubernetes.NewForConfig(config)
 }
 
-func GetPodList(client *kubernetes.Clientset, namespace string, app string) []dto.Pod {
+func GetPodList(client *kubernetes.Clientset, namespace string, node string, app string) []dto.Pod {
 	emptyOptions := metav1.ListOptions{}
 
 	if app != "" {
 		emptyOptions.LabelSelector = "k8s-app=" + app
+	}
+	if node != "" {
+		emptyOptions.FieldSelector = "spec.nodeName=" + node
 	}
 
 	list, _ := client.CoreV1().Pods(namespace).List(context.TODO(), emptyOptions)
