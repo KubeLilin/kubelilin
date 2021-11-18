@@ -87,3 +87,14 @@ func (controller ClusterController) PostClusterByConfig(ctx *context.HttpContext
 
 	return controller.Fail(err.Error())
 }
+
+func (controller ClusterController) DeleteDelClusterInfo(ctx *context.HttpContext) mvc.ApiResult {
+	id := ctx.Input.Query("id")
+	clusterId, err := strconv.ParseInt(id, 10, 64)
+	if err == nil {
+		controller.clusterService.DeleteCluster(clusterId)
+		return controller.OK(err == nil)
+	}
+	return controller.Fail(err.Error())
+
+}

@@ -75,3 +75,8 @@ func (cluster *ClusterService) ImportK8sConfig(configFile multipart.File, cluste
 	err = cluster.db.Model(&models.SgrTenantCluster{}).Create(clusterData).Error
 	return clusterData, err
 }
+
+func (cs *ClusterService) DeleteCluster(clusterId int64) (err error) {
+	res := cs.db.Model(&models.SgrTenantCluster{}).Delete(&models.SgrTenantCluster{}, clusterId)
+	return res.Error
+}

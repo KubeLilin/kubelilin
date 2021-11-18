@@ -226,8 +226,8 @@ type SgrTenantCluster struct {
 	Config       string     `gorm:"column:config;type:text;not null" json:"config"`                     // k8s config text
 	Sort         int        `gorm:"column:sort;type:int(11);not null" json:"sort"`                      // 排序
 	Status       int8       `gorm:"column:status;type:tinyint(4);not null" json:"status"`               // 状态
-	CreateTime   *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"`        // 创建时间
-	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime;not null" json:"updateTime"`        // 更新时间
+	CreateTime   *time.Time `gorm:"column:create_time;type:datetime;" json:"createTime"`                // 创建时间
+	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime;" json:"updateTime"`                // 更新时间
 }
 
 // TableName get sql table name.获取数据库表名
