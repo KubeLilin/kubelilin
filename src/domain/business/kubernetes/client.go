@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -111,6 +112,7 @@ func GetNodeList(client *kubernetes.Clientset) []dto.Node {
 		for _, addr := range nd.Status.Addresses {
 			address = append(address, dto.NodeAddress{Type: string(addr.Type), Address: addr.Address})
 		}
+
 		node := dto.Node{
 			Uid:       string(nd.UID),
 			Name:      nd.Name,
@@ -131,6 +133,14 @@ func GetNodeList(client *kubernetes.Clientset) []dto.Node {
 			KubeletVersion:          nd.Status.NodeInfo.KubeletVersion,
 			OperatingSystem:         nd.Status.NodeInfo.OperatingSystem,
 			Architecture:            nd.Status.NodeInfo.Architecture,
+			Status:                  string(nd.Status.Phase),
+		}
+		node.Status = "notready"
+		for _, condition := range nd.Status.Conditions {
+			if condition.Type == v1.NodeReady && condition.Status == v1.ConditionTrue {
+				node.Status = "ready"
+				break
+			}
 		}
 
 		nodeList = append(nodeList, node)

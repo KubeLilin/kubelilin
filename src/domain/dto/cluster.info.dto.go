@@ -43,4 +43,5 @@ type Node struct {
 	KubeletVersion          string        `json:"kubeletVersion"`
 	OperatingSystem         string        `json:"operatingSystem"`
 	Architecture            string        `json:"architecture"`
+	Status                  string        `json:"status"`
 }
