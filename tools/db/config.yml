@@ -1,0 +1,32 @@
+base:
+    is_dev: true
+db_info:
+    host: 49.232.153.51
+    port: 3306
+    username: sgr_dev
+    password: A.jiheMA?2
+    database: sgr_pass
+    type: 0
+out_dir: ../../src/domain/database/models/
+url_tag: json
+language: 中 文
+db_tag: gorm
+simple: false
+is_web_tag: true
+is_web_tag_pk_hidden: false
+is_foreign_key: false
+is_out_sql: false
+is_out_func: false
+is_gui: true
+is_table_name: true
+is_null_to_point: true
+table_prefix: ""
+self_type_define:
+    date: '*time.Time'
+    datetime: '*time.Time'
+out_file_name: ""
+web_tag_type: 0
+table_names: ""
+is_column_name: true
+is_out_file_by_table_name: false
+
