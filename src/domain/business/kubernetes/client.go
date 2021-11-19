@@ -44,7 +44,9 @@ func NewClientSetWithFileContent(fileContent string) (*kubernetes.Clientset, err
 		fmt.Println(err.Error())
 		return nil, err
 	}
-	return kubernetes.NewForConfig(config)
+	client, err := kubernetes.NewForConfig(config)
+	client.ServerVersion()
+	return client, err
 }
 
 func GetPodList(client *kubernetes.Clientset, namespace string, node string, app string) []dto.Pod {

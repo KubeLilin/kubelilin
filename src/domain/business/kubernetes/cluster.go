@@ -11,7 +11,11 @@ import (
 	"sgr/domain/database/models"
 	"sgr/domain/dto"
 	"strings"
+	"sync"
 )
+
+var k8sClientMemoryCache = map[string]*kubernetes.Clientset{}
+var mutex sync.RWMutex
 
 type ClusterService struct {
 	db *gorm.DB
@@ -21,10 +25,15 @@ func NewClusterService(db *gorm.DB) *ClusterService {
 	return &ClusterService{db: db}
 }
 
-func (cluster *ClusterService) GetClustersByTenant(tenantId int64) ([]dto.ClusterInfo, error) {
+func (cluster *ClusterService) GetClustersByTenant(tenantId int64, clusterName string) ([]dto.ClusterInfo, error) {
 	var data []models.SgrTenantCluster
 	var clusterList []dto.ClusterInfo
-	cluster.db.Model(&models.SgrTenantCluster{}).Where("tenant_id = ?", tenantId).Find(&data)
+	sb := strings.Builder{}
+	sb.WriteString("tenant_id = ?")
+	if clusterName != "" {
+		sb.WriteString(" and name=? ")
+	}
+	cluster.db.Model(&models.SgrTenantCluster{}).Where(sb.String(), tenantId, clusterName).Find(&data)
 	for _, item := range data {
 		t := dto.ClusterInfo{}
 		copier.Copy(&t, item)
@@ -34,12 +43,44 @@ func (cluster *ClusterService) GetClustersByTenant(tenantId int64) ([]dto.Cluste
 }
 
 func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId int64, clusterId int) (*kubernetes.Clientset, error) {
-	var data models.SgrTenantCluster
-	cluster.db.Model(&models.SgrTenantCluster{}).Where("tenant_id = ? AND id = ?", tenantId, clusterId).First(&data)
-	return NewClientSetWithFileContent(data.Config)
+	//判断缓存是否存在
+	key := "t" + string(tenantId) + "c" + string(clusterId)
+	clientValue, ok := k8sClientMemoryCache[key]
+	if ok {
+		healthy, err := cluster.ClientHealthCheck(clientValue)
+		if ok && healthy {
+			return clientValue, nil
+		}
+		return nil, err
+	} else {
+		mutex.Lock()
+		var data models.SgrTenantCluster
+		cluster.db.Model(&models.SgrTenantCluster{}).Where("tenant_id = ? AND id = ?", tenantId, clusterId).First(&data)
+		client, err := NewClientSetWithFileContent(data.Config)
+		if err == nil {
+			healthy, err := cluster.ClientHealthCheck(client)
+			if healthy {
+				k8sClientMemoryCache[key] = client
+			} else {
+				return nil, err
+			}
+		}
+		mutex.Unlock()
+		return client, err
+	}
 }
 
+func (cluster *ClusterService) ClientHealthCheck(client *kubernetes.Clientset) (bool, error) {
+	_, err := client.ServerVersion()
+	return err == nil, err
+}
 func (cluster *ClusterService) ImportK8sConfig(configFile multipart.File, clusterName string, tenantId uint64) (res *models.SgrTenantCluster, err error) {
+	//判断集群是否已经存在
+	var exitsCount int64
+	cluster.db.Model(models.SgrTenantCluster{}).Where("tenant_id=? and name=?", tenantId, clusterName).Count(&exitsCount)
+	if exitsCount > 0 {
+		return nil, errors.New("already have the same cluster")
+	}
 	//读取配置文件
 	defer configFile.Close()
 	content, _ := ioutil.ReadAll(configFile)
@@ -76,7 +117,7 @@ func (cluster *ClusterService) ImportK8sConfig(configFile multipart.File, cluste
 	return clusterData, err
 }
 
-func (cs *ClusterService) DeleteCluster(clusterId int64) (err error) {
-	res := cs.db.Model(&models.SgrTenantCluster{}).Delete(&models.SgrTenantCluster{}, clusterId)
+func (cluster *ClusterService) DeleteCluster(clusterId int64) (err error) {
+	res := cluster.db.Model(&models.SgrTenantCluster{}).Delete(&models.SgrTenantCluster{}, clusterId)
 	return res.Error
 }

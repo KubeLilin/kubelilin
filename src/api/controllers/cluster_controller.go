@@ -67,20 +67,19 @@ func (controller ClusterController) GetNodes(ctx *context.HttpContext) mvc.ApiRe
 
 func (controller ClusterController) GetList(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
-	tenantClusterList, _ := controller.clusterService.GetClustersByTenant(userInfo.TenantID)
+	clusterName := ctx.Input.Query("name")
+	tenantClusterList, _ := controller.clusterService.GetClustersByTenant(userInfo.TenantID, clusterName)
 	return controller.OK(tenantClusterList)
 }
 
-func (controller ClusterController) PostClusterByConfig(ctx *context.HttpContext, req *req.ImportClusterReq) mvc.ApiResult {
-	// 这块 用 req 就是获取不到 不知道为什么！！！！
+func (controller ClusterController) PostClusterByConfig(ctx *context.HttpContext, request *req.ImportClusterReq) mvc.ApiResult {
 	_, k8sFile, err := ctx.Input.FormFile("file1")
 	if err != nil {
 		return controller.Fail(err.Error())
 	}
 	configFile, _ := k8sFile.Open()
-
-	// 这里导入得判断下唯一性 name + tenantid
-	config, err := controller.clusterService.ImportK8sConfig(configFile, req.NickName, req.TenantId)
+	userInfo := req.GetUserInfo(ctx)
+	config, err := controller.clusterService.ImportK8sConfig(configFile, request.NickName, uint64(userInfo.TenantID))
 	if err == nil {
 		return controller.OK(config)
 	}
