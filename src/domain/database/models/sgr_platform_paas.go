@@ -172,7 +172,8 @@ var SgrTenantColumns = struct {
 type SgrTenantApplication struct {
 	ID         uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`
 	Name       string     `gorm:"column:name;type:varchar(50);not null" json:"name"`                  // 集群应用名称(英文唯一)
-	Lables     string     `gorm:"column:lables;type:varchar(50);not null" json:"lables"`              // 应用中文名称
+	TenantID   uint64     `gorm:"column:tenant_id;type:bigint(11);not null" json:"tenantId"`          // 租户
+	Labels     string     `gorm:"column:labels;type:varchar(50);not null" json:"labels"`              // 应用中文名称
 	Remarks    string     `gorm:"column:remarks;type:varchar(200);not null" json:"remarks"`           // 集群应用备注
 	Git        string     `gorm:"column:git;type:varchar(500);not null" json:"git"`                   // 集群应用绑定的git地址
 	Level      uint16     `gorm:"column:level;type:smallint(6) unsigned;not null" json:"level"`       // 应用级别

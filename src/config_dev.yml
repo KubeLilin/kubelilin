@@ -7,7 +7,7 @@ yoyogo:
       address: ":8080"
       max_request_size: 2096157
       mvc:
-        template: "v1/{controller}/{action}"
+        template: "{tenantId}/v1/{controller}/{action}"
       cors:
         allow_origins: ["*"]
         allow_methods: ["*"]

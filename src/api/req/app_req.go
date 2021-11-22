@@ -1,7 +1,15 @@
 package req
 
+import (
+	"github.com/yoyofx/yoyogo/web/mvc"
+	"sgr/pkg/page"
+)
+
 type AppReq struct {
+	mvc.RequestBody
+	page.PageRequest
 	ID       uint64 `json:"id" uri:"id"`
+	TenantId uint64
 	Name     string `json:"name" uri:"name"`
 	Labels   string `json:"labels" uri:"labels"`
 	Remarks  string `json:"remarks" uri:"remarks"`
