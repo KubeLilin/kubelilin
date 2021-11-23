@@ -20,6 +20,7 @@ type Pod struct {
 	ClusterName string        `json:"clusterName"`
 	Count       int           `json:"podCount"`
 	Ready       int           `json:"podReadyCount"`
+	StartTime   string        `json:"startTime"`
 	Age         time.Duration `json:"age"`
 	Status      string        `json:"status"`
 	Restarts    int           `json:"restarts"`
