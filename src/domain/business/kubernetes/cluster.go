@@ -47,22 +47,22 @@ func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId int64, clu
 	key := "t" + string(tenantId) + "c" + string(clusterId)
 	clientValue, ok := k8sClientMemoryCache[key]
 	if ok {
-		healthy, err := cluster.ClientHealthCheck(clientValue)
+		healthy, healthyErr := cluster.ClientHealthCheck(clientValue)
 		if ok && healthy {
 			return clientValue, nil
 		}
-		return nil, err
+		return nil, healthyErr
 	} else {
 		mutex.Lock()
 		var data models.SgrTenantCluster
 		cluster.db.Model(&models.SgrTenantCluster{}).Where("tenant_id = ? AND id = ?", tenantId, clusterId).First(&data)
 		client, err := NewClientSetWithFileContent(data.Config)
 		if err == nil {
-			healthy, err := cluster.ClientHealthCheck(client)
+			healthy, healthyErr := cluster.ClientHealthCheck(client)
 			if healthy {
 				k8sClientMemoryCache[key] = client
 			} else {
-				return nil, err
+				return nil, healthyErr
 			}
 		}
 		mutex.Unlock()
