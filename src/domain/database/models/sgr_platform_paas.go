@@ -264,16 +264,18 @@ var SgrTenantClusterColumns = struct {
 
 // SgrTenantDeployments 集群部署
 type SgrTenantDeployments struct {
-	ID              uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`
+	ID              uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`         // 部署ID
 	Name            string     `gorm:"column:name;type:varchar(50);not null" json:"name"`                        // 部署名称(英文唯一)
+	Nickname        string     `gorm:"column:nickname;type:varchar(50);not null" json:"nickname"`                // 部署中文名称#
 	TenantID        uint64     `gorm:"column:tenant_id;type:bigint(20) unsigned;not null" json:"tenantId"`       // 租户ID
-	Nickname        string     `gorm:"column:nickname;type:varchar(50);not null" json:"nickname"`                // 部署中文名称
 	ClusterID       uint64     `gorm:"column:cluster_id;type:bigint(20) unsigned;not null" json:"clusterId"`     // 集群ID
 	NamespaceID     uint64     `gorm:"column:namespace_id;type:bigint(20) unsigned;not null" json:"namespaceId"` // 命名空间ID
-	AppID           uint64     `gorm:"column:app_id;type:bigint(20) unsigned;not null" json:"appId"`             // 应用ID
+	AppID           *uint64    `gorm:"column:app_id;type:bigint(20) unsigned" json:"appId"`                      // 应用ID
+	AppName         string     `gorm:"column:app_name;type:varchar(50);not null" json:"appName"`                 // 应用名称(英文唯一)
+	ImageHub        string     `gorm:"column:image_hub;type:varchar(200)" json:"imageHub"`                       // 自动生成的镜像仓库地址( hub域名/apps/{应用名-部署名} , 如 http://hub.yoyogo.run/apps/demo-prod )
 	Status          uint8      `gorm:"column:status;type:tinyint(3) unsigned;not null;default:1" json:"status"`  // 状态
 	WorkloadType    string     `gorm:"column:workload_type;type:varchar(15);not null" json:"workloadType"`       // 部署类型(Deployment、DaemonSet、StatefulSet、CronJob)
-	Replicas        uint32     `gorm:"column:replicas;type:int(10) unsigned;not null;default:1" json:"replicas"` // 部署副本数
+	Replicas        uint32     `gorm:"column:replicas;type:int(10) unsigned;not null;default:1" json:"replicas"` // 部署副本数#
 	ServiceEnable   bool       `gorm:"column:service_enable;type:tinyint(1);not null" json:"serviceEnable"`      // 是否开启 Service
 	ServiceAway     string     `gorm:"column:service_away;type:varchar(10)" json:"serviceAway"`                  // Service访问方式(NodePort、ClusterPort)
 	ServicePortType string     `gorm:"column:service_port_type;type:varchar(8)" json:"servicePortType"`          // Service端口映射类型(TCP/UDP)
@@ -291,11 +293,13 @@ func (m *SgrTenantDeployments) TableName() string {
 var SgrTenantDeploymentsColumns = struct {
 	ID              string
 	Name            string
-	TenantID        string
 	Nickname        string
+	TenantID        string
 	ClusterID       string
 	NamespaceID     string
 	AppID           string
+	AppName         string
+	ImageHub        string
 	Status          string
 	WorkloadType    string
 	Replicas        string
@@ -308,11 +312,13 @@ var SgrTenantDeploymentsColumns = struct {
 }{
 	ID:              "id",
 	Name:            "name",
-	TenantID:        "tenant_id",
 	Nickname:        "nickname",
+	TenantID:        "tenant_id",
 	ClusterID:       "cluster_id",
 	NamespaceID:     "namespace_id",
 	AppID:           "app_id",
+	AppName:         "app_name",
+	ImageHub:        "image_hub",
 	Status:          "status",
 	WorkloadType:    "workload_type",
 	Replicas:        "replicas",
