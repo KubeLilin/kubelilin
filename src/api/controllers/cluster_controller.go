@@ -97,5 +97,3 @@ func (controller ClusterController) DeleteDelClusterInfo(ctx *context.HttpContex
 	return controller.Fail(err.Error())
 
 }
-
-//func (controller ClusterController) Post
