@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"sgr/api/req"
@@ -36,10 +37,16 @@ func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *re
 	return mvc.Success(res)
 }
 
-func (c *ApplicationController) GetAppList(ctx *context.HttpContext, request *req.AppReq) mvc.ApiResult {
+func (c *ApplicationController) GetAppList(ctx *context.HttpContext) mvc.ApiResult {
+	request := req.AppReq{}
+	ctx.BindWithUri(&request)
 	userInfo := req.GetUserInfo(ctx)
 	request.TenantId = userInfo.TenantID
-	res := c.service.QueryAppList(request)
+	err, res := c.service.QueryAppList(&request)
+	fmt.Println(res.Data)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
 	return mvc.Success(res)
 }
 
