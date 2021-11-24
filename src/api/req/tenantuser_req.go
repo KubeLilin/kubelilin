@@ -74,7 +74,7 @@ type JwtCustomClaims struct {
 
 type UserInfo struct {
 	UserId   int64
-	TenantID int64
+	TenantID uint64
 }
 
 func GetUserInfo(ctx *context.HttpContext) *UserInfo {
@@ -87,7 +87,7 @@ func GetUserInfo(ctx *context.HttpContext) *UserInfo {
 	if mappings != nil {
 		maps := mappings.(map[string]interface{})
 		defaultUserInfo.UserId, _ = strconv.ParseInt(fmt.Sprintf("%v", maps["uid"]), 10, 64)
-		defaultUserInfo.TenantID, _ = strconv.ParseInt(fmt.Sprintf("%v", maps["tenantId"]), 10, 64)
+		defaultUserInfo.TenantID, _ = strconv.ParseUint(fmt.Sprintf("%v", maps["tenantId"]), 10, 64)
 		return defaultUserInfo
 	} else {
 		global.GlobalLogger.Error("Not found user info by Jwt claims !")

@@ -1,7 +1,6 @@
 package tenant
 
 import (
-	"fmt"
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 	"sgr/api/req"
@@ -41,7 +40,7 @@ func (ts *TenantService) CreateTenant(tenant *models.SgrTenant) bool {
 			return err
 		}
 		//给用户分配权限 先鸽了哪天想写了再写
-		userRole:=&models.SgrTenantUserRole{
+		userRole := &models.SgrTenantUserRole{
 			UserID: tenantAdmin.ID,
 			RoleID: 1,
 		}
@@ -55,8 +54,7 @@ func (ts *TenantService) CreateTenant(tenant *models.SgrTenant) bool {
 }
 
 func (ts *TenantService) UpdateTenant(tenant *models.SgrTenant) *models.SgrTenant {
-	res := ts.db.Save(tenant)
-	fmt.Printf("更新条数：%d", res.RowsAffected)
+	ts.db.Save(tenant)
 	return tenant
 }
 

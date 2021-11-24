@@ -25,7 +25,7 @@ func NewClusterService(db *gorm.DB) *ClusterService {
 	return &ClusterService{db: db}
 }
 
-func (cluster *ClusterService) GetClustersByTenant(tenantId int64, clusterName string) ([]dto.ClusterInfo, error) {
+func (cluster *ClusterService) GetClustersByTenant(tenantId uint64, clusterName string) ([]dto.ClusterInfo, error) {
 	var data []models.SgrTenantCluster
 	var clusterList []dto.ClusterInfo
 	sb := strings.Builder{}
@@ -42,7 +42,7 @@ func (cluster *ClusterService) GetClustersByTenant(tenantId int64, clusterName s
 	return clusterList, nil
 }
 
-func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId int64, clusterId int) (*kubernetes.Clientset, error) {
+func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId uint64, clusterId int) (*kubernetes.Clientset, error) {
 	//判断缓存是否存在
 	key := "t" + string(tenantId) + "c" + string(clusterId)
 	clientValue, ok := k8sClientMemoryCache[key]

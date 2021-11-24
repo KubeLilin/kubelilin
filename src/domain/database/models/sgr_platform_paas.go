@@ -171,8 +171,8 @@ var SgrTenantColumns = struct {
 // SgrTenantApplication 集群应用
 type SgrTenantApplication struct {
 	ID         uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`
-	TenantID   *uint64    `gorm:"column:tenant_Id;type:bigint(20) unsigned" json:"tenantId"`
 	Name       string     `gorm:"column:name;type:varchar(50);not null" json:"name"`                  // 集群应用名称(英文唯一)
+	TenantID   uint64     `gorm:"column:tenant_id;type:bigint(11);not null" json:"tenantId"`          // 租户
 	Labels     string     `gorm:"column:labels;type:varchar(50);not null" json:"labels"`              // 应用中文名称
 	Remarks    string     `gorm:"column:remarks;type:varchar(200);not null" json:"remarks"`           // 集群应用备注
 	Git        string     `gorm:"column:git;type:varchar(500);not null" json:"git"`                   // 集群应用绑定的git地址
@@ -191,9 +191,8 @@ func (m *SgrTenantApplication) TableName() string {
 // SgrTenantApplicationColumns get sql column name.获取数据库列名
 var SgrTenantApplicationColumns = struct {
 	ID         string
-	TenantID   string
 	Name       string
-	Labels     string
+	Lables     string
 	Remarks    string
 	Git        string
 	Level      string
@@ -203,9 +202,8 @@ var SgrTenantApplicationColumns = struct {
 	UpdateTime string
 }{
 	ID:         "id",
-	TenantID:   "tenant_Id",
 	Name:       "name",
-	Labels:     "labels",
+	Lables:     "lables",
 	Remarks:    "remarks",
 	Git:        "git",
 	Level:      "level",
