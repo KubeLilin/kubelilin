@@ -272,6 +272,7 @@ type SgrTenantDeployments struct {
 	NamespaceID     uint64     `gorm:"column:namespace_id;type:bigint(20) unsigned;not null" json:"namespaceId"` // 命名空间ID
 	AppID           *uint64    `gorm:"column:app_id;type:bigint(20) unsigned" json:"appId"`                      // 应用ID
 	AppName         string     `gorm:"column:app_name;type:varchar(50);not null" json:"appName"`                 // 应用名称(英文唯一)
+	Level           string     `gorm:"column:level;type:varchar(8);not null" json:"level"`                       // 环境级别 ( Prod , Test , Dev )
 	ImageHub        string     `gorm:"column:image_hub;type:varchar(200)" json:"imageHub"`                       // 自动生成的镜像仓库地址( hub域名/apps/{应用名-部署名} , 如 http://hub.yoyogo.run/apps/demo-prod )
 	Status          uint8      `gorm:"column:status;type:tinyint(3) unsigned;not null;default:1" json:"status"`  // 状态
 	WorkloadType    string     `gorm:"column:workload_type;type:varchar(15);not null" json:"workloadType"`       // 部署类型(Deployment、DaemonSet、StatefulSet、CronJob)
@@ -299,6 +300,7 @@ var SgrTenantDeploymentsColumns = struct {
 	NamespaceID     string
 	AppID           string
 	AppName         string
+	Level           string
 	ImageHub        string
 	Status          string
 	WorkloadType    string
@@ -318,6 +320,7 @@ var SgrTenantDeploymentsColumns = struct {
 	NamespaceID:     "namespace_id",
 	AppID:           "app_id",
 	AppName:         "app_name",
+	Level:           "level",
 	ImageHub:        "image_hub",
 	Status:          "status",
 	WorkloadType:    "workload_type",

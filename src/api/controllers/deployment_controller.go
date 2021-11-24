@@ -19,7 +19,7 @@ func NewDeploymentController(clusterService *kubernetes.ClusterService) *Deploym
 
 func (controller DeploymentController) PostNew(ctx *context.HttpContext, request *req.DeploymentReq) mvc.ApiResult {
 
-	return controller.OK("ok")
+	return controller.OK(request)
 }
 
 func (controller DeploymentController) PostModify(ctx *context.HttpContext, request *req.DeploymentReq) mvc.ApiResult {
