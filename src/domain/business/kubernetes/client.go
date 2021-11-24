@@ -81,11 +81,11 @@ func GetPodList(client *kubernetes.Clientset, namespace string, node string, app
 			ClusterName: item.ClusterName,
 			Count:       podCount,
 			Ready:       podReadyCount,
+			StartTime:   item.Status.StartTime.Time.Format("2006-01-02 15:04:05"),
 			Age:         time.Now().Sub(item.Status.StartTime.Time),
 			Status:      string(item.Status.Phase),
 			Restarts:    podRestartCount,
 		}
-
 		podList = append(podList, podInfo)
 	}
 	return podList
