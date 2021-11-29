@@ -171,8 +171,8 @@ var SgrTenantColumns = struct {
 // SgrTenantApplication 集群应用
 type SgrTenantApplication struct {
 	ID         uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`
+	TenantID   *uint64    `gorm:"column:tenant_Id;type:bigint(20) unsigned" json:"tenantId"`
 	Name       string     `gorm:"column:name;type:varchar(50);not null" json:"name"`                  // 集群应用名称(英文唯一)
-	TenantID   uint64     `gorm:"column:tenant_id;type:bigint(11);not null" json:"tenantId"`          // 租户
 	Labels     string     `gorm:"column:labels;type:varchar(50);not null" json:"labels"`              // 应用中文名称
 	Remarks    string     `gorm:"column:remarks;type:varchar(200);not null" json:"remarks"`           // 集群应用备注
 	Git        string     `gorm:"column:git;type:varchar(500);not null" json:"git"`                   // 集群应用绑定的git地址
@@ -191,8 +191,9 @@ func (m *SgrTenantApplication) TableName() string {
 // SgrTenantApplicationColumns get sql column name.获取数据库列名
 var SgrTenantApplicationColumns = struct {
 	ID         string
+	TenantID   string
 	Name       string
-	Lables     string
+	Labels     string
 	Remarks    string
 	Git        string
 	Level      string
@@ -202,8 +203,9 @@ var SgrTenantApplicationColumns = struct {
 	UpdateTime string
 }{
 	ID:         "id",
+	TenantID:   "tenant_Id",
 	Name:       "name",
-	Lables:     "lables",
+	Labels:     "labels",
 	Remarks:    "remarks",
 	Git:        "git",
 	Level:      "level",
@@ -270,6 +272,7 @@ type SgrTenantDeployments struct {
 	NamespaceID     uint64     `gorm:"column:namespace_id;type:bigint(20) unsigned;not null" json:"namespaceId"` // 命名空间ID
 	AppID           *uint64    `gorm:"column:app_id;type:bigint(20) unsigned" json:"appId"`                      // 应用ID
 	AppName         string     `gorm:"column:app_name;type:varchar(50);not null" json:"appName"`                 // 应用名称(英文唯一)
+	LastImage       string     `gorm:"column:last_image;type:varchar(150)" json:"lastImage"`
 	Level           string     `gorm:"column:level;type:varchar(8);not null" json:"level"`                       // 环境级别 ( Prod , Test , Dev )
 	ImageHub        string     `gorm:"column:image_hub;type:varchar(200)" json:"imageHub"`                       // 自动生成的镜像仓库地址( hub域名/apps/{应用名-部署名} , 如 http://hub.yoyogo.run/apps/demo-prod )
 	Status          uint8      `gorm:"column:status;type:tinyint(3) unsigned;not null;default:1" json:"status"`  // 状态
@@ -298,6 +301,7 @@ var SgrTenantDeploymentsColumns = struct {
 	NamespaceID     string
 	AppID           string
 	AppName         string
+	LastImage       string
 	Level           string
 	ImageHub        string
 	Status          string
@@ -318,6 +322,7 @@ var SgrTenantDeploymentsColumns = struct {
 	NamespaceID:     "namespace_id",
 	AppID:           "app_id",
 	AppName:         "app_name",
+	LastImage:       "last_image",
 	Level:           "level",
 	ImageHub:        "image_hub",
 	Status:          "status",
