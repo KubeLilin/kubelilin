@@ -66,7 +66,20 @@ func GetPodList(client *kubernetes.Clientset, namespace string, node string, app
 		podCount := len(item.Status.ContainerStatuses)
 		podReadyCount := 0
 		podRestartCount := 0
+		var containerList []dto.Container
 		for _, containerStatus := range item.Status.ContainerStatuses {
+			// add container list to pod item;
+			containerInfo := dto.Container{
+				Id:           containerStatus.ContainerID,
+				Name:         containerStatus.Name,
+				Image:        containerStatus.Image,
+				State:        containerStatus.State.String(),
+				Ready:        containerStatus.Ready,
+				RestartCount: containerStatus.RestartCount,
+				Started:      containerStatus.Started,
+			}
+			containerList = append(containerList, containerInfo)
+			// add pod status
 			if containerStatus.Ready {
 				podReadyCount++
 			}
@@ -74,17 +87,18 @@ func GetPodList(client *kubernetes.Clientset, namespace string, node string, app
 		}
 
 		podInfo := dto.Pod{
-			Namespace:   item.Namespace,
-			PodName:     item.Name,
-			PodIP:       item.Status.PodIP,
-			HostIP:      item.Status.HostIP,
-			ClusterName: item.ClusterName,
-			Count:       podCount,
-			Ready:       podReadyCount,
-			StartTime:   item.Status.StartTime.Time.Format("2006-01-02 15:04:05"),
-			Age:         time.Now().Sub(item.Status.StartTime.Time),
-			Status:      string(item.Status.Phase),
-			Restarts:    podRestartCount,
+			Namespace:     item.Namespace,
+			PodName:       item.Name,
+			PodIP:         item.Status.PodIP,
+			HostIP:        item.Status.HostIP,
+			ClusterName:   item.ClusterName,
+			Count:         podCount,
+			Ready:         podReadyCount,
+			StartTime:     item.Status.StartTime.Time.Format("2006-01-02 15:04:05"),
+			Age:           time.Now().Sub(item.Status.StartTime.Time),
+			Status:        string(item.Status.Phase),
+			Restarts:      podRestartCount,
+			ContainerList: containerList,
 		}
 		podList = append(podList, podInfo)
 	}

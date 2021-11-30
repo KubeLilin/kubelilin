@@ -13,17 +13,28 @@ type ClusterInfo struct {
 }
 
 type Pod struct {
-	Namespace   string        `json:"namespace"`
-	PodName     string        `json:"name"`
-	PodIP       string        `json:"ip"`
-	HostIP      string        `json:"hostIP"`
-	ClusterName string        `json:"clusterName"`
-	Count       int           `json:"podCount"`
-	Ready       int           `json:"podReadyCount"`
-	StartTime   string        `json:"startTime"`
-	Age         time.Duration `json:"age"`
-	Status      string        `json:"status"`
-	Restarts    int           `json:"restarts"`
+	Namespace     string        `json:"namespace"`
+	PodName       string        `json:"name"`
+	PodIP         string        `json:"ip"`
+	HostIP        string        `json:"hostIP"`
+	ClusterName   string        `json:"clusterName"`
+	Count         int           `json:"podCount"`
+	Ready         int           `json:"podReadyCount"`
+	StartTime     string        `json:"startTime"`
+	Age           time.Duration `json:"age"`
+	Status        string        `json:"status"`
+	Restarts      int           `json:"restarts"`
+	ContainerList []Container   `json:"containers"`
+}
+
+type Container struct {
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	Image        string `json:"image"`
+	State        string `json:"state"`
+	Ready        bool   `json:"ready"`
+	RestartCount int32  `json:"restartCount"`
+	Started      *bool  `json:"started,omitempty"`
 }
 
 type Namespace struct {
