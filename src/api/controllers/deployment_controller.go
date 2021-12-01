@@ -17,18 +17,21 @@ func NewDeploymentController(deploymentService *app.DeploymentService) *Deployme
 	return &DeploymentController{deploymentService: deploymentService}
 }
 
-func (controller DeploymentController) PostStepV1(ctx *context.HttpContext, request *req.DeploymentRequest) mvc.ApiResult {
+func (controller DeploymentController) PostStepV1(ctx *context.HttpContext, request *req.DeploymentStepRequest) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
 	//default values
 	//request.Replicas = 1
 	//request.WorkloadType = app.Deployment
-	err, m := controller.deploymentService.NewOrUpdateDeployment(request.SgrTenantDeployments)
+	err, m := controller.deploymentService.NewOrUpdateDeployment(request)
 	if err == nil {
 		return mvc.Success(m)
 	}
-
 	return mvc.Fail(err.Error())
+}
+
+func (controller *DeploymentController) PostDeploymentStep1() {
+
 }
 
 func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.ApiResult {
@@ -39,13 +42,10 @@ func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.Api
 	if userInfo != nil {
 		tenantID = userInfo.TenantID
 	}
-
 	appid, _ := strconv.ParseUint(strAppId, 10, 64)
-
 	depolymentList, err := controller.deploymentService.GetDeployments(appid, tenantID, deployName)
 	if err != nil {
 		return mvc.Fail(err.Error())
 	}
-
 	return mvc.Success(depolymentList)
 }

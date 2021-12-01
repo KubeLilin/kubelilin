@@ -1,7 +1,10 @@
 package app
 
 import (
+	"errors"
+	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
+	"sgr/api/req"
 	"sgr/domain/database/models"
 	"sgr/domain/dto"
 	"strings"
@@ -22,7 +25,7 @@ func NewDeploymentService(db *gorm.DB) *DeploymentService {
 	return &DeploymentService{db: db}
 }
 
-func (deployment *DeploymentService) NewOrUpdateDeployment(deployModel *models.SgrTenantDeployments) (error, *models.SgrTenantDeployments) {
+func (deployment *DeploymentService) NewOrUpdateDeployment(deployModel *req.DeploymentStepRequest) (error, *req.DeploymentStepRequest) {
 	var deploy *models.SgrTenantDeployments
 
 	deployment.db.Model(deployModel).Where("app_id = ? and name = ?", deployModel.AppID, deployModel.Name).First(&deploy)
@@ -33,6 +36,31 @@ func (deployment *DeploymentService) NewOrUpdateDeployment(deployModel *models.S
 		dbRes := deployment.db.Model(deployModel).Updates(deployModel)
 		return dbRes.Error, deployModel
 	}
+}
+
+func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *req.DeploymentStepRequest) (error, *models.SgrTenantDeployments) {
+	dpModel := &models.SgrTenantDeployments{}
+	err := copier.Copy(dpModel, deployModel)
+	if err != nil {
+		return err, nil
+	}
+	dbRes := deployment.db.Model(deployModel).Create(dpModel)
+	return dbRes.Error, dpModel
+}
+
+func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.DeploymentStepRequest) (error, *models.SgrTenantDeployments) {
+	dpModel := models.SgrTenantDeployments{}
+	dpcModel := models.SgrTenantDeploymentsContainers{}
+	deployment.db.Model(deployModel).Where("app_id = ? and id = ?", deployModel.AppID, deployModel.ID).First(&dpModel)
+	if dpModel.AppID == nil {
+		return errors.New("未找到相应的部署数据"), nil
+	}
+	deployment.db.Transaction(func(tx *gorm.DB) error {
+		tx.Model(&models.SgrTenantDeployments{}).Updates(dpModel)
+		tx.Model(&models.SgrTenantDeploymentsContainers{}).Create(dpcModel)
+		return nil
+	})
+	return nil, nil
 }
 
 func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint64, deployName string) ([]dto.DeploymentItemDto, error) {
