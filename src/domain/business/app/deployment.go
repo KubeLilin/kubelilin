@@ -38,7 +38,9 @@ func (deployment *DeploymentService) NewOrUpdateDeployment(deployModel *models.S
 func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint64, deployName string) ([]dto.DeploymentItemDto, error) {
 	var deploymentList []dto.DeploymentItemDto
 	dataSql := strings.Builder{}
-	dataSql.WriteString(`SELECT d.id, d.nickname ,d.name, c.name  as 'clusterName' , n.namespace ,d.last_image as 'lastImage', 0 'running' , d.replicas 'expected', '0.0.0.0' as 'serviceIP', '' as 'serviceName'
+	dataSql.WriteString(`SELECT d.id, d.nickname ,d.name, c.name  as 'clusterName' ,
+  d.cluster_id as 'clusterId' , n.namespace ,d.last_image as 'lastImage', 0 'running' , 
+  d.replicas 'expected', '0.0.0.0' as 'serviceIP', d.service_name as 'serviceName'
   FROM sgr_tenant_deployments d
   INNER JOIN sgr_tenant_cluster c on c.id = d.cluster_id
   INNER JOIN sgr_tenant_namespace n on n.id = d.namespace_id

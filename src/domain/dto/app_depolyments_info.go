@@ -6,6 +6,7 @@ type DeploymentItemDto struct {
 	NickName    string `gorm:"column:nickname" json:"nickname"`
 	NameSpace   string `gorm:"column:namespace" json:"namespace"`
 	ClusterName string `gorm:"column:clusterName" json:"clusterName"`
+	ClusterId   uint64 `gorm:"column:clusterId" json:"clusterId"`
 	Status      string `gorm:"column:status" json:"status"`
 	LastImage   string `gorm:"column:lastImage" json:"lastImage"`
 	Running     uint64 `gorm:"column:running" json:"running"`

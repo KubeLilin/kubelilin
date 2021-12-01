@@ -279,6 +279,7 @@ type SgrTenantDeployments struct {
 	WorkloadType    string     `gorm:"column:workload_type;type:varchar(15);not null" json:"workloadType"`       // 部署类型(Deployment、DaemonSet、StatefulSet、CronJob)
 	Replicas        uint32     `gorm:"column:replicas;type:int(10) unsigned;not null;default:1" json:"replicas"` // 部署副本数#
 	ServiceEnable   bool       `gorm:"column:service_enable;type:tinyint(1);not null" json:"serviceEnable"`      // 是否开启 Service
+	ServiceName     string     `gorm:"column:service_name;type:varchar(150)" json:"serviceName"`                 // 服务名称
 	ServiceAway     string     `gorm:"column:service_away;type:varchar(10)" json:"serviceAway"`                  // Service访问方式(NodePort、ClusterPort)
 	ServicePortType string     `gorm:"column:service_port_type;type:varchar(8)" json:"servicePortType"`          // Service端口映射类型(TCP/UDP)
 	ServicePort     *uint16    `gorm:"column:service_port;type:smallint(5) unsigned" json:"servicePort"`         // Service端口映射(容器端口->服务端口)
@@ -308,6 +309,7 @@ var SgrTenantDeploymentsColumns = struct {
 	WorkloadType    string
 	Replicas        string
 	ServiceEnable   string
+	ServiceName     string
 	ServiceAway     string
 	ServicePortType string
 	ServicePort     string
@@ -329,6 +331,7 @@ var SgrTenantDeploymentsColumns = struct {
 	WorkloadType:    "workload_type",
 	Replicas:        "replicas",
 	ServiceEnable:   "service_enable",
+	ServiceName:     "service_name",
 	ServiceAway:     "service_away",
 	ServicePortType: "service_port_type",
 	ServicePort:     "service_port",
