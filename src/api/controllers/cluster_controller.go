@@ -44,6 +44,16 @@ func (controller ClusterController) GetNamespaces(ctx *context.HttpContext) mvc.
 	return controller.OK(namespaces)
 }
 
+func (controller ClusterController) GetNamespacesFromDB(ctx *context.HttpContext) mvc.ApiResult {
+	//tenantId := ctx.Input.QueryDefault("tid","")
+	// get k8s cluster client by tenant id
+	userInfo := req.GetUserInfo(ctx)
+	strCid := ctx.Input.QueryDefault("cid", "0")
+	cid, _ := strconv.Atoi(strCid)
+	res := controller.clusterService.GetNameSpacesFromDB(userInfo.TenantID, cid)
+	return controller.OK(res)
+}
+
 func (controller ClusterController) GetDeployments(ctx *context.HttpContext) mvc.ApiResult {
 	namespace := ctx.Input.QueryDefault("namespace", "")
 	userInfo := req.GetUserInfo(ctx)

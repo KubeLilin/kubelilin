@@ -30,8 +30,26 @@ func (controller DeploymentController) PostStepV1(ctx *context.HttpContext, requ
 	return mvc.Fail(err.Error())
 }
 
-func (controller *DeploymentController) PostDeploymentStep1() {
+func (controller *DeploymentController) PostCreateDeploymentStep1(ctx *context.HttpContext, deployModel *req.DeploymentStepRequest) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	var tenantID uint64 = 0
+	if userInfo != nil {
+		tenantID = userInfo.TenantID
+	}
+	deployModel.TenantID = tenantID
+	err, res := controller.deploymentService.CreateDeploymentStep1(deployModel)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(res)
+}
 
+func (controller *DeploymentController) PostCreateDeploymentStep2(deployModel *req.DeploymentStepRequest) mvc.ApiResult {
+	err, res := controller.deploymentService.CreateDeploymentStep2(deployModel)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(res)
 }
 
 func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.ApiResult {

@@ -343,7 +343,7 @@ var SgrTenantDeploymentsColumns = struct {
 type SgrTenantDeploymentsContainers struct {
 	ID                uint64  `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`              // 容器ID
 	Name              string  `gorm:"column:name;type:varchar(30);not null" json:"name"`                             // 容器名称：主容器默认为 app
-	DeployID          int64   `gorm:"column:deploy_id;type:bigint(20);not null" json:"deployId"`                     // 部署ID
+	DeployID          uint64  `gorm:"column:deploy_id;type:bigint(20);not null" json:"deployId"`                     // 部署ID
 	IsMain            bool    `gorm:"column:is_main;type:tinyint(1);not null" json:"isMain"`                         // 是否是主容器
 	Image             string  `gorm:"column:image;type:varchar(150);not null" json:"image"`                          // 镜像
 	ImageVersion      string  `gorm:"column:image_version;type:varchar(20);not null" json:"imageVersion"`            // 镜像版本

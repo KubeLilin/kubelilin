@@ -10,7 +10,7 @@ type DeploymentStepRequest struct {
 	TenantID        uint64  `json:"tenantId"`    // 租户ID
 	ClusterID       uint64  `json:"clusterId"`   // 集群ID
 	NamespaceID     uint64  `json:"namespaceId"` // 命名空间ID
-	AppID           *uint64 `json:"appId"`       // 应用ID
+	AppID           string  `json:"appId"`       // 应用ID
 	AppName         string  `json:"appName"`     // 应用名称(英文唯一)
 	LastImage       string  `json:"lastImage"`
 	Level           string  `json:"level"`           // 环境级别 ( Prod , Test , Dev )
@@ -22,4 +22,8 @@ type DeploymentStepRequest struct {
 	ServiceAway     string  `json:"serviceAway"`     // Service访问方式(NodePort、ClusterPort)
 	ServicePortType string  `json:"servicePortType"` // Service端口映射类型(TCP/UDP)
 	ServicePort     *uint16 `json:"servicePort"`     // Service端口映射(容器端口->服务端口) 	// 更新时间
+	RequestCPU      string  `json:"requestCpu"`      // CPU限制Core - request
+	RequestMemory   string  `json:"requestMemory"`   // 内存限制MiB - request
+	LimitCPU        string  `json:"limitCpu"`        // CPU限制Core - limit
+	LimitMemory     string  `json:"limitMemory"`     // 内存限制MiB
 }
