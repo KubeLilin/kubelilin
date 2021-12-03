@@ -11,9 +11,12 @@ type ImportClusterReq struct {
 	TenantId uint64 `form:"tenantId"`
 }
 
-type DeploymentReq struct {
+type DeploymentRequest struct {
 	mvc.RequestBody
+	*models.SgrTenantDeployments
+}
 
-	Deployments models.SgrTenantDeployments             `json:"deployment"`
-	Containers  []models.SgrTenantDeploymentsContainers `json:"containers"`
+type ContainersRequest struct {
+	mvc.RequestBody
+	Containers []*models.SgrTenantDeploymentsContainers `json:"containers"`
 }

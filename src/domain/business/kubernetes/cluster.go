@@ -42,6 +42,12 @@ func (cluster *ClusterService) GetClustersByTenant(tenantId uint64, clusterName 
 	return clusterList, nil
 }
 
+func (cluster *ClusterService) GetNameSpacesFromDB(tenantId uint64, clusterId int) []models.SgrTenantNamespace {
+	var res []models.SgrTenantNamespace
+	cluster.db.Model(&models.SgrTenantNamespace{}).Where("tenant_id=? and cluster_id=?", tenantId, clusterId).Find(&res)
+	return res
+}
+
 func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId uint64, clusterId int) (*kubernetes.Clientset, error) {
 	//判断缓存是否存在
 	key := "t" + string(tenantId) + "c" + string(clusterId)

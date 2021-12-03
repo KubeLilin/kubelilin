@@ -28,4 +28,5 @@ func ConfigureMvc(builder *mvc.ControllerBuilder) {
 	builder.AddController(controllers.NewRoleMenuController)
 	builder.AddController(controllers.NewClusterController)
 	builder.AddController(controllers.NewApplicationController)
+	builder.AddController(controllers.NewDeploymentController)
 }

@@ -28,6 +28,7 @@ func init() {
 			serviceCollection.AddTransient(tenant.NewRoleMenuService)
 			serviceCollection.AddTransient(app.NewApplicationService)
 			serviceCollection.AddTransient(kubernetes.NewClusterService)
+			serviceCollection.AddTransient(app.NewDeploymentService)
 
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
 

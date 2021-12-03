@@ -171,8 +171,8 @@ var SgrTenantColumns = struct {
 // SgrTenantApplication 集群应用
 type SgrTenantApplication struct {
 	ID         uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`
+	TenantID   *uint64    `gorm:"column:tenant_Id;type:bigint(20) unsigned" json:"tenantId"`
 	Name       string     `gorm:"column:name;type:varchar(50);not null" json:"name"`                  // 集群应用名称(英文唯一)
-	TenantID   uint64     `gorm:"column:tenant_id;type:bigint(11);not null" json:"tenantId"`          // 租户
 	Labels     string     `gorm:"column:labels;type:varchar(50);not null" json:"labels"`              // 应用中文名称
 	Remarks    string     `gorm:"column:remarks;type:varchar(200);not null" json:"remarks"`           // 集群应用备注
 	Git        string     `gorm:"column:git;type:varchar(500);not null" json:"git"`                   // 集群应用绑定的git地址
@@ -191,8 +191,9 @@ func (m *SgrTenantApplication) TableName() string {
 // SgrTenantApplicationColumns get sql column name.获取数据库列名
 var SgrTenantApplicationColumns = struct {
 	ID         string
+	TenantID   string
 	Name       string
-	Lables     string
+	Labels     string
 	Remarks    string
 	Git        string
 	Level      string
@@ -202,8 +203,9 @@ var SgrTenantApplicationColumns = struct {
 	UpdateTime string
 }{
 	ID:         "id",
+	TenantID:   "tenant_Id",
 	Name:       "name",
-	Lables:     "lables",
+	Labels:     "labels",
 	Remarks:    "remarks",
 	Git:        "git",
 	Level:      "level",
@@ -270,12 +272,14 @@ type SgrTenantDeployments struct {
 	NamespaceID     uint64     `gorm:"column:namespace_id;type:bigint(20) unsigned;not null" json:"namespaceId"` // 命名空间ID
 	AppID           *uint64    `gorm:"column:app_id;type:bigint(20) unsigned" json:"appId"`                      // 应用ID
 	AppName         string     `gorm:"column:app_name;type:varchar(50);not null" json:"appName"`                 // 应用名称(英文唯一)
+	LastImage       string     `gorm:"column:last_image;type:varchar(150)" json:"lastImage"`
 	Level           string     `gorm:"column:level;type:varchar(8);not null" json:"level"`                       // 环境级别 ( Prod , Test , Dev )
 	ImageHub        string     `gorm:"column:image_hub;type:varchar(200)" json:"imageHub"`                       // 自动生成的镜像仓库地址( hub域名/apps/{应用名-部署名} , 如 http://hub.yoyogo.run/apps/demo-prod )
 	Status          uint8      `gorm:"column:status;type:tinyint(3) unsigned;not null;default:1" json:"status"`  // 状态
 	WorkloadType    string     `gorm:"column:workload_type;type:varchar(15);not null" json:"workloadType"`       // 部署类型(Deployment、DaemonSet、StatefulSet、CronJob)
 	Replicas        uint32     `gorm:"column:replicas;type:int(10) unsigned;not null;default:1" json:"replicas"` // 部署副本数#
 	ServiceEnable   bool       `gorm:"column:service_enable;type:tinyint(1);not null" json:"serviceEnable"`      // 是否开启 Service
+	ServiceName     string     `gorm:"column:service_name;type:varchar(150)" json:"serviceName"`                 // 服务名称
 	ServiceAway     string     `gorm:"column:service_away;type:varchar(10)" json:"serviceAway"`                  // Service访问方式(NodePort、ClusterPort)
 	ServicePortType string     `gorm:"column:service_port_type;type:varchar(8)" json:"servicePortType"`          // Service端口映射类型(TCP/UDP)
 	ServicePort     *uint16    `gorm:"column:service_port;type:smallint(5) unsigned" json:"servicePort"`         // Service端口映射(容器端口->服务端口)
@@ -298,12 +302,14 @@ var SgrTenantDeploymentsColumns = struct {
 	NamespaceID     string
 	AppID           string
 	AppName         string
+	LastImage       string
 	Level           string
 	ImageHub        string
 	Status          string
 	WorkloadType    string
 	Replicas        string
 	ServiceEnable   string
+	ServiceName     string
 	ServiceAway     string
 	ServicePortType string
 	ServicePort     string
@@ -318,12 +324,14 @@ var SgrTenantDeploymentsColumns = struct {
 	NamespaceID:     "namespace_id",
 	AppID:           "app_id",
 	AppName:         "app_name",
+	LastImage:       "last_image",
 	Level:           "level",
 	ImageHub:        "image_hub",
 	Status:          "status",
 	WorkloadType:    "workload_type",
 	Replicas:        "replicas",
 	ServiceEnable:   "service_enable",
+	ServiceName:     "service_name",
 	ServiceAway:     "service_away",
 	ServicePortType: "service_port_type",
 	ServicePort:     "service_port",
@@ -335,7 +343,7 @@ var SgrTenantDeploymentsColumns = struct {
 type SgrTenantDeploymentsContainers struct {
 	ID                uint64  `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`              // 容器ID
 	Name              string  `gorm:"column:name;type:varchar(30);not null" json:"name"`                             // 容器名称：主容器默认为 app
-	DeployID          int64   `gorm:"column:deploy_id;type:bigint(20);not null" json:"deployId"`                     // 部署ID
+	DeployID          uint64  `gorm:"column:deploy_id;type:bigint(20);not null" json:"deployId"`                     // 部署ID
 	IsMain            bool    `gorm:"column:is_main;type:tinyint(1);not null" json:"isMain"`                         // 是否是主容器
 	Image             string  `gorm:"column:image;type:varchar(150);not null" json:"image"`                          // 镜像
 	ImageVersion      string  `gorm:"column:image_version;type:varchar(20);not null" json:"imageVersion"`            // 镜像版本
