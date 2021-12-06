@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"sgr/api/req"
@@ -66,4 +67,18 @@ func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.Api
 		return mvc.Fail(err.Error())
 	}
 	return mvc.Success(depolymentList)
+}
+
+func (controller DeploymentController) GetDeploymentFormInfo(ctx *context.HttpContext) mvc.ApiResult {
+	strDpId := ctx.Input.Query("dpId")
+	fmt.Println(strDpId)
+	dpId, err := strconv.ParseUint(strDpId, 10, 64)
+	if err != nil {
+		return mvc.FailWithMsg(nil, "部署id无效或者未接收到部署id")
+	}
+	resErr, res := controller.deploymentService.GetDeploymentForm(dpId)
+	if resErr != nil {
+		return mvc.FailWithMsg(nil, resErr.Error())
+	}
+	return mvc.Success(res)
 }

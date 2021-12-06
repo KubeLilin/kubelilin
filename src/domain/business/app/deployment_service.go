@@ -42,24 +42,47 @@ func (deployment *DeploymentService) NewOrUpdateDeployment(deployModel *req.Depl
 
 func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *req.DeploymentStepRequest) (error, *models.SgrTenantDeployments) {
 	dpModel := &models.SgrTenantDeployments{}
-	fmt.Println(deployModel)
 	err := copier.Copy(dpModel, deployModel)
 	if err != nil {
 		return err, nil
 	}
-	appId, _ := strconv.ParseUint(deployModel.AppID, 10, 10)
-	dpModel.AppID = &appId
-	fmt.Println(dpModel)
-	dbRes := deployment.db.Model(&models.SgrTenantDeployments{}).Create(dpModel)
-	return dbRes.Error, dpModel
+	svcPort, _ := strconv.ParseUint(deployModel.ServicePort, 10, 16)
+	dpModel.ServicePort = &svcPort
+	//名称端口重复性校验
+
+	if deployModel.ID > 0 {
+		var existCount int64
+		deployment.db.Model(&models.SgrTenantDeployments{}).Where("name=? and id!=?", deployModel.Name, deployModel.ID).Count(&existCount)
+		if existCount > 0 {
+			return errors.New("已经存在相同的部署"), nil
+		}
+		deployment.db.Model(&models.SgrTenantDeployments{}).Where("service_away=? and service_port=? and id !=?", deployModel.ServiceAway, deployModel.ServicePort, deployModel.ID).Count(&existCount)
+		if existCount > 0 {
+			return errors.New("已经存在相同的服务端口"), nil
+		}
+		dbRes := deployment.db.Model(&models.SgrTenantDeployments{}).Where("id=?", deployModel.ID).Updates(dpModel)
+		return dbRes.Error, dpModel
+	} else {
+		var existCount int64
+		deployment.db.Model(&models.SgrTenantDeployments{}).Where("name=?", deployModel.Name).Count(&existCount)
+		if existCount > 0 {
+			return errors.New("已经存在相同的部署"), nil
+		}
+		deployment.db.Model(&models.SgrTenantDeployments{}).Where("service_away=? and service_port=?", deployModel.ServiceAway, deployModel.ServicePort).Count(&existCount)
+		if existCount > 0 {
+			return errors.New("已经存在相同的服务端口"), nil
+		}
+		dbRes := deployment.db.Model(&models.SgrTenantDeployments{}).Create(dpModel)
+		return dbRes.Error, dpModel
+	}
 }
 
 func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.DeploymentStepRequest) (error, *models.SgrTenantDeployments) {
 	dpModel := models.SgrTenantDeployments{}
-	requestCPU, _ := strconv.ParseFloat(deployModel.RequestCPU, 10)
-	requestMemory, _ := strconv.ParseFloat(deployModel.RequestMemory, 10)
-	limitCPU, _ := strconv.ParseFloat(deployModel.LimitCPU, 10)
-	limitMemory, _ := strconv.ParseFloat(deployModel.LimitMemory, 10)
+	requestCPU, _ := strconv.ParseFloat(deployModel.RequestCPU, 64)
+	requestMemory, _ := strconv.ParseFloat(deployModel.RequestMemory, 64)
+	limitCPU, _ := strconv.ParseFloat(deployModel.LimitCPU, 64)
+	limitMemory, _ := strconv.ParseFloat(deployModel.LimitMemory, 64)
 	dpcModel := models.SgrTenantDeploymentsContainers{
 		DeployID:      deployModel.ID,
 		IsMain:        true,
@@ -67,9 +90,10 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.Depl
 		RequestMemory: requestMemory,
 		LimitCPU:      limitCPU,
 		LimitMemory:   limitMemory,
+		ID:            deployModel.DPCID,
 	}
 	deployment.db.Model(&models.SgrTenantDeployments{}).Where("id = ?", deployModel.ID).First(&dpModel)
-	if dpModel.AppID == nil {
+	if dpModel.AppID == 0 {
 		return errors.New("未找到相应的部署数据"), nil
 	}
 	tsRes := deployment.db.Transaction(func(tx *gorm.DB) error {
@@ -79,11 +103,22 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.Depl
 		if dpRes.Error != nil {
 			return dpRes.Error
 		}
-		//创建CPU 内存限制
-		dpcRes := tx.Model(&models.SgrTenantDeploymentsContainers{}).Create(&dpcModel)
-		if dpcRes.Error != nil {
-			return dpcRes.Error
+		/*var existDpc models.SgrTenantDeploymentsContainers
+		tx.Model(&models.SgrTenantDeploymentsContainers{}).Where("deploy_id=?",deployModel.ID).First(&existDpc)*/
+		if deployModel.DPCID > 0 {
+			//更新CPU 内存限制
+			dpcRes := tx.Model(&models.SgrTenantDeploymentsContainers{}).Updates(&dpcModel)
+			if dpcRes.Error != nil {
+				return dpcRes.Error
+			}
+		} else {
+			//创建CPU 内存限制
+			dpcRes := tx.Model(&models.SgrTenantDeploymentsContainers{}).Create(&dpcModel)
+			if dpcRes.Error != nil {
+				return dpcRes.Error
+			}
 		}
+
 		return nil
 	})
 	if tsRes != nil {
@@ -107,4 +142,18 @@ func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint6
 	}
 	dataRes := deployment.db.Raw(dataSql.String(), appId, tenantId).Scan(&deploymentList)
 	return deploymentList, dataRes.Error
+}
+
+func (deployment *DeploymentService) GetDeploymentForm(id uint64) (error, *req.DeploymentStepRequest) {
+
+	res := &req.DeploymentStepRequest{}
+	sql := strings.Builder{}
+	sql.WriteString(`select dp.id, dp.name,dp.nickname,dp.tenant_id,dp.cluster_id,dp.namespace_id,dp.app_id,dp.app_name,
+       dp.level,dp.replicas,dp.service_away,dp.service_enable,dp.service_port,dp.service_port_type,
+       dpc.request_cpu,dpc.limit_cpu,dpc.request_memory,dpc.limit_memory
+       from sgr_tenant_deployments as dp
+inner join sgr_tenant_deployments_containers as dpc on dp.id=dpc.deploy_id
+where dp.id=?`)
+	resErr := deployment.db.Raw(sql.String(), id).Scan(res)
+	return resErr.Error, res
 }
