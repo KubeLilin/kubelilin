@@ -42,25 +42,23 @@ func (deployment *DeploymentService) NewOrUpdateDeployment(deployModel *req.Depl
 
 func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *req.DeploymentStepRequest) (error, *models.SgrTenantDeployments) {
 	dpModel := &models.SgrTenantDeployments{}
+	dpModel.ServiceName = deployModel.Name + ".svc.cluster.sgr"
 	err := copier.Copy(dpModel, deployModel)
 	if err != nil {
 		return err, nil
 	}
 	svcPort, _ := strconv.ParseUint(deployModel.ServicePort, 10, 16)
+
 	dpModel.ServicePort = &svcPort
 	//名称端口重复性校验
-
 	if deployModel.ID > 0 {
 		var existCount int64
-		deployment.db.Model(&models.SgrTenantDeployments{}).Where("name=? and id!=?", deployModel.Name, deployModel.ID).Count(&existCount)
-		if existCount > 0 {
-			return errors.New("已经存在相同的部署"), nil
-		}
 		deployment.db.Model(&models.SgrTenantDeployments{}).Where("service_away=? and service_port=? and id !=?", deployModel.ServiceAway, deployModel.ServicePort, deployModel.ID).Count(&existCount)
 		if existCount > 0 {
 			return errors.New("已经存在相同的服务端口"), nil
 		}
-		dbRes := deployment.db.Model(&models.SgrTenantDeployments{}).Where("id=?", deployModel.ID).Updates(dpModel)
+		dbRes := deployment.db.Model(&models.SgrTenantDeployments{}).Where("id=?", deployModel.ID).Updates(map[string]interface{}{models.SgrTenantDeploymentsColumns.Nickname: deployModel.Nickname,
+			models.SgrTenantDeploymentsColumns.ServiceEnable: deployModel.ServiceEnable, models.SgrTenantDeploymentsColumns.ServicePort: deployModel.ServicePort})
 		return dbRes.Error, dpModel
 	} else {
 		var existCount int64
@@ -68,7 +66,7 @@ func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *req.Depl
 		if existCount > 0 {
 			return errors.New("已经存在相同的部署"), nil
 		}
-		deployment.db.Model(&models.SgrTenantDeployments{}).Where("service_away=? and service_port=?", deployModel.ServiceAway, deployModel.ServicePort).Count(&existCount)
+		deployment.db.Model(&models.SgrTenantDeployments{}).Where("service_away=? and service_port=? and id!=?", deployModel.ServiceAway, deployModel.ServicePort, deployModel.ID).Count(&existCount)
 		if existCount > 0 {
 			return errors.New("已经存在相同的服务端口"), nil
 		}
@@ -79,35 +77,35 @@ func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *req.Depl
 
 func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.DeploymentStepRequest) (error, *models.SgrTenantDeployments) {
 	dpModel := models.SgrTenantDeployments{}
-	requestCPU, _ := strconv.ParseFloat(deployModel.RequestCPU, 64)
+	/*requestCPU, _ := strconv.ParseFloat(deployModel.RequestCPU, 64)
 	requestMemory, _ := strconv.ParseFloat(deployModel.RequestMemory, 64)
 	limitCPU, _ := strconv.ParseFloat(deployModel.LimitCPU, 64)
-	limitMemory, _ := strconv.ParseFloat(deployModel.LimitMemory, 64)
+	limitMemory, _ := strconv.ParseFloat(deployModel.LimitMemory, 64)*/
 	dpcModel := models.SgrTenantDeploymentsContainers{
 		DeployID:      deployModel.ID,
 		IsMain:        true,
-		RequestCPU:    requestCPU,
-		RequestMemory: requestMemory,
-		LimitCPU:      limitCPU,
-		LimitMemory:   limitMemory,
-		ID:            deployModel.DPCID,
+		RequestCPU:    deployModel.RequestCPU,
+		RequestMemory: deployModel.RequestMemory,
+		LimitCPU:      deployModel.LimitCPU,
+		LimitMemory:   deployModel.LimitMemory,
 	}
+
+	fmt.Println(dpcModel)
 	deployment.db.Model(&models.SgrTenantDeployments{}).Where("id = ?", deployModel.ID).First(&dpModel)
 	if dpModel.AppID == 0 {
 		return errors.New("未找到相应的部署数据"), nil
 	}
 	tsRes := deployment.db.Transaction(func(tx *gorm.DB) error {
 		//更新副本数
-		fmt.Println(models.SgrTenantDeploymentsColumns.Replicas)
 		dpRes := tx.Model(&models.SgrTenantDeployments{}).Where("id = ?", deployModel.ID).Update(models.SgrTenantDeploymentsColumns.Replicas, deployModel.Replicas)
 		if dpRes.Error != nil {
 			return dpRes.Error
 		}
-		/*var existDpc models.SgrTenantDeploymentsContainers
-		tx.Model(&models.SgrTenantDeploymentsContainers{}).Where("deploy_id=?",deployModel.ID).First(&existDpc)*/
-		if deployModel.DPCID > 0 {
+		var existDpc models.SgrTenantDeploymentsContainers
+		tx.Model(&models.SgrTenantDeploymentsContainers{}).Where("deploy_id=?", deployModel.ID).First(&existDpc)
+		if existDpc.ID > 0 {
 			//更新CPU 内存限制
-			dpcRes := tx.Model(&models.SgrTenantDeploymentsContainers{}).Updates(&dpcModel)
+			dpcRes := tx.Model(&models.SgrTenantDeploymentsContainers{}).Where("id=?", existDpc.ID).Updates(&dpcModel)
 			if dpcRes.Error != nil {
 				return dpcRes.Error
 			}
@@ -148,7 +146,7 @@ func (deployment *DeploymentService) GetDeploymentForm(id uint64) (error, *req.D
 
 	res := &req.DeploymentStepRequest{}
 	sql := strings.Builder{}
-	sql.WriteString(`select dp.id, dp.name,dp.nickname,dp.tenant_id,dp.cluster_id,dp.namespace_id,dp.app_id,dp.app_name,
+	sql.WriteString(`select dp.id,dpc.id as dpc_id , dp.name,dp.nickname,dp.tenant_id,dp.cluster_id,dp.namespace_id,dp.app_id,dp.app_name,
        dp.level,dp.replicas,dp.service_away,dp.service_enable,dp.service_port,dp.service_port_type,
        dpc.request_cpu,dpc.limit_cpu,dpc.request_memory,dpc.limit_memory
        from sgr_tenant_deployments as dp
