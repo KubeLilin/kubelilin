@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"k8s.io/api/core/v1"
@@ -190,4 +191,26 @@ func GetDeploymentList(client *kubernetes.Clientset, namespace string) []dto.Dep
 		deploymentList = append(deploymentList, item)
 	}
 	return deploymentList
+}
+
+func SetReplicasNumber(client *kubernetes.Clientset, namespace string, deploymentName string, number int32) (bool, error) {
+	emptyOptions := metav1.GetOptions{}
+	deployment, getErr := client.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, emptyOptions)
+	if getErr != nil {
+		panic(fmt.Errorf("Failed to get latest version of Deployment: %v", getErr))
+		return false, getErr
+	}
+	if number > 0 && number < 20 {
+		//replica数量降低到1
+		deployment.Spec.Replicas = &number
+		_, err := client.AppsV1().Deployments(namespace).Update(context.TODO(), deployment, metav1.UpdateOptions{})
+		if err != nil {
+			return false, err
+		}
+	} else {
+		err := errors.New("Replicas Number can be set 0-20.")
+		panic(err)
+		return false, err
+	}
+	return true, nil
 }

@@ -6,16 +6,18 @@ import (
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"sgr/api/req"
 	"sgr/domain/business/app"
+	"sgr/domain/business/kubernetes"
 	"strconv"
 )
 
 type DeploymentController struct {
 	mvc.ApiController
 	deploymentService *app.DeploymentService
+	clusterService    *kubernetes.ClusterService
 }
 
-func NewDeploymentController(deploymentService *app.DeploymentService) *DeploymentController {
-	return &DeploymentController{deploymentService: deploymentService}
+func NewDeploymentController(deploymentService *app.DeploymentService, clusterService *kubernetes.ClusterService) *DeploymentController {
+	return &DeploymentController{deploymentService: deploymentService, clusterService: clusterService}
 }
 
 func (controller DeploymentController) PostStepV1(ctx *context.HttpContext, request *req.DeploymentStepRequest) mvc.ApiResult {
@@ -81,4 +83,16 @@ func (controller DeploymentController) GetDeploymentFormInfo(ctx *context.HttpCo
 		return mvc.FailWithMsg(nil, resErr.Error())
 	}
 	return mvc.Success(res)
+}
+
+func (controller DeploymentController) PostReplicas(request *req.SacRequest, ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	strCid := ctx.Input.QueryDefault("cid", "0")
+	cid, _ := strconv.Atoi(strCid)
+	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
+	ret, err := kubernetes.SetReplicasNumber(client, request.Namespace, request.DeploymentName, request.Number)
+	if err != nil {
+		panic(err)
+	}
+	return mvc.Success(ret)
 }

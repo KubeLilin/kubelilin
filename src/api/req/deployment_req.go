@@ -26,3 +26,10 @@ type DeploymentStepRequest struct {
 	LimitCPU        float64 `json:"limitCpu" gorm:"column:limit_cpu;type:decimal(4,2) unsigned;not null"`       // CPU限制Core - limit
 	LimitMemory     float64 `json:"limitMemory" gorm:"column:limit_memory;type:decimal(5,0) unsigned;not null"` // 内存限制MiB
 }
+
+type SacRequest struct {
+	mvc.RequestBody
+	Namespace      string `json:"namespace" uri:"namespace"`
+	DeploymentName string `json:"deploymentName" uri:"deploymentName"`
+	Number         int32  `json:"number" uri:"number"`
+}
