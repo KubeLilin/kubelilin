@@ -214,3 +214,7 @@ func SetReplicasNumber(client *kubernetes.Clientset, namespace string, deploymen
 	}
 	return true, nil
 }
+
+func DestroyPod(client *kubernetes.Clientset, namespace string, podName string) error {
+	return client.CoreV1().Pods(namespace).Delete(context.TODO(), podName, metav1.DeleteOptions{})
+}

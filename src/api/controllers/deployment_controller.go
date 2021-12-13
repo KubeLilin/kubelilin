@@ -111,3 +111,13 @@ func (controller DeploymentController) PostReplicasById(request *req.ScaleV1Requ
 	}
 	return mvc.Success(ret)
 }
+
+func (controller DeploymentController) PostDestroyPod(request *req.DestroyPodRequest, ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, request.ClusterId)
+	err := kubernetes.DestroyPod(client, request.Namespace, request.PodName)
+	if err != nil {
+		return mvc.FailWithMsg("操作失败", err.Error())
+	}
+	return mvc.Success(true)
+}

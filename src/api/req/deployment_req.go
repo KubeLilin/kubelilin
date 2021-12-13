@@ -40,3 +40,10 @@ type ScaleV1Request struct {
 	DeploymentId uint64 `json:"deployId" uri:"deployId"`
 	Number       int32  `json:"number" uri:"number"`
 }
+
+type DestroyPodRequest struct {
+	mvc.RequestBody
+	ClusterId uint64 `json:"clusterId" uri:"clusterId"`
+	Namespace string `json:"namespace" uri:"namespace"`
+	PodName   string `json:"podName"`
+}
