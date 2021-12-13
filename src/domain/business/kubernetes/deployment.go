@@ -1,7 +1,6 @@
 package kubernetes
 
 import (
-	"context"
 	"errors"
 	"gorm.io/gorm"
 	extensionsv1beta1 "k8s.io/client-go/kubernetes/typed/extensions/v1beta1"
@@ -41,6 +40,7 @@ func (ds *DeploymentSupervisor) ExecuteDeployment(dpId, tenantId uint64) error {
 		return errors.New("请维护部署镜像信息")
 	}
 	//endregion
+	return nil
 }
 
 func (ds *DeploymentSupervisor) InitDeploymentTemplate(tenantId uint64, dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers) (error, interface{}) {
@@ -59,10 +59,10 @@ func (ds *DeploymentSupervisor) InitDeploymentTemplate(tenantId uint64, dp *mode
 	}
 	switch apiVersion {
 	case EXTENSION_V1_BETA1:
-		ds.InitExtensionV1Beta1deployment(clientSet.ExtensionsV1beta1())
+		ds.InitExtensionV1Beta1deployment(clientSet.ExtensionsV1beta1(), nil, nil)
 	}
 
-	return nil
+	return nil, nil
 }
 
 func (ds *DeploymentSupervisor) InitExtensionV1Beta1deployment(client extensionsv1beta1.ExtensionsV1beta1Interface, dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers) (error, interface{}) {
@@ -71,9 +71,10 @@ func (ds *DeploymentSupervisor) InitExtensionV1Beta1deployment(client extensions
 	if dbErr.Error != nil {
 		return errors.New("未找到命名空间信息"), nil
 	}
-	k8sDeployment := client.Deployments(namespace.Namespace)
+	_ = client.Deployments(namespace.Namespace)
 
-	k8sDeployment.Create(context.TODO())
+	//k8sDeployment.Create(context.TODO())
+	return nil, nil
 }
 
 func (ds *DeploymentSupervisor) InitAppsV1Beta1Deployment(client extensionsv1beta1.ExtensionsV1beta1Interface) {

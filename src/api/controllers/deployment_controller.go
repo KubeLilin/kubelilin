@@ -85,14 +85,29 @@ func (controller DeploymentController) GetDeploymentFormInfo(ctx *context.HttpCo
 	return mvc.Success(res)
 }
 
-func (controller DeploymentController) PostReplicas(request *req.SacRequest, ctx *context.HttpContext) mvc.ApiResult {
+func (controller DeploymentController) PostReplicas(request *req.ScaleRequest, ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
-	strCid := ctx.Input.QueryDefault("cid", "0")
-	cid, _ := strconv.Atoi(strCid)
-	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
+	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, request.ClusterId)
 	ret, err := kubernetes.SetReplicasNumber(client, request.Namespace, request.DeploymentName, request.Number)
 	if err != nil {
 		panic(err)
+	}
+	return mvc.Success(ret)
+}
+
+func (controller DeploymentController) PostReplicasById(request *req.ScaleV1Request, ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	deployment, _ := controller.deploymentService.GetDeploymentByID(request.DeploymentId)
+	if deployment.ID == 0 {
+		return mvc.Fail("未找到部署信息")
+	}
+	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, deployment.ClusterId)
+
+	ret, _ := kubernetes.SetReplicasNumber(client, deployment.NameSpace, deployment.Name, request.Number)
+	if ret {
+		_ = controller.deploymentService.SetReplicas(request.DeploymentId, request.Number)
+	} else {
+		return mvc.Fail("操作失败")
 	}
 	return mvc.Success(ret)
 }

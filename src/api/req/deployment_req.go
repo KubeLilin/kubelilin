@@ -27,9 +27,16 @@ type DeploymentStepRequest struct {
 	LimitMemory     float64 `json:"limitMemory" gorm:"column:limit_memory;type:decimal(5,0) unsigned;not null"` // 内存限制MiB
 }
 
-type SacRequest struct {
+type ScaleRequest struct {
 	mvc.RequestBody
 	Namespace      string `json:"namespace" uri:"namespace"`
 	DeploymentName string `json:"deploymentName" uri:"deploymentName"`
 	Number         int32  `json:"number" uri:"number"`
+	ClusterId      uint64 `json:"clusterId" uri:"clusterId"`
+}
+
+type ScaleV1Request struct {
+	mvc.RequestBody
+	DeploymentId uint64 `json:"deployId" uri:"deployId"`
+	Number       int32  `json:"number" uri:"number"`
 }

@@ -155,3 +155,20 @@ where dp.id=?`)
 	resErr := deployment.db.Raw(sql.String(), id).Scan(res)
 	return resErr.Error, res
 }
+
+func (deployment *DeploymentService) GetDeploymentByID(id uint64) (dto.DeploymentItemDto, error) {
+	var dpModel dto.DeploymentItemDto
+	sql := strings.Builder{}
+	sql.WriteString(`SELECT d.id, d.nickname ,d.name,
+  d.cluster_id as 'clusterId' , n.namespace ,d.replicas 'expected',  d.service_name as 'serviceName'
+  FROM sgr_tenant_deployments d
+  INNER JOIN sgr_tenant_namespace n on n.id = d.namespace_id
+  WHERE  d.id = ?`)
+	resErr := deployment.db.Raw(sql.String(), id).Scan(&dpModel)
+	return dpModel, resErr.Error
+}
+
+func (deployment *DeploymentService) SetReplicas(id uint64, number int32) error {
+	dpRes := deployment.db.Model(&models.SgrTenantDeployments{}).Where("id = ?", id).Update(models.SgrTenantDeploymentsColumns.Replicas, number)
+	return dpRes.Error
+}

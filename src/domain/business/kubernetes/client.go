@@ -200,7 +200,7 @@ func SetReplicasNumber(client *kubernetes.Clientset, namespace string, deploymen
 		panic(fmt.Errorf("Failed to get latest version of Deployment: %v", getErr))
 		return false, getErr
 	}
-	if number > 0 && number < 20 {
+	if number >= 0 && number <= 20 {
 		//replica数量降低到1
 		deployment.Spec.Replicas = &number
 		_, err := client.AppsV1().Deployments(namespace).Update(context.TODO(), deployment, metav1.UpdateOptions{})
