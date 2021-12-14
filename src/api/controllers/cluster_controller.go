@@ -24,7 +24,7 @@ func (controller ClusterController) GetPods(ctx *context.HttpContext) mvc.ApiRes
 
 	userInfo := req.GetUserInfo(ctx)
 	strCid := ctx.Input.QueryDefault("cid", "0")
-	cid, _ := strconv.Atoi(strCid)
+	cid, _ := strconv.ParseUint(strCid, 10, 64)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
 
 	podList := kubernetes.GetPodList(client, namespace, k8snode, k8sapp)
@@ -37,7 +37,7 @@ func (controller ClusterController) GetNamespaces(ctx *context.HttpContext) mvc.
 	// get k8s cluster client by tenant id
 	userInfo := req.GetUserInfo(ctx)
 	strCid := ctx.Input.QueryDefault("cid", "0")
-	cid, _ := strconv.Atoi(strCid)
+	cid, _ := strconv.ParseUint(strCid, 10, 64)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
 
 	namespaces := kubernetes.GetAllNamespaces(client)
@@ -58,7 +58,7 @@ func (controller ClusterController) GetDeployments(ctx *context.HttpContext) mvc
 	namespace := ctx.Input.QueryDefault("namespace", "")
 	userInfo := req.GetUserInfo(ctx)
 	strCid := ctx.Input.QueryDefault("cid", "0")
-	cid, _ := strconv.Atoi(strCid)
+	cid, _ := strconv.ParseUint(strCid, 10, 64)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
 
 	list := kubernetes.GetDeploymentList(client, namespace)
@@ -68,7 +68,7 @@ func (controller ClusterController) GetDeployments(ctx *context.HttpContext) mvc
 func (controller ClusterController) GetNodes(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
 	strCid := ctx.Input.QueryDefault("cid", "0")
-	cid, _ := strconv.Atoi(strCid)
+	cid, _ := strconv.ParseUint(strCid, 10, 64)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
 
 	nodeList := kubernetes.GetNodeList(client)
