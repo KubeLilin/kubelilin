@@ -48,7 +48,7 @@ func (cluster *ClusterService) GetNameSpacesFromDB(tenantId uint64, clusterId in
 	return res
 }
 
-func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId uint64, clusterId int) (*kubernetes.Clientset, error) {
+func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId uint64, clusterId uint64) (*kubernetes.Clientset, error) {
 	//判断缓存是否存在
 	key := "t" + string(tenantId) + "c" + string(clusterId)
 	clientValue, ok := k8sClientMemoryCache[key]

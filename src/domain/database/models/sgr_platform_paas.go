@@ -277,7 +277,7 @@ type SgrTenantDeployments struct {
 	ImageHub        string     `gorm:"column:image_hub;type:varchar(200)" json:"imageHub"`                       // 自动生成的镜像仓库地址( hub域名/apps/{应用名-部署名} , 如 http://hub.yoyogo.run/apps/demo-prod )
 	Status          uint8      `gorm:"column:status;type:tinyint(3) unsigned;not null;default:1" json:"status"`  // 状态
 	WorkloadType    string     `gorm:"column:workload_type;type:varchar(15);not null" json:"workloadType"`       // 部署类型(Deployment、DaemonSet、StatefulSet、CronJob)
-	Replicas        uint32     `gorm:"column:replicas;type:int(10) unsigned;not null;default:1" json:"replicas"` // 部署副本数#
+	Replicas        int32      `gorm:"column:replicas;type:int(10) unsigned;not null;default:1" json:"replicas"` // 部署副本数#
 	ServiceEnable   bool       `gorm:"column:service_enable;type:tinyint(1);not null" json:"serviceEnable"`      // 是否开启 Service
 	ServiceName     string     `gorm:"column:service_name;type:varchar(150)" json:"serviceName"`                 // 服务名称
 	ServiceAway     string     `gorm:"column:service_away;type:varchar(10)" json:"serviceAway"`                  // Service访问方式(NodePort、ClusterPort)
