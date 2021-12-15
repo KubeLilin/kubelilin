@@ -32,3 +32,12 @@ func TestSlices(t *testing.T) {
 	fmt.Println((*p)[1])
 
 }
+
+func TestPointer(t *testing.T) {
+	name := "deployment"
+	var ss *string
+	ss = &name
+
+	println(*ss)
+
+}
