@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"flag"
@@ -217,4 +218,25 @@ func SetReplicasNumber(client *kubernetes.Clientset, namespace string, deploymen
 
 func DestroyPod(client *kubernetes.Clientset, namespace string, podName string) error {
 	return client.CoreV1().Pods(namespace).Delete(context.TODO(), podName, metav1.DeleteOptions{})
+}
+
+func GetLogs(client *kubernetes.Clientset, namespace string, podName string, containerName string, lines int64) ([]string, error) {
+	options := &v1.PodLogOptions{Container: containerName, TailLines: &lines}
+	request := client.CoreV1().Pods(namespace).GetLogs(podName, options)
+	readCloser, err := request.Stream(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+	defer readCloser.Close()
+	var logLines []string
+	r := bufio.NewReader(readCloser)
+	for {
+		bytes, err := r.ReadBytes('\n')
+		logLines = append(logLines, string(bytes))
+		if err != nil {
+			break
+		}
+		bytes = nil
+	}
+	return logLines, nil
 }

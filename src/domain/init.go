@@ -29,7 +29,7 @@ func init() {
 			serviceCollection.AddTransient(app.NewApplicationService)
 			serviceCollection.AddTransient(kubernetes.NewClusterService)
 			serviceCollection.AddTransient(app.NewDeploymentService)
-
+			serviceCollection.AddTransient(kubernetes.NewDeploymentSupervisor)
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
 
 		})

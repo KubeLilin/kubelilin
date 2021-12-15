@@ -282,7 +282,7 @@ type SgrTenantDeployments struct {
 	ServiceName     string     `gorm:"column:service_name;type:varchar(150)" json:"serviceName"`                 // 服务名称
 	ServiceAway     string     `gorm:"column:service_away;type:varchar(10)" json:"serviceAway"`                  // Service访问方式(NodePort、ClusterPort)
 	ServicePortType string     `gorm:"column:service_port_type;type:varchar(8)" json:"servicePortType"`          // Service端口映射类型(TCP/UDP)
-	ServicePort     *uint64    `gorm:"column:service_port;type:smallint(5) unsigned" json:"servicePort"`         // Service端口映射(容器端口->服务端口)
+	ServicePort     uint32     `gorm:"column:service_port;type:smallint(5) unsigned" json:"servicePort"`         // Service端口映射(容器端口->服务端口)
 	CreateTime      *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"`              // 创建时间
 	UpdateTime      *time.Time `gorm:"column:update_time;type:datetime;not null" json:"updateTime"`              // 更新时间
 }

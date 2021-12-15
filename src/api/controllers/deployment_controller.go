@@ -12,23 +12,24 @@ import (
 
 type DeploymentController struct {
 	mvc.ApiController
-	deploymentService *app.DeploymentService
-	clusterService    *kubernetes.ClusterService
+	deploymentService    *app.DeploymentService
+	deploymentSupervisor *kubernetes.DeploymentSupervisor
+	clusterService       *kubernetes.ClusterService
 }
 
-func NewDeploymentController(deploymentService *app.DeploymentService, clusterService *kubernetes.ClusterService) *DeploymentController {
-	return &DeploymentController{deploymentService: deploymentService, clusterService: clusterService}
+func NewDeploymentController(deploymentService *app.DeploymentService, clusterService *kubernetes.ClusterService, deploymentSupervisor *kubernetes.DeploymentSupervisor) *DeploymentController {
+	return &DeploymentController{deploymentService: deploymentService, clusterService: clusterService, deploymentSupervisor: deploymentSupervisor}
 }
 
-func (controller DeploymentController) PostStepV1(ctx *context.HttpContext, request *req.DeploymentStepRequest) mvc.ApiResult {
+func (controller DeploymentController) POSTExecuteDeployment(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
-	request.TenantID = userInfo.TenantID
-	//default values
-	//request.Replicas = 1
-	//request.WorkloadType = app.Deployment
-	err, m := controller.deploymentService.NewOrUpdateDeployment(request)
+	dpIdStr := ctx.Input.Query("dpId")
+	dpId, _ := strconv.ParseUint(dpIdStr, 10, 64)
+	fmt.Println(dpIdStr)
+	fmt.Println(controller.deploymentSupervisor)
+	res, err := controller.deploymentSupervisor.ExecuteDeployment(dpId, userInfo.TenantID)
 	if err == nil {
-		return mvc.Success(m)
+		return mvc.Success(res)
 	}
 	return mvc.Fail(err.Error())
 }
@@ -120,4 +121,16 @@ func (controller DeploymentController) PostDestroyPod(request *req.DestroyPodReq
 		return mvc.FailWithMsg("操作失败", err.Error())
 	}
 	return mvc.Success(true)
+}
+
+func (controller DeploymentController) GetPodLogs(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	var request *req.PodLogsRequest
+	_ = ctx.BindWithUri(&request)
+	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, request.ClusterId)
+	logs, err := kubernetes.GetLogs(client, request.Namespace, request.PodName, request.ContainerName, request.Lines)
+	if err != nil {
+		return mvc.FailWithMsg("获取Pod日志失败！", err.Error())
+	}
+	return mvc.Success(logs)
 }
