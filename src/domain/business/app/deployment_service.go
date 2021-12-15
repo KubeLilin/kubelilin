@@ -47,9 +47,9 @@ func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *req.Depl
 	if err != nil {
 		return err, nil
 	}
-	svcPort, _ := strconv.ParseUint(deployModel.ServicePort, 10, 16)
+	svcPort, _ := strconv.ParseUint(deployModel.ServicePort, 10, 32)
 
-	dpModel.ServicePort = &svcPort
+	dpModel.ServicePort = uint32(svcPort)
 	//名称端口重复性校验
 	if deployModel.ID > 0 {
 		var existCount int64
