@@ -122,3 +122,15 @@ func (controller DeploymentController) PostDestroyPod(request *req.DestroyPodReq
 	}
 	return mvc.Success(true)
 }
+
+func (controller DeploymentController) GetPodLogs(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	var request *req.PodLogsRequest
+	_ = ctx.BindWithUri(&request)
+	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, request.ClusterId)
+	logs, err := kubernetes.GetLogs(client, request.Namespace, request.PodName, request.ContainerName, request.Lines)
+	if err != nil {
+		return mvc.FailWithMsg("获取Pod日志失败！", err.Error())
+	}
+	return mvc.Success(logs)
+}

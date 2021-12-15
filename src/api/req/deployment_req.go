@@ -47,3 +47,12 @@ type DestroyPodRequest struct {
 	Namespace string `json:"namespace" uri:"namespace"`
 	PodName   string `json:"podName"`
 }
+
+type PodLogsRequest struct {
+	mvc.RequestBody
+	ClusterId     uint64 `json:"clusterId" uri:"clusterId"`
+	Namespace     string `json:"namespace" uri:"namespace"`
+	PodName       string `json:"podName" uri:"podName"`
+	ContainerName string `json:"containerName" uri:"containerName"`
+	Lines         int64  `json:"lines" uri:"lines"`
+}
