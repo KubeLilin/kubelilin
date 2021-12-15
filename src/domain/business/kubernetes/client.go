@@ -7,6 +7,8 @@ import (
 	"flag"
 	"fmt"
 	"k8s.io/api/core/v1"
+	"sort"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -239,4 +241,39 @@ func GetLogs(client *kubernetes.Clientset, namespace string, podName string, con
 		bytes = nil
 	}
 	return logLines, nil
+}
+
+func GetEvents(client *kubernetes.Clientset, namespace string, deployment string) []dto.EventItemDto {
+	var eventList []dto.EventItemDto
+	var k8sEventList []v1.Event
+	podList, _ := client.CoreV1().Pods(namespace).List(context.TODO(),
+		metav1.ListOptions{LabelSelector: "k8s-app=" + deployment})
+
+	deploymentEvents, _ := client.CoreV1().Events(namespace).List(context.TODO(),
+		metav1.ListOptions{TypeMeta: metav1.TypeMeta{Kind: "Deployment"}, FieldSelector: "involvedObject.name=" + deployment})
+	k8sEventList = append(k8sEventList, deploymentEvents.Items...)
+
+	for _, item := range podList.Items {
+		podEvents, _ := client.CoreV1().Events(namespace).List(context.TODO(),
+			metav1.ListOptions{TypeMeta: metav1.TypeMeta{Kind: "Pod"}, FieldSelector: "involvedObject.name=" + item.Name})
+		k8sEventList = append(k8sEventList, podEvents.Items...)
+	}
+
+	for _, event := range k8sEventList {
+		eventItem := dto.EventItemDto{
+			FirstTime:   event.FirstTimestamp.Time,
+			LastTime:    event.LastTimestamp.Time,
+			Name:        event.Name,
+			Level:       event.Type,
+			Reason:      event.Reason,
+			Information: event.Message,
+			Kind:        event.InvolvedObject.Kind,
+		}
+
+		eventList = append(eventList, eventItem)
+	}
+	sort.Slice(eventList, func(i, j int) bool {
+		return eventList[i].FirstTime.After(eventList[j].FirstTime)
+	})
+	return eventList
 }

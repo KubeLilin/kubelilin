@@ -16,7 +16,7 @@ yoyogo:
         header: "Authorization"
         secret: "12391JdeOW^%$#@"
         prefix: "Bearer"
-        expires: 3600
+        expires: 360000
         enable: true
         skip_path: [
           "/v1/user/login",

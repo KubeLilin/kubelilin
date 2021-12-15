@@ -134,3 +134,14 @@ func (controller DeploymentController) GetPodLogs(ctx *context.HttpContext) mvc.
 	}
 	return mvc.Success(logs)
 }
+
+func (controller DeploymentController) GetEvents(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	var request *req.EventsRequest
+	_ = ctx.BindWithUri(&request)
+	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, request.ClusterId)
+	events := kubernetes.GetEvents(client, request.Namespace, request.Deployment)
+
+	return mvc.Success(events)
+
+}

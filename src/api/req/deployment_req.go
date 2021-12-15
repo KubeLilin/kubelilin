@@ -56,3 +56,10 @@ type PodLogsRequest struct {
 	ContainerName string `json:"containerName" uri:"containerName"`
 	Lines         int64  `json:"lines" uri:"lines"`
 }
+
+type EventsRequest struct {
+	mvc.RequestBody
+	ClusterId  uint64 `json:"clusterId" uri:"clusterId"`
+	Namespace  string `json:"namespace" uri:"namespace"`
+	Deployment string `json:"deployment" uri:"deployment"`
+}
