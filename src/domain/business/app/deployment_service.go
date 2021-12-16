@@ -53,11 +53,11 @@ func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *req.Depl
 	dpModel.ServicePort = uint32(svcPort)
 	//名称端口重复性校验
 	if deployModel.ID > 0 {
-		var existCount int64
-		deployment.db.Model(&models.SgrTenantDeployments{}).Where("service_away=? and service_port=? and id !=?", deployModel.ServiceAway, deployModel.ServicePort, deployModel.ID).Count(&existCount)
-		if existCount > 0 {
-			return errors.New("已经存在相同的服务端口"), nil
-		}
+		//var existCount int64
+		//deployment.db.Model(&models.SgrTenantDeployments{}).Where("service_away=? and service_port=? and id !=?", deployModel.ServiceAway, deployModel.ServicePort, deployModel.ID).Count(&existCount)
+		//if existCount > 0 {
+		//	return errors.New("已经存在相同的服务端口"), nil
+		//}
 		dbRes := deployment.db.Model(&models.SgrTenantDeployments{}).Where("id=?", deployModel.ID).Updates(map[string]interface{}{models.SgrTenantDeploymentsColumns.Nickname: deployModel.Nickname,
 			models.SgrTenantDeploymentsColumns.ServiceEnable: deployModel.ServiceEnable, models.SgrTenantDeploymentsColumns.ServicePort: deployModel.ServicePort})
 		return dbRes.Error, dpModel
@@ -67,10 +67,10 @@ func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *req.Depl
 		if existCount > 0 {
 			return errors.New("已经存在相同的部署"), nil
 		}
-		deployment.db.Model(&models.SgrTenantDeployments{}).Where("service_away=? and service_port=? and id!=?", deployModel.ServiceAway, deployModel.ServicePort, deployModel.ID).Count(&existCount)
-		if existCount > 0 {
-			return errors.New("已经存在相同的服务端口"), nil
-		}
+		//deployment.db.Model(&models.SgrTenantDeployments{}).Where("service_away=? and service_port=? and id!=?", deployModel.ServiceAway, deployModel.ServicePort, deployModel.ID).Count(&existCount)
+		//if existCount > 0 {
+		//	return errors.New("已经存在相同的服务端口"), nil
+		//}
 		dbRes := deployment.db.Model(&models.SgrTenantDeployments{}).Create(dpModel)
 		return dbRes.Error, dpModel
 	}
