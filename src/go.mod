@@ -8,6 +8,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/yoyofx/yoyogo v1.7.11
 	github.com/yoyofxteam/dependencyinjection v1.0.1
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gorm.io/driver/mysql v1.1.3
 	gorm.io/gorm v1.21.12
 	k8s.io/api v0.22.0

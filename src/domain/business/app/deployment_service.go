@@ -2,7 +2,6 @@ package app
 
 import (
 	"errors"
-	"fmt"
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 	"sgr/api/req"
@@ -43,6 +42,8 @@ func (deployment *DeploymentService) NewOrUpdateDeployment(deployModel *req.Depl
 func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *req.DeploymentStepRequest) (error, *models.SgrTenantDeployments) {
 	dpModel := &models.SgrTenantDeployments{}
 	dpModel.ServiceName = deployModel.Name + ".svc.cluster.sgr"
+	dpModel.WorkloadType = "Deployment"
+	dpModel.ServicePortType = "TCP"
 	err := copier.Copy(dpModel, deployModel)
 	if err != nil {
 		return err, nil
@@ -89,8 +90,6 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.Depl
 		LimitCPU:      deployModel.LimitCPU,
 		LimitMemory:   deployModel.LimitMemory,
 	}
-
-	fmt.Println(dpcModel)
 	deployment.db.Model(&models.SgrTenantDeployments{}).Where("id = ?", deployModel.ID).First(&dpModel)
 	if dpModel.AppID == 0 {
 		return errors.New("未找到相应的部署数据"), nil

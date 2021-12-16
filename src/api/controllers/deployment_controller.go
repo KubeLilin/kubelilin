@@ -21,12 +21,10 @@ func NewDeploymentController(deploymentService *app.DeploymentService, clusterSe
 	return &DeploymentController{deploymentService: deploymentService, clusterService: clusterService, deploymentSupervisor: deploymentSupervisor}
 }
 
-func (controller DeploymentController) POSTExecuteDeployment(ctx *context.HttpContext) mvc.ApiResult {
+func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
 	dpIdStr := ctx.Input.Query("dpId")
 	dpId, _ := strconv.ParseUint(dpIdStr, 10, 64)
-	fmt.Println(dpIdStr)
-	fmt.Println(controller.deploymentSupervisor)
 	res, err := controller.deploymentSupervisor.ExecuteDeployment(dpId, userInfo.TenantID)
 	if err == nil {
 		return mvc.Success(res)
@@ -141,7 +139,16 @@ func (controller DeploymentController) GetEvents(ctx *context.HttpContext) mvc.A
 	_ = ctx.BindWithUri(&request)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, request.ClusterId)
 	events := kubernetes.GetEvents(client, request.Namespace, request.Deployment)
-
 	return mvc.Success(events)
+}
 
+func (controller DeploymentController) GetYaml(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	dpIdStr := ctx.Input.Query("dpId")
+	dpId, _ := strconv.ParseUint(dpIdStr, 10, 64)
+	yamlStr, err := controller.deploymentSupervisor.GetDeploymentYaml(userInfo.TenantID, dpId)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(yamlStr)
 }

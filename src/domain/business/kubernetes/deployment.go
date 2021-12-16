@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	appsv1 "k8s.io/api/apps/v1"
 	appsv1beta1 "k8s.io/api/apps/v1beta1"
@@ -48,7 +49,6 @@ func NewDeploymentSupervisor(db *gorm.DB, clusterService *ClusterService) *Deplo
 }
 
 func (ds *DeploymentSupervisor) ExecuteDeployment(dpId, tenantId uint64) (interface{}, error) {
-	fmt.Println(dpId)
 	//region 参数校验
 	dpDatum := models.SgrTenantDeployments{}
 	dpcDatum := models.SgrTenantDeploymentsContainers{}
@@ -488,4 +488,46 @@ func (ds *DeploymentSupervisor) AssemblingContainer(dp models.SgrTenantDeploymen
 	container.Ports = ports
 	containerArr = append(containerArr, container)
 	return containerArr, nil
+}
+
+func (ds *DeploymentSupervisor) GetDeploymentYaml(tenantId, dpId uint64) (string, error) {
+	dpDatum := models.SgrTenantDeployments{}
+	dbErr := ds.db.Model(&models.SgrTenantDeployments{}).Where("id=?", dpId).First(&dpDatum)
+	if dbErr.Error != nil {
+		return "", errors.New("未找到相应的部署")
+	}
+	namespace, err := ds.GetNameSpaceByDpId(dpId)
+	if err != nil {
+		return "", err
+	}
+	clusterInfo := &models.SgrTenantCluster{}
+	dbErr = ds.db.Model(&models.SgrTenantCluster{}).Where("id=? and tenant_id=?", dpDatum.ClusterID, tenantId).First(clusterInfo)
+	if dbErr.Error != nil {
+		return "", errors.New("未找到集群信息")
+	}
+	clientSet, clientSetErr := ds.clusterService.GetClusterClientByTenantAndId(tenantId, clusterInfo.ID)
+	if clientSetErr != nil {
+		return "", clientSetErr
+	}
+	k8sDeployment, err := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), dpDatum.Name, metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+	yamlBytes, yamlErr := yaml.Marshal(k8sDeployment)
+	return string(yamlBytes), yamlErr
+}
+
+func (ds *DeploymentSupervisor) GetNameSpaceByDpId(dpId uint64) (string, error) {
+
+	var namespace string
+	err := ds.db.Model(&models.SgrTenantNamespace{}).Raw(`select  t1.namespace from sgr_tenant_namespace as t1 
+inner join  sgr_tenant_deployments std on t1.id=std.namespace_id and std.id=? `, dpId).Scan(&namespace)
+	if err.Error != nil {
+		return "", err.Error
+	}
+	if namespace == "" {
+		return namespace, errors.New("没有找到部署的命名空间")
+	}
+
+	return namespace, nil
 }
