@@ -130,7 +130,7 @@ func (ds *DeploymentSupervisor) ApplyDeployment(client appsv1client.AppsV1Interf
 	deploymentDatum.Kind = &kind
 
 	metalabel := make(map[string]string)
-	metalabel["app"] = "apply-demo"
+	metalabel["k8s-app"] = dp.Name
 	deploymentDatum.Labels = metalabel
 	//spec
 	spec := appsapplyv1.DeploymentSpecApplyConfiguration{}
@@ -144,7 +144,7 @@ func (ds *DeploymentSupervisor) ApplyDeployment(client appsv1client.AppsV1Interf
 	}
 	//selector
 	selectorMap := make(map[string]string)
-	selectorMap["app"] = dp.Name
+	selectorMap["k8s-app"] = dp.Name
 	spec.Selector = &appsapplymetav1.LabelSelectorApplyConfiguration{
 		MatchLabels: selectorMap,
 	}
@@ -382,8 +382,9 @@ func (ds *DeploymentSupervisor) SwitchApiVersion(clusterVersion string) (error, 
 func (ds *DeploymentSupervisor) AssemblingContainerForApply(dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers) ([]corev1.ContainerApplyConfiguration, error) {
 	var containerArr []corev1.ContainerApplyConfiguration
 	imagePullPolicy := v1.PullIfNotPresent
+	cn := "app"
 	container := corev1.ContainerApplyConfiguration{
-		Name:            &dp.Name,
+		Name:            &cn,
 		Image:           &dpc.Image,
 		ImagePullPolicy: &imagePullPolicy,
 	}
