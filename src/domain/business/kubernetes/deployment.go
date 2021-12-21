@@ -1,11 +1,11 @@
 package kubernetes
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	appsv1 "k8s.io/api/apps/v1"
 	appsv1beta1 "k8s.io/api/apps/v1beta1"
@@ -15,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/cli-runtime/pkg/printers"
 	appsapplyv1 "k8s.io/client-go/applyconfigurations/apps/v1"
 	corev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	appsapplymetav1 "k8s.io/client-go/applyconfigurations/meta/v1"
@@ -514,8 +515,14 @@ func (ds *DeploymentSupervisor) GetDeploymentYaml(tenantId, dpId uint64) (string
 	if err != nil {
 		return "", err
 	}
-	yamlBytes, yamlErr := yaml.Marshal(k8sDeployment)
-	return string(yamlBytes), yamlErr
+	//yamlBytes, yamlErr := yaml.Marshal(k8sDeployment)
+	yamlPrinter := printers.YAMLPrinter{}
+	buffers := bytes.NewBufferString("")
+	k8sDeployment.Kind = "Deployment"
+	k8sDeployment.APIVersion = "apps/v1"
+	yamlErr := yamlPrinter.PrintObj(k8sDeployment, buffers)
+
+	return buffers.String(), yamlErr
 }
 
 func (ds *DeploymentSupervisor) GetNameSpaceByDpId(dpId uint64) (string, error) {

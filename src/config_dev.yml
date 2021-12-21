@@ -20,6 +20,7 @@ yoyogo:
         enable: true
         skip_path: [
           "/v1/user/login",
+          "/v1/pod/terminal",
         ]
   cloud:
     discovery:

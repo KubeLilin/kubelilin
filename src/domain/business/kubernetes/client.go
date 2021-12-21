@@ -7,14 +7,16 @@ import (
 	"flag"
 	"fmt"
 	"k8s.io/api/core/v1"
-	"sort"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/client-go/util/homedir"
 	"path/filepath"
 	"sgr/domain/dto"
+	"sort"
 	"time"
 )
 
@@ -276,4 +278,34 @@ func GetEvents(client *kubernetes.Clientset, namespace string, deployment string
 		return eventList[i].FirstTime.After(eventList[j].FirstTime)
 	})
 	return eventList
+}
+
+func Exec(client *kubernetes.Clientset, cfg *rest.Config, terminal *WebTerminal, namespace string, podName string, containerName string) error {
+	req := client.CoreV1().RESTClient().Post().
+		Resource("pods").
+		Name(podName).
+		Namespace(namespace).
+		SubResource("exec")
+
+	req.VersionedParams(&v1.PodExecOptions{
+		Container: containerName,
+		Command:   []string{"/bin/bash"},
+		Stdin:     true,
+		Stdout:    true,
+		Stderr:    true,
+		TTY:       terminal.Tty(),
+	}, scheme.ParameterCodec)
+
+	executor, err := remotecommand.NewSPDYExecutor(cfg, "POST", req.URL())
+	if err != nil {
+		return err
+	}
+	err = executor.Stream(remotecommand.StreamOptions{
+		Stdin:             terminal.Stdin(),
+		Stdout:            terminal.Stdout(),
+		Stderr:            terminal.Stderr(),
+		TerminalSizeQueue: terminal,
+		Tty:               terminal.Tty(),
+	})
+	return err
 }

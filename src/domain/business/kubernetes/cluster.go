@@ -7,6 +7,8 @@ import (
 	"gorm.io/gorm"
 	"io/ioutil"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 	"mime/multipart"
 	"sgr/domain/database/models"
 	"sgr/domain/dto"
@@ -74,6 +76,12 @@ func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId uint64, cl
 		mutex.Unlock()
 		return client, err
 	}
+}
+
+func (cluster *ClusterService) GetClusterConfig(tenantId uint64, clusterId uint64) (*rest.Config, error) {
+	var data models.SgrTenantCluster
+	cluster.db.Model(&models.SgrTenantCluster{}).Where("tenant_id = ? AND id = ?", tenantId, clusterId).First(&data)
+	return clientcmd.RESTConfigFromKubeConfig([]byte(data.Config))
 }
 
 func (cluster *ClusterService) ClientHealthCheck(client *kubernetes.Clientset) (bool, error) {
