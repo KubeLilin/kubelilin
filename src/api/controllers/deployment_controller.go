@@ -21,11 +21,10 @@ func NewDeploymentController(deploymentService *app.DeploymentService, clusterSe
 	return &DeploymentController{deploymentService: deploymentService, clusterService: clusterService, deploymentSupervisor: deploymentSupervisor}
 }
 
-func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpContext) mvc.ApiResult {
+func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpContext, execReq *req.ExecDeploymentRequest) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
-	dpIdStr := ctx.Input.Query("dpId")
-	dpId, _ := strconv.ParseUint(dpIdStr, 10, 64)
-	res, err := controller.deploymentSupervisor.ExecuteDeployment(dpId, userInfo.TenantID)
+	execReq.TenantId = userInfo.TenantID
+	res, err := controller.deploymentSupervisor.ExecuteDeployment(execReq)
 	if err == nil {
 		return mvc.Success(res)
 	}

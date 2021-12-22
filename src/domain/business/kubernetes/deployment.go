@@ -23,6 +23,7 @@ import (
 	appsv1beta1client "k8s.io/client-go/kubernetes/typed/apps/v1beta1"
 	appsv1beta2client "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
 	extensionsclient "k8s.io/client-go/kubernetes/typed/extensions/v1beta1"
+	"sgr/api/req"
 	"sgr/domain/database/models"
 	"strconv"
 )
@@ -49,15 +50,31 @@ func NewDeploymentSupervisor(db *gorm.DB, clusterService *ClusterService) *Deplo
 	}
 }
 
-func (ds *DeploymentSupervisor) ExecuteDeployment(dpId, tenantId uint64) (interface{}, error) {
+func (ds *DeploymentSupervisor) ExecuteDeployment(execReq *req.ExecDeploymentRequest) (interface{}, error) {
 	//region 参数校验
+	if execReq.DpId == 0 {
+		return nil, errors.New("未接收到部署ID")
+	}
+	if execReq.IsDiv && execReq.WholeImage == "" {
+		return nil, errors.New("请填写正确的镜像地址")
+	}
+	if !execReq.IsDiv && (execReq.Image == "" || execReq.ImageTag == "") {
+		return nil, errors.New("请填写正确的镜像地址")
+	}
+	if !execReq.IsDiv {
+		execReq.WholeImage = execReq.Image + ":" + execReq.ImageTag
+	}
 	dpDatum := models.SgrTenantDeployments{}
 	dpcDatum := models.SgrTenantDeploymentsContainers{}
-	dbErr := ds.db.Model(&models.SgrTenantDeployments{}).Where("id=?", dpId).First(&dpDatum)
+	dbErr := ds.db.Model(&models.SgrTenantDeployments{}).Where("id=?", execReq.DpId).First(&dpDatum)
 	if dbErr.Error != nil {
 		return nil, errors.New("未找到相应的部署")
 	}
-	dbErr = ds.db.Model(&models.SgrTenantDeploymentsContainers{}).Where("deploy_id=?", dpId).First(&dpcDatum)
+	dbErr = ds.db.Model(&models.SgrTenantDeploymentsContainers{}).Where("deploy_id=?", execReq.DpId).Update("image", execReq.WholeImage)
+	if dbErr.Error != nil {
+		return nil, errors.New("设置镜像失败，请查看服务日志")
+	}
+	dbErr = ds.db.Model(&models.SgrTenantDeploymentsContainers{}).Where("deploy_id=?", execReq.DpId).First(&dpcDatum)
 	if dbErr.Error != nil {
 		return nil, errors.New("部署资源限制条件尚未维护，请添加资源限制条件")
 	}
@@ -65,7 +82,7 @@ func (ds *DeploymentSupervisor) ExecuteDeployment(dpId, tenantId uint64) (interf
 		return nil, errors.New("请维护部署镜像信息")
 	}
 	//endregion
-	return ds.InitDeploymentByApply(tenantId, &dpDatum, &dpcDatum)
+	return ds.InitDeploymentByApply(execReq.TenantId, &dpDatum, &dpcDatum)
 }
 
 // InitDeploymentByCreate 使用Create的方式创建deployment/**

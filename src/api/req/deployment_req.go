@@ -81,3 +81,13 @@ type PodTerminalExecRequest struct {
 	ContainerName string `json:"containerName" uri:"containerName"`
 	TenantId      uint64 `json:"tenantId" uri:"tenantId"`
 }
+
+type ExecDeploymentRequest struct {
+	mvc.RequestBody
+	Image      string `json:"image" uri:"image"`
+	ImageTag   string `json:"imageTag" uri:"imageTag"`
+	WholeImage string `json:"wholeImage" uri:"wholeImage"`
+	IsDiv      bool   `json:"IsDiv" uri:"IsDiv"`
+	DpId       uint64 `json:"dpId" uri:"dpId"`
+	TenantId   uint64 `json:"tenantId" uri:"tenantId"`
+}
