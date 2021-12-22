@@ -6,6 +6,7 @@ type ClusterInfo struct {
 	ID           uint64 `json:"id"`           // ID
 	TenantID     *int64 `json:"tenantId"`     // 租户ID
 	Name         string `json:"name"`         // 集群名称
+	Nickname     string `json:"nickname"`     // 集群名称
 	Version      string `json:"version"`      // k8s 版本号
 	Distribution string `json:"distribution"` // 来源
 	Sort         *int   `json:"sort"`         // 排序
