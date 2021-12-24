@@ -110,8 +110,8 @@ func (controller ClusterController) DeleteDelClusterInfo(ctx *context.HttpContex
 
 func (controller ClusterController) PutNewNamespace(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
-	id := ctx.Input.QueryDefault("id", "0")
-	clusterId, _ := strconv.ParseUint(id, 10, 64)
+	cid := ctx.Input.QueryDefault("cid", "0")
+	clusterId, _ := strconv.ParseUint(cid, 10, 64)
 	namespace := ctx.Input.QueryDefault("namespace", "default")
 
 	clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, clusterId)

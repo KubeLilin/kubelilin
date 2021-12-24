@@ -7,7 +7,7 @@ yoyogo:
       address: ":8080"
       max_request_size: 2096157
       mvc:
-        template: "{tenantId}/v1/{controller}/{action}"
+        template: "v1/{controller}/{action}"
       cors:
         allow_origins: ["*"]
         allow_methods: ["*"]
@@ -53,12 +53,12 @@ yoyogo:
     db:
       name: db1
       type: mysql
-      url: tcp(m.yoyogo.run:3306)/sgr_platform_paas?charset=utf8&parseTime=True
+      url: tcp(47.100.213.49:3306)/sgr_pass?charset=utf8&parseTime=True
       username: root
-      password: 123.com
+      password: P@ssW0rd
       debug: true
     redis:
       name: reids1
-      url: m.yoyogo.run:6379
-      password: 123.com
+      url: 47.100.213.49:6379
+      password: P@ssW0rd
       db: 0
