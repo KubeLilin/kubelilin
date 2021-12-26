@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/yoyofx/yoyogo/abstractions"
 	"github.com/yoyofx/yoyogo/abstractions/xlog"
-	nacosConfig "github.com/yoyofx/yoyogo/pkg/configuration/nacos"
 	_ "github.com/yoyofx/yoyogo/pkg/datasources/mysql"
 	_ "github.com/yoyofx/yoyogo/pkg/datasources/redis"
 	"github.com/yoyofx/yoyogo/pkg/servicediscovery/nacos"
@@ -19,7 +19,10 @@ func main() {
 	global.GlobalLogger = xlog.GetXLogger("global")
 
 	// 加载 nacos 远程配置
-	config := nacosConfig.RemoteConfig("config")
+	//config := nacosConfig.RemoteConfig("config")
+	config := abstractions.NewConfigurationBuilder().
+		AddEnvironment().
+		AddYamlFile("config").Build()
 
 	web.NewWebHostBuilder().
 		UseConfiguration(config).

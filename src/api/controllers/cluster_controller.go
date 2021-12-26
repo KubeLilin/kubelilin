@@ -107,3 +107,17 @@ func (controller ClusterController) DeleteDelClusterInfo(ctx *context.HttpContex
 	return controller.Fail(err.Error())
 
 }
+
+func (controller ClusterController) PutNewNamespace(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	cid := ctx.Input.QueryDefault("cid", "0")
+	clusterId, _ := strconv.ParseUint(cid, 10, 64)
+	namespace := ctx.Input.QueryDefault("namespace", "default")
+
+	clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, clusterId)
+	err := kubernetes.CreateNamespace(clientSet, namespace)
+	if err != nil {
+		return controller.Fail(err.Error())
+	}
+	return controller.OK(err == nil)
+}

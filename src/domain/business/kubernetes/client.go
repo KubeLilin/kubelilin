@@ -309,3 +309,14 @@ func Exec(client *kubernetes.Clientset, cfg *rest.Config, terminal *WebTerminal,
 	})
 	return err
 }
+
+func CreateNamespace(client *kubernetes.Clientset, namespace string) error {
+	nsClient := client.CoreV1().Namespaces()
+	ns := &v1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: namespace,
+		},
+	}
+	_, err := nsClient.Create(context.TODO(), ns, metav1.CreateOptions{})
+	return err
+}

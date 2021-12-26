@@ -50,6 +50,16 @@ func (cluster *ClusterService) GetNameSpacesFromDB(tenantId uint64, clusterId in
 	return res
 }
 
+func (cluster *ClusterService) CreateNamespace(clusterId uint64, namespace string) (bool, error) {
+	var exitsCount int64
+	cluster.db.Model(models.SgrTenantNamespace{}).Where("cluster_id=? and namespace=?", clusterId, namespace).Count(&exitsCount)
+	if exitsCount > 0 {
+		return false, errors.New("already have the same namespace")
+	}
+
+	return true, nil
+}
+
 func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId uint64, clusterId uint64) (*kubernetes.Clientset, error) {
 	//判断缓存是否存在
 	key := "t" + string(tenantId) + "c" + string(clusterId)
