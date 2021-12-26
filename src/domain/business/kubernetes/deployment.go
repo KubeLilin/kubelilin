@@ -19,6 +19,7 @@ import (
 	appsapplyv1 "k8s.io/client-go/applyconfigurations/apps/v1"
 	corev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	appsapplymetav1 "k8s.io/client-go/applyconfigurations/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	appsv1client "k8s.io/client-go/kubernetes/typed/apps/v1"
 	appsv1beta1client "k8s.io/client-go/kubernetes/typed/apps/v1beta1"
 	appsv1beta2client "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
@@ -38,15 +39,23 @@ const (
 	APPS_V1                          = "apps/v1"
 )
 
+const (
+	CLUSTER_IP   string = "ClusterIP"
+	NODE_PORT    string = "NodePort"
+	LOAD_BALANCE string = "LoadBalancer"
+)
+
 type DeploymentSupervisor struct {
 	db             *gorm.DB
 	clusterService *ClusterService
+	k8sService     *ServiceSupervisor
 }
 
-func NewDeploymentSupervisor(db *gorm.DB, clusterService *ClusterService) *DeploymentSupervisor {
+func NewDeploymentSupervisor(db *gorm.DB, clusterService *ClusterService, k8sService *ServiceSupervisor) *DeploymentSupervisor {
 	return &DeploymentSupervisor{
 		db:             db,
 		clusterService: clusterService,
+		k8sService:     k8sService,
 	}
 }
 
@@ -125,12 +134,25 @@ func (ds *DeploymentSupervisor) InitDeploymentByApply(tenantId uint64, dp *model
 	if clientSetErr != nil {
 		return nil, clientSetErr
 	}
-	return ds.ApplyDeployment(clientSet.AppsV1(), dp, dpc)
-	return nil, errors.New("未找到当前集群版本的API")
+	var res []interface{}
+	//创建pod
+	dpRes, dpErr := ds.ApplyDeployment(clientSet, dp, dpc)
+	if dpErr != nil {
+		return nil, dpErr
+	}
+	res = append(res, dpRes)
+	//创建svc
+	svcRes, svcErr := ds.k8sService.ApplyService(clientSet.CoreV1(), dp)
+	if svcErr != nil {
+		return nil, dpErr
+	}
+	res = append(res, svcRes)
+	return res, nil
 }
 
-func (ds *DeploymentSupervisor) ApplyDeployment(client appsv1client.AppsV1Interface, dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers) (interface{}, error) {
+func (ds *DeploymentSupervisor) ApplyDeployment(clientSet *kubernetes.Clientset, dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers) (interface{}, error) {
 	namespace := &models.SgrTenantNamespace{}
+	client := clientSet.AppsV1()
 	dbErr := ds.db.Model(&models.SgrTenantNamespace{}).Where("id=?", dp.NamespaceID).First(namespace)
 	if dbErr.Error != nil {
 		return errors.New("未找到命名空间信息"), nil
