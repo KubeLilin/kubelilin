@@ -15,8 +15,8 @@ type ServiceSupervisor struct {
 	db *gorm.DB
 }
 
-func NewServiceSupervisor(db *gorm.DB) ServiceSupervisor {
-	return ServiceSupervisor{
+func NewServiceSupervisor(db *gorm.DB) *ServiceSupervisor {
+	return &ServiceSupervisor{
 		db: db,
 	}
 }
