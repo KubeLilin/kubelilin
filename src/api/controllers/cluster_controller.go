@@ -114,10 +114,14 @@ func (controller ClusterController) PutNewNamespace(ctx *context.HttpContext) mv
 	clusterId, _ := strconv.ParseUint(cid, 10, 64)
 	namespace := ctx.Input.QueryDefault("namespace", "default")
 
-	clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, clusterId)
-	err := kubernetes.CreateNamespace(clientSet, namespace)
-	if err != nil {
-		return controller.Fail(err.Error())
+	created, err := controller.clusterService.CreateNamespace(userInfo.TenantID, clusterId, namespace)
+	if created {
+		clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, clusterId)
+		err = kubernetes.CreateNamespace(clientSet, namespace)
+		if err != nil {
+			return controller.Fail(err.Error())
+		}
+		return controller.OK(err == nil)
 	}
-	return controller.OK(err == nil)
+	return controller.Fail(err.Error())
 }
