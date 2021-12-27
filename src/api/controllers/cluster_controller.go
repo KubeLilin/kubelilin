@@ -88,8 +88,9 @@ func (controller ClusterController) PostClusterByConfig(ctx *context.HttpContext
 		return controller.Fail(err.Error())
 	}
 	configFile, _ := k8sFile.Open()
-	userInfo := req.GetUserInfo(ctx)
-	config, err := controller.clusterService.ImportK8sConfig(configFile, request.NickName, uint64(userInfo.TenantID))
+	//userInfo := req.GetUserInfo(ctx)
+	// 只能导入到 平台租户中，再进行分配
+	config, err := controller.clusterService.ImportK8sConfig(configFile, request.NickName, uint64(1))
 	if err == nil {
 		return controller.OK(config)
 	}
@@ -101,7 +102,7 @@ func (controller ClusterController) DeleteDelClusterInfo(ctx *context.HttpContex
 	id := ctx.Input.Query("id")
 	clusterId, err := strconv.ParseInt(id, 10, 64)
 	if err == nil {
-		controller.clusterService.DeleteCluster(clusterId)
+		_ = controller.clusterService.DeleteCluster(clusterId)
 		return controller.OK(err == nil)
 	}
 	return controller.Fail(err.Error())
@@ -109,14 +110,14 @@ func (controller ClusterController) DeleteDelClusterInfo(ctx *context.HttpContex
 }
 
 func (controller ClusterController) PutNewNamespace(ctx *context.HttpContext) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+	//userInfo := req.GetUserInfo(ctx)
 	cid := ctx.Input.QueryDefault("cid", "0")
 	clusterId, _ := strconv.ParseUint(cid, 10, 64)
 	namespace := ctx.Input.QueryDefault("namespace", "default")
-
-	created, err := controller.clusterService.CreateNamespace(userInfo.TenantID, clusterId, namespace)
+	//只能导入到 平台租户中，再进行分配
+	created, err := controller.clusterService.CreateNamespace(1, clusterId, namespace)
 	if created {
-		clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, clusterId)
+		clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(1, clusterId)
 		err = kubernetes.CreateNamespace(clientSet, namespace)
 		if err != nil {
 			return controller.Fail(err.Error())
