@@ -37,18 +37,19 @@ func (svc *ServiceSupervisor) ApplyService(client corev1.CoreV1Interface, dp *mo
 	metaLabel["k8s-app"] = dp.Name
 	spec := v1.ServiceSpec{}
 	spec.Selector = metaLabel
-	if dp.ServicePortType == CLUSTER_IP {
-		spec.Type = v1.ServiceTypeClusterIP
-	} else if dp.ServicePortType == NODE_PORT {
-		spec.Type = v1.ServiceTypeNodePort
-	}
+	//构造端口数据
 	var ports []v1.ServicePort
 	portNumber := int32(dp.ServicePort)
 	port := v1.ServicePort{
 		Protocol:   v1.ProtocolTCP,
 		Port:       portNumber,
 		TargetPort: intstr.FromInt(int(dp.ServicePort)),
-		NodePort:   portNumber,
+	}
+	if dp.ServicePortType == CLUSTER_IP {
+		spec.Type = v1.ServiceTypeClusterIP
+	} else if dp.ServicePortType == NODE_PORT {
+		spec.Type = v1.ServiceTypeNodePort
+		port.NodePort = portNumber
 	}
 	ports = append(ports, port)
 	spec.Ports = ports
