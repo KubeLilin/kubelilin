@@ -144,7 +144,7 @@ func (ds *DeploymentSupervisor) InitDeploymentByApply(tenantId uint64, dp *model
 	//创建svc
 	svcRes, svcErr := ds.k8sService.ApplyService(clientSet.CoreV1(), dp)
 	if svcErr != nil {
-		return nil, dpErr
+		return nil, svcErr
 	}
 	res = append(res, svcRes)
 	return res, nil
