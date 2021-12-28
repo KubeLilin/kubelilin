@@ -127,17 +127,25 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.Depl
 func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint64, deployName string) ([]dto.DeploymentItemDto, error) {
 	var deploymentList []dto.DeploymentItemDto
 	dataSql := strings.Builder{}
-	dataSql.WriteString(`SELECT d.id, d.nickname ,d.name, c.name  as 'clusterName' ,
+	dataSql.WriteString(`SELECT d.id, d.nickname ,d.name, c.name  as 'clusterName' ,app.name as 'appName',
   d.cluster_id as 'clusterId' , n.namespace ,d.last_image as 'lastImage', 0 'running' , 
   d.replicas 'expected', '0.0.0.0' as 'serviceIP', d.service_name as 'serviceName'
   FROM sgr_tenant_deployments d
   INNER JOIN sgr_tenant_cluster c on c.id = d.cluster_id
   INNER JOIN sgr_tenant_namespace n on n.id = d.namespace_id
-  WHERE  d.app_id = ? AND d.tenant_id =? `)
+  INNER JOIN sgr_tenant_application app on  app.id = d.app_id
+  WHERE d.tenant_id =? `)
+
 	if deployName != "" {
 		dataSql.WriteString("AND d.nickname like '%" + deployName + "%'")
 	}
-	dataRes := deployment.db.Raw(dataSql.String(), appId, tenantId).Scan(&deploymentList)
+	var params []interface{}
+	if appId > 0 {
+		dataSql.WriteString("AND d.app_id = ?")
+		params = append(params, appId)
+	}
+	params = append(params, tenantId)
+	dataRes := deployment.db.Raw(dataSql.String(), params...).Scan(&deploymentList)
 	return deploymentList, dataRes.Error
 }
 

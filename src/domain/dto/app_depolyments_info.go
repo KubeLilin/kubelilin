@@ -15,6 +15,7 @@ type DeploymentItemDto struct {
 	Expected    uint64 `gorm:"column:expected" json:"expected"`
 	ServiceIP   string `gorm:"column:serviceIP"  json:"serviceIP"`
 	ServiceName string `gorm:"column:serviceName" json:"serviceName"`
+	AppName     string `gorm:"column:appName" json:"appName"`
 }
 
 type EventItemDto struct {
