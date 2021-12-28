@@ -56,13 +56,15 @@ func (controller *DeploymentController) PostCreateDeploymentStep2(deployModel *r
 func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.ApiResult {
 	strAppId := ctx.Input.QueryDefault("appid", "0")
 	deployName := ctx.Input.QueryDefault("nickname", "")
+	appName := ctx.Input.QueryDefault("appName", "")
+
 	userInfo := req.GetUserInfo(ctx)
 	var tenantID uint64 = 0
 	if userInfo != nil {
 		tenantID = userInfo.TenantID
 	}
 	appid, _ := strconv.ParseUint(strAppId, 10, 64)
-	depolymentList, err := controller.deploymentService.GetDeployments(appid, tenantID, deployName)
+	depolymentList, err := controller.deploymentService.GetDeployments(appid, tenantID, deployName, appName)
 	if err != nil {
 		return mvc.Fail(err.Error())
 	}

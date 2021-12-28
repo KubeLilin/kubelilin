@@ -124,7 +124,7 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.Depl
 	return nil, &dpModel
 }
 
-func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint64, deployName string) ([]dto.DeploymentItemDto, error) {
+func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint64, deployName string, appName string) ([]dto.DeploymentItemDto, error) {
 	var deploymentList []dto.DeploymentItemDto
 	dataSql := strings.Builder{}
 	dataSql.WriteString(`SELECT d.id, d.nickname ,d.name, c.name  as 'clusterName' ,app.name as 'appName',
@@ -139,6 +139,11 @@ func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint6
 	if deployName != "" {
 		dataSql.WriteString("AND d.nickname like '%" + deployName + "%'")
 	}
+
+	if appName != "" {
+		dataSql.WriteString("AND app.name like '%" + appName + "%'")
+	}
+
 	var params []interface{}
 	if appId > 0 {
 		dataSql.WriteString("AND d.app_id = ?")
