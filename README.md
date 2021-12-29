@@ -1,6 +1,21 @@
 # sgr-platform-api
 SGR cloud native backend .
 
+## PaaS 平台运行
+### Backend & MySQL
+```bash
+git clone https://github.com/yoyofxteam/sgr-platform-api.git
+cd sgr-platform-api/scripts
+docker-compose -f ./docker-compose.yaml up -d
+```
+### FrontEnd
+```bash
+git clone https://github.com/yoyofxteam/sgr-platform-ui.git
+cd sgr-platform-ui/src
+npm install
+npm run start
+```
+
 # 管理中心
 * 角色管理
 * 用户管理
