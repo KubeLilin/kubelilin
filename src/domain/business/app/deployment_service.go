@@ -2,7 +2,6 @@ package app
 
 import (
 	"errors"
-	"fmt"
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 	"sgr/api/req"
@@ -42,7 +41,9 @@ func (deployment *DeploymentService) NewOrUpdateDeployment(deployModel *req.Depl
 
 func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *req.DeploymentStepRequest) (error, *models.SgrTenantDeployments) {
 	dpModel := &models.SgrTenantDeployments{}
-	dpModel.ServiceName = deployModel.Name + ".svc.cluster.sgr"
+	dpModel.ServiceName = deployModel.Name + "-svc-cluster-sgr"
+	dpModel.WorkloadType = "Deployment"
+	dpModel.ServicePortType = "TCP"
 	err := copier.Copy(dpModel, deployModel)
 	if err != nil {
 		return err, nil
@@ -52,11 +53,11 @@ func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *req.Depl
 	dpModel.ServicePort = uint32(svcPort)
 	//名称端口重复性校验
 	if deployModel.ID > 0 {
-		var existCount int64
-		deployment.db.Model(&models.SgrTenantDeployments{}).Where("service_away=? and service_port=? and id !=?", deployModel.ServiceAway, deployModel.ServicePort, deployModel.ID).Count(&existCount)
-		if existCount > 0 {
-			return errors.New("已经存在相同的服务端口"), nil
-		}
+		//var existCount int64
+		//deployment.db.Model(&models.SgrTenantDeployments{}).Where("service_away=? and service_port=? and id !=?", deployModel.ServiceAway, deployModel.ServicePort, deployModel.ID).Count(&existCount)
+		//if existCount > 0 {
+		//	return errors.New("已经存在相同的服务端口"), nil
+		//}
 		dbRes := deployment.db.Model(&models.SgrTenantDeployments{}).Where("id=?", deployModel.ID).Updates(map[string]interface{}{models.SgrTenantDeploymentsColumns.Nickname: deployModel.Nickname,
 			models.SgrTenantDeploymentsColumns.ServiceEnable: deployModel.ServiceEnable, models.SgrTenantDeploymentsColumns.ServicePort: deployModel.ServicePort})
 		return dbRes.Error, dpModel
@@ -66,10 +67,10 @@ func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *req.Depl
 		if existCount > 0 {
 			return errors.New("已经存在相同的部署"), nil
 		}
-		deployment.db.Model(&models.SgrTenantDeployments{}).Where("service_away=? and service_port=? and id!=?", deployModel.ServiceAway, deployModel.ServicePort, deployModel.ID).Count(&existCount)
-		if existCount > 0 {
-			return errors.New("已经存在相同的服务端口"), nil
-		}
+		//deployment.db.Model(&models.SgrTenantDeployments{}).Where("service_away=? and service_port=? and id!=?", deployModel.ServiceAway, deployModel.ServicePort, deployModel.ID).Count(&existCount)
+		//if existCount > 0 {
+		//	return errors.New("已经存在相同的服务端口"), nil
+		//}
 		dbRes := deployment.db.Model(&models.SgrTenantDeployments{}).Create(dpModel)
 		return dbRes.Error, dpModel
 	}
@@ -89,8 +90,6 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.Depl
 		LimitCPU:      deployModel.LimitCPU,
 		LimitMemory:   deployModel.LimitMemory,
 	}
-
-	fmt.Println(dpcModel)
 	deployment.db.Model(&models.SgrTenantDeployments{}).Where("id = ?", deployModel.ID).First(&dpModel)
 	if dpModel.AppID == 0 {
 		return errors.New("未找到相应的部署数据"), nil
@@ -125,20 +124,33 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.Depl
 	return nil, &dpModel
 }
 
-func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint64, deployName string) ([]dto.DeploymentItemDto, error) {
+func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint64, deployName string, appName string) ([]dto.DeploymentItemDto, error) {
 	var deploymentList []dto.DeploymentItemDto
 	dataSql := strings.Builder{}
-	dataSql.WriteString(`SELECT d.id, d.nickname ,d.name, c.name  as 'clusterName' ,
+	dataSql.WriteString(`SELECT d.id, d.nickname ,d.name, c.name  as 'clusterName' ,app.name as 'appName',
   d.cluster_id as 'clusterId' , n.namespace ,d.last_image as 'lastImage', 0 'running' , 
   d.replicas 'expected', '0.0.0.0' as 'serviceIP', d.service_name as 'serviceName'
   FROM sgr_tenant_deployments d
   INNER JOIN sgr_tenant_cluster c on c.id = d.cluster_id
   INNER JOIN sgr_tenant_namespace n on n.id = d.namespace_id
-  WHERE  d.app_id = ? AND d.tenant_id =? `)
+  INNER JOIN sgr_tenant_application app on  app.id = d.app_id
+  WHERE d.tenant_id =? `)
+
 	if deployName != "" {
 		dataSql.WriteString("AND d.nickname like '%" + deployName + "%'")
 	}
-	dataRes := deployment.db.Raw(dataSql.String(), appId, tenantId).Scan(&deploymentList)
+
+	if appName != "" {
+		dataSql.WriteString("AND app.name like '%" + appName + "%'")
+	}
+
+	var params []interface{}
+	if appId > 0 {
+		dataSql.WriteString("AND d.app_id = ?")
+		params = append(params, appId)
+	}
+	params = append(params, tenantId)
+	dataRes := deployment.db.Raw(dataSql.String(), params...).Scan(&deploymentList)
 	return deploymentList, dataRes.Error
 }
 

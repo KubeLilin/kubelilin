@@ -56,3 +56,38 @@ type PodLogsRequest struct {
 	ContainerName string `json:"containerName" uri:"containerName"`
 	Lines         int64  `json:"lines" uri:"lines"`
 }
+
+type EventsRequest struct {
+	mvc.RequestBody
+	ClusterId  uint64 `json:"clusterId" uri:"clusterId"`
+	Namespace  string `json:"namespace" uri:"namespace"`
+	Deployment string `json:"deployment" uri:"deployment"`
+}
+
+type PodRequest struct {
+	mvc.RequestBody
+	ClusterId     uint64 `json:"clusterId" uri:"clusterId"`
+	Namespace     string `json:"namespace" uri:"namespace"`
+	PodName       string `json:"podName" uri:"podName"`
+	ContainerName string `json:"containerName" uri:"containerName"`
+	Lines         int64  `json:"lines" uri:"lines"`
+}
+
+type PodTerminalExecRequest struct {
+	mvc.RequestBody
+	ClusterId     uint64 `json:"clusterId" uri:"clusterId"`
+	Namespace     string `json:"namespace" uri:"namespace"`
+	PodName       string `json:"podName" uri:"podName"`
+	ContainerName string `json:"containerName" uri:"containerName"`
+	TenantId      uint64 `json:"tenantId" uri:"tenantId"`
+}
+
+type ExecDeploymentRequest struct {
+	mvc.RequestBody
+	Image      string `json:"image" uri:"image"`
+	ImageTag   string `json:"imageTag" uri:"imageTag"`
+	WholeImage string `json:"wholeImage" uri:"wholeImage"`
+	IsDiv      bool   `json:"IsDiv" uri:"IsDiv"`
+	DpId       uint64 `json:"dpId" uri:"dpId"`
+	TenantId   uint64 `json:"tenantId" uri:"tenantId"`
+}

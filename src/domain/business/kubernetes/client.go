@@ -9,10 +9,14 @@ import (
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/client-go/util/homedir"
 	"path/filepath"
 	"sgr/domain/dto"
+	"sort"
 	"time"
 )
 
@@ -239,4 +243,80 @@ func GetLogs(client *kubernetes.Clientset, namespace string, podName string, con
 		bytes = nil
 	}
 	return logLines, nil
+}
+
+func GetEvents(client *kubernetes.Clientset, namespace string, deployment string) []dto.EventItemDto {
+	var eventList []dto.EventItemDto
+	var k8sEventList []v1.Event
+	podList, _ := client.CoreV1().Pods(namespace).List(context.TODO(),
+		metav1.ListOptions{LabelSelector: "k8s-app=" + deployment})
+
+	deploymentEvents, _ := client.CoreV1().Events(namespace).List(context.TODO(),
+		metav1.ListOptions{TypeMeta: metav1.TypeMeta{Kind: "Deployment"}, FieldSelector: "involvedObject.name=" + deployment})
+	k8sEventList = append(k8sEventList, deploymentEvents.Items...)
+
+	for _, item := range podList.Items {
+		podEvents, _ := client.CoreV1().Events(namespace).List(context.TODO(),
+			metav1.ListOptions{TypeMeta: metav1.TypeMeta{Kind: "Pod"}, FieldSelector: "involvedObject.name=" + item.Name})
+		k8sEventList = append(k8sEventList, podEvents.Items...)
+	}
+
+	for _, event := range k8sEventList {
+		eventItem := dto.EventItemDto{
+			FirstTime:   event.FirstTimestamp.Time,
+			LastTime:    event.LastTimestamp.Time,
+			Name:        event.Name,
+			Level:       event.Type,
+			Reason:      event.Reason,
+			Information: event.Message,
+			Kind:        event.InvolvedObject.Kind,
+		}
+
+		eventList = append(eventList, eventItem)
+	}
+	sort.Slice(eventList, func(i, j int) bool {
+		return eventList[i].FirstTime.After(eventList[j].FirstTime)
+	})
+	return eventList
+}
+
+func Exec(client *kubernetes.Clientset, cfg *rest.Config, terminal *WebTerminal, namespace string, podName string, containerName string) error {
+	req := client.CoreV1().RESTClient().Post().
+		Resource("pods").
+		Name(podName).
+		Namespace(namespace).
+		SubResource("exec")
+
+	req.VersionedParams(&v1.PodExecOptions{
+		Container: containerName,
+		Command:   []string{"/bin/bash"},
+		Stdin:     true,
+		Stdout:    true,
+		Stderr:    true,
+		TTY:       terminal.Tty(),
+	}, scheme.ParameterCodec)
+
+	executor, err := remotecommand.NewSPDYExecutor(cfg, "POST", req.URL())
+	if err != nil {
+		return err
+	}
+	err = executor.Stream(remotecommand.StreamOptions{
+		Stdin:             terminal.Stdin(),
+		Stdout:            terminal.Stdout(),
+		Stderr:            terminal.Stderr(),
+		TerminalSizeQueue: terminal,
+		Tty:               terminal.Tty(),
+	})
+	return err
+}
+
+func CreateNamespace(client *kubernetes.Clientset, namespace string) error {
+	nsClient := client.CoreV1().Namespaces()
+	ns := &v1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: namespace,
+		},
+	}
+	_, err := nsClient.Create(context.TODO(), ns, metav1.CreateOptions{})
+	return err
 }

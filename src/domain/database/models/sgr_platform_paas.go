@@ -171,7 +171,7 @@ var SgrTenantColumns = struct {
 // SgrTenantApplication 集群应用
 type SgrTenantApplication struct {
 	ID         uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`
-	TenantID   *uint64    `gorm:"column:tenant_Id;type:bigint(20) unsigned" json:"tenantId"`
+	TenantID   uint64     `gorm:"column:tenant_Id;type:bigint(20) unsigned" json:"tenantId"`
 	Name       string     `gorm:"column:name;type:varchar(50);not null" json:"name"`                  // 集群应用名称(英文唯一)
 	Labels     string     `gorm:"column:labels;type:varchar(50);not null" json:"labels"`              // 应用中文名称
 	Remarks    string     `gorm:"column:remarks;type:varchar(200);not null" json:"remarks"`           // 集群应用备注
@@ -410,8 +410,8 @@ var SgrTenantDeploymentsContainersColumns = struct {
 // SgrTenantNamespace 集群_命名空间
 type SgrTenantNamespace struct {
 	ID         uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null" json:"id"`
-	TenantID   *uint64    `gorm:"column:tenant_id;type:bigint(20) unsigned" json:"tenantId"`   // 租户ID
-	ClusterID  *uint64    `gorm:"column:cluster_id;type:bigint(20) unsigned" json:"clusterId"` // 集群ID
+	TenantID   uint64     `gorm:"column:tenant_id;type:bigint(20) unsigned" json:"tenantId"`   // 租户ID
+	ClusterID  uint64     `gorm:"column:cluster_id;type:bigint(20) unsigned" json:"clusterId"` // 集群ID
 	Namespace  string     `gorm:"column:namespace;type:varchar(50);not null" json:"namespace"` // 命名空间名称
 	CreateTime *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"` // 创建时间
 	UpdateTime *time.Time `gorm:"column:update_time;type:datetime;not null" json:"updateTime"` // 更新时间

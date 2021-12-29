@@ -3,6 +3,7 @@ module sgr
 go 1.16
 
 require (
+	github.com/fasthttp/websocket v1.4.3
 	github.com/jinzhu/copier v0.3.2
 	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.7.0
@@ -12,6 +13,7 @@ require (
 	gorm.io/gorm v1.21.12
 	k8s.io/api v0.22.0
 	k8s.io/apimachinery v0.22.0
+	k8s.io/cli-runtime v0.22.0
 	k8s.io/client-go v0.22.0
 )
 

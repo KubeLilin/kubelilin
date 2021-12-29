@@ -7,11 +7,14 @@ import (
 	"gorm.io/gorm"
 	"io/ioutil"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 	"mime/multipart"
 	"sgr/domain/database/models"
 	"sgr/domain/dto"
 	"strings"
 	"sync"
+	"time"
 )
 
 var k8sClientMemoryCache = map[string]*kubernetes.Clientset{}
@@ -48,6 +51,26 @@ func (cluster *ClusterService) GetNameSpacesFromDB(tenantId uint64, clusterId in
 	return res
 }
 
+func (cluster *ClusterService) CreateNamespace(tenantID uint64, clusterId uint64, namespace string) (bool, error) {
+	var exitsCount int64
+	cluster.db.Model(models.SgrTenantNamespace{}).Where("cluster_id=? and namespace=?", clusterId, namespace).Count(&exitsCount)
+	if exitsCount > 0 {
+		return false, errors.New("already have the same namespace")
+	}
+
+	now := time.Now()
+	record := &models.SgrTenantNamespace{
+		TenantID:   tenantID,
+		ClusterID:  clusterId,
+		Namespace:  namespace,
+		CreateTime: &now,
+		UpdateTime: &now,
+		Status:     1,
+	}
+	err := cluster.db.Model(models.SgrTenantNamespace{}).Create(record).Error
+	return err == nil, err
+}
+
 func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId uint64, clusterId uint64) (*kubernetes.Clientset, error) {
 	//判断缓存是否存在
 	key := "t" + string(tenantId) + "c" + string(clusterId)
@@ -74,6 +97,12 @@ func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId uint64, cl
 		mutex.Unlock()
 		return client, err
 	}
+}
+
+func (cluster *ClusterService) GetClusterConfig(tenantId uint64, clusterId uint64) (*rest.Config, error) {
+	var data models.SgrTenantCluster
+	cluster.db.Model(&models.SgrTenantCluster{}).Where("tenant_id = ? AND id = ?", tenantId, clusterId).First(&data)
+	return clientcmd.RESTConfigFromKubeConfig([]byte(data.Config))
 }
 
 func (cluster *ClusterService) ClientHealthCheck(client *kubernetes.Clientset) (bool, error) {

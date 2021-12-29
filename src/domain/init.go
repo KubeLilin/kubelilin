@@ -30,6 +30,8 @@ func init() {
 			serviceCollection.AddTransient(kubernetes.NewClusterService)
 			serviceCollection.AddTransient(app.NewDeploymentService)
 			serviceCollection.AddTransient(kubernetes.NewDeploymentSupervisor)
+			serviceCollection.AddTransient(kubernetes.NewServiceSupervisor)
+
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
 
 		})

@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -14,13 +15,16 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/cli-runtime/pkg/printers"
 	appsapplyv1 "k8s.io/client-go/applyconfigurations/apps/v1"
 	corev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	appsapplymetav1 "k8s.io/client-go/applyconfigurations/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	appsv1client "k8s.io/client-go/kubernetes/typed/apps/v1"
 	appsv1beta1client "k8s.io/client-go/kubernetes/typed/apps/v1beta1"
 	appsv1beta2client "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
 	extensionsclient "k8s.io/client-go/kubernetes/typed/extensions/v1beta1"
+	"sgr/api/req"
 	"sgr/domain/database/models"
 	"strconv"
 )
@@ -35,28 +39,51 @@ const (
 	APPS_V1                          = "apps/v1"
 )
 
+const (
+	CLUSTER_IP   string = "ClusterIP"
+	NODE_PORT    string = "NodePort"
+	LOAD_BALANCE string = "LoadBalancer"
+)
+
 type DeploymentSupervisor struct {
 	db             *gorm.DB
 	clusterService *ClusterService
+	k8sService     *ServiceSupervisor
 }
 
-func NewDeploymentSupervisor(db *gorm.DB, clusterService *ClusterService) *DeploymentSupervisor {
+func NewDeploymentSupervisor(db *gorm.DB, clusterService *ClusterService, k8sService *ServiceSupervisor) *DeploymentSupervisor {
 	return &DeploymentSupervisor{
 		db:             db,
 		clusterService: clusterService,
+		k8sService:     k8sService,
 	}
 }
 
-func (ds *DeploymentSupervisor) ExecuteDeployment(dpId, tenantId uint64) (interface{}, error) {
-	fmt.Println(dpId)
+func (ds *DeploymentSupervisor) ExecuteDeployment(execReq *req.ExecDeploymentRequest) (interface{}, error) {
 	//region 参数校验
+	if execReq.DpId == 0 {
+		return nil, errors.New("未接收到部署ID")
+	}
+	if execReq.IsDiv && execReq.WholeImage == "" {
+		return nil, errors.New("请填写正确的镜像地址")
+	}
+	if !execReq.IsDiv && (execReq.Image == "" || execReq.ImageTag == "") {
+		return nil, errors.New("请填写正确的镜像地址")
+	}
+	if !execReq.IsDiv {
+		execReq.WholeImage = execReq.Image + ":" + execReq.ImageTag
+	}
 	dpDatum := models.SgrTenantDeployments{}
 	dpcDatum := models.SgrTenantDeploymentsContainers{}
-	dbErr := ds.db.Model(&models.SgrTenantDeployments{}).Where("id=?", dpId).First(&dpDatum)
+	dbErr := ds.db.Model(&models.SgrTenantDeployments{}).Where("id=?", execReq.DpId).First(&dpDatum)
 	if dbErr.Error != nil {
 		return nil, errors.New("未找到相应的部署")
 	}
-	dbErr = ds.db.Model(&models.SgrTenantDeploymentsContainers{}).Where("deploy_id=?", dpId).First(&dpcDatum)
+	dbErr = ds.db.Model(&models.SgrTenantDeploymentsContainers{}).Where("deploy_id=?", execReq.DpId).Update("image", execReq.WholeImage)
+	if dbErr.Error != nil {
+		return nil, errors.New("设置镜像失败，请查看服务日志")
+	}
+	dbErr = ds.db.Model(&models.SgrTenantDeploymentsContainers{}).Where("deploy_id=?", execReq.DpId).First(&dpcDatum)
 	if dbErr.Error != nil {
 		return nil, errors.New("部署资源限制条件尚未维护，请添加资源限制条件")
 	}
@@ -64,7 +91,7 @@ func (ds *DeploymentSupervisor) ExecuteDeployment(dpId, tenantId uint64) (interf
 		return nil, errors.New("请维护部署镜像信息")
 	}
 	//endregion
-	return ds.InitDeploymentByApply(tenantId, &dpDatum, &dpcDatum)
+	return ds.InitDeploymentByApply(execReq.TenantId, &dpDatum, &dpcDatum)
 }
 
 // InitDeploymentByCreate 使用Create的方式创建deployment/**
@@ -107,12 +134,25 @@ func (ds *DeploymentSupervisor) InitDeploymentByApply(tenantId uint64, dp *model
 	if clientSetErr != nil {
 		return nil, clientSetErr
 	}
-	return ds.ApplyDeployment(clientSet.AppsV1(), dp, dpc)
-	return nil, errors.New("未找到当前集群版本的API")
+	var res []interface{}
+	//创建pod
+	dpRes, dpErr := ds.ApplyDeployment(clientSet, dp, dpc)
+	if dpErr != nil {
+		return nil, dpErr
+	}
+	res = append(res, dpRes)
+	//创建svc
+	svcRes, svcErr := ds.k8sService.ApplyService(clientSet.CoreV1(), dp)
+	if svcErr != nil {
+		return nil, svcErr
+	}
+	res = append(res, svcRes)
+	return res, nil
 }
 
-func (ds *DeploymentSupervisor) ApplyDeployment(client appsv1client.AppsV1Interface, dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers) (interface{}, error) {
+func (ds *DeploymentSupervisor) ApplyDeployment(clientSet *kubernetes.Clientset, dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers) (interface{}, error) {
 	namespace := &models.SgrTenantNamespace{}
+	client := clientSet.AppsV1()
 	dbErr := ds.db.Model(&models.SgrTenantNamespace{}).Where("id=?", dp.NamespaceID).First(namespace)
 	if dbErr.Error != nil {
 		return errors.New("未找到命名空间信息"), nil
@@ -130,7 +170,7 @@ func (ds *DeploymentSupervisor) ApplyDeployment(client appsv1client.AppsV1Interf
 	deploymentDatum.Kind = &kind
 
 	metalabel := make(map[string]string)
-	metalabel["app"] = "apply-demo"
+	metalabel["k8s-app"] = dp.Name
 	deploymentDatum.Labels = metalabel
 	//spec
 	spec := appsapplyv1.DeploymentSpecApplyConfiguration{}
@@ -144,7 +184,7 @@ func (ds *DeploymentSupervisor) ApplyDeployment(client appsv1client.AppsV1Interf
 	}
 	//selector
 	selectorMap := make(map[string]string)
-	selectorMap["app"] = dp.Name
+	selectorMap["k8s-app"] = dp.Name
 	spec.Selector = &appsapplymetav1.LabelSelectorApplyConfiguration{
 		MatchLabels: selectorMap,
 	}
@@ -382,8 +422,9 @@ func (ds *DeploymentSupervisor) SwitchApiVersion(clusterVersion string) (error, 
 func (ds *DeploymentSupervisor) AssemblingContainerForApply(dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers) ([]corev1.ContainerApplyConfiguration, error) {
 	var containerArr []corev1.ContainerApplyConfiguration
 	imagePullPolicy := v1.PullIfNotPresent
+	cn := "app"
 	container := corev1.ContainerApplyConfiguration{
-		Name:            &dp.Name,
+		Name:            &cn,
 		Image:           &dpc.Image,
 		ImagePullPolicy: &imagePullPolicy,
 	}
@@ -488,4 +529,52 @@ func (ds *DeploymentSupervisor) AssemblingContainer(dp models.SgrTenantDeploymen
 	container.Ports = ports
 	containerArr = append(containerArr, container)
 	return containerArr, nil
+}
+
+func (ds *DeploymentSupervisor) GetDeploymentYaml(tenantId, dpId uint64) (string, error) {
+	dpDatum := models.SgrTenantDeployments{}
+	dbErr := ds.db.Model(&models.SgrTenantDeployments{}).Where("id=?", dpId).First(&dpDatum)
+	if dbErr.Error != nil {
+		return "", errors.New("未找到相应的部署")
+	}
+	namespace, err := ds.GetNameSpaceByDpId(dpId)
+	if err != nil {
+		return "", err
+	}
+	clusterInfo := &models.SgrTenantCluster{}
+	dbErr = ds.db.Model(&models.SgrTenantCluster{}).Where("id=? and tenant_id=?", dpDatum.ClusterID, tenantId).First(clusterInfo)
+	if dbErr.Error != nil {
+		return "", errors.New("未找到集群信息")
+	}
+	clientSet, clientSetErr := ds.clusterService.GetClusterClientByTenantAndId(tenantId, clusterInfo.ID)
+	if clientSetErr != nil {
+		return "", clientSetErr
+	}
+	k8sDeployment, err := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), dpDatum.Name, metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+	//yamlBytes, yamlErr := yaml.Marshal(k8sDeployment)
+	yamlPrinter := printers.YAMLPrinter{}
+	buffers := bytes.NewBufferString("")
+	k8sDeployment.Kind = "Deployment"
+	k8sDeployment.APIVersion = "apps/v1"
+	yamlErr := yamlPrinter.PrintObj(k8sDeployment, buffers)
+
+	return buffers.String(), yamlErr
+}
+
+func (ds *DeploymentSupervisor) GetNameSpaceByDpId(dpId uint64) (string, error) {
+
+	var namespace string
+	err := ds.db.Model(&models.SgrTenantNamespace{}).Raw(`select  t1.namespace from sgr_tenant_namespace as t1 
+inner join  sgr_tenant_deployments std on t1.id=std.namespace_id and std.id=? `, dpId).Scan(&namespace)
+	if err.Error != nil {
+		return "", err.Error
+	}
+	if namespace == "" {
+		return namespace, errors.New("没有找到部署的命名空间")
+	}
+
+	return namespace, nil
 }
