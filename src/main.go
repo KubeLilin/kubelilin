@@ -5,7 +5,6 @@ import (
 	"github.com/yoyofx/yoyogo/abstractions/xlog"
 	_ "github.com/yoyofx/yoyogo/pkg/datasources/mysql"
 	_ "github.com/yoyofx/yoyogo/pkg/datasources/redis"
-	"github.com/yoyofx/yoyogo/pkg/servicediscovery/nacos"
 	"github.com/yoyofx/yoyogo/web"
 	"github.com/yoyofx/yoyogo/web/actionresult/extension"
 	"github.com/yoyofx/yoyogo/web/middlewares"
@@ -45,5 +44,5 @@ func main() {
 
 func Bootstrap(container *dependencyinjection.ServiceCollection) {
 	// 注册 Nacos 服务发现
-	nacos.UseServiceDiscovery(container)
+	//nacos.UseServiceDiscovery(container)
 }

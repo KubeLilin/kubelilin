@@ -20,7 +20,7 @@ FROM yoyofx/tini:1.0-alpine as production
 
 COPY --from=builder /publish/app /
 
-COPY --from=builder /publish/*.yml /
+COPY --from=builder /publish/config_test.yml /config_dev.yml
 
 # Run
 CMD ["/app"]
