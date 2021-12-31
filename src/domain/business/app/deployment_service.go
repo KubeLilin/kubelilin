@@ -145,11 +145,12 @@ func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint6
 	}
 
 	var params []interface{}
+	params = append(params, tenantId)
 	if appId > 0 {
 		dataSql.WriteString("AND d.app_id = ?")
 		params = append(params, appId)
 	}
-	params = append(params, tenantId)
+
 	dataRes := deployment.db.Raw(dataSql.String(), params...).Scan(&deploymentList)
 	return deploymentList, dataRes.Error
 }
