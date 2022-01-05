@@ -23,7 +23,12 @@ func TestJenkinsJob(t *testing.T) {
 	assert.Equal(t, ping != "", true)
 
 	pipeline.SwitchJobName("sample-pipeline-test")
-	job, _ := pipeline.GetJobInfo(10)
+	job, _ := pipeline.GetJobInfo(11)
 
 	assert.Equal(t, job != nil, true)
+
+	logs, err := pipeline.GetJobLogs(11)
+
+	assert.Equal(t, logs != "", true)
+
 }

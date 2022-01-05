@@ -46,6 +46,7 @@ type Pipeline interface {
 	GetJobInfo(runID int64) (*JobInfo, error)
 	SetWorkFlow(processor FlowProcessor)
 	SwitchJobName(jobName string)
+	GetJobLogs(runID int64) (string, error)
 }
 
 // HTTPClient defined http native client

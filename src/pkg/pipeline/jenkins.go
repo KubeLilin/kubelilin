@@ -217,6 +217,19 @@ func (w *Jenkins) GetJobInfo(runID int64) (*JobInfo, error) {
 	}, nil
 }
 
+func (w *Jenkins) GetJobLogs(runID int64) (string, error) {
+	//  /job/sample-pipeline-test/12/logText/progressiveText?start=0
+	if err := w.crumbHeaderVerify(); err != nil {
+		return "", err
+	}
+	url := fmt.Sprintf("%v/job/%v/%v/logText/progressiveText?start=0", strings.TrimSuffix(w.url, "/"), w.jobName, runID)
+	_, respBody, err := sentHTTPRequest("GET", w.user, w.token, w.crumbKey, w.crumbValue, url, nil)
+	if err != nil {
+		return "", err
+	}
+	return string(respBody), nil
+}
+
 // Run CIPipeline
 func (buildflow *CIContext) Run(addr, user, token, crumbKey, crumbValue, jobName string, param []byte) (int64, error) {
 	// get config xml
