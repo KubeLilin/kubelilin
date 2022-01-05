@@ -13,7 +13,7 @@ const BaseXML = `
         </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
         <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.3.8"/>
     </actions>
-    <description>atomci jenkins pipeline</description>
+    <description>SGR PaaS jenkins pipeline</description>
     <keepDependencies>false</keepDependencies>
     <properties>
         <jenkins.model.BuildDiscarderProperty>
