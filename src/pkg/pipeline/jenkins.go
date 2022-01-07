@@ -3,6 +3,7 @@ package pipeline
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -177,16 +178,17 @@ func (w *Jenkins) getJobInfo(runID int64) (*JobBaseInfo, error) {
 }
 
 // GetJobInfo ..
-func (w *Jenkins) GetJobInfo(runID int64) (*JobInfo, error) {
+func (w *Jenkins) GetJobInfo(jobName string, runID int64) (*JobInfo, error) {
 	if err := w.crumbHeaderVerify(); err != nil {
 		return nil, err
 	}
+	w.jobName = jobName
 	jobBaseInfo, err := w.getJobInfo(runID)
 	if err != nil {
 		return nil, err
 	}
 
-	url := fmt.Sprintf("%v/job/%v/%v/wfapi/describe", strings.TrimSuffix(w.url, "/"), w.jobName, runID)
+	url := fmt.Sprintf("%v/job/%v/%v/wfapi/describe", strings.TrimSuffix(w.url, "/"), jobName, runID)
 	_, respBody, err := sentHTTPRequest("GET", w.user, w.token, w.crumbKey, w.crumbValue, url, nil)
 	if err != nil {
 		return nil, err
@@ -217,17 +219,65 @@ func (w *Jenkins) GetJobInfo(runID int64) (*JobInfo, error) {
 	}, nil
 }
 
-func (w *Jenkins) GetJobLogs(runID int64) (string, error) {
+func (w *Jenkins) GetJobLogs(jobName string, runID int64) (string, error) {
 	//  /job/sample-pipeline-test/12/logText/progressiveText?start=0
 	if err := w.crumbHeaderVerify(); err != nil {
 		return "", err
 	}
-	url := fmt.Sprintf("%v/job/%v/%v/logText/progressiveText?start=0", strings.TrimSuffix(w.url, "/"), w.jobName, runID)
+	url := fmt.Sprintf("%v/job/%v/%v/logText/progressiveText?start=0", strings.TrimSuffix(w.url, "/"), jobName, runID)
 	_, respBody, err := sentHTTPRequest("GET", w.user, w.token, w.crumbKey, w.crumbValue, url, nil)
 	if err != nil {
 		return "", err
 	}
 	return string(respBody), nil
+}
+
+func (w *Jenkins) RunJob(jobName string) (int64, error) {
+	if err := w.crumbHeaderVerify(); err != nil {
+		return 0, err
+	}
+	jw := jenkinsWorker{
+		url:        w.url,
+		user:       w.user,
+		token:      w.token,
+		crumbKey:   w.crumbKey,
+		crumbValue: w.crumbValue,
+		jobName:    jobName,
+	}
+	jobInfo, err := jw.GetJob()
+	if err != nil {
+		return 0, err
+	}
+	nextBuildNumber := jobInfo.NextBuildNumber
+	return buildNow(w.url, w.user, w.token, w.crumbKey, w.crumbValue, jobName, nextBuildNumber)
+}
+
+func (w *Jenkins) SaveJob(jobName string, processor FlowProcessor) error {
+	if err := w.crumbHeaderVerify(); err != nil {
+		return err
+	}
+	context := processor.(*CIContext)
+	if context == nil {
+		return errors.New("类型转换失败")
+	}
+
+	pipelineStrs, err := context.GetCIPipelineXML(*context)
+	if err != nil {
+		return err
+	}
+	jw := jenkinsWorker{
+		url:        w.url,
+		user:       w.user,
+		token:      w.token,
+		crumbKey:   w.crumbKey,
+		crumbValue: w.crumbValue,
+		jobName:    jobName,
+	}
+	err = jw.CreateOrUpdateJob(pipelineStrs)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // Run CIPipeline

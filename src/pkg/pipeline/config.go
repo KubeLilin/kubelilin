@@ -40,7 +40,7 @@ type CIContext struct {
 	Stages             string
 	EnvVars            []EnvItem
 	ContainerTemplates []ContainerEnv
-	CallBack           DeployRequest
+	CallBack           *DeployRequest
 }
 
 // DeployContext ...

@@ -38,6 +38,7 @@ spec:
     stages {
         {{ .Stages }}
 
+  		{{if .CallBack }}
         stage('Callback') {
             steps {
                 retry(count: 5) {
@@ -45,6 +46,9 @@ spec:
                 }
             }
         }
+        {{ else }}
+
+    	{{ end }}
     }
 }
 `
@@ -53,7 +57,7 @@ spec:
 const Checkout = `
 stage('Checkout') {
     {{if .CheckoutItems }}
-    parallel {
+    stages {
         {{- range $i, $item := .CheckoutItems }}
         stage('{{ $item.Name }}') {
             steps {
@@ -72,19 +76,19 @@ stage('Checkout') {
 
 // Compile stage
 const Compile = `
-stage('Builds') {
+stage('Compile') {
     {{if .BuildItems }}
-    parallel {
+	parallel {
         {{- range $i, $item := .BuildItems }}
         stage('{{ $item.Name }}') {
-            steps {
-                container('{{ $item.ContainerName }}') {
-                    {{ $item.Command }}
-                }
-            }
-        }
+			steps {
+				container('{{ $item.ContainerName }}') {
+					{{ $item.Command }}
+				}
+			}
+		}
         {{- end }}
-    }
+	}
     {{ else }}
         steps {
             sh "echo 'there was no build items'"
@@ -95,27 +99,42 @@ stage('Builds') {
 
 // BuildImage stage
 const BuildImage = `
-stage('Images') {
+stage('Build') {
     {{if .ImageItems }}
-    parallel {
-        {{- range $i, $item := .ImageItems }}
-        stage('{{ $item.Name }}') {
-            steps {
-                container("kaniko") {
-                    sh "[ -d $DOCKER_CONFIG ] || mkdir -pv $DOCKER_CONFIG"
-
-                    sh """
-                    echo '{"auths": {"'$REGISTRY_ADDR'": {"auth": "'$DOCKER_AUTH'"}}}' > $DOCKER_CONFIG/config.json
-                    """
-                    {{ $item.Command }}
-                }
-            }
-        }
-        {{- end }}
-    }
+	 parallel {
+      {{- range $i, $item := .ImageItems }}
+		  stage('{{ $item.Name }}') {
+				steps {
+				   container('{{ $item.ContainerName }}') {
+						{{ $item.Command }}
+					}
+				}
+		  }
+      {{- end }}
+	 }
     {{ else }}
         steps {
             sh "echo 'there was no images items'"
+        }
+    {{ end }}
+}
+`
+
+const DeployImage = `
+stage('Deploy') {
+    {{if .DeployItems }}
+	parallel {
+      {{- range $i, $item := .DeployItems }}
+       stage('{{ $item.Name }}') {
+		   steps {
+			   {{ $item.Command }}
+		   }
+       }
+      {{- end }}
+	}
+    {{ else }}
+        steps {
+            sh "echo 'there was no deploy items'"
         }
     {{ end }}
 }

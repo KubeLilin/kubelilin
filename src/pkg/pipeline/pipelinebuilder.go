@@ -43,7 +43,7 @@ func (builder *Builder) Build() (Pipeline, error) {
 }
 
 // WorkFlowProcessor 生成流水线代码 /**
-func (builder *Builder) WorkFlowProcessor(inputParams []EnvItem, callback DeployRequest,
+func (builder *Builder) WorkFlowProcessor(inputParams []EnvItem, callback *DeployRequest,
 	checkoutSteps []StepItem, buildSteps []StepItem, imageSteps []StepItem) FlowProcessor {
 	envVars := []EnvItem{
 		{Key: "JENKINS_SLAVE_WORKSPACE", Value: "/home/jenkins/agent"},
@@ -62,6 +62,12 @@ func (builder *Builder) WorkFlowProcessor(inputParams []EnvItem, callback Deploy
 			Image:      builder.Options.dockerBuildImage,
 			CommandArr: []string{"sleep"},
 			ArgsArr:    []string{"99d"},
+		},
+		{
+			Name:       "docker",
+			Image:      "yoyofx/kaniko-executor:debug",
+			WorkingDir: "/home/jenkins/agent",
+			CommandArr: []string{"cat"},
 		},
 	}
 

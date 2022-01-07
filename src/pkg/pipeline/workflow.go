@@ -25,12 +25,14 @@ func (d Driver) String() (s string) {
 // Pipeline ..
 type Pipeline interface {
 	Ping() (string, error)
-	Build() (int64, error)
 	Abort(RunID int64) error
-	GetJobInfo(runID int64) (*JobInfo, error)
-	SetWorkFlow(processor FlowProcessor)
-	SwitchJobName(jobName string)
-	GetJobLogs(runID int64) (string, error)
+	GetJobInfo(jobName string, runID int64) (*JobInfo, error)
+	GetJobLogs(jobName string, runID int64) (string, error)
+	RunJob(jobName string) (int64, error)
+	SaveJob(jobName string, processor FlowProcessor) error
+	//SwitchJobName(jobName string)
+	//Build() (int64, error)
+	//SetWorkFlow(processor FlowProcessor)
 }
 
 // HTTPClient defined http native client
