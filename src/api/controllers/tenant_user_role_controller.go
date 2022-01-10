@@ -49,3 +49,12 @@ func (c *TenantUserRoleController) GetUserRole(ctx *context.HttpContext) mvc.Api
 		Message: "666",
 	}
 }
+
+func (c *TenantUserRoleController) GetAllRole(ctx *context.HttpContext) mvc.ApiResult {
+	res, err := c.Service.AllRoles()
+	return mvc.ApiResult{
+		Success: err == nil,
+		Data:    res,
+		Message: "666",
+	}
+}

@@ -52,3 +52,10 @@ func (urs *TenantUserRoleService) QueryUserRole(req req.UserRoleReq) (error, *pa
 		"sgr_tenant_role as t2 on t1.role_id=t2.id where t1.user_id=? "
 	return page.StartPage(urs.db, req.PageIndex, req.PageSize).DoScan(resData, sql, req.UserID)
 }
+
+func (urs *TenantUserRoleService) AllRoles() ([]res.UserRoleRes, error) {
+	var resData []res.UserRoleRes
+	sql := "select t2.id as role_id,t2.role_name from sgr_tenant_role as t2"
+	err := urs.db.Raw(sql).Scan(&resData).Error
+	return resData, err
+}
