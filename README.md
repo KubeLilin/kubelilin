@@ -18,9 +18,9 @@ npm run start
 
 # Todo:
 ## fix bugs
--[X] 为用户分配角色
--[ ] 导入集群时，创建集群对应的namespace （一个租户 对应一个集群一个namespace 1:N ）
--[ ] namespace分配配额 （cpu、内存、磁盘、pod）等
+1. [X] 为用户分配角色
+2. [ ] 导入集群时，创建集群对应的namespace （一个租户 对应一个集群一个namespace 1:N ）
+3. [ ] namespace分配配额 （cpu、内存、磁盘、pod）等
 
 ## 流水线(jenkins)
 流水线（应用级） 一个流水线可以有多个应用
