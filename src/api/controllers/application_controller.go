@@ -19,7 +19,7 @@ func NewApplicationController(service *app.ApplicationService) *ApplicationContr
 
 func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request *req.AppReq) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
-	request.TenantId = userInfo.TenantID
+	request.TenantID = userInfo.TenantID
 	err, res := c.service.CreateApp(request)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
@@ -29,7 +29,7 @@ func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request 
 
 func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *req.AppReq) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
-	request.TenantId = userInfo.TenantID
+	request.TenantID = userInfo.TenantID
 	err, res := c.service.UpdateApp(request)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
@@ -40,8 +40,9 @@ func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *re
 func (c *ApplicationController) GetAppList(ctx *context.HttpContext) mvc.ApiResult {
 	request := req.AppReq{}
 	ctx.BindWithUri(&request)
+
 	userInfo := req.GetUserInfo(ctx)
-	request.TenantId = userInfo.TenantID
+	request.TenantID = userInfo.TenantID
 	err, res := c.service.QueryAppList(&request)
 	fmt.Println(res.Data)
 	if err != nil {

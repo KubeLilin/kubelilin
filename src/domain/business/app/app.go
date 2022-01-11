@@ -21,7 +21,7 @@ func NewApplicationService(db *gorm.DB) *ApplicationService {
 
 func (s *ApplicationService) CreateApp(req *req.AppReq) (error, *models.SgrTenantApplication) {
 	var exitCount int64
-	s.db.Model(&models.SgrTenantApplication{}).Where("tenant_id=? and name=?", req.TenantId, req.Name).Count(&exitCount)
+	s.db.Model(&models.SgrTenantApplication{}).Where("tenant_id=? and name=?", req.TenantID, req.Name).Count(&exitCount)
 	if exitCount > 0 {
 		return errors.New("already have the same name application"), nil
 	}
@@ -72,6 +72,12 @@ func (s *ApplicationService) QueryAppList(req *req.AppReq) (error, *page.Page) {
 		sb.WriteString(" AND t1.language=?")
 		sqlParams = append(sqlParams, req.Language)
 	}
+
+	if req.TenantID > 0 {
+		sb.WriteString(" AND t1.tenant_Id=?")
+		sqlParams = append(sqlParams, req.TenantID)
+	}
+
 	return page.StartPage(s.db, req.PageIndex, req.PageSize).DoScan(res, sb.String(), sqlParams...)
 }
 

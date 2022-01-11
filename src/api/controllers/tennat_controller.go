@@ -34,7 +34,7 @@ func (controller TenantController) PostCreate(tenant *req.TenantRequest) mvc.Api
 	res := controller.Service.CreateTenant(&models.SgrTenant{
 		TName:  tenant.TName,
 		TCode:  tenant.TCode,
-		Status: *tenant.Status,
+		Status: 1,
 	})
 
 	errorMessage := ""

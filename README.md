@@ -23,7 +23,7 @@ npm run start
 
 ### 管理员能力 ：
 1. 集群管理： 导入集群 ， 导入的集群对所有租户可见
-2. 命名空间管理：为租户创建命名空间 默认生成 ns-{tenant_code} 比如  ns-admin 的 namespace
+2. 命名空间管理：为租户创建命名空间 默认生成 sgr-ns-{tenant_code} 比如  ns-admin 的 namespace
 3. 命名空间分配配额资源： CPU、内存、POD数、磁盘空间
 
 ### 租户下的用户：
