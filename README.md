@@ -19,8 +19,16 @@ npm run start
 # Todo:
 ## fix bugs
 1. [X] 为用户分配角色
-2. [ ] 导入集群时，创建集群对应的namespace （一个租户 对应一个集群一个namespace 1:N ）
-3. [ ] namespace分配配额 （cpu、内存、磁盘、pod）等
+2. [ ] namespace分配配额 （cpu、内存、磁盘、pod）等
+
+### 管理员能力 ：
+1. 集群管理： 导入集群 ， 导入的集群对所有租户可见
+2. 命名空间管理：为租户创建命名空间 默认生成 ns-{tenant_code} 比如  ns-admin 的 namespace
+3. 命名空间分配配额资源： CPU、内存、POD数、磁盘空间
+
+### 租户下的用户：
+创建应用部署的时间 ，可以看到所有集群，只能看到该租户下的NS
+
 
 ## 流水线(jenkins)
 流水线（应用级） 一个流水线可以有多个应用
