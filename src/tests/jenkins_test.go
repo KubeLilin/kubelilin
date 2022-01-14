@@ -29,7 +29,7 @@ func TestGetJenkinsJob(t *testing.T) {
 func TestJenkinsJob(t *testing.T) {
 
 	builder := pipelineV1.NewBuilder()
-	builder.UseJenkins("http://152.136.141.235:32001", "jenkins", "11e681bb454a36a9ce0e0a6fd030d059a9").
+	builder.UseJenkins("http://152.136.141.235:32001", "jenkins", "11d32a54cd6150bd626d8ed73c3bfa02d6").
 		UseKubernetes("sgr-ci", "golang:1.16.5")
 
 	pipeline, _ := builder.Build()

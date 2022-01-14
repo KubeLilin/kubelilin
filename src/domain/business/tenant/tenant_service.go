@@ -71,9 +71,13 @@ func (ts *TenantService) ChangeStatus(id uint64, status int8) bool {
 func (ts *TenantService) QueryTenantList(request *req.TenantRequest) *page.Page {
 	params := &models.SgrTenant{}
 	err := copier.Copy(params, request)
+	params.TName = ""
 	if err != nil {
 		panic(err)
 	}
 	condition := ts.db.Model(&models.SgrTenant{}).Where(params)
+	if request.TName != "" {
+		condition.Where("t_name like ?", "%"+request.TName+"%")
+	}
 	return page.StartPage(condition, request.PageIndex, request.PageSize).DoFind(&[]models.SgrTenant{})
 }

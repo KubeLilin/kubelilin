@@ -542,7 +542,7 @@ func (ds *DeploymentSupervisor) GetDeploymentYaml(tenantId, dpId uint64) (string
 		return "", err
 	}
 	clusterInfo := &models.SgrTenantCluster{}
-	dbErr = ds.db.Model(&models.SgrTenantCluster{}).Where("id=? and tenant_id=?", dpDatum.ClusterID, tenantId).First(clusterInfo)
+	dbErr = ds.db.Model(&models.SgrTenantCluster{}).Where("id=? ", dpDatum.ClusterID).First(clusterInfo)
 	if dbErr.Error != nil {
 		return "", errors.New("未找到集群信息")
 	}

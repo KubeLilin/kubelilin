@@ -77,7 +77,7 @@ func (cluster *ClusterService) CreateNamespace(tenantID uint64, clusterId uint64
 
 func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId uint64, clusterId uint64) (*kubernetes.Clientset, error) {
 	//判断缓存是否存在
-	key := "t" + string(tenantId) + "c" + string(clusterId)
+	key := "c" + string(clusterId)
 	clientValue, ok := k8sClientMemoryCache[key]
 	if ok {
 		healthy, healthyErr := cluster.ClientHealthCheck(clientValue)
