@@ -26,10 +26,11 @@ func TestGetJenkinsJob(t *testing.T) {
 	assert.Equal(t, job1 != nil, true)
 }
 
+// add /etc/hosts jenkins.sgr-ci IP
 func TestJenkinsJob(t *testing.T) {
 
 	builder := pipelineV1.NewBuilder()
-	builder.UseJenkins("http://152.136.141.235:32001", "jenkins", "11d32a54cd6150bd626d8ed73c3bfa02d6").
+	builder.UseJenkins("http://jenkins.sgr-ci:32001", "jenkins", "11d32a54cd6150bd626d8ed73c3bfa02d6").
 		UseKubernetes("sgr-ci", "golang:1.16.5")
 
 	pipeline, _ := builder.Build()
