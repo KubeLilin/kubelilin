@@ -124,7 +124,7 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.Depl
 	return nil, &dpModel
 }
 
-func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint64, deployName string, appName string) ([]dto.DeploymentItemDto, error) {
+func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint64, deployName string, appName string, clusterId uint64) ([]dto.DeploymentItemDto, error) {
 	var deploymentList []dto.DeploymentItemDto
 	dataSql := strings.Builder{}
 	dataSql.WriteString(`SELECT d.id, d.nickname ,d.name, c.name  as 'clusterName' ,app.name as 'appName',
@@ -137,7 +137,7 @@ func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint6
   WHERE d.tenant_id =? `)
 
 	if deployName != "" {
-		dataSql.WriteString("AND d.nickname like '%" + deployName + "%'")
+		dataSql.WriteString("AND d.name like '%" + deployName + "%'")
 	}
 
 	if appName != "" {
@@ -147,8 +147,13 @@ func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint6
 	var params []interface{}
 	params = append(params, tenantId)
 	if appId > 0 {
-		dataSql.WriteString("AND d.app_id = ?")
+		dataSql.WriteString(" AND d.app_id = ? ")
 		params = append(params, appId)
+	}
+
+	if clusterId > 0 {
+		dataSql.WriteString(" AND c.id = ? ")
+		params = append(params, clusterId)
 	}
 
 	dataRes := deployment.db.Raw(dataSql.String(), params...).Scan(&deploymentList)

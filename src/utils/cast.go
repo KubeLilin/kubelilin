@@ -24,6 +24,14 @@ func StringToInt64(s string) (int64, error) {
 	return strconv.ParseInt(s, 10, 64)
 }
 
+func StringToUInt64(s string) (uint64, error) {
+	return strconv.ParseUint(s, 10, 64)
+}
+
+func StringToInt(s string) (int, error) {
+	return strconv.Atoi(s)
+}
+
 func StringToBool(s string) (bool, error) {
 	if s == "false" {
 		return false, nil

@@ -12,6 +12,7 @@ import (
 	"mime/multipart"
 	"sgr/domain/database/models"
 	"sgr/domain/dto"
+	"sgr/pkg/page"
 	"strings"
 	"sync"
 	"time"
@@ -53,6 +54,28 @@ func (cluster *ClusterService) GetNameSpacesFromDB(tenantId uint64, clusterId in
 	var res []models.SgrTenantNamespace
 	cluster.db.Model(&models.SgrTenantNamespace{}).Where(" cluster_id=?", clusterId).Find(&res)
 	return res
+}
+
+func (cluster *ClusterService) GetNameSpacesListForDB(clusterId int, tenantName string, PageIndex int, PageSize int) (error, *page.Page) {
+	var res []dto.NamespaceInfo
+	sqlBuilder := strings.Builder{}
+	sqlBuilder.WriteString(`select ns.id,ns.tenant_id tenantId,ns.cluster_id clusterId,ns.namespace , clr.name clusterName ,tt.t_code tenantCode, tt.t_name tenantName from sgr_tenant_namespace ns 
+INNER JOIN sgr_tenant_cluster clr on clr.id = ns.cluster_id
+INNER JOIN sgr_tenant tt on tt.id = ns.tenant_id WHERE 1=1 `)
+	var params []interface{}
+	if clusterId > 0 {
+		sqlBuilder.WriteString(" AND ns.cluster_id=?")
+		params = append(params, clusterId)
+	}
+
+	if tenantName != "" {
+		sqlBuilder.WriteString(" AND tt.t_name like ?")
+		params = append(params, "%"+tenantName+"%")
+	}
+
+	//err := cluster.db.Raw(sqlBuilder.String(), params...).Scan(&res).Error
+
+	return page.StartPage(cluster.db, PageIndex, PageSize).DoScan(&res, sqlBuilder.String(), params...)
 }
 
 func (cluster *ClusterService) CreateNamespace(tenantID uint64, clusterId uint64, namespace string) (bool, error) {

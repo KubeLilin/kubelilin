@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"k8s.io/api/core/v1"
+	resourcev1 "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -319,4 +320,42 @@ func CreateNamespace(client *kubernetes.Clientset, namespace string) error {
 	}
 	_, err := nsClient.Create(context.TODO(), ns, metav1.CreateOptions{})
 	return err
+}
+
+func GetResourceQuotasByNamespace(client *kubernetes.Clientset, namespace string) ([]dto.ResourceQuotas, error) {
+	quotaClient := client.CoreV1().ResourceQuotas(namespace)
+	resourceQuotas, err := quotaClient.Get(context.TODO(), "quota-"+namespace, metav1.GetOptions{})
+	var resourceQuotaInfo []dto.ResourceQuotas
+
+	resource := "limits.cpu"
+	Limit := resourceQuotas.Status.Hard.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
+	Used := resourceQuotas.Status.Used.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
+	resourceQuotaInfo = append(resourceQuotaInfo,
+		dto.ResourceQuotas{Name: resource,
+			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.Value(), UsedValue: Used.Value()})
+
+	resource = "limits.memory"
+	Limit = resourceQuotas.Status.Hard.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
+	Used = resourceQuotas.Status.Used.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
+	resourceQuotaInfo = append(resourceQuotaInfo,
+		dto.ResourceQuotas{Name: resource,
+			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.Value(), UsedValue: Used.Value()})
+
+	resource = "count.pods"
+	Limit = resourceQuotas.Status.Hard.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
+	Used = resourceQuotas.Status.Used.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
+	resourceQuotaInfo = append(resourceQuotaInfo,
+		dto.ResourceQuotas{Name: resource,
+			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.Value(), UsedValue: Used.Value()})
+
+	//resourceQuotaInfo = append(resourceQuotaInfo,
+	//	dto.ResourceQuotas{
+	//		Name:  "limits.memory",
+	//		Value: resourceQuotas.Status.Hard.Name("limits.memory", resourcev1.DecimalExponent).String()})
+	//resourceQuotaInfo = append(resourceQuotaInfo,
+	//	dto.ResourceQuotas{
+	//		Name:  "count.pods",
+	//		Value: resourceQuotas.Status.Hard.Name("count.pods", resourcev1.DecimalExponent).String()})
+
+	return resourceQuotaInfo, err
 }
