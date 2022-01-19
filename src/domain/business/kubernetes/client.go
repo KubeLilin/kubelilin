@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"sgr/domain/dto"
 	"sort"
+	"strconv"
 	"time"
 )
 
@@ -358,4 +359,31 @@ func GetResourceQuotasByNamespace(client *kubernetes.Clientset, namespace string
 	//		Value: resourceQuotas.Status.Hard.Name("count.pods", resourcev1.DecimalExponent).String()})
 
 	return resourceQuotaInfo, err
+}
+
+func CreateResourceQuotasByNamespace(client *kubernetes.Clientset, quotas dto.QuotasSpec) error {
+	quotaClient := client.CoreV1().ResourceQuotas(quotas.Namespace)
+	resourceQuotas, err := quotaClient.Get(context.TODO(), "quota-"+quotas.Namespace, metav1.GetOptions{})
+
+	resourceHard := map[v1.ResourceName]resourcev1.Quantity{
+		v1.ResourceLimitsCPU:    resourcev1.MustParse(strconv.Itoa(quotas.LimitCpu)),
+		v1.ResourceLimitsMemory: resourcev1.MustParse(strconv.Itoa(quotas.LimitMemory) + "Gi"),
+		v1.ResourcePods:         resourcev1.MustParse(strconv.Itoa(quotas.LimitPods)),
+	}
+	if err != nil { // not found for create
+		resourceQuotas = &v1.ResourceQuota{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "quota-" + quotas.Namespace,
+			},
+			Spec: v1.ResourceQuotaSpec{
+				Hard: resourceHard,
+			},
+		}
+		_, err = quotaClient.Create(context.TODO(), resourceQuotas, metav1.CreateOptions{})
+	} else { // founded for update
+		resourceQuotas.Spec.Hard = resourceHard
+		_, err = quotaClient.Update(context.TODO(), resourceQuotas, metav1.UpdateOptions{})
+	}
+
+	return err
 }

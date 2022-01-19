@@ -5,6 +5,7 @@ import (
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"sgr/api/req"
 	"sgr/domain/business/kubernetes"
+	"sgr/domain/dto"
 	"sgr/utils"
 	"strconv"
 )
@@ -159,4 +160,20 @@ func (controller ClusterController) GetResourceQuota(ctx *context.HttpContext) m
 	clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(0, clusterId)
 	req, _ := kubernetes.GetResourceQuotasByNamespace(clientSet, namespace)
 	return controller.OK(req)
+}
+
+func (controller ClusterController) PostResourceQuota(ctx *context.HttpContext) mvc.ApiResult {
+	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
+	clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(0, clusterId)
+	var quotas dto.QuotasSpec
+	err := ctx.Bind(&quotas)
+	if err != nil {
+		return controller.Fail(err.Error())
+	}
+
+	err = kubernetes.CreateResourceQuotasByNamespace(clientSet, quotas)
+	if err != nil {
+		return controller.Fail(err.Error())
+	}
+	return controller.OK(true)
 }
