@@ -62,7 +62,7 @@ yoyogo:
       url: 47.100.213.49:6379
       password: P@ssW0rd
       db: 0
-scv:
+vcs:
   git:
     url: https://gogs.xiaocui.site
     token: d2911632a4ac8db4ce13a3135700b58a5c8d7772

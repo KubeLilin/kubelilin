@@ -10,11 +10,12 @@ import (
 
 type ApplicationController struct {
 	mvc.ApiController
-	service *app.ApplicationService
+	service    *app.ApplicationService
+	vscService *app.VcsService
 }
 
-func NewApplicationController(service *app.ApplicationService) *ApplicationController {
-	return &ApplicationController{service: service}
+func NewApplicationController(service *app.ApplicationService, vscService *app.VcsService) *ApplicationController {
+	return &ApplicationController{service: service, vscService: vscService}
 }
 
 func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request *req.AppReq) mvc.ApiResult {
@@ -59,4 +60,17 @@ func (c *ApplicationController) GetAppLanguage() mvc.ApiResult {
 func (c *ApplicationController) GetAppLevel() mvc.ApiResult {
 	res := c.service.QueryAppLevel()
 	return mvc.Success(res)
+}
+
+func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	appName := ctx.Input.Query("appName")
+	fmt.Println(userInfo)
+	fmt.Println("租户ID")
+	fmt.Println(userInfo.TenantID)
+	cvsRes, err := c.vscService.InitGitRepository(userInfo.TenantID, appName)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(cvsRes)
 }
