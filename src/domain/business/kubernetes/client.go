@@ -342,7 +342,7 @@ func GetResourceQuotasByNamespace(client *kubernetes.Clientset, namespace string
 		dto.ResourceQuotas{Name: resource,
 			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.Value(), UsedValue: Used.Value()})
 
-	resource = "count.pods"
+	resource = "pods"
 	Limit = resourceQuotas.Status.Hard.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
 	Used = resourceQuotas.Status.Used.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
 	resourceQuotaInfo = append(resourceQuotaInfo,
