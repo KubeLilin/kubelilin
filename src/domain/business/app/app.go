@@ -56,6 +56,8 @@ func (s *ApplicationService) UpdateApp(req *req.AppReq) (error, int64) {
 	appModel.Remarks = req.Remarks
 	appModel.Language = req.Language
 	appModel.Status = req.Status
+	//appModel.Git = req.Git
+	appModel.Labels = req.Labels
 	dbRes := s.db.Model(&models.SgrTenantApplication{}).Where("id=?", req.ID).Updates(appModel)
 	if dbRes.Error != nil {
 		return nil, 0
