@@ -12,11 +12,12 @@ import (
 )
 
 type ApplicationService struct {
-	db *gorm.DB
+	db         *gorm.DB
+	vcsService *VcsService
 }
 
-func NewApplicationService(db *gorm.DB) *ApplicationService {
-	return &ApplicationService{db: db}
+func NewApplicationService(db *gorm.DB, vcsService *VcsService) *ApplicationService {
+	return &ApplicationService{db: db, vcsService: vcsService}
 }
 
 func (s *ApplicationService) CreateApp(req *req.AppReq) (error, *models.SgrTenantApplication) {
@@ -30,9 +31,21 @@ func (s *ApplicationService) CreateApp(req *req.AppReq) (error, *models.SgrTenan
 	if err != nil {
 		return err, nil
 	}
-	dbRes := s.db.Model(models.SgrTenantApplication{}).Create(appModel)
-	if dbRes.Error != nil {
-		return dbRes.Error, nil
+	dbErr := s.db.Transaction(func(tx *gorm.DB) error {
+		dbRes := s.db.Model(models.SgrTenantApplication{}).Create(appModel)
+		if dbRes.Error != nil {
+			return nil
+		}
+		orgRes, _ := s.vcsService.CreateGitOrganizationByTenant(req.TenantID)
+		_, repoErr := s.vcsService.CreateGitRepository(req.Name, orgRes.FullName)
+		if repoErr != nil {
+			return repoErr
+		}
+		return nil
+	})
+	//创建git仓库
+	if dbErr != nil {
+		return dbErr, nil
 	}
 	return nil, appModel
 }

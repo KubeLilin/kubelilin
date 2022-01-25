@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gogs/go-gogs-client"
 	"github.com/yoyofx/yoyogo/abstractions"
 	"gorm.io/gorm"
@@ -35,10 +36,19 @@ func (vcs *VcsService) CreateGitOrganizationByTenant(tenantId uint64) (*gogs.Org
 	//创建组织
 	orgRes, err := vcs.CreateGitOrganization(tenant.TCode)
 	if err != nil {
+		fmt.Println(err)
 		if !strings.Contains(err.Error(), "exists") {
+			fmt.Println("不包含存在")
 			return nil, err
+		} else {
+			fmt.Println("赋值新对象")
+			orgRes = &gogs.Organization{
+				FullName: tenant.TCode,
+				UserName: tenant.TCode,
+			}
 		}
 	}
+	fmt.Println(orgRes)
 	return orgRes, nil
 }
 
@@ -75,6 +85,7 @@ func (vcs *VcsService) InitGitRepository(tenantId uint64, appName string) (strin
 	sb.WriteString(tenant.TCode)
 	sb.WriteString("/")
 	sb.WriteString(appName)
+	sb.WriteString(".git")
 	gitUrl := sb.String()
 	return gitUrl, nil
 }
