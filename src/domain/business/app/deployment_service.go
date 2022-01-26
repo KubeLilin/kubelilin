@@ -7,6 +7,7 @@ import (
 	"sgr/api/req"
 	"sgr/domain/database/models"
 	"sgr/domain/dto"
+	"sgr/pkg/page"
 	"strconv"
 	"strings"
 )
@@ -124,8 +125,9 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.Depl
 	return nil, &dpModel
 }
 
-func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint64, deployName string, appName string, clusterId uint64) ([]dto.DeploymentItemDto, error) {
-	var deploymentList []dto.DeploymentItemDto
+func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint64,
+	deployName string, appName string, clusterId uint64, pageIndex int, pageSize int) (error, *page.Page) {
+
 	dataSql := strings.Builder{}
 	dataSql.WriteString(`SELECT d.id, d.nickname ,d.name, c.name  as 'clusterName' ,app.name as 'appName',
   d.cluster_id as 'clusterId' , n.namespace ,d.last_image as 'lastImage', 0 'running' , 
@@ -155,9 +157,10 @@ func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint6
 		dataSql.WriteString(" AND c.id = ? ")
 		params = append(params, clusterId)
 	}
-
-	dataRes := deployment.db.Raw(dataSql.String(), params...).Scan(&deploymentList)
-	return deploymentList, dataRes.Error
+	var deploymentList []dto.DeploymentItemDto
+	return page.StartPage(deployment.db, pageIndex, pageSize).DoScan(&deploymentList, dataSql.String(), params...)
+	//dataRes := deployment.db.Raw(dataSql.String(), params...).Scan(&deploymentList)
+	//return deploymentList, dataRes.Error
 }
 
 func (deployment *DeploymentService) GetDeploymentForm(id uint64) (error, *req.DeploymentStepRequest) {

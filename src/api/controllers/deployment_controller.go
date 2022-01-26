@@ -7,7 +7,6 @@ import (
 	"sgr/api/req"
 	"sgr/domain/business/app"
 	"sgr/domain/business/kubernetes"
-	"sgr/utils"
 	"strconv"
 )
 
@@ -55,22 +54,24 @@ func (controller *DeploymentController) PostCreateDeploymentStep2(deployModel *r
 }
 
 func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.ApiResult {
-	strAppId := ctx.Input.QueryDefault("appid", "0")
-	deployName := ctx.Input.QueryDefault("nickname", "")
-	appName := ctx.Input.QueryDefault("appName", "")
-	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
-
+	//strAppId := ctx.Input.QueryDefault("appid", "0")
+	//deployName := ctx.Input.QueryDefault("nickname", "")
+	//appName := ctx.Input.QueryDefault("appName", "")
+	//clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
+	//appid, _ := strconv.ParseUint(strAppId, 10, 64)
+	var request req.DeploymentGetListRequest
+	_ = ctx.BindWithUri(&request)
 	userInfo := req.GetUserInfo(ctx)
 	var tenantID uint64 = 0
 	if userInfo != nil {
 		tenantID = userInfo.TenantID
 	}
-	appid, _ := strconv.ParseUint(strAppId, 10, 64)
-	depolymentList, err := controller.deploymentService.GetDeployments(appid, tenantID, deployName, appName, clusterId)
+	err, deploymentList := controller.deploymentService.GetDeployments(request.AppID, tenantID,
+		request.DeployName, request.AppName, request.ClusterId, request.CurrentPage, request.PageSize)
 	if err != nil {
 		return mvc.Fail(err.Error())
 	}
-	return mvc.Success(depolymentList)
+	return mvc.Success(deploymentList)
 }
 
 func (controller DeploymentController) GetDeploymentFormInfo(ctx *context.HttpContext) mvc.ApiResult {

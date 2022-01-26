@@ -70,14 +70,14 @@ func (s *ApplicationService) QueryAppList(req *req.AppReq) (error, *page.Page) {
 	var sqlParams []interface{}
 	sb := strings.Builder{}
 	sb.WriteString("SELECT t1.*,t2.name as language_name,t3.name as level_name FROM sgr_tenant_application AS t1 INNER JOIN sgr_code_application_language AS t2  ")
-	sb.WriteString(" ON t1.language = t2.id INNER JOIN sgr_code_application_level AS t3 ON t1.LEVEL = t3.id WHERE 1=1")
+	sb.WriteString(" ON t1.language = t2.id INNER JOIN sgr_code_application_level AS t3 ON t1.LEVEL = t3.id WHERE t1.status = 1 ")
 	if req.Name != "" {
-		sb.WriteString(" AND t1.name like '%" + req.Name + "%'")
-		sqlParams = append(sqlParams, req.Name)
+		sb.WriteString(" AND t1.name like ?")
+		sqlParams = append(sqlParams, "%"+req.Name+"%")
 	}
 	if req.Labels != "" {
-		sb.WriteString(" AND t1.labels like '%" + req.Labels + "%'")
-		sqlParams = append(sqlParams, req.Labels)
+		sb.WriteString(" AND t1.labels like ?")
+		sqlParams = append(sqlParams, "%"+req.Labels+"%")
 	}
 	if req.Level != 0 {
 		sb.WriteString(" AND t1.level=?")
