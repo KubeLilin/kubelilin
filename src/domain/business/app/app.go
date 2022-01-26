@@ -3,6 +3,7 @@ package app
 import (
 	"errors"
 	"github.com/jinzhu/copier"
+	"github.com/yoyofx/yoyogo/abstractions"
 	"gorm.io/gorm"
 	"sgr/api/req"
 	"sgr/domain/database/models"
@@ -13,11 +14,12 @@ import (
 
 type ApplicationService struct {
 	db         *gorm.DB
-	vcsService *VcsService
+	vcsService VcsService
+	config     abstractions.IConfiguration
 }
 
-func NewApplicationService(db *gorm.DB, vcsService *VcsService) *ApplicationService {
-	return &ApplicationService{db: db, vcsService: vcsService}
+func NewApplicationService(db *gorm.DB, gogsVcsService *GogsVcsService, config abstractions.IConfiguration) *ApplicationService {
+	return &ApplicationService{db: db, vcsService: gogsVcsService, config: config}
 }
 
 func (s *ApplicationService) CreateApp(req *req.AppReq) (error, *models.SgrTenantApplication) {
@@ -36,8 +38,7 @@ func (s *ApplicationService) CreateApp(req *req.AppReq) (error, *models.SgrTenan
 		if dbRes.Error != nil {
 			return nil
 		}
-		orgRes, _ := s.vcsService.CreateGitOrganizationByTenant(req.TenantID)
-		_, repoErr := s.vcsService.CreateGitRepository(req.Name, orgRes.FullName)
+		_, repoErr := s.vcsService.CreateTenantRepository(req.TenantID, req.Name)
 		if repoErr != nil {
 			return repoErr
 		}
@@ -106,4 +107,21 @@ func (s *ApplicationService) QueryAppLevel() []models.SgrCodeApplicationLevel {
 	var levelList []models.SgrCodeApplicationLevel
 	s.db.Model(&models.SgrCodeApplicationLevel{}).Find(&levelList)
 	return levelList
+}
+
+func (s *ApplicationService) InitGitRepository(tenantId uint64, appName string) (string, error) {
+	tenant := models.SgrTenant{}
+	dberr := s.db.Model(models.SgrTenant{}).Where("id=?", tenantId).First(&tenant)
+	if dberr.Error != nil {
+		return "", dberr.Error
+	}
+	sb := strings.Builder{}
+	sb.WriteString(s.config.GetString(GIT_URL))
+	sb.WriteString("/")
+	sb.WriteString(tenant.TCode)
+	sb.WriteString("/")
+	sb.WriteString(appName)
+	sb.WriteString(".git")
+	gitUrl := sb.String()
+	return gitUrl, nil
 }
