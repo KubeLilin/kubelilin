@@ -125,3 +125,17 @@ func (s *ApplicationService) InitGitRepository(tenantId uint64, appName string) 
 	gitUrl := sb.String()
 	return gitUrl, nil
 }
+
+func (s *ApplicationService) GetAppInfo(appId uint64) (dto.ApplicationDisplayDTO, error) {
+	sql := `
+SELECT t.t_name tenantName,app.name appName,app.labels,app.git,app.imagehub hub,lev.name level , lang.name language ,app.status 
+from sgr_tenant_application app 
+INNER JOIN sgr_code_application_level lev on lev.id = app.level
+INNER JOIN sgr_code_application_language lang on lang.id = app.language
+INNER JOIN sgr_tenant t on t.id = app.tenant_Id 
+WHERE app.id = ?
+`
+	var appInfo dto.ApplicationDisplayDTO
+	err := s.db.Raw(sql, appId).First(&appInfo).Error
+	return appInfo, err
+}

@@ -6,6 +6,7 @@ import (
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"sgr/api/req"
 	"sgr/domain/business/app"
+	"sgr/utils"
 )
 
 type ApplicationController struct {
@@ -69,4 +70,13 @@ func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResu
 		return mvc.FailWithMsg(nil, err.Error())
 	}
 	return mvc.Success(cvsRes)
+}
+
+func (c *ApplicationController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
+	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
+	info, err := c.service.GetAppInfo(appId)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(info)
 }
