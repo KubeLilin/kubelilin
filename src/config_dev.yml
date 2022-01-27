@@ -22,29 +22,6 @@ yoyogo:
           "/v1/user/login",
           "/v1/pod/terminal",
         ]
-  cloud:
-    discovery:
-      cache:
-        ttl: 30     # seconds
-      strategy: "round-robin"    # round-robin  , weight-time ,  random
-      type: "nacos"
-      metadata:
-        url: "nacos.yoyogo.run"
-        port: 80
-        namespace: "2fd38432-a05f-4554-bf59-15f247409bd0"
-        group: "DEFAULT_GROUP"
-        cluster: ""
-        configserver:
-          dataId: "sgr_platform_api"
-        auth:
-          enable: true
-          username: "nacos"
-          password: "nacos"
-          endpoint: ""
-          regionId: ""
-          accessKey: ""
-          secretKey: ""
-          openKMS: false
   datasource:
     pool:
       init_cap: 2
@@ -70,6 +47,12 @@ vcs:
     password: admin123
 hub:
   harbor:
+    url: https://harbor.xiaocui.site
     username: admin
     password: Harbor12345
+    token: YWRtaW46SGFyYm9yMTIzNDU=
+pipeline:
+  jenkins:
+    username: jenkins
+    token: 11d32a54cd6150bd626d8ed73c3bfa02d6
 
