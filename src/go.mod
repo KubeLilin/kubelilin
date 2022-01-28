@@ -4,6 +4,8 @@ go 1.16
 
 require (
 	github.com/fasthttp/websocket v1.4.3
+	github.com/gogs/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
+	github.com/isbrick/http-client v0.0.0-20210321135403-0a5df00fdb84
 	github.com/jinzhu/copier v0.3.2
 	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.7.0

@@ -30,11 +30,13 @@ func NewTenantController(service *tenant.TenantService) *TenantController {
 	}
 */
 func (controller TenantController) PostCreate(tenant *req.TenantRequest) mvc.ApiResult {
-	fmt.Println(tenant)
+	if tenant.TCode == "admin" {
+		return mvc.FailWithMsg(nil, "admin为系统预留字段，请使用其他命名")
+	}
 	res := controller.Service.CreateTenant(&models.SgrTenant{
 		TName:  tenant.TName,
 		TCode:  tenant.TCode,
-		Status: *tenant.Status,
+		Status: 1,
 	})
 
 	errorMessage := ""

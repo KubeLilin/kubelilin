@@ -1,6 +1,19 @@
 package req
 
-import "github.com/yoyofx/yoyogo/web/mvc"
+import (
+	"github.com/yoyofx/yoyogo/web/mvc"
+	"sgr/pkg/page"
+)
+
+type DeploymentGetListRequest struct {
+	mvc.RequestBody
+	page.PageRequest
+
+	AppID      uint64 `json:"appid" uri:"appid"`
+	AppName    string `json:"appName" uri:"appName"`
+	DeployName string `json:"nickname" uri:"nickname"`
+	ClusterId  uint64 `json:"clusterId" uri:"clusterId"`
+}
 
 type DeploymentStepRequest struct {
 	mvc.RequestBody

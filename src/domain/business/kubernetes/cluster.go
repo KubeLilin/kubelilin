@@ -12,6 +12,7 @@ import (
 	"mime/multipart"
 	"sgr/domain/database/models"
 	"sgr/domain/dto"
+	"sgr/pkg/page"
 	"strings"
 	"sync"
 	"time"
@@ -31,12 +32,16 @@ func NewClusterService(db *gorm.DB) *ClusterService {
 func (cluster *ClusterService) GetClustersByTenant(tenantId uint64, clusterName string) ([]dto.ClusterInfo, error) {
 	var data []models.SgrTenantCluster
 	var clusterList []dto.ClusterInfo
-	sb := strings.Builder{}
-	sb.WriteString("tenant_id = ?")
-	if clusterName != "" {
-		sb.WriteString(" and name=? ")
-	}
-	cluster.db.Model(&models.SgrTenantCluster{}).Where(sb.String(), tenantId, clusterName).Find(&data)
+	//sb := strings.Builder{}
+	//var params []interface{}
+	//sb.WriteString(" 1=1 ")
+	//sb.WriteString("tenant_id = ?")
+	//if clusterName != "" {
+	//	sb.WriteString(" and name=? ")
+	//	params = append(params, clusterName)
+	//}
+	cluster.db.Model(&models.SgrTenantCluster{}).Find(&data)
+	//cluster.db.Model(&models.SgrTenantCluster{}).Where(sb.String(), tenantId, clusterName).Find(&data)
 	for _, item := range data {
 		t := dto.ClusterInfo{}
 		copier.Copy(&t, item)
@@ -47,8 +52,30 @@ func (cluster *ClusterService) GetClustersByTenant(tenantId uint64, clusterName 
 
 func (cluster *ClusterService) GetNameSpacesFromDB(tenantId uint64, clusterId int) []models.SgrTenantNamespace {
 	var res []models.SgrTenantNamespace
-	cluster.db.Model(&models.SgrTenantNamespace{}).Where("tenant_id=? and cluster_id=?", tenantId, clusterId).Find(&res)
+	cluster.db.Model(&models.SgrTenantNamespace{}).Where(" cluster_id=?", clusterId).Find(&res)
 	return res
+}
+
+func (cluster *ClusterService) GetNameSpacesListForDB(clusterId int, tenantName string, PageIndex int, PageSize int) (error, *page.Page) {
+	var res []dto.NamespaceInfo
+	sqlBuilder := strings.Builder{}
+	sqlBuilder.WriteString(`select ns.id,ns.tenant_id tenantId,ns.cluster_id clusterId,ns.namespace , clr.name clusterName ,tt.t_code tenantCode, tt.t_name tenantName from sgr_tenant_namespace ns 
+INNER JOIN sgr_tenant_cluster clr on clr.id = ns.cluster_id
+INNER JOIN sgr_tenant tt on tt.id = ns.tenant_id WHERE 1=1 `)
+	var params []interface{}
+	if clusterId > 0 {
+		sqlBuilder.WriteString(" AND ns.cluster_id=?")
+		params = append(params, clusterId)
+	}
+
+	if tenantName != "" {
+		sqlBuilder.WriteString(" AND tt.t_name like ?")
+		params = append(params, "%"+tenantName+"%")
+	}
+
+	//err := cluster.db.Raw(sqlBuilder.String(), params...).Scan(&res).Error
+
+	return page.StartPage(cluster.db, PageIndex, PageSize).DoScan(&res, sqlBuilder.String(), params...)
 }
 
 func (cluster *ClusterService) CreateNamespace(tenantID uint64, clusterId uint64, namespace string) (bool, error) {
@@ -73,7 +100,7 @@ func (cluster *ClusterService) CreateNamespace(tenantID uint64, clusterId uint64
 
 func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId uint64, clusterId uint64) (*kubernetes.Clientset, error) {
 	//判断缓存是否存在
-	key := "t" + string(tenantId) + "c" + string(clusterId)
+	key := "c" + string(clusterId)
 	clientValue, ok := k8sClientMemoryCache[key]
 	if ok {
 		healthy, healthyErr := cluster.ClientHealthCheck(clientValue)
@@ -84,7 +111,7 @@ func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId uint64, cl
 	} else {
 		mutex.Lock()
 		var data models.SgrTenantCluster
-		cluster.db.Model(&models.SgrTenantCluster{}).Where("tenant_id = ? AND id = ?", tenantId, clusterId).First(&data)
+		cluster.db.Model(&models.SgrTenantCluster{}).Where(" id = ?", clusterId).First(&data)
 		client, err := NewClientSetWithFileContent(data.Config)
 		if err == nil {
 			healthy, healthyErr := cluster.ClientHealthCheck(client)
@@ -101,7 +128,7 @@ func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId uint64, cl
 
 func (cluster *ClusterService) GetClusterConfig(tenantId uint64, clusterId uint64) (*rest.Config, error) {
 	var data models.SgrTenantCluster
-	cluster.db.Model(&models.SgrTenantCluster{}).Where("tenant_id = ? AND id = ?", tenantId, clusterId).First(&data)
+	cluster.db.Model(&models.SgrTenantCluster{}).Where(" id = ?", clusterId).First(&data)
 	return clientcmd.RESTConfigFromKubeConfig([]byte(data.Config))
 }
 
@@ -112,7 +139,8 @@ func (cluster *ClusterService) ClientHealthCheck(client *kubernetes.Clientset) (
 func (cluster *ClusterService) ImportK8sConfig(configFile multipart.File, clusterName string, tenantId uint64) (res *models.SgrTenantCluster, err error) {
 	//判断集群是否已经存在
 	var exitsCount int64
-	cluster.db.Model(models.SgrTenantCluster{}).Where("tenant_id=? and name=?", tenantId, clusterName).Count(&exitsCount)
+	//tenant_id=? and  tenantId
+	cluster.db.Model(models.SgrTenantCluster{}).Where(" name=?", clusterName).Count(&exitsCount)
 	if exitsCount > 0 {
 		return nil, errors.New("already have the same cluster")
 	}

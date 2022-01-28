@@ -5,6 +5,8 @@ import (
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"sgr/api/req"
 	"sgr/domain/business/kubernetes"
+	"sgr/domain/dto"
+	"sgr/utils"
 	"strconv"
 )
 
@@ -51,6 +53,19 @@ func (controller ClusterController) GetNamespacesFromDB(ctx *context.HttpContext
 	strCid := ctx.Input.QueryDefault("cid", "0")
 	cid, _ := strconv.Atoi(strCid)
 	res := controller.clusterService.GetNameSpacesFromDB(userInfo.TenantID, cid)
+	return controller.OK(res)
+}
+
+func (controller ClusterController) GetNamespaceList(ctx *context.HttpContext) mvc.ApiResult {
+	strCid := ctx.Input.QueryDefault("cid", "0")
+	tenantName := ctx.Input.QueryDefault("tenant", "")
+	pageIndex, _ := utils.StringToInt(ctx.Input.QueryDefault("current", "0"))
+	pageSize, _ := utils.StringToInt(ctx.Input.QueryDefault("pageSize", "0"))
+	cid, _ := strconv.Atoi(strCid)
+	err, res := controller.clusterService.GetNameSpacesListForDB(cid, tenantName, pageIndex, pageSize)
+	if err != nil {
+		return controller.Fail(err.Error())
+	}
 	return controller.OK(res)
 }
 
@@ -114,10 +129,11 @@ func (controller ClusterController) PutNewNamespace(ctx *context.HttpContext) mv
 	cid := ctx.Input.QueryDefault("cid", "0")
 	clusterId, _ := strconv.ParseUint(cid, 10, 64)
 	namespace := ctx.Input.QueryDefault("namespace", "default")
+	tenantId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("tentantId", "0"))
 	//只能导入到 平台租户中，再进行分配
-	created, err := controller.clusterService.CreateNamespace(1, clusterId, namespace)
+	created, err := controller.clusterService.CreateNamespace(tenantId, clusterId, namespace)
 	if created {
-		clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(1, clusterId)
+		clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(0, clusterId)
 		err = kubernetes.CreateNamespace(clientSet, namespace)
 		if err != nil {
 			return controller.Fail(err.Error())
@@ -125,4 +141,39 @@ func (controller ClusterController) PutNewNamespace(ctx *context.HttpContext) mv
 		return controller.OK(err == nil)
 	}
 	return controller.Fail(err.Error())
+}
+
+func (controller ClusterController) PutNewK8sNamespace(ctx *context.HttpContext) mvc.ApiResult {
+	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
+	namespace := ctx.Input.QueryDefault("namespace", "")
+	clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(0, clusterId)
+	err := kubernetes.CreateNamespace(clientSet, namespace)
+	if err != nil {
+		return controller.Fail(err.Error())
+	}
+	return controller.OK(err == nil)
+}
+
+func (controller ClusterController) GetResourceQuota(ctx *context.HttpContext) mvc.ApiResult {
+	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
+	namespace := ctx.Input.QueryDefault("namespace", "")
+	clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(0, clusterId)
+	req, _ := kubernetes.GetResourceQuotasByNamespace(clientSet, namespace)
+	return controller.OK(req)
+}
+
+func (controller ClusterController) PostResourceQuota(ctx *context.HttpContext) mvc.ApiResult {
+	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
+	clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(0, clusterId)
+	var quotas dto.QuotasSpec
+	err := ctx.Bind(&quotas)
+	if err != nil {
+		return controller.Fail(err.Error())
+	}
+
+	err = kubernetes.CreateResourceQuotasByNamespace(clientSet, quotas)
+	if err != nil {
+		return controller.Fail(err.Error())
+	}
+	return controller.OK(true)
 }

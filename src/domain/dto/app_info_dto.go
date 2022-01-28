@@ -17,3 +17,15 @@ type ApplicationInfoDTO struct {
 	CreateTime   *time.Time `gorm:"column:create_time;type:datetime" `                 // 创建时间
 	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" `                 // 更新时间
 }
+
+type ApplicationDisplayDTO struct {
+	Name       string `gorm:"column:appName;" `                         // 集群应用名称(英文唯一)
+	TenantName string `gorm:"column:tenantName;" `                      // 租户
+	Labels     string `gorm:"column:labels;type:varchar(50);not null" ` // 应用中文名称
+	Git        string `gorm:"column:git;type:varchar(500);not null" `   // 集群应用绑定的git地址
+	Hub        string `gorm:"column:hub;"`
+	Level      string `gorm:"column:level;" `
+	Language   string `gorm:"column:language;" `                                 // 开发语言
+	Status     int8   `gorm:"column:status;type:tinyint(4);not null;default:0" ` // 状态
+
+}

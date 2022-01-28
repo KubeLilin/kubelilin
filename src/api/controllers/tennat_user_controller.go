@@ -111,6 +111,7 @@ func (user *UserController) PostRegister(ctx *context.HttpContext) mvc.ApiResult
 	return mvc.ApiResult{
 		Success: ok,
 		Message: retMessage,
+		Data:    registerUser,
 	}
 }
 

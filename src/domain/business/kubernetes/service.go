@@ -10,6 +10,7 @@ import (
 	applycorev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"sgr/domain/database/models"
+	"strings"
 )
 
 type ServiceSupervisor struct {
@@ -47,8 +48,10 @@ func (svc *ServiceSupervisor) ApplyService(client corev1.CoreV1Interface, dp *mo
 	portNumber := int32(dp.ServicePort)
 	protocol := v1.ProtocolTCP
 	targetPort := intstr.FromInt(int(dp.ServicePort))
+
+	servicePortName := strings.ToLower((string)(protocol))
 	port := applycorev1.ServicePortApplyConfiguration{
-		Name:       &svcName,
+		Name:       &servicePortName,
 		Protocol:   &protocol,
 		Port:       &portNumber,
 		TargetPort: &targetPort,

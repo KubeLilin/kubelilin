@@ -9,7 +9,7 @@ type AppReq struct {
 	mvc.RequestBody
 	page.PageRequest
 	ID       uint64 `json:"id" uri:"id"`
-	TenantId uint64
+	TenantID uint64 `json:"tenantId" uri:"tenantId"`
 	Name     string `json:"name" uri:"name"`
 	Labels   string `json:"labels" uri:"labels"`
 	Remarks  string `json:"remarks" uri:"remarks"`

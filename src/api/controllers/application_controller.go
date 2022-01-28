@@ -6,6 +6,7 @@ import (
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"sgr/api/req"
 	"sgr/domain/business/app"
+	"sgr/utils"
 )
 
 type ApplicationController struct {
@@ -19,7 +20,7 @@ func NewApplicationController(service *app.ApplicationService) *ApplicationContr
 
 func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request *req.AppReq) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
-	request.TenantId = userInfo.TenantID
+	request.TenantID = userInfo.TenantID
 	err, res := c.service.CreateApp(request)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
@@ -29,7 +30,7 @@ func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request 
 
 func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *req.AppReq) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
-	request.TenantId = userInfo.TenantID
+	request.TenantID = userInfo.TenantID
 	err, res := c.service.UpdateApp(request)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
@@ -40,8 +41,9 @@ func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *re
 func (c *ApplicationController) GetAppList(ctx *context.HttpContext) mvc.ApiResult {
 	request := req.AppReq{}
 	ctx.BindWithUri(&request)
+
 	userInfo := req.GetUserInfo(ctx)
-	request.TenantId = userInfo.TenantID
+	request.TenantID = userInfo.TenantID
 	err, res := c.service.QueryAppList(&request)
 	fmt.Println(res.Data)
 	if err != nil {
@@ -58,4 +60,23 @@ func (c *ApplicationController) GetAppLanguage() mvc.ApiResult {
 func (c *ApplicationController) GetAppLevel() mvc.ApiResult {
 	res := c.service.QueryAppLevel()
 	return mvc.Success(res)
+}
+
+func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	appName := ctx.Input.Query("appName")
+	cvsRes, err := c.service.InitGitRepository(userInfo.TenantID, appName)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(cvsRes)
+}
+
+func (c *ApplicationController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
+	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
+	info, err := c.service.GetAppInfo(appId)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(info)
 }

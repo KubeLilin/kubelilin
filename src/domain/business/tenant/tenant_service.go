@@ -32,9 +32,9 @@ func (ts *TenantService) CreateTenant(tenant *models.SgrTenant) bool {
 		//创建第一个用户
 		tenantAdmin := &models.SgrTenantUser{
 			TenantID: tenant.ID,
-			Account:  tenant.TCode + "admin",
-			UserName: tenant.TName + "Administrator",
-			Password: "123456",
+			Account:  tenant.TName + "admin",
+			UserName: tenant.TCode + "-admin",
+			Password: "1234abcd",
 		}
 		if err := ts.db.Create(tenantAdmin).Error; err != nil {
 			return err
@@ -42,7 +42,7 @@ func (ts *TenantService) CreateTenant(tenant *models.SgrTenant) bool {
 		//给用户分配权限 先鸽了哪天想写了再写
 		userRole := &models.SgrTenantUserRole{
 			UserID: tenantAdmin.ID,
-			RoleID: 1,
+			RoleID: 2, // 2: admin 租户管理员
 		}
 		if err := ts.db.Create(userRole).Error; err != nil {
 			return err
@@ -71,9 +71,13 @@ func (ts *TenantService) ChangeStatus(id uint64, status int8) bool {
 func (ts *TenantService) QueryTenantList(request *req.TenantRequest) *page.Page {
 	params := &models.SgrTenant{}
 	err := copier.Copy(params, request)
+	params.TName = ""
 	if err != nil {
 		panic(err)
 	}
 	condition := ts.db.Model(&models.SgrTenant{}).Where(params)
+	if request.TName != "" {
+		condition.Where("t_name like ?", "%"+request.TName+"%")
+	}
 	return page.StartPage(condition, request.PageIndex, request.PageSize).DoFind(&[]models.SgrTenant{})
 }

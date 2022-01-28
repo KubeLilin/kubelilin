@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"k8s.io/api/core/v1"
+	resourcev1 "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -17,6 +18,7 @@ import (
 	"path/filepath"
 	"sgr/domain/dto"
 	"sort"
+	"strconv"
 	"time"
 )
 
@@ -318,5 +320,61 @@ func CreateNamespace(client *kubernetes.Clientset, namespace string) error {
 		},
 	}
 	_, err := nsClient.Create(context.TODO(), ns, metav1.CreateOptions{})
+	return err
+}
+
+func GetResourceQuotasByNamespace(client *kubernetes.Clientset, namespace string) ([]dto.ResourceQuotas, error) {
+	quotaClient := client.CoreV1().ResourceQuotas(namespace)
+	resourceQuotas, err := quotaClient.Get(context.TODO(), "quota-"+namespace, metav1.GetOptions{})
+	var resourceQuotaInfo []dto.ResourceQuotas
+
+	resource := "limits.cpu"
+	Limit := resourceQuotas.Status.Hard.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
+	Used := resourceQuotas.Status.Used.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
+	resourceQuotaInfo = append(resourceQuotaInfo,
+		dto.ResourceQuotas{Name: resource,
+			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.Value(), UsedValue: Used.Value()})
+
+	resource = "limits.memory"
+	Limit = resourceQuotas.Status.Hard.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
+	Used = resourceQuotas.Status.Used.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
+	resourceQuotaInfo = append(resourceQuotaInfo,
+		dto.ResourceQuotas{Name: resource,
+			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.Value(), UsedValue: Used.Value()})
+
+	resource = "pods"
+	Limit = resourceQuotas.Status.Hard.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
+	Used = resourceQuotas.Status.Used.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
+	resourceQuotaInfo = append(resourceQuotaInfo,
+		dto.ResourceQuotas{Name: resource,
+			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.Value(), UsedValue: Used.Value()})
+
+	return resourceQuotaInfo, err
+}
+
+func CreateResourceQuotasByNamespace(client *kubernetes.Clientset, quotas dto.QuotasSpec) error {
+	quotaClient := client.CoreV1().ResourceQuotas(quotas.Namespace)
+	resourceQuotas, err := quotaClient.Get(context.TODO(), "quota-"+quotas.Namespace, metav1.GetOptions{})
+
+	resourceHard := map[v1.ResourceName]resourcev1.Quantity{
+		v1.ResourceLimitsCPU:    resourcev1.MustParse(strconv.Itoa(quotas.LimitCpu)),
+		v1.ResourceLimitsMemory: resourcev1.MustParse(strconv.Itoa(quotas.LimitMemory) + "Gi"),
+		v1.ResourcePods:         resourcev1.MustParse(strconv.Itoa(quotas.LimitPods)),
+	}
+	if err != nil { // not found for create
+		resourceQuotas = &v1.ResourceQuota{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "quota-" + quotas.Namespace,
+			},
+			Spec: v1.ResourceQuotaSpec{
+				Hard: resourceHard,
+			},
+		}
+		_, err = quotaClient.Create(context.TODO(), resourceQuotas, metav1.CreateOptions{})
+	} else { // founded for update
+		resourceQuotas.Spec.Hard = resourceHard
+		_, err = quotaClient.Update(context.TODO(), resourceQuotas, metav1.UpdateOptions{})
+	}
+
 	return err
 }

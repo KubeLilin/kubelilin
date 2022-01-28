@@ -15,8 +15,10 @@ type Page struct {
 }
 
 type PageRequest struct {
-	PageIndex int `json:"pageIndex" uri:"pageIndex"`
-	PageSize  int `json:"pageSize" uri:"pageSize"`
+	PageIndex   int    `json:"pageIndex" uri:"pageIndex"`
+	PageSize    int    `json:"pageSize" uri:"pageSize"`
+	CurrentPage int    `json:"current" uri:"current"`
+	Keyword     string `json:"keyword" uri:"keyword"`
 }
 
 func (pg PageRequest) OffSet() int {
@@ -68,8 +70,8 @@ func (ph *PageHelper) DoScan(data interface{}, sql string, values ...interface{}
 	sb.WriteString(strconv.Itoa(ph.pageInfo.PageSize))
 	dataSql = sb.String()
 	fmt.Println(dataSql)
-	countRes := ph.db.Raw(countSql, values).Scan(&count)
-	dataRes := ph.db.Raw(dataSql, values).Scan(data)
+	countRes := ph.db.Raw(countSql, values...).Scan(&count)
+	dataRes := ph.db.Raw(dataSql, values...).Scan(data)
 	if countRes.Error != nil {
 		err = countRes.Error
 	}

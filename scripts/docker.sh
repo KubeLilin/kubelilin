@@ -5,6 +5,8 @@ docker-compose build --no-cache
 
 
 
+## dev
+docker build -t yoyofx/sgr-api:dev1.0 -f .\Dockerfile_Prod .
 
 
 
