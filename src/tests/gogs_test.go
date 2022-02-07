@@ -4,6 +4,7 @@ import (
 	"fmt"
 	gogs "github.com/gogs/go-gogs-client"
 	"github.com/stretchr/testify/assert"
+	"regexp"
 	"testing"
 )
 
@@ -43,4 +44,14 @@ func TestCreateOrg(t *testing.T) {
 	fmt.Println(err)
 	fmt.Println(res)
 	assert.NoError(t, err)
+}
+
+func TestGetRegexpLibrary(t *testing.T) {
+	text := "https://github.com/abc/hello.git"
+
+	reg := regexp.MustCompile("^https.*/(\\w+).git")
+	groups := reg.FindStringSubmatch(text)
+	if len(groups) > 1 {
+		println(groups[1])
+	}
 }
