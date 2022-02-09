@@ -14,12 +14,12 @@ import (
 
 type ApplicationService struct {
 	db         *gorm.DB
-	vcsService VcsService
+	VCSService VcsService
 	config     abstractions.IConfiguration
 }
 
 func NewApplicationService(db *gorm.DB, gogsVcsService *GogsVcsService, config abstractions.IConfiguration) *ApplicationService {
-	return &ApplicationService{db: db, vcsService: gogsVcsService, config: config}
+	return &ApplicationService{db: db, VCSService: gogsVcsService, config: config}
 }
 
 func (s *ApplicationService) CreateApp(req *req.AppReq) (error, *models.SgrTenantApplication) {
@@ -38,7 +38,7 @@ func (s *ApplicationService) CreateApp(req *req.AppReq) (error, *models.SgrTenan
 		if dbRes.Error != nil {
 			return nil
 		}
-		_, repoErr := s.vcsService.CreateTenantRepository(req.TenantID, req.Name)
+		_, repoErr := s.VCSService.CreateTenantRepository(req.TenantID, req.Name)
 		if repoErr != nil {
 			return repoErr
 		}
