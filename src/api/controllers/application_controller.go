@@ -91,3 +91,21 @@ func (c *ApplicationController) GetGitBranches(ctx *context.HttpContext) mvc.Api
 	// appInfo.Git
 	return mvc.Fail("no data")
 }
+
+func (c *ApplicationController) GetBuildScripts(ctx *context.HttpContext) mvc.ApiResult {
+	return mvc.Success(
+		context.H{
+			"golang": `# 编译命令，注：当前已在代码根路径下
+go env -w GOPROXY=https://goproxy.cn,direct
+go build -ldflags="-s -w" -o app .
+`,
+			"java": `# 编译命令，注：当前已在代码根路径下
+mvn clean package                         
+`,
+			"nodejs": `# 编译命令，注：当前已在代码根路径下
+npm config set registry https://registry.npm.taobao.org --global
+npm install
+npm run build
+`,
+		})
+}
