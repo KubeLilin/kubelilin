@@ -109,3 +109,11 @@ npm run build
 `,
 		})
 }
+
+func (c *ApplicationController) PostNewPipeline(ctx *context.HttpContext, req *req.AppNewPipelineReq) mvc.ApiResult {
+	err, pipeline := c.service.NewPipeline(req)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(pipeline.ID)
+}

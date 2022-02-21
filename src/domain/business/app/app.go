@@ -10,6 +10,7 @@ import (
 	"sgr/domain/dto"
 	"sgr/pkg/page"
 	"strings"
+	"time"
 )
 
 type ApplicationService struct {
@@ -138,4 +139,29 @@ WHERE app.id = ?
 	var appInfo dto.ApplicationDisplayDTO
 	err := s.db.Raw(sql, appId).First(&appInfo).Error
 	return appInfo, err
+}
+
+func (s *ApplicationService) NewPipeline(req *req.AppNewPipelineReq) (error, *models.SgrTenantApplicationPipelines) {
+	var exitCount int64
+	s.db.Model(&models.SgrTenantApplicationPipelines{}).Where("appid=? and name=?", req.AppId, req.Name).Count(&exitCount)
+	if exitCount > 0 {
+		return errors.New("already have the same name pipeline"), nil
+	}
+
+	now := time.Now()
+	appModel := &models.SgrTenantApplicationPipelines{
+		Appid:        req.AppId,
+		Name:         req.Name,
+		Dsl:          "",
+		LastTaskID:   "",
+		Status:       uint8(1),
+		CreationTime: &now,
+		UpdateTime:   &now,
+	}
+	dbRes := s.db.Model(models.SgrTenantApplicationPipelines{}).Create(appModel)
+	if dbRes.Error != nil {
+		return nil, appModel
+	}
+
+	return nil, appModel
 }

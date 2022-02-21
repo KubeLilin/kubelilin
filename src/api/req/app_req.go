@@ -18,3 +18,9 @@ type AppReq struct {
 	Language uint16 `json:"language" uri:"language"`
 	Status   int8   `json:"status" uri:"status"`
 }
+
+type AppNewPipelineReq struct {
+	mvc.RequestBody
+	AppId uint64 `json:"appid" uri:"appid"`
+	Name  string `json:"name" uri:"name"`
+}
