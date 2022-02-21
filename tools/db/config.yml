@@ -1,11 +1,11 @@
 base:
     is_dev: true
 db_info:
-    host: m.yoyogo.run
+    host: 47.100.213.49
     port: 3306
     username: root
-    password: 123.com
-    database: sgr_platform_paas
+    password: P@ssW0rd
+    database: sgr_pass
     type: 0
 out_dir: ../../src/domain/database/models/
 url_tag: json
@@ -22,6 +22,7 @@ is_table_name: true
 is_null_to_point: true
 table_prefix: ""
 self_type_define:
+    uint: 'uint32'
     date: '*time.Time'
     datetime: '*time.Time'
 out_file_name: ""
