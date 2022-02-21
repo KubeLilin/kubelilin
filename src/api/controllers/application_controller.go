@@ -117,3 +117,17 @@ func (c *ApplicationController) PostNewPipeline(ctx *context.HttpContext, req *r
 	}
 	return mvc.Success(pipeline.ID)
 }
+
+func (c *ApplicationController) GetPipelines(ctx *context.HttpContext) mvc.ApiResult {
+	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
+	if appId == 0 {
+		return mvc.Fail("没有找到应用")
+	}
+
+	pipelines, err := c.service.GetAppPipelines(appId)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+
+	return mvc.Success(pipelines)
+}

@@ -165,3 +165,10 @@ func (s *ApplicationService) NewPipeline(req *req.AppNewPipelineReq) (error, *mo
 
 	return nil, appModel
 }
+
+func (s *ApplicationService) GetAppPipelines(appId uint64) ([]dto.PipelineInfo, error) {
+	sql := `SELECT id,appid,name,dsl,taskStatus,lastTaskId FROM sgr_tenant_application_pipelines WHERE appid=?`
+	var pipelineInfoList []dto.PipelineInfo
+	err := s.db.Raw(sql, appId).Find(&pipelineInfoList).Error
+	return pipelineInfoList, err
+}
