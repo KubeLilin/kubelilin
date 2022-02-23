@@ -80,3 +80,69 @@ func (c *ApplicationController) GetInfo(ctx *context.HttpContext) mvc.ApiResult 
 	}
 	return mvc.Success(info)
 }
+
+func (c *ApplicationController) GetGitBranches(ctx *context.HttpContext) mvc.ApiResult {
+	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
+	appInfo, _ := c.service.GetAppInfo(appId)
+	if appInfo.Git != "" {
+		names, _ := c.service.VCSService.GetGitBranches(appInfo.Git)
+		return mvc.Success(names)
+	}
+	// appInfo.Git
+	return mvc.Fail("no data")
+}
+
+func (c *ApplicationController) GetBuildScripts(ctx *context.HttpContext) mvc.ApiResult {
+	return mvc.Success(
+		context.H{
+			"golang": `# 编译命令，注：当前已在代码根路径下
+go env -w GOPROXY=https://goproxy.cn,direct
+go build -ldflags="-s -w" -o app .
+`,
+			"java": `# 编译命令，注：当前已在代码根路径下
+mvn clean package                         
+`,
+			"nodejs": `# 编译命令，注：当前已在代码根路径下
+npm config set registry https://registry.npm.taobao.org --global
+npm install
+npm run build
+`,
+		})
+}
+
+func (c *ApplicationController) PostNewPipeline(ctx *context.HttpContext, req *req.AppNewPipelineReq) mvc.ApiResult {
+	err, pipeline := c.service.NewPipeline(req)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(pipeline.ID)
+}
+
+func (c *ApplicationController) GetPipelines(ctx *context.HttpContext) mvc.ApiResult {
+	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
+	if appId == 0 {
+		return mvc.Fail("没有找到应用")
+	}
+	pipelines, err := c.service.GetAppPipelines(appId)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(pipelines)
+}
+
+func (c *ApplicationController) PostEditPipeline(request *req.EditPipelineReq) mvc.ApiResult {
+	err := c.service.UpdatePipeline(request)
+	if err != nil {
+		return mvc.Fail(false)
+	}
+	return mvc.Success(true)
+}
+
+func (c *ApplicationController) GetPipeline(ctx *context.HttpContext) mvc.ApiResult {
+	pipelineId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
+	pipeline, err := c.service.GetPipelineById(pipelineId)
+	if err != nil {
+		return mvc.Fail("not found pipeline!")
+	}
+	return mvc.Success(pipeline)
+}

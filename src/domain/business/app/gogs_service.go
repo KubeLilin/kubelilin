@@ -5,6 +5,7 @@ import (
 	"github.com/gogs/go-gogs-client"
 	"github.com/yoyofx/yoyogo/abstractions"
 	"gorm.io/gorm"
+	"regexp"
 	"sgr/domain/database/models"
 )
 
@@ -108,4 +109,45 @@ func (vcs *GogsVcsService) CreateRepository(repoName string) (*VcsRepository, er
 			nil
 	}
 	return nil, err
+}
+
+func (vcs *GogsVcsService) GetGitBranches(gitAddr string) ([]string, error) {
+	gitUrl := vcs.config.GetString(GIT_URL)
+	gitToken := vcs.config.GetString(GIT_TOKEN)
+	gogsClient := gogs.NewClient(gitUrl, gitToken)
+
+	repoRes, err := getRepoNames(gitAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	branches, err := gogsClient.ListRepoBranches(repoRes.OrganizationName, repoRes.RepositoryName)
+	if err != nil {
+		return nil, err
+	}
+
+	var branchesNameList []string
+	for _, branch := range branches {
+		branchesNameList = append(branchesNameList, branch.Name)
+	}
+	return branchesNameList, nil
+}
+
+type GitRepoNames struct {
+	OrganizationName string
+	RepositoryName   string
+}
+
+func getRepoNames(gitAddr string) (*GitRepoNames, error) {
+	reg := regexp.MustCompile("^http.*/(\\w+)/(\\w+).git")
+	groups := reg.FindStringSubmatch(gitAddr)
+
+	if len(groups) > 1 {
+		return &GitRepoNames{
+			OrganizationName: groups[1],
+			RepositoryName:   groups[2],
+		}, nil
+	} else {
+		return nil, errors.New("not found")
+	}
 }

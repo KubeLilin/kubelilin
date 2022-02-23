@@ -18,6 +18,7 @@ CREATE DATABASE IF NOT EXISTS sgr_pass
      DEFAULT CHARACTER SET utf8
      DEFAULT COLLATE utf8_general_ci;
 
+
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -77,7 +78,7 @@ CREATE TABLE `sgr_role_menu_map` (
                                      `creation_time` datetime DEFAULT CURRENT_TIMESTAMP,
                                      `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                                      PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=557 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='角色菜单权限影射';
+) ENGINE=InnoDB AUTO_INCREMENT=571 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='角色菜单权限影射';
 
 -- ----------------------------
 -- Records of sgr_role_menu_map
@@ -117,21 +118,20 @@ INSERT INTO `sgr_role_menu_map` VALUES (256, 12, 34, '2022-01-11 19:58:25', '202
 INSERT INTO `sgr_role_menu_map` VALUES (257, 12, 35, '2022-01-11 19:58:25', '2022-01-11 19:58:25');
 INSERT INTO `sgr_role_menu_map` VALUES (258, 12, 38, '2022-01-11 19:58:25', '2022-01-11 19:58:25');
 INSERT INTO `sgr_role_menu_map` VALUES (259, 12, 36, '2022-01-11 19:58:25', '2022-01-11 19:58:25');
-INSERT INTO `sgr_role_menu_map` VALUES (542, 2, 1, '2022-01-11 20:52:35', '2022-01-11 20:52:35');
-INSERT INTO `sgr_role_menu_map` VALUES (543, 2, 27, '2022-01-11 20:52:35', '2022-01-11 20:52:35');
-INSERT INTO `sgr_role_menu_map` VALUES (544, 2, 29, '2022-01-11 20:52:35', '2022-01-11 20:52:35');
-INSERT INTO `sgr_role_menu_map` VALUES (545, 2, 31, '2022-01-11 20:52:35', '2022-01-11 20:52:35');
-INSERT INTO `sgr_role_menu_map` VALUES (546, 2, 37, '2022-01-11 20:52:35', '2022-01-11 20:52:35');
-INSERT INTO `sgr_role_menu_map` VALUES (547, 2, 28, '2022-01-11 20:52:35', '2022-01-11 20:52:35');
-INSERT INTO `sgr_role_menu_map` VALUES (548, 2, 32, '2022-01-11 20:52:35', '2022-01-11 20:52:35');
-INSERT INTO `sgr_role_menu_map` VALUES (549, 2, 33, '2022-01-11 20:52:35', '2022-01-11 20:52:35');
-INSERT INTO `sgr_role_menu_map` VALUES (550, 2, 34, '2022-01-11 20:52:35', '2022-01-11 20:52:35');
-INSERT INTO `sgr_role_menu_map` VALUES (551, 2, 35, '2022-01-11 20:52:35', '2022-01-11 20:52:35');
-INSERT INTO `sgr_role_menu_map` VALUES (552, 2, 38, '2022-01-11 20:52:35', '2022-01-11 20:52:35');
-INSERT INTO `sgr_role_menu_map` VALUES (553, 2, 36, '2022-01-11 20:52:35', '2022-01-11 20:52:35');
-INSERT INTO `sgr_role_menu_map` VALUES (554, 2, 7, '2022-01-11 20:52:35', '2022-01-11 20:52:35');
-INSERT INTO `sgr_role_menu_map` VALUES (555, 2, 5, '2022-01-11 20:52:35', '2022-01-11 20:52:35');
-INSERT INTO `sgr_role_menu_map` VALUES (556, 2, 3, '2022-01-11 20:52:35', '2022-01-11 20:52:35');
+INSERT INTO `sgr_role_menu_map` VALUES (557, 2, 1, '2022-02-21 17:00:39', '2022-02-21 17:00:39');
+INSERT INTO `sgr_role_menu_map` VALUES (558, 2, 27, '2022-02-21 17:00:39', '2022-02-21 17:00:39');
+INSERT INTO `sgr_role_menu_map` VALUES (559, 2, 29, '2022-02-21 17:00:39', '2022-02-21 17:00:39');
+INSERT INTO `sgr_role_menu_map` VALUES (560, 2, 31, '2022-02-21 17:00:39', '2022-02-21 17:00:39');
+INSERT INTO `sgr_role_menu_map` VALUES (561, 2, 37, '2022-02-21 17:00:39', '2022-02-21 17:00:39');
+INSERT INTO `sgr_role_menu_map` VALUES (562, 2, 28, '2022-02-21 17:00:39', '2022-02-21 17:00:39');
+INSERT INTO `sgr_role_menu_map` VALUES (563, 2, 32, '2022-02-21 17:00:39', '2022-02-21 17:00:39');
+INSERT INTO `sgr_role_menu_map` VALUES (564, 2, 33, '2022-02-21 17:00:39', '2022-02-21 17:00:39');
+INSERT INTO `sgr_role_menu_map` VALUES (565, 2, 34, '2022-02-21 17:00:39', '2022-02-21 17:00:39');
+INSERT INTO `sgr_role_menu_map` VALUES (566, 2, 35, '2022-02-21 17:00:39', '2022-02-21 17:00:39');
+INSERT INTO `sgr_role_menu_map` VALUES (567, 2, 38, '2022-02-21 17:00:39', '2022-02-21 17:00:39');
+INSERT INTO `sgr_role_menu_map` VALUES (568, 2, 7, '2022-02-21 17:00:39', '2022-02-21 17:00:39');
+INSERT INTO `sgr_role_menu_map` VALUES (569, 2, 5, '2022-02-21 17:00:39', '2022-02-21 17:00:39');
+INSERT INTO `sgr_role_menu_map` VALUES (570, 2, 3, '2022-02-21 17:00:39', '2022-02-21 17:00:39');
 COMMIT;
 
 -- ----------------------------
@@ -173,7 +173,7 @@ INSERT INTO `sgr_sys_menu` VALUES (28, 0, '', '应用管理', '', '/applications
 INSERT INTO `sgr_sys_menu` VALUES (29, 0, '', '配置管理', '', '/applications/configs', './applications/configs', 0, 27, 0, 1, '2021-12-24 06:50:20', '2021-12-24 06:50:20');
 INSERT INTO `sgr_sys_menu` VALUES (31, 0, '', '服务治理', '', '/applications/serviceconfig', './applications/serviceconfig', 0, 27, 0, 1, '2021-12-24 07:03:05', '2021-12-24 07:03:05');
 INSERT INTO `sgr_sys_menu` VALUES (32, 0, '', 'DevOps', 'ProjectOutlined', '/devops', './devops', 1, 0, 0, 1, '2021-12-24 07:30:43', '2021-12-24 07:30:43');
-INSERT INTO `sgr_sys_menu` VALUES (33, 0, '', '流水线管理', '', '/devops', './devops', 0, 32, 0, 1, '2021-12-24 07:31:08', '2021-12-24 07:31:08');
+INSERT INTO `sgr_sys_menu` VALUES (33, 0, '', '流水线管理', '', '/devops/pipeline', './devops/pipeline', 0, 32, 0, 1, '2021-12-24 07:31:08', '2022-02-10 06:46:21');
 INSERT INTO `sgr_sys_menu` VALUES (34, 0, '', '网络中心', 'RocketOutlined', '/components', './components', 1, 0, 0, 1, '2021-12-24 07:33:40', '2022-01-11 04:04:25');
 INSERT INTO `sgr_sys_menu` VALUES (35, 0, '', '微服务网关', '', '/components/apigateway', './components/apigateway', 0, 34, 0, 1, '2021-12-24 07:44:50', '2021-12-24 07:44:50');
 INSERT INTO `sgr_sys_menu` VALUES (36, 0, '', '监控中心', 'RadarChartOutlined', '/monitor', './monitor', 1, 0, 0, 1, '2021-12-24 07:51:59', '2021-12-24 07:51:59');
@@ -237,12 +237,29 @@ INSERT INTO `sgr_tenant_application` VALUES (13, 1, 'repo3', NULL, '', 'https://
 COMMIT;
 
 -- ----------------------------
+-- Table structure for sgr_tenant_application_pipelines
+-- ----------------------------
+DROP TABLE IF EXISTS `sgr_tenant_application_pipelines`;
+CREATE TABLE `sgr_tenant_application_pipelines` (
+                                                    `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT 'Pipeline ID',
+                                                    `appid` bigint unsigned NOT NULL COMMENT '应用ID',
+                                                    `name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '流水线名称, appid 下唯一',
+                                                    `dsl` text CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT '流水线DSL',
+                                                    `taskStatus` int unsigned DEFAULT NULL COMMENT '流水线任务状态( ready=0 , running=1, success=2, fail=3,  )',
+                                                    `lastTaskId` varchar(15) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '最后一次任务执行ID',
+                                                    `status` tinyint unsigned NOT NULL,
+                                                    `creation_time` datetime DEFAULT NULL,
+                                                    `update_time` datetime DEFAULT NULL,
+                                                    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='应用流水线';
+
+-- ----------------------------
 -- Table structure for sgr_tenant_cluster
 -- ----------------------------
 DROP TABLE IF EXISTS `sgr_tenant_cluster`;
 CREATE TABLE `sgr_tenant_cluster` (
                                       `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
-                                      `tenant_id` bigint unsigned DEFAULT NULL COMMENT '租户ID',
+                                      `tenant_id` bigint unsigned NOT NULL COMMENT '租户ID',
                                       `nickname` varchar(50) NOT NULL COMMENT '别名',
                                       `name` varchar(50) NOT NULL COMMENT '集群名称',
                                       `version` varchar(50) DEFAULT NULL COMMENT 'k8s 版本号',
@@ -260,7 +277,7 @@ CREATE TABLE `sgr_tenant_cluster` (
 -- ----------------------------
 BEGIN;
 INSERT INTO `sgr_tenant_cluster` VALUES (3, 1, '', 'cls-hbktlqm5', 'v1.18.4-tke.11', '', 'apiVersion: v1\nclusters:\n- cluster:\n    certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN5RENDQWJDZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJd01UQXlOakExTkRFek5sb1hEVE13TVRBeU5EQTFOREV6Tmxvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTlVCCmZCNDJHVkxGaXVxSnZmcGdWSVYzT3h5VjNJU0l2SU5aaFdvMW9IRFF6bnFVOXU1b0hnNEZmbkxHU3BRSVdLN1gKOXNNRTBQc21DaCtwY2ZiMEszNW9OVnlFUWU3dndYVFVaU3Znb0lWb0xNWENYRlB5L2xkTVFTQURuZWw4Vnl0dgpYREVua0pvSTdIUEtmZ3E3czZ4cjh0VXFDQUZPMGErLzZHYWtFZXI0SlNVREQxZDFyY3dNVWd4VS9IaGQxVkhSClNQOEh3d1EvWHdIUzdpWUF2bmJOQ3pkNWxLWmNEeWV2ZVVsb2JrYmRxUllRMFplY3dGWjU4bDgyZFdyUWJkUFIKem9DcGRCdTJHQmtmZUtpUjhUb0Q2Q0IxYlFvb0JNSXQ4dG96dzNCL2JDMTRJeEZwUFgxdUNCWWJyK2NzUmNrTQoxOUM3NldqaUFCZ0hpMXNvTkgwQ0F3RUFBYU1qTUNFd0RnWURWUjBQQVFIL0JBUURBZ0tVTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFMWll6VjRkZkF2Y1VPYXVFL0dGT2tvOVRQdWMKZ3h5NHVJczhhOURtTno4S3J0YjRsZG41bTljWnQ0RFRFUTJwbWwwOEY5cVBYRy9EY0FjWWE3ckFlVkZWUWNyMgpXMmI5dEVyMWZjTEhUWlF1aFpzQVVuT3FkcTYreDRkQTBTcTJLbm1hMWlnQmJoUWJCc3cyVGdIOEFtS0NxMXVXClhQVU1XWFE5NlB0eUYvWjEvTUdmcC9CMi9LZHdpVWd0WCtSQnlhWGsxaXJsZzZLb1owcVZDK1lxMTdOZG92QTYKa2habC9XZXlYaEZnaUhaclAwNHR1MzlhVHEyTkhsWk4vWjBvOXVYVUZ2RnVZYURwWGRNakxHNDFhU3p6KzJLVwpwZ0NkVGZXQkpGMzJMV2Npc21lcG5YVENxS2xEeWxDZW13bEg5OWljUGtUd2tOd2xXYlIzOFpKOFlsTT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=\n    server: https://cls-hbktlqm5.ccs.tencent-cloud.com\n  name: cls-hbktlqm5\ncontexts:\n- context:\n    cluster: cls-hbktlqm5\n    user: \"86509022\"\n  name: cls-hbktlqm5-86509022-context-default\ncurrent-context: cls-hbktlqm5-86509022-context-default\nkind: Config\npreferences: {}\nusers:\n- name: \"86509022\"\n  user:\n    client-certificate-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURDRENDQWZDZ0F3SUJBZ0lJUnJvbVFheWpCRFF3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TURFeU1qRXhOakEyTVRGYUZ3MDBNREV5TWpFeE5qQTJNVEZhTURJeApFakFRQmdOVkJBb1RDWFJyWlRwMWMyVnljekVjTUJvR0ExVUVBeE1UT0RZMU1Ea3dNakl0TVRZd09EVTJOamMzCk1UQ0NBU0l3RFFZSktvWklodmNOQVFFQkJRQURnZ0VQQURDQ0FRb0NnZ0VCQUw2NXRiZDdsNjlDTTdsL1dNTHAKSTJSZ3ZXTmtic3BjcGllMlpVUXNIZ0JGcE1jc1JvZFVNUW5LbmZrZHh3NlIrSVAzTWVtVnVEZHYwR0dEalFFVAp6K0V6aU13dmorUkdqZkxrc0E1WWVxRjZnVUJjOFArSkMvVW11SDVNM0taK29IYXVZT2M1VTREeXBscVFpWTdOCmdNdk1SZ29LcmNOaVE1V3BxZ2k2UzNtTnF2Z0I3azFsR2hFeFhoRDZERExmWFRvaGhiMGQ0Q1lZUnlLSkZiWUUKMGFHTSt0TjVTOUdOZXlQZGZORTNFcVVzbHp4emJDajZseWxMQ3NUTGw1L0pLUGRvblBWd2JoV0RlZ1ZtNEp5LwpzbUpoSW81MHdLRDZDdVUxa1JYZXgzcGMrbUZDMUwvV3VMdUVOVWcxSVRPdWh0YjlsdXVqYVlnVUk3V2JvMkVOCi9Wa0NBd0VBQWFNL01EMHdEZ1lEVlIwUEFRSC9CQVFEQWdLRU1CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUMKQmdnckJnRUZCUWNEQVRBTUJnTlZIUk1CQWY4RUFqQUFNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUFqRFgybQp2c0N4T05VSmhLUDZWRHBFZy9MWTB6Ni9GMHBkblpoVFBFb3pwMDg1R01EbWZCdUxuSmxIbE54czZjc0t5Qk53CmtDMWtUM3Q1NndkWXUxVjBtN0tvZHFudjloWGxBYWZ6S0pmT1F3NlVzZmtqSjJZL0wwT2FMaWhLZ0IzYnpMWVcKZE0veVgwYlpVNzRlSHRraS9ydTRzOGFLamg4UzVMQnpzQ25Yc1dsOXdwdCt6ZXBkVnJVbDZPWmhOOVdTLzU2awpYcWZxMjAzeDMvWk1kdG53R0huOWZxQisyb2Yrc3BwY0dYdGJnanV0LzBXQVVhZWdTcUFqRGxLekcrMkJrTGJmCjB6dFp1UUFBVXBBSVBZeU1PZU1YOUdObmVSWWM5QUQ2ZnpVMWdTaEdIaEY3RDZobDl0NXpjRmZueUdGRmVSR2IKVVBEWVc0MlNJL0I5Vk1NNwotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==\n    client-key-data: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcEFJQkFBS0NBUUVBdnJtMXQzdVhyMEl6dVg5WXd1a2paR0M5WTJSdXlseW1KN1psUkN3ZUFFV2t4eXhHCmgxUXhDY3FkK1IzSERwSDRnL2N4NlpXNE4yL1FZWU9OQVJQUDRUT0l6QytQNUVhTjh1U3dEbGg2b1hxQlFGencKLzRrTDlTYTRma3pjcG42Z2RxNWc1emxUZ1BLbVdwQ0pqczJBeTh4R0NncXR3MkpEbGFtcUNMcExlWTJxK0FIdQpUV1VhRVRGZUVQb01NdDlkT2lHRnZSM2dKaGhISW9rVnRnVFJvWXo2MDNsTDBZMTdJOTE4MFRjU3BTeVhQSE5zCktQcVhLVXNLeE11WG44a285MmljOVhCdUZZTjZCV2JnbkwreVltRWlqblRBb1BvSzVUV1JGZDdIZWx6NllVTFUKdjlhNHU0UTFTRFVoTTY2RzF2Mlc2Nk5waUJRanRadWpZUTM5V1FJREFRQUJBb0lCQUVXVWNMUG9sZlR0UFB1TwpkdTVjcVhuRVJUT09mMUM2TGkvTXZmTDUrVlAyRkdCSlNjMnpMRlM3STVpdmdXQlNab3lXVVJJN2VjSlh1M2puCnlqZzdaeHBzZDVxdU8xdDNWZS9uK0VhemhzR0VkTVRyWTB5R1RlTjQ1ZFBGN0xXYytxTnhpSTZ5ZmtGTHhON0QKWGp2SHd4WVdodkxBNUpXa01xM1dBTjlBUDZxdkh0N0FPVW4zb3lLZklWUTRHVlNXaWVPL3hBR0dMMUVMamZKVwpzYmR4NG92eHdHb1JKMGpod0x3THViMVp1ZnFGQkY0TldKa3NRRG94SW9RNzc0R2VCdWlPQnlBbEZJVW1ydERnCkhyS21Pci92cjVZelNuZjc3UFNrUUlwWnNETG5JLzRMRmxhc0xpQ0U0dVlMYnh5aDNoQVh4dllNL3E1RWUyWHIKakdjUXZvVUNnWUVBK2VTOSt2MitvalRUcFpGMmJLWmtIbzVac3FSSlFGcVB5ZVh1aHdSOWxkeTJvV1M2Z25ibQpnV0RQaVVJUGsvOG4vaGEvU1BVRWpLbjdEUEl3NWp2MEduYU1ucEhZVDdpTWlyajJWMGZEZWF6eUJoZVEvenRqClFBSXZLeXAvcmN6cGttTUpBTWJpamVVQ3dvNE9CQnh1bFpMdUlyc3BMeTBsbCtOUlo5NGs4KzhDZ1lFQXcyTFUKZ2tCR2dqT0ZPR2RCOHg5UHdlcm5VVG00b3huajZ5dGJzY2VacG1wQzZBNG8zcytqc1U3YXRXOVJDOHk4U0ZhOApQR2IrV0haL0cwajlXam9XOFl0d1ZlaUxTMzNsNE9GeFRSM2xxdkZZNDFUbjk0cGYvazdIMnVQTWkwazNhaDh4ClZVUG81OHJRTEpobVlaV2d1b3FjdkZONElkZnRPNVp0SFAveXV6Y0NnWUJLeTh5UmM2RzdxMVF1R252M3lWWHUKVDIxSnF5TEJ3Rm1KZE9rUVFLZldVMW5XdE8rZVhUaGhRVGpkUElpdEk1STAyMW9sM0RDZ2FjQmEvNkxqUnM2cApuUkk1NUMxNnJ5Smg0enJZcFFJOVNTYW43Q1hhUDB4VnZGR2grZlo5YnZmNmVPb1k4VzZlU2cycGJodUQzMzY2CkJtQ0F4TVJ1K25SbUlnUWJzc0ljd1FLQmdRQ2hBakpJMjVxKzlLSFZweEdydmFQR0UwTm5wZjlIT0xDZlBPMmwKQk96VFBFSENaTmk5TTdLYkRIWWlpWWJxQ0Y4bjVZSGM3S3F3VDRYVEFFVDNNMk53elExWFhmaGJ6M1c5NlVtcQoyUFpIOWZiZjd6bnd2WEQ1YWdZN2xQa2Ixc3Y1Z1pidndyU05QbzVxRVhSYytpYW5VazV5eXYzMk5hL2pLTVRsCjN1MHg1UUtCZ1FDVWkyeWVMOTYvcUREZ3p3amdyOWNWZFhGdU8xVFZtNXl2QmMzK015ZFh1dzlYaGFmRGowMXYKUmcvT2loNnptZmRkOEwxb05GNTY2ZmVja3ZKYzRCTWJVeDRRd2o3c1A3SStibGYyUzlLc3B3U00yWTN4SFBkSApsZU02eldnajF1bFBUbWt4SkpWYk4rL2RzZGZHTnpFQU9Qc2dKYkVKbDJFVnBVZWhlOWZ4bVE9PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=\n', 0, 1, '2021-12-24 17:06:43', '2021-12-24 17:06:43');
-INSERT INTO `sgr_tenant_cluster` VALUES (4, 1, '', 'microk8s-cluster', 'v1.22.4-3+adc4115d990346', '', 'apiVersion: v1\r\nclusters:\r\n- cluster:\r\n    certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUREekNDQWZlZ0F3SUJBZ0lVWHdxbU9RcGhYWUwxT0ZvbE9tTDJYci9mRkJJd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0Z6RVZNQk1HQTFVRUF3d01NVEF1TVRVeUxqRTRNeTR4TUI0WERUSXhNVEF4TVRJeU1UWXlNRm9YRFRNeApNVEF3T1RJeU1UWXlNRm93RnpFVk1CTUdBMVVFQXd3TU1UQXVNVFV5TGpFNE15NHhNSUlCSWpBTkJna3Foa2lHCjl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUF0K1JVUG1TSzJaNmRnTlZXS1MyZEh2WEF3VWFiV0poQlZpT0wKekNyWVBkdS8zMVlxc2VPQXFPcEs2djZEei85VFdSODFBMnZUK3ovNmdpZ1NodDBWYTI5WUQyU1ljWkhjUFRYaQpHUHVNTHkwS0ZabnkxbFhqTUU4em9TMHNwOE8yRTE3dnRsa1NtNHk3YTRkbUZ6MGdhcVRMeXd2bE1WdUJ3WSsxClhJUTBJTlgxZGtKY215V2V4NFFvSERXU3FraWc0ajNwUlFwWkNhd2Yrbk0reTVHS1EzMUdZdGx1VXUwUGhoWXYKM2llR1FtQU5hdzlybEJRa0RMNUtYenJQZlpIMTJ3U21iZUtjZ0w1cDI4c1k2eEpsRzJ0M3JqK3VFb01VYnpyWAptSkxkaVlpaXdUclRNbjFrUDdTbThnNENRWkRteTFtdXA3OGJKYzZTMEJRWWJaYkFKUUlEQVFBQm8xTXdVVEFkCkJnTlZIUTRFRmdRVW5hK0hDWmw5OGpHMHhYV1dwNm1ydHNkR0lvTXdId1lEVlIwakJCZ3dGb0FVbmErSENabDkKOGpHMHhYV1dwNm1ydHNkR0lvTXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QU5CZ2txaGtpRzl3MEJBUXNGQUFPQwpBUUVBTVlESXJmODZYc0FQYzlOMkJrL2dzYXVmcGxNbkZKazlRQmZINzNvOTczNnlLeXFTZmdxejZ5cHRvVm9nCmVJSG9sSXd3VFVqQUwvSTlYb0lZMHVCcGVFdytPQ3lIbmp0L2VxVTZnKysyZWZtOEpaZGpBbUczT0NXSWVMUnoKdmNYL0ZBTUtXbmRwdVpJcWNDVS9aZEdrMHNoZWtXTExuN3pOcVR2aS9BOWdOUDE3K1VlR05DSlJaRXFSTVpQMwpiUHZKTlRVcXUxMkw5YlFrS0FyZGJ2U0xMb2I5VU9rYWFodXRQQ3RGb0dyUTFXY0VUK25nUEVkaFpUTGp4MUt4ClcwendhRk0zM2ZGKy85YTM4eGFmLzV6SSszNlVtOFlMT2lIL3cvN3BSbzdLTFNVZ2V5bWR4a21OaDZIVENzQ3oKc1ZXQzZRQVd1TW02ZDVzK3o2cWFZWXQwb2c9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==\r\n    server: https://47.100.213.49:8325\r\n  name: microk8s-cluster\r\ncontexts:\r\n- context:\r\n    cluster: microk8s-cluster\r\n    user: admin\r\n  name: microk8s\r\ncurrent-context: microk8s\r\nkind: Config\r\npreferences: {}\r\nusers:\r\n- name: admin\r\n  user:\r\n    token: YUxSc1F5ZnBvOFp1V0laTy9jQnhhc1VwRXNyS1BTZkk2MS9nUnBKQ3FGRT0K', 0, 1, NULL, NULL);
+INSERT INTO `sgr_tenant_cluster` VALUES (4, 1, '', 'microk8s-cluster', 'v1.22.4-3+adc4115d990346', '', 'apiVersion: v1\r\nclusters:\r\n- cluster:\r\n    certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUREekNDQWZlZ0F3SUJBZ0lVQzdPVGlodEx1ZWFVYUNOZ3VFQ1F1aWRmV1ljd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0Z6RVZNQk1HQTFVRUF3d01NVEF1TVRVeUxqRTRNeTR4TUI0WERUSXlNREl3TVRFek16RTBOVm9YRFRNeQpNREV6TURFek16RTBOVm93RnpFVk1CTUdBMVVFQXd3TU1UQXVNVFV5TGpFNE15NHhNSUlCSWpBTkJna3Foa2lHCjl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFuWHVTbmVwc3NIRUp0UjlWMUpjQTJaQmxnQk0vTVFXeDAwcU8KQzJuVWk2UCtUZDloOENtam1wS2p5TURwYzBOV2tVQVp3L0JOd1VYN0dHWG5EcjBsaW5oc1lTWkxydkdWOGw3TgpFR3dhd1VsY3FzZXova3dOZDI5Q2pBaTU4TUFaOWtKNUpianJLN2lXU0tPeHdkK0pvcWtSSVh3clJCUzU4VEFlCjVTNXFNK3dlUXhtcy9oSUpnZFNSL3ZSNC8yMERZd3JKT3ZkR0kzb1I1cUxjdm8weldYZ0NvNFZkNUQwYUQzMGMKMW50eVViODNjc2JPcGtvcU9HNnRsejBtNk5tZUNNLy9FVW5ncEtRbkIyUXNwaFhMYjFsT0VEZWF0K3ZyU1RMUApKQzUreG5xK1J0d3VXL0Fod0tJb1pBN2NiT2Y1MHljYlFqclArUTBqWHVZMi9uY0REd0lEQVFBQm8xTXdVVEFkCkJnTlZIUTRFRmdRVWQxbG9jOEpRaVo2R2pLMTZNQ0Z6OSs2bkllOHdId1lEVlIwakJCZ3dGb0FVZDFsb2M4SlEKaVo2R2pLMTZNQ0Z6OSs2bkllOHdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QU5CZ2txaGtpRzl3MEJBUXNGQUFPQwpBUUVBVmpBVDFkT1BEN3VMNE9DcXNCTVBTQ2JVeTFBS0wyT3AreFNJQ0NDRUV6V1RhNVk3bkRuYlh0bnVZS1hkCnhOdkdrSStZMFh4TE1oZm1PSklaNUEwTjRwdmRuYzdxSWZ0d01uWHNVU3dMTENkTE5sa1VpcWVRZ1F6UWtUeWcKaHB3aUU4REtlL2xvblMwczh2VUkvdVpEb0xiOFF0d2U2U3ZTcmpoajJsNUJLZUNaYjB6RHl1ZGNRZ1VDYWNJYwpMcWo5SXZ0amZaUG9selAxSTV6aDE0VG5pUFpERGFhYXplNGkxU1VET1JPeFp0TjhFSXlDWWxPN0t0b0txWFNsCmhqb0dzeEVnY1N2NmZBMlhVVGhKd1IvYUZPemxXZW4vOWV2VHlrZjRhSzN0YnFEMWVzL3M4cHVXY1g2ZExwNlYKK1NYc3E4RTl2WjhZRGRlQkRJZS9lSXlnN3c9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==\r\n    server: https://47.100.213.49:8325\r\n  name: microk8s-cluster\r\ncontexts:\r\n- context:\r\n    cluster: microk8s-cluster\r\n    user: admin\r\n  name: microk8s\r\ncurrent-context: microk8s\r\nkind: Config\r\npreferences: {}\r\nusers:\r\n- name: admin\r\n  user:\r\n    token: VXJKWEp1ZmJJS09JVklxbDBoNFpoSitkY0g5b3lqcVUvTUxqcFlWbHAxQT0K', 0, 1, '2022-02-07 17:57:37', '2022-02-07 17:57:37');
 COMMIT;
 
 -- ----------------------------
@@ -281,16 +298,16 @@ CREATE TABLE `sgr_tenant_deployments` (
                                           `image_hub` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
                                           `app_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
                                           `workload_type` varchar(25) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
-                                          `replicas` int unsigned DEFAULT '1',
+                                          `replicas` int unsigned NOT NULL DEFAULT '1',
                                           `service_enable` tinyint unsigned DEFAULT NULL,
                                           `service_name` varchar(150) DEFAULT NULL,
                                           `service_away` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
-                                          `service_port` int unsigned DEFAULT NULL,
+                                          `service_port` int unsigned NOT NULL DEFAULT '0',
                                           `service_port_type` varchar(8) DEFAULT NULL,
                                           `last_image` varchar(350) DEFAULT NULL,
                                           `level` varchar(8) DEFAULT NULL,
                                           PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3 COMMENT='集群部署';
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3 COMMENT='集群部署';
 
 -- ----------------------------
 -- Records of sgr_tenant_deployments
@@ -301,6 +318,7 @@ INSERT INTO `sgr_tenant_deployments` VALUES (2, 1, 'test-nginx-microk8s-cluster'
 INSERT INTO `sgr_tenant_deployments` VALUES (3, 1, 'prod-nginx-cls-hbktlqm5', 'prod-nginx', 3, 1, 1, 1, NULL, NULL, '', '', 'Deployment', 1, 1, 'prod-nginx-cls-hbktlqm-svc-cluster-sgr', 'ClusterPort', 80, '', '', 'prod');
 INSERT INTO `sgr_tenant_deployments` VALUES (4, 1, 'dev-yoyogodemo-cls-hbktlqm5', 'yoyogo-demo', 3, 1, 2, 1, NULL, NULL, '', '', 'Deployment', 1, 1, 'dev-yoyogodemo-cls-hbktlqm5-svc-cluster-sgr', 'ClusterPort', 8080, '', '', 'dev');
 INSERT INTO `sgr_tenant_deployments` VALUES (5, 1, 'test-nginx-cls-hbktlqm5', 'prism-desgin', 3, 1, 1, 1, NULL, NULL, '', '', 'Deployment', 1, 1, 'test-nginx-cls-hbktlqm5-svc-cluster-sgr', 'ClusterPort', 8092, '', '', 'test');
+INSERT INTO `sgr_tenant_deployments` VALUES (6, 1, 'prod-yoyogodemo-microk8s-cluster', 'yoyogo-demo正式环境', 4, 2, 2, 1, NULL, NULL, '', '', 'Deployment', 1, 0, 'prod-yoyogodemo-microk8s-cluster-svc-cluster-sgr', 'ClusterPort', 8080, '', '', 'prod');
 COMMIT;
 
 -- ----------------------------
@@ -327,7 +345,7 @@ CREATE TABLE `sgr_tenant_deployments_containers` (
                                                      `liveness` varchar(300) DEFAULT NULL,
                                                      `readness` varchar(300) DEFAULT NULL,
                                                      PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3 COMMENT='应用部署容器配置';
 
 -- ----------------------------
 -- Records of sgr_tenant_deployments_containers
@@ -338,6 +356,7 @@ INSERT INTO `sgr_tenant_deployments_containers` VALUES (2, '', 2, 1, 'docker.io/
 INSERT INTO `sgr_tenant_deployments_containers` VALUES (3, '', 3, 1, 'docker.io/library/nginx:alpine', '', '', 0.25, 128, 0.25, 256, '', '', '', '', '', '', '');
 INSERT INTO `sgr_tenant_deployments_containers` VALUES (4, '', 4, 1, '', '', '', 0.10, 128, 0.25, 256, '', '', '', '', '', '', '');
 INSERT INTO `sgr_tenant_deployments_containers` VALUES (5, '', 5, 1, 'yoyofx/prism-desgin:v0.1', '', '', 0.25, 128, 0.25, 256, '', '', '', '', '', '', '');
+INSERT INTO `sgr_tenant_deployments_containers` VALUES (6, '', 6, 1, 'yoyofx/yoyogo-demo:v0.1', '', '', 0.25, 128, 0.25, 256, '', '', '', '', '', '', '');
 COMMIT;
 
 -- ----------------------------
@@ -346,8 +365,8 @@ COMMIT;
 DROP TABLE IF EXISTS `sgr_tenant_namespace`;
 CREATE TABLE `sgr_tenant_namespace` (
                                         `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-                                        `tenant_id` bigint unsigned DEFAULT NULL COMMENT '租户ID',
-                                        `cluster_id` bigint unsigned DEFAULT NULL COMMENT '集群ID',
+                                        `tenant_id` bigint unsigned NOT NULL COMMENT '租户ID',
+                                        `cluster_id` bigint unsigned NOT NULL COMMENT '集群ID',
                                         `namespace` varchar(50) NOT NULL COMMENT '命名空间名称',
                                         `create_time` datetime NOT NULL COMMENT '创建时间',
                                         `update_time` datetime NOT NULL COMMENT '更新时间',
@@ -361,12 +380,6 @@ CREATE TABLE `sgr_tenant_namespace` (
 BEGIN;
 INSERT INTO `sgr_tenant_namespace` VALUES (1, 1, 3, 'yoyogo', '2021-12-24 16:24:21', '2021-12-24 16:24:23', 1);
 INSERT INTO `sgr_tenant_namespace` VALUES (2, 1, 4, 'sukt-core', '2021-12-24 16:54:47', '2021-12-24 16:54:49', 1);
-INSERT INTO `sgr_tenant_namespace` VALUES (5, 1, 3, 'sgr-test', '2021-12-24 09:22:06', '2021-12-24 09:22:06', 1);
-INSERT INTO `sgr_tenant_namespace` VALUES (6, 1, 4, 'sgr-dev', '2021-12-27 10:24:41', '2021-12-27 10:24:41', 1);
-INSERT INTO `sgr_tenant_namespace` VALUES (7, 1, 4, 'sgr-test', '2021-12-27 11:20:34', '2021-12-27 11:20:34', 1);
-INSERT INTO `sgr_tenant_namespace` VALUES (8, 1, 3, 'yyy', '2022-01-17 08:37:20', '2022-01-17 08:37:20', 1);
-INSERT INTO `sgr_tenant_namespace` VALUES (9, 1, 3, 'sgrns-admin', '2022-01-18 04:04:27', '2022-01-18 04:04:27', 1);
-INSERT INTO `sgr_tenant_namespace` VALUES (10, 1, 4, 'devops', '2022-01-18 15:58:39', '2022-01-18 15:58:42', 1);
 COMMIT;
 
 -- ----------------------------
@@ -401,7 +414,7 @@ COMMIT;
 DROP TABLE IF EXISTS `sgr_tenant_user`;
 CREATE TABLE `sgr_tenant_user` (
                                    `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-                                   `tenant_id` bigint NOT NULL COMMENT '租户',
+                                   `tenant_id` bigint unsigned NOT NULL COMMENT '租户',
                                    `user_name` varchar(50) DEFAULT NULL COMMENT '用户名',
                                    `account` varchar(50) NOT NULL COMMENT '账号',
                                    `password` varchar(255) NOT NULL COMMENT '密码',
@@ -429,7 +442,7 @@ COMMIT;
 DROP TABLE IF EXISTS `sgr_tenant_user_role`;
 CREATE TABLE `sgr_tenant_user_role` (
                                         `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-                                        `user_id` bigint NOT NULL COMMENT '用户id',
+                                        `user_id` bigint unsigned NOT NULL COMMENT '用户id',
                                         `role_id` bigint NOT NULL COMMENT '角色id',
                                         `creation_time` datetime DEFAULT CURRENT_TIMESTAMP,
                                         `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,

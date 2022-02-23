@@ -135,7 +135,8 @@ func (ds *DeploymentSupervisor) ApplyDeployment(clientSet *kubernetes.Clientset,
 	deploymentDatum.Labels = metalabel
 	//spec
 	spec := appsapplyv1.DeploymentSpecApplyConfiguration{}
-	spec.Replicas = &dp.Replicas
+	replicas := int32(dp.Replicas)
+	spec.Replicas = &replicas
 	//strategy
 	spec.Strategy = &appsapplyv1.DeploymentStrategyApplyConfiguration{
 		RollingUpdate: &appsapplyv1.RollingUpdateDeploymentApplyConfiguration{

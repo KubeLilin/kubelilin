@@ -1,9 +1,11 @@
 package tests
 
 import (
+	"errors"
 	"fmt"
 	gogs "github.com/gogs/go-gogs-client"
 	"github.com/stretchr/testify/assert"
+	"regexp"
 	"testing"
 )
 
@@ -43,4 +45,35 @@ func TestCreateOrg(t *testing.T) {
 	fmt.Println(err)
 	fmt.Println(res)
 	assert.NoError(t, err)
+}
+
+func TestGetRegexpLibrary(t *testing.T) {
+	git := "https://gogs.xiaocui.site/administration/nginx.git"
+
+	names, _ := GetRepoNames(git)
+	fmt.Println(names.OrganizationName, names.RepositoryName)
+
+	bs, err := gitClient.ListRepoBranches(names.OrganizationName, names.RepositoryName)
+
+	assert.Equal(t, len(bs) >= 2, true)
+	assert.NoError(t, err)
+}
+
+type GitRepoNames struct {
+	OrganizationName string
+	RepositoryName   string
+}
+
+func GetRepoNames(gitAddr string) (*GitRepoNames, error) {
+	reg := regexp.MustCompile("^http.*/(\\w+)/(\\w+).git")
+	groups := reg.FindStringSubmatch(gitAddr)
+
+	if len(groups) > 1 {
+		return &GitRepoNames{
+			OrganizationName: groups[1],
+			RepositoryName:   groups[2],
+		}, nil
+	} else {
+		return nil, errors.New("not found")
+	}
 }

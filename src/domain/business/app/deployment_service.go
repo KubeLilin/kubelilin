@@ -51,7 +51,7 @@ func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *req.Depl
 	}
 	svcPort, _ := strconv.ParseUint(deployModel.ServicePort, 10, 32)
 
-	dpModel.ServicePort = uint32(svcPort)
+	dpModel.ServicePort = uint(svcPort)
 	//名称端口重复性校验
 	if deployModel.ID > 0 {
 		//var existCount int64
@@ -85,7 +85,7 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.Depl
 	limitMemory, _ := strconv.ParseFloat(deployModel.LimitMemory, 64)*/
 	dpcModel := models.SgrTenantDeploymentsContainers{
 		DeployID:      deployModel.ID,
-		IsMain:        true,
+		IsMain:        1,
 		RequestCPU:    deployModel.RequestCPU,
 		RequestMemory: deployModel.RequestMemory,
 		LimitCPU:      deployModel.LimitCPU,
