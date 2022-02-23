@@ -123,11 +123,26 @@ func (c *ApplicationController) GetPipelines(ctx *context.HttpContext) mvc.ApiRe
 	if appId == 0 {
 		return mvc.Fail("没有找到应用")
 	}
-
 	pipelines, err := c.service.GetAppPipelines(appId)
 	if err != nil {
 		return mvc.Fail(err.Error())
 	}
-
 	return mvc.Success(pipelines)
+}
+
+func (c *ApplicationController) PostEditPipeline(request *req.EditPipelineReq) mvc.ApiResult {
+	err := c.service.UpdatePipeline(request)
+	if err != nil {
+		return mvc.Fail(false)
+	}
+	return mvc.Success(true)
+}
+
+func (c *ApplicationController) GetPipeline(ctx *context.HttpContext) mvc.ApiResult {
+	pipelineId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
+	pipeline, err := c.service.GetPipelineById(pipelineId)
+	if err != nil {
+		return mvc.Fail("not found pipeline!")
+	}
+	return mvc.Success(pipeline)
 }

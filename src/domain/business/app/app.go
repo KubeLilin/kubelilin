@@ -172,3 +172,28 @@ func (s *ApplicationService) GetAppPipelines(appId uint64) ([]dto.PipelineInfo, 
 	err := s.db.Raw(sql, appId).Find(&pipelineInfoList).Error
 	return pipelineInfoList, err
 }
+
+func (s *ApplicationService) GetPipelineById(id uint64) (dto.PipelineInfo, error) {
+	sql := `SELECT id,appid,name,dsl,taskStatus,lastTaskId FROM sgr_tenant_application_pipelines WHERE id=?`
+	var pipelineInfo dto.PipelineInfo
+	err := s.db.Raw(sql, id).First(&pipelineInfo).Error
+	return pipelineInfo, err
+}
+
+func (s *ApplicationService) UpdatePipeline(request *req.EditPipelineReq) error {
+	var pipelineInfo models.SgrTenantApplicationPipelines
+	dbRes := s.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).First(&pipelineInfo)
+	if dbRes.Error != nil {
+		return dbRes.Error
+	}
+	pipelineInfo.Name = request.Name
+	pipelineInfo.Dsl = request.DSL
+	now := time.Now()
+	pipelineInfo.UpdateTime = &now
+
+	dbRes = s.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).Updates(pipelineInfo)
+	if dbRes.Error != nil {
+		return nil
+	}
+	return nil
+}
