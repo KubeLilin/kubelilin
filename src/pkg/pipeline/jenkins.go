@@ -446,8 +446,9 @@ func sentHTTPRequest(method, user, token, crumbKey, crumbValue, url string, body
 	if err != nil {
 		return nil, nil, err
 	}
-	req.Header.Set("Content-Type", "application/xml")
+	req.Header.Set("Content-Type", "application/xml;charset=UTF-8")
 	req.Header.Set("Accept", "application/xml")
+	req.Header.Add("Accept-Charset", "utf-8")
 	if crumbKey != "" && crumbValue != "" {
 		req.Header.Set(crumbKey, crumbValue)
 	}

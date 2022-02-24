@@ -3,7 +3,6 @@ package pipeline
 import (
 	"fmt"
 	"log"
-	"sgr/domain/dto"
 	"sgr/pkg/pipeline/templates"
 	"strings"
 )
@@ -101,7 +100,7 @@ func (builder *Builder) WorkFlowProcessor(inputParams []EnvItem, callback *Deplo
 	return flowProcessor
 }
 
-func (builder *Builder) CICDProcessor(inputParams []EnvItem, stages map[string][]dto.StepInfo) FlowProcessor {
+func (builder *Builder) CICDProcessor(inputParams []EnvItem, stages map[string]interface{}) FlowProcessor {
 	envVars := []EnvItem{
 		{Key: "JENKINS_SLAVE_WORKSPACE", Value: "/home/jenkins/agent"},
 		{Key: "ACCESS_TOKEN", Value: builder.Options.jenkinsUserToken},
@@ -127,17 +126,11 @@ func (builder *Builder) CICDProcessor(inputParams []EnvItem, stages map[string][
 			CommandArr: []string{"cat"},
 		},
 	}
-
-	var taskPipelineXMLStrArr []string
-	checkoutTasks, _ := GeneratePipelineXMLStr(templates.Checkout, stages)
-
-	taskPipelineXMLStrArr = append(taskPipelineXMLStrArr, checkoutTasks)
-
-	pipelineJson := strings.Join(taskPipelineXMLStrArr, " ")
+	pipelineDSL, _ := GeneratePipelineXMLStr(templates.CICD, stages)
 	flowProcessor := &CIContext{
 		EnvVars:            envVars,
 		ContainerTemplates: containerTemplates,
-		Stages:             pipelineJson,
+		Stages:             pipelineDSL,
 		CommonContext: CommonContext{
 			Namespace: builder.Options.k8sNamespace,
 		},

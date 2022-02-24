@@ -88,7 +88,8 @@ func (ds *DeploymentSupervisor) ExecuteDeployment(execReq *req.ExecDeploymentReq
 // InitDeploymentByApply 使用apply的方式创建deployment/**
 func (ds *DeploymentSupervisor) InitDeploymentByApply(tenantId uint64, dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers) (interface{}, error) {
 	clusterInfo := &models.SgrTenantCluster{}
-	dbErr := ds.db.Model(&models.SgrTenantCluster{}).Where("id=? and tenant_id=?", dp.ClusterID, tenantId).First(clusterInfo)
+	//and tenant_id=?   ,tenantId
+	dbErr := ds.db.Model(&models.SgrTenantCluster{}).Where("id=?", dp.ClusterID).First(clusterInfo)
 	if dbErr.Error != nil {
 		return nil, errors.New("未找到集群信息")
 	}

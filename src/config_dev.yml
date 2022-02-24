@@ -21,6 +21,7 @@ yoyogo:
         skip_path: [
           "/v1/user/login",
           "/v1/pod/terminal",
+          "v1/deployment/executedeployment",
         ]
   datasource:
     pool:
@@ -53,6 +54,7 @@ hub:
     token: YWRtaW46SGFyYm9yMTIzNDU=
 pipeline:
   jenkins:
+    k8s-namespace: sgr-ci
     username: jenkins
     token: 11d32a54cd6150bd626d8ed73c3bfa02d6
 
