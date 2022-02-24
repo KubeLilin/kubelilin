@@ -12,6 +12,11 @@ type DeployRequest struct {
 	Body  string `json:"body"`
 }
 
+type StageItem struct {
+	Name  string
+	Steps []StepItem
+}
+
 // StepItem Jenkins Step item struct defined
 type StepItem struct {
 	Name          string

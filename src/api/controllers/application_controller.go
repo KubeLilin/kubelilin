@@ -107,6 +107,10 @@ npm config set registry https://registry.npm.taobao.org --global
 npm install
 npm run build
 `,
+			"dotnet": `# 编译命令，注：当前已在代码根路径下
+dotnet restore
+dotnet publish -p:PublishSingleFile=true -r linux-musl-x64 --self-contained true -p:PublishTrimmed=True -p:TrimMode=Link -c Release -o /app/publish                       
+`,
 		})
 }
 
