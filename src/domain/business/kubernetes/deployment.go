@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
 	v1 "k8s.io/api/core/v1"
@@ -226,13 +227,13 @@ func (ds *DeploymentSupervisor) AssemblingContainerForApply(dp *models.SgrTenant
 	})
 	container.Ports = ports
 
-	container.Env = injectionContainerEnv()
+	container.Env = injectionContainerEnv(dpc.Environments)
 
 	containerArr = append(containerArr, container)
 	return containerArr, nil
 }
 
-func injectionContainerEnv() []corev1.EnvVarApplyConfiguration {
+func injectionContainerEnv(envJson string) []corev1.EnvVarApplyConfiguration {
 	var envs []corev1.EnvVarApplyConfiguration
 	envs = append(envs,
 		*corev1.EnvVar().WithName("MY_NODE_NAME").WithValueFrom(
@@ -252,6 +253,20 @@ func injectionContainerEnv() []corev1.EnvVarApplyConfiguration {
 			corev1.EnvVarSource().WithFieldRef(corev1.ObjectFieldSelector().WithFieldPath("status.podIP")),
 		))
 
+	//region 添加录入对系统环境变量
+	if envJson != "" {
+		var envArr []req.DeploymentEnv
+		envJsonErr := json.Unmarshal([]byte(envJson), &envArr)
+		if envJsonErr == nil {
+			for _, x := range envArr {
+				envs = append(envs,
+					*corev1.EnvVar().WithName(x.Key).WithValue(x.Value),
+				)
+			}
+		}
+	}
+
+	//endregion
 	return envs
 }
 
