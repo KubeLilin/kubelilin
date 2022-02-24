@@ -46,6 +46,7 @@ func (controller *DeploymentController) PostCreateDeploymentStep1(ctx *context.H
 }
 
 func (controller *DeploymentController) PostCreateDeploymentStep2(deployModel *req.DeploymentStepRequest) mvc.ApiResult {
+	fmt.Println(deployModel)
 	err, res := controller.deploymentService.CreateDeploymentStep2(deployModel)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())

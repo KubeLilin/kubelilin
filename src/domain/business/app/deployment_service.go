@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
@@ -83,6 +84,11 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.Depl
 	requestMemory, _ := strconv.ParseFloat(deployModel.RequestMemory, 64)
 	limitCPU, _ := strconv.ParseFloat(deployModel.LimitCPU, 64)
 	limitMemory, _ := strconv.ParseFloat(deployModel.LimitMemory, 64)*/
+
+	envJson, jsonErr := json.Marshal(deployModel.Environments)
+	if jsonErr != nil {
+		return jsonErr, nil
+	}
 	dpcModel := models.SgrTenantDeploymentsContainers{
 		DeployID:      deployModel.ID,
 		IsMain:        1,
@@ -90,6 +96,7 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.Depl
 		RequestMemory: deployModel.RequestMemory,
 		LimitCPU:      deployModel.LimitCPU,
 		LimitMemory:   deployModel.LimitMemory,
+		Environments:  string(envJson),
 	}
 	deployment.db.Model(&models.SgrTenantDeployments{}).Where("id = ?", deployModel.ID).First(&dpModel)
 	if dpModel.AppID == 0 {
@@ -169,11 +176,19 @@ func (deployment *DeploymentService) GetDeploymentForm(id uint64) (error, *req.D
 	sql := strings.Builder{}
 	sql.WriteString(`select dp.id,dpc.id as dpc_id , dp.name,dp.nickname,dp.tenant_id,dp.cluster_id,dp.namespace_id,dp.app_id,dp.app_name,
        dp.level,dp.replicas,dp.service_away,dp.service_enable,dp.service_port,dp.service_port_type,
-       dpc.request_cpu,dpc.limit_cpu,dpc.request_memory,dpc.limit_memory
+       dpc.request_cpu,dpc.limit_cpu,dpc.request_memory,dpc.limit_memory,dpc.environments as env_json
        from sgr_tenant_deployments as dp
 inner join sgr_tenant_deployments_containers as dpc on dp.id=dpc.deploy_id
 where dp.id=?`)
 	resErr := deployment.db.Raw(sql.String(), id).Scan(res)
+	if resErr != nil && res.EnvJson != "" {
+		var env []req.DeploymentEnv
+		jsonErr := json.Unmarshal([]byte(res.EnvJson), &env)
+		if jsonErr != nil {
+			return jsonErr, nil
+		}
+		res.Environments = env
+	}
 	return resErr.Error, res
 }
 
