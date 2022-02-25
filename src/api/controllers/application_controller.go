@@ -86,7 +86,10 @@ func (c *ApplicationController) GetGitBranches(ctx *context.HttpContext) mvc.Api
 	appInfo, _ := c.service.GetAppInfo(appId)
 	if appInfo.Git != "" {
 		names, _ := c.service.VCSService.GetGitBranches(appInfo.Git)
-		return mvc.Success(names)
+		return mvc.Success(context.H{
+			"git":      appInfo.Git,
+			"branches": names,
+		})
 	}
 	// appInfo.Git
 	return mvc.Fail("no data")
