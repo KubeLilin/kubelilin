@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/yoyofx/yoyogo/abstractions"
 	"gorm.io/gorm"
@@ -114,6 +115,34 @@ func (pipelineService *PipelineService) UpdatePipeline(request *req.EditPipeline
 }
 
 func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) error {
+	var pipelineStages []dto.StageInfo
+	_ = json.Unmarshal([]byte(request.DSL), &pipelineStages)
+
+	lilinHost := pipelineService.config.GetString("kubelilin.host")
+	if lilinHost == "" {
+		lilinHost = "localhost"
+	}
+	//harborAddress := pipelineService.config.GetString("hub.harbor.url")
+	//pipelineName := fmt.Sprintf("pipeline-%s-app-%s", request.Name, request.AppId)
+	//imageName := fmt.Sprintf("app-%s-pipeline-%s", request.AppId, request.Id)
+	//buildImage := ""
 
 	return nil
+}
+
+func (pipelineService *PipelineService) GetBuildImageByLanguage(languageName string) string {
+	buildImage := ""
+	switch languageName {
+	case "java":
+		buildImage = "maven:3.8.4-jdk-8"
+		break
+	case "golang":
+		buildImage = "golang:1.16.5"
+		break
+	case "nodejs":
+		buildImage = "node:16-alpine"
+	case "dotnet":
+		buildImage = "mcr.microsoft.com/dotnet/sdk:5.0"
+	}
+	return buildImage
 }

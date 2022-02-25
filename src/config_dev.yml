@@ -48,13 +48,16 @@ vcs:
     password: admin123
 hub:
   harbor:
-    url: https://harbor.xiaocui.site
+    url: harbor.xiaocui.site
     username: admin
     password: Harbor12345
     token: YWRtaW46SGFyYm9yMTIzNDU=
 pipeline:
   jenkins:
-    k8s-namespace: sgr-ci
+    k8s-namespace: sgr-ci     # kube-lilin
     username: jenkins
     token: 11d32a54cd6150bd626d8ed73c3bfa02d6
+
+kubelilin:
+  host: api.kubelilin.com
 
