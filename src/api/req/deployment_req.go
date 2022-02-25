@@ -105,6 +105,7 @@ type ExecDeploymentRequest struct {
 	IsDiv      bool   `json:"IsDiv" uri:"IsDiv"`
 	DpId       uint64 `json:"dpId" uri:"dpId"`
 	TenantId   uint64 `json:"tenantId" uri:"tenantId"`
+	Memo       string `json:"memo"`
 }
 
 type DeploymentEnv struct {
