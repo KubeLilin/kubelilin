@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sgr-apiserver
-  namespace: sgr-system
+  name: kubelilin-dashboard
+  namespace: kube-lilin
 spec:
   selector:
     matchLabels:
-      app: sgr-apiserver
+      app: kubelilin-dashboard
   replicas: 1                       # tells deployment to run 2 pods matching the template
   template:                         # create pods using pod definition in this template
     metadata:
       labels:
-        app: sgr-apiserver
+        app: kubelilin-dashboard
     spec:
       containers:
         - name: app
-          image: yoyofx/sgr-api:dev1.0
+          image: yoyofx/sgr-ui:dev1.3
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8080
+            - containerPort: 80

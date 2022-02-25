@@ -11,11 +11,12 @@ import (
 
 type ApplicationController struct {
 	mvc.ApiController
-	service *app.ApplicationService
+	service         *app.ApplicationService
+	pipelineService *app.PipelineService
 }
 
-func NewApplicationController(service *app.ApplicationService) *ApplicationController {
-	return &ApplicationController{service: service}
+func NewApplicationController(service *app.ApplicationService, pipelineService *app.PipelineService) *ApplicationController {
+	return &ApplicationController{service: service, pipelineService: pipelineService}
 }
 
 func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request *req.AppReq) mvc.ApiResult {
@@ -96,29 +97,11 @@ func (c *ApplicationController) GetGitBranches(ctx *context.HttpContext) mvc.Api
 }
 
 func (c *ApplicationController) GetBuildScripts(ctx *context.HttpContext) mvc.ApiResult {
-	return mvc.Success(
-		context.H{
-			"golang": `# 编译命令，注：当前已在代码根路径下
-go env -w GOPROXY=https://goproxy.cn,direct
-go build -ldflags="-s -w" -o app .
-`,
-			"java": `# 编译命令，注：当前已在代码根路径下
-mvn clean package                         
-`,
-			"nodejs": `# 编译命令，注：当前已在代码根路径下
-npm config set registry https://registry.npm.taobao.org --global
-npm install
-npm run build
-`,
-			"dotnet": `# 编译命令，注：当前已在代码根路径下
-dotnet restore
-dotnet publish -p:PublishSingleFile=true -r linux-musl-x64 --self-contained true -p:PublishTrimmed=True -p:TrimMode=Link -c Release -o /app/publish                       
-`,
-		})
+	return mvc.Success(c.pipelineService.GetBuildScripts())
 }
 
 func (c *ApplicationController) PostNewPipeline(ctx *context.HttpContext, req *req.AppNewPipelineReq) mvc.ApiResult {
-	err, pipeline := c.service.NewPipeline(req)
+	err, pipeline := c.pipelineService.NewPipeline(req)
 	if err != nil {
 		return mvc.Fail(err.Error())
 	}
@@ -130,7 +113,7 @@ func (c *ApplicationController) GetPipelines(ctx *context.HttpContext) mvc.ApiRe
 	if appId == 0 {
 		return mvc.Fail("没有找到应用")
 	}
-	pipelines, err := c.service.GetAppPipelines(appId)
+	pipelines, err := c.pipelineService.GetAppPipelines(appId)
 	if err != nil {
 		return mvc.Fail(err.Error())
 	}
@@ -138,16 +121,18 @@ func (c *ApplicationController) GetPipelines(ctx *context.HttpContext) mvc.ApiRe
 }
 
 func (c *ApplicationController) PostEditPipeline(request *req.EditPipelineReq) mvc.ApiResult {
-	err := c.service.UpdatePipeline(request)
+	err := c.pipelineService.UpdatePipeline(request)
 	if err != nil {
 		return mvc.Fail(false)
+	} else {
+
 	}
 	return mvc.Success(true)
 }
 
 func (c *ApplicationController) GetPipeline(ctx *context.HttpContext) mvc.ApiResult {
 	pipelineId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
-	pipeline, err := c.service.GetPipelineById(pipelineId)
+	pipeline, err := c.pipelineService.GetPipelineById(pipelineId)
 	if err != nil {
 		return mvc.Fail("not found pipeline!")
 	}

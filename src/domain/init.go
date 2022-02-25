@@ -32,6 +32,8 @@ func init() {
 			serviceCollection.AddTransient(kubernetes.NewDeploymentSupervisor)
 			serviceCollection.AddTransient(kubernetes.NewServiceSupervisor)
 			serviceCollection.AddTransient(app.NewVcsService)
+			serviceCollection.AddTransient(app.NewPipelineService)
+
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
 
 		})
