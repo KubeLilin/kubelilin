@@ -8,6 +8,7 @@ import (
 	"sgr/api/req"
 	"sgr/domain/database/models"
 	"sgr/domain/dto"
+	pipelineV1 "sgr/pkg/pipeline"
 	"time"
 )
 
@@ -122,15 +123,33 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 	if lilinHost == "" {
 		lilinHost = "localhost"
 	}
+	jenkinsUrl := pipelineService.config.GetString("pipeline.jenkins.url")
+	jenkinsToken := pipelineService.config.GetString("pipeline.jenkins.token")
+	jenkinsUser := pipelineService.config.GetString("pipeline.jenkins.username")
+	jenkinsNamespace := pipelineService.config.GetString("pipeline.jenkins.k8s-namespace")
+	buildImage := ""
+	builder := pipelineV1.NewBuilder()
+	builder.UseJenkins(jenkinsUrl, jenkinsUser, jenkinsToken).
+		UseKubernetes(jenkinsNamespace).UseBuildImage(buildImage)
+
 	//harborAddress := pipelineService.config.GetString("hub.harbor.url")
 	//pipelineName := fmt.Sprintf("pipeline-%s-app-%s", request.Name, request.AppId)
 	//imageName := fmt.Sprintf("app-%s-pipeline-%s", request.AppId, request.Id)
 	//buildImage := ""
+	//
+	//// 转换DSL
+	//env := []pipelineV1.EnvItem{
+	//	// {Key: "SGR_DOCKER_FILE", Value: "./examples/simpleweb/Dockerfile"},
+	//	{Key: "SGR_REPOSITORY_NAME", Value: fmt.Sprintf("%s/apps/%s", harborAddress, imageName)},
+	//	{Key: "SGR_REGISTRY_ADDR", Value: fmt.Sprintf("https://%s/", harborAddress)},
+	//	{Key: "SGR_REGISTRY_AUTH", Value: "YWRtaW46SGFyYm9yMTIzNDU="},
+	//	{Key: "SGR_REGISTRY_CONFIG", Value: "/kaniko/.docker"},
+	//}
 
 	return nil
 }
 
-func (pipelineService *PipelineService) GetBuildImageByLanguage(languageName string) string {
+func getBuildImageByLanguage(languageName string) string {
 	buildImage := ""
 	switch languageName {
 	case "java":
