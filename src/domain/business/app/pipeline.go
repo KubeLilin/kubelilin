@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/yoyofx/yoyogo/abstractions"
 	"gorm.io/gorm"
 	"sgr/api/req"
@@ -116,37 +117,106 @@ func (pipelineService *PipelineService) UpdatePipeline(request *req.EditPipeline
 }
 
 func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) error {
+	// Generate pipeline name and docker image name.
+	pipelineName := fmt.Sprintf("pipeline-%s-app-%s", request.Name, request.AppId)
+	imageName := fmt.Sprintf("app-%s-pipeline-%s", request.AppId, request.Id)
+	// pipeline json from frontend
 	var pipelineStages []dto.StageInfo
 	_ = json.Unmarshal([]byte(request.DSL), &pipelineStages)
 
+	// get config by configuration
 	lilinHost := pipelineService.config.GetString("kubelilin.host")
 	if lilinHost == "" {
 		lilinHost = "localhost"
 	}
+	// 	 jenkins config
 	jenkinsUrl := pipelineService.config.GetString("pipeline.jenkins.url")
 	jenkinsToken := pipelineService.config.GetString("pipeline.jenkins.token")
 	jenkinsUser := pipelineService.config.GetString("pipeline.jenkins.username")
 	jenkinsNamespace := pipelineService.config.GetString("pipeline.jenkins.k8s-namespace")
-	buildImage := ""
+	//	 harbor config
+	harborAddress := pipelineService.config.GetString("hub.harbor.url")
+	harborToken := pipelineService.config.GetString("hub.harbor.token")
+
+	// Conversion JSON to DSL
+	// Set SGR_DOCKER_FILE value, that apply to code_build step .
+	env := []pipelineV1.EnvItem{
+		// {Key: "SGR_DOCKER_FILE", Value: "./examples/simpleweb/Dockerfile"},
+		{Key: "SGR_REPOSITORY_NAME", Value: fmt.Sprintf("%s/apps/%s", harborAddress, imageName)},
+		{Key: "SGR_REGISTRY_ADDR", Value: fmt.Sprintf("https://%s/", harborAddress)},
+		{Key: "SGR_REGISTRY_AUTH", Value: harborToken},
+		{Key: "SGR_REGISTRY_CONFIG", Value: "/kaniko/.docker"},
+	}
+	var buildImage string
+
+	var dslStageList []pipelineV1.StageItem
+	for _, stage := range pipelineStages {
+		dslStageItem := pipelineV1.StageItem{Name: stage.Name}
+		for _, step := range stage.Steps {
+			switch step.Key { // git_pull  , code_build  ,  cmd_shell ,  app_deploy
+			case "git_pull":
+				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: step.Name,
+					Command: fmt.Sprintf("	git url: '%s', branch: '%s'", step.Content["git"], step.Content["branch"])})
+				break
+			case "cmd_shell":
+				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: step.Name,
+					Command: fmt.Sprintf(`
+					sh '''
+					 %s
+					'''`, step.Content["shell"].(string))})
+				break
+			case "app_deploy":
+				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: step.Name,
+					Command: fmt.Sprintf(`
+					sh '''
+					# curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d "{"wholeImage": "${SGR_REPOSITORY_NAME}:v${BUILD_NUMBER}", "IsDiv":true , "dpId": %v, "tenantId": 0 }" https://%s/v1/deployment/executedeployment
+					echo "{"wholeImage": "${SGR_REPOSITORY_NAME}:v${BUILD_NUMBER}", "IsDiv":true , "dpId": 1, "tenantId": 0 }"
+					'''`, lilinHost, step.Content["depolyment"])})
+				break
+			case "code_build":
+				// 添加编译环境,Dockerfile 文件位置
+				env = append(env, pipelineV1.EnvItem{Key: "SGR_DOCKER_FILE", Value: step.Content["buildFile"].(string)})
+				// 添加编译环境 编译镜像：版本
+				buildEnv := step.Content["buildEnv"].(string)
+				buildImage = getBuildImageByLanguage(buildEnv)
+
+				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: "code build",
+					Command: fmt.Sprintf(`
+					container('build') {
+						sh '''
+						%s
+						'''
+					}`, step.Content["buildScript"])})
+
+				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: "docker build",
+					Command: `
+					container('docker') {
+						sh "[ -d $SGR_REGISTRY_CONFIG ] || mkdir -pv $SGR_REGISTRY_CONFIG"
+   						sh """
+                    		echo '{"auths": {"'$SGR_REGISTRY_ADDR'": {"auth": "'$SGR_REGISTRY_AUTH'"}}}' > $SGR_REGISTRY_CONFIG/config.json
+						"""
+						sh '''#!/busybox/sh
+							/kaniko/executor -f $SGR_DOCKER_FILE -c . --destination=$SGR_REPOSITORY_NAME:v$BUILD_NUMBER  --insecure --skip-tls-verify -v=debug
+						''' 
+					}`})
+				break
+			}
+		}
+
+		dslStageList = append(dslStageList, dslStageItem)
+	}
+
+	stageItems := map[string]interface{}{"pipelineStages": dslStageList}
+
+	// connect jenkins and save the job
 	builder := pipelineV1.NewBuilder()
 	builder.UseJenkins(jenkinsUrl, jenkinsUser, jenkinsToken).
 		UseKubernetes(jenkinsNamespace).UseBuildImage(buildImage)
 
-	//harborAddress := pipelineService.config.GetString("hub.harbor.url")
-	//pipelineName := fmt.Sprintf("pipeline-%s-app-%s", request.Name, request.AppId)
-	//imageName := fmt.Sprintf("app-%s-pipeline-%s", request.AppId, request.Id)
-	//buildImage := ""
-	//
-	//// 转换DSL
-	//env := []pipelineV1.EnvItem{
-	//	// {Key: "SGR_DOCKER_FILE", Value: "./examples/simpleweb/Dockerfile"},
-	//	{Key: "SGR_REPOSITORY_NAME", Value: fmt.Sprintf("%s/apps/%s", harborAddress, imageName)},
-	//	{Key: "SGR_REGISTRY_ADDR", Value: fmt.Sprintf("https://%s/", harborAddress)},
-	//	{Key: "SGR_REGISTRY_AUTH", Value: "YWRtaW46SGFyYm9yMTIzNDU="},
-	//	{Key: "SGR_REGISTRY_CONFIG", Value: "/kaniko/.docker"},
-	//}
+	processor := builder.CICDProcessor(env, stageItems)
+	pipeline, _ := builder.Build()
 
-	return nil
+	return pipeline.SaveJob(pipelineName, processor)
 }
 
 func getBuildImageByLanguage(languageName string) string {

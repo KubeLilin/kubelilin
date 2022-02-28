@@ -19,6 +19,7 @@ func NewApplicationController(service *app.ApplicationService, pipelineService *
 	return &ApplicationController{service: service, pipelineService: pipelineService}
 }
 
+// PostCreateApp new application.
 func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request *req.AppReq) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
@@ -29,6 +30,7 @@ func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request 
 	return mvc.Success(res)
 }
 
+// PutEditApp edit application information.
 func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *req.AppReq) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
@@ -39,9 +41,10 @@ func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *re
 	return mvc.Success(res)
 }
 
+// GetAppList get application list by tenant id.
 func (c *ApplicationController) GetAppList(ctx *context.HttpContext) mvc.ApiResult {
 	request := req.AppReq{}
-	ctx.BindWithUri(&request)
+	_ = ctx.BindWithUri(&request)
 
 	userInfo := req.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
@@ -53,16 +56,19 @@ func (c *ApplicationController) GetAppList(ctx *context.HttpContext) mvc.ApiResu
 	return mvc.Success(res)
 }
 
+// GetAppLanguage get language for application
 func (c *ApplicationController) GetAppLanguage() mvc.ApiResult {
 	res := c.service.QueryAppCodeLanguage()
 	return mvc.Success(res)
 }
 
+// GetAppLevel get level for application
 func (c *ApplicationController) GetAppLevel() mvc.ApiResult {
 	res := c.service.QueryAppLevel()
 	return mvc.Success(res)
 }
 
+// GetGitRepo get git address for application
 func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
 	appName := ctx.Input.Query("appName")
@@ -73,6 +79,7 @@ func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResu
 	return mvc.Success(cvsRes)
 }
 
+// GetInfo get application information
 func (c *ApplicationController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	info, err := c.service.GetAppInfo(appId)
@@ -82,6 +89,7 @@ func (c *ApplicationController) GetInfo(ctx *context.HttpContext) mvc.ApiResult 
 	return mvc.Success(info)
 }
 
+// GetGitBranches get git addresses & branches for pipeline
 func (c *ApplicationController) GetGitBranches(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	appInfo, _ := c.service.GetAppInfo(appId)
@@ -96,11 +104,13 @@ func (c *ApplicationController) GetGitBranches(ctx *context.HttpContext) mvc.Api
 	return mvc.Fail("no data")
 }
 
-func (c *ApplicationController) GetBuildScripts(ctx *context.HttpContext) mvc.ApiResult {
+// GetBuildScripts get pipeline build scripts for code_build step.
+func (c *ApplicationController) GetBuildScripts() mvc.ApiResult {
 	return mvc.Success(c.pipelineService.GetBuildScripts())
 }
 
-func (c *ApplicationController) PostNewPipeline(ctx *context.HttpContext, req *req.AppNewPipelineReq) mvc.ApiResult {
+// PostNewPipeline new pipeline only by name & id
+func (c *ApplicationController) PostNewPipeline(req *req.AppNewPipelineReq) mvc.ApiResult {
 	err, pipeline := c.pipelineService.NewPipeline(req)
 	if err != nil {
 		return mvc.Fail(err.Error())
@@ -108,6 +118,7 @@ func (c *ApplicationController) PostNewPipeline(ctx *context.HttpContext, req *r
 	return mvc.Success(pipeline.ID)
 }
 
+// GetPipelines get pipeline list by application id.
 func (c *ApplicationController) GetPipelines(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	if appId == 0 {
@@ -120,16 +131,20 @@ func (c *ApplicationController) GetPipelines(ctx *context.HttpContext) mvc.ApiRe
 	return mvc.Success(pipelines)
 }
 
+// PostEditPipeline Save pipeline information and DSL.
 func (c *ApplicationController) PostEditPipeline(request *req.EditPipelineReq) mvc.ApiResult {
 	err := c.pipelineService.UpdatePipeline(request)
+	if err == nil {
+		err = c.pipelineService.UpdateDSL(request)
+	}
 	if err != nil {
 		return mvc.Fail(false)
-	} else {
-
 	}
+
 	return mvc.Success(true)
 }
 
+// GetPipeline get pipeline frontend json by id.
 func (c *ApplicationController) GetPipeline(ctx *context.HttpContext) mvc.ApiResult {
 	pipelineId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
 	pipeline, err := c.pipelineService.GetPipelineById(pipelineId)
