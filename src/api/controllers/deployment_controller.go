@@ -7,6 +7,7 @@ import (
 	"sgr/api/req"
 	"sgr/domain/business/app"
 	"sgr/domain/business/kubernetes"
+	"sgr/pkg/page"
 	"strconv"
 )
 
@@ -156,4 +157,17 @@ func (controller DeploymentController) GetYaml(ctx *context.HttpContext) mvc.Api
 		return mvc.FailWithMsg(nil, err.Error())
 	}
 	return mvc.Success(yamlStr)
+}
+
+func (controller DeploymentController) GetReleaseRecord(ctx *context.HttpContext) mvc.ApiResult {
+	dpIdStr := ctx.Input.Query("dpId")
+	dpId, _ := strconv.ParseUint(dpIdStr, 10, 64)
+	appIdStr := ctx.Input.Query("appId")
+	appId, _ := strconv.ParseUint(appIdStr, 10, 64)
+	pgaeReq := page.InitPageByCtx(ctx)
+	err, res := controller.deploymentSupervisor.QueryReleaseRecord(appId, dpId, pgaeReq)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(res)
 }

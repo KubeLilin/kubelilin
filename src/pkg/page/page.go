@@ -2,6 +2,7 @@ package page
 
 import (
 	"fmt"
+	"github.com/yoyofx/yoyogo/web/context"
 	"gorm.io/gorm"
 	"strconv"
 	"strings"
@@ -23,6 +24,16 @@ type PageRequest struct {
 
 func (pg PageRequest) OffSet() int {
 	return (pg.PageIndex - 1) * pg.PageSize
+}
+
+func InitPageByCtx(ctx *context.HttpContext) *PageRequest {
+
+	pageIndex, _ := strconv.ParseInt(ctx.Input.Query("current"), 10, 32)
+	paagSize, _ := strconv.ParseInt(ctx.Input.Query("pageSize"), 10, 32)
+	return &PageRequest{
+		PageIndex: int(pageIndex),
+		PageSize:  int(paagSize),
+	}
 }
 
 type PageHelper struct {
