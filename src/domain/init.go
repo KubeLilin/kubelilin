@@ -8,6 +8,7 @@ import (
 	"sgr/domain/business/kubernetes"
 	"sgr/domain/business/tenant"
 	"sgr/domain/conf"
+	pipelineV1 "sgr/pkg/pipeline"
 )
 
 // init 所有业务对象的IOC容器注入入口
@@ -35,6 +36,19 @@ func init() {
 			serviceCollection.AddTransient(app.NewPipelineService)
 
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
+			injectionJenkinsBuilder(config, serviceCollection)
 
 		})
+}
+
+func injectionJenkinsBuilder(config abstractions.IConfiguration, serviceCollection *dependencyinjection.ServiceCollection) {
+	jenkinsUrl := config.GetString("pipeline.jenkins.url")
+	jenkinsToken := config.GetString("pipeline.jenkins.token")
+	jenkinsUser := config.GetString("pipeline.jenkins.username")
+	jenkinsNamespace := config.GetString("pipeline.jenkins.k8s-namespace")
+
+	serviceCollection.AddSingleton(func() *pipelineV1.Builder {
+		return pipelineV1.NewBuilder().UseJenkins(jenkinsUrl, jenkinsUser, jenkinsToken).
+			UseKubernetes(jenkinsNamespace)
+	})
 }

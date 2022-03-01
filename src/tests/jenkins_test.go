@@ -12,7 +12,7 @@ import (
 
 func TestGetJenkinsJob(t *testing.T) {
 	builder := pipelineV1.NewBuilder()
-	builder.UseJenkins("http://152.136.141.235:32001", "jenkins", "11e681bb454a36a9ce0e0a6fd030d059a9").
+	builder.UseJenkins("http://152.136.141.235:32001", "jenkins", "11d32a54cd6150bd626d8ed73c3bfa02d6").
 		UseKubernetes("sgr-ci").UseBuildImage("golang:1.16.5")
 
 	pipeline, _ := builder.Build()
@@ -23,7 +23,23 @@ func TestGetJenkinsJob(t *testing.T) {
 	}
 	fmt.Printf("jenkins version  %s", ping)
 
-	job1, _ := pipeline.GetJobInfo("sample-pipeline-test", 25)
+	job1, _ := pipeline.GetJobInfo("pipeline-4-app-2", 9)
+
+	seconds := job1.DurationMillis / 1000
+	dd, hh, mm, ss := seconds/3600/12, seconds/3600, (seconds%3600)/60, seconds%60
+	fff := fmt.Sprintf("%dd:%dh:%dm:%ds", dd, hh, mm, ss)
+	ds := ""
+	if hh > 0 {
+		ds = fmt.Sprintf("%dh", hh)
+	} else if mm > 0 {
+		ds = fmt.Sprintf("%dm", mm)
+	} else if ss > 0 {
+		ds = fmt.Sprintf("%ds", ss)
+	}
+
+	assert.Equal(t, ds != "", true)
+
+	assert.Equal(t, fff != "", true)
 
 	assert.Equal(t, job1 != nil, true)
 }

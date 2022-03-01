@@ -153,3 +153,30 @@ func (c *ApplicationController) GetPipeline(ctx *context.HttpContext) mvc.ApiRes
 	}
 	return mvc.Success(pipeline)
 }
+
+func (c *ApplicationController) PostRunPipeline(request *req.RunPipelineReq) mvc.ApiResult {
+	taskId, err := c.pipelineService.RunPipeline(request)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(taskId)
+}
+
+func (c *ApplicationController) PostPipelineStatus(request *req.PipelineStatusReq) mvc.ApiResult {
+	err := c.pipelineService.UpdatePipelineStatus(request)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(true)
+
+}
+
+func (c *ApplicationController) GetPipelineDetails(httpContext *context.HttpContext) mvc.ApiResult {
+	var request req.PipelineDetailsReq
+	_ = httpContext.BindWithUri(&request)
+	job, err := c.pipelineService.GetDetails(&request)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(job)
+}

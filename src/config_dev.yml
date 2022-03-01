@@ -21,7 +21,8 @@ yoyogo:
         skip_path: [
           "/v1/user/login",
           "/v1/pod/terminal",
-          "v1/deployment/executedeployment",
+          "/v1/deployment/executedeployment",
+          "/v1/application/pipelinestatus"
         ]
   datasource:
     pool:
@@ -60,5 +61,5 @@ pipeline:
     token: 11d32a54cd6150bd626d8ed73c3bfa02d6
 
 kubelilin:
-  host: api.kubelilin.com
+  host: localhost:8080 #api.kubelilin.com
 

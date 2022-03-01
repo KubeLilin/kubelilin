@@ -10,16 +10,18 @@ import (
 	"sgr/domain/database/models"
 	"sgr/domain/dto"
 	pipelineV1 "sgr/pkg/pipeline"
+	"strconv"
 	"time"
 )
 
 type PipelineService struct {
-	db     *gorm.DB
-	config abstractions.IConfiguration
+	db             *gorm.DB
+	jenkinsBuilder *pipelineV1.Builder
+	config         abstractions.IConfiguration
 }
 
-func NewPipelineService(db *gorm.DB, config abstractions.IConfiguration) *PipelineService {
-	return &PipelineService{db: db, config: config}
+func NewPipelineService(db *gorm.DB, jenkins *pipelineV1.Builder, config abstractions.IConfiguration) *PipelineService {
+	return &PipelineService{db: db, jenkinsBuilder: jenkins, config: config}
 }
 
 /*
@@ -106,6 +108,8 @@ func (pipelineService *PipelineService) UpdatePipeline(request *req.EditPipeline
 	}
 	pipelineInfo.Name = request.Name
 	pipelineInfo.Dsl = request.DSL
+	taskStatus := uint(0)
+	pipelineInfo.TaskStatus = &taskStatus
 	now := time.Now()
 	pipelineInfo.UpdateTime = &now
 
@@ -118,8 +122,8 @@ func (pipelineService *PipelineService) UpdatePipeline(request *req.EditPipeline
 
 func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) error {
 	// Generate pipeline name and docker image name.
-	pipelineName := fmt.Sprintf("pipeline-%s-app-%s", request.Name, request.AppId)
-	imageName := fmt.Sprintf("app-%s-pipeline-%s", request.AppId, request.Id)
+	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
+	imageName := pipelineName
 	// pipeline json from frontend
 	var pipelineStages []dto.StageInfo
 	_ = json.Unmarshal([]byte(request.DSL), &pipelineStages)
@@ -129,11 +133,11 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 	if lilinHost == "" {
 		lilinHost = "localhost"
 	}
-	// 	 jenkins config
-	jenkinsUrl := pipelineService.config.GetString("pipeline.jenkins.url")
-	jenkinsToken := pipelineService.config.GetString("pipeline.jenkins.token")
-	jenkinsUser := pipelineService.config.GetString("pipeline.jenkins.username")
-	jenkinsNamespace := pipelineService.config.GetString("pipeline.jenkins.k8s-namespace")
+	//// 	 jenkins config
+	//jenkinsUrl := pipelineService.config.GetString("pipeline.jenkins.url")
+	//jenkinsToken := pipelineService.config.GetString("pipeline.jenkins.token")
+	//jenkinsUser := pipelineService.config.GetString("pipeline.jenkins.username")
+	//jenkinsNamespace := pipelineService.config.GetString("pipeline.jenkins.k8s-namespace")
 	//	 harbor config
 	harborAddress := pipelineService.config.GetString("hub.harbor.url")
 	harborToken := pipelineService.config.GetString("hub.harbor.token")
@@ -169,8 +173,8 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: step.Name,
 					Command: fmt.Sprintf(`
 					sh '''
-					# curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d "{"wholeImage": "${SGR_REPOSITORY_NAME}:v${BUILD_NUMBER}", "IsDiv":true , "dpId": %v, "tenantId": 0 }" https://%s/v1/deployment/executedeployment
-					echo "{"wholeImage": "${SGR_REPOSITORY_NAME}:v${BUILD_NUMBER}", "IsDiv":true , "dpId": 1, "tenantId": 0 }"
+					curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d "{"wholeImage": "${SGR_REPOSITORY_NAME}:v${BUILD_NUMBER}", "IsDiv":true , "dpId": %v, "tenantId": 0 }" https://%s/v1/deployment/executedeployment
+					# echo "{"wholeImage": "${SGR_REPOSITORY_NAME}:v${BUILD_NUMBER}", "IsDiv":true , "dpId": 1, "tenantId": 0 }"
 					'''`, lilinHost, step.Content["depolyment"])})
 				break
 			case "code_build":
@@ -209,9 +213,11 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 	stageItems := map[string]interface{}{"pipelineStages": dslStageList}
 
 	// connect jenkins and save the job
-	builder := pipelineV1.NewBuilder()
-	builder.UseJenkins(jenkinsUrl, jenkinsUser, jenkinsToken).
-		UseKubernetes(jenkinsNamespace).UseBuildImage(buildImage)
+	//builder := pipelineV1.NewBuilder()
+	//builder.UseJenkins(jenkinsUrl, jenkinsUser, jenkinsToken).
+	//	UseKubernetes(jenkinsNamespace).UseBuildImage(buildImage)
+
+	builder := pipelineService.jenkinsBuilder.UseBuildImage(buildImage)
 
 	processor := builder.CICDProcessor(env, stageItems)
 	pipeline, _ := builder.Build()
@@ -234,4 +240,44 @@ func getBuildImageByLanguage(languageName string) string {
 		buildImage = "mcr.microsoft.com/dotnet/sdk:5.0"
 	}
 	return buildImage
+}
+
+func (pipelineService *PipelineService) RunPipeline(request *req.RunPipelineReq) (int64, error) {
+	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
+	builder := pipelineService.jenkinsBuilder
+	pipeline, _ := builder.Build()
+	taskId, err := pipeline.RunJob(pipelineName)
+
+	// update databse
+	var pipelineInfo models.SgrTenantApplicationPipelines
+	_ = pipelineService.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).First(&pipelineInfo)
+	now := time.Now()
+	pipelineInfo.UpdateTime = &now
+	pipelineInfo.LastTaskID = strconv.FormatInt(taskId, 10)
+	taskStatus := uint(1)
+	pipelineInfo.TaskStatus = &taskStatus
+	_ = pipelineService.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).Updates(pipelineInfo)
+
+	return taskId, err
+}
+
+func (pipelineService *PipelineService) UpdatePipelineStatus(request *req.PipelineStatusReq) error {
+	// update databse
+	var pipelineInfo models.SgrTenantApplicationPipelines
+	_ = pipelineService.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).First(&pipelineInfo)
+	now := time.Now()
+	pipelineInfo.UpdateTime = &now
+	taskStatus := uint(request.Status)
+	pipelineInfo.TaskStatus = &taskStatus
+	dbRes := pipelineService.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).Updates(pipelineInfo)
+	return dbRes.Error
+}
+
+func (pipelineService *PipelineService) GetDetails(request *req.PipelineDetailsReq) (*pipelineV1.JobInfo, error) {
+	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
+	builder := pipelineService.jenkinsBuilder
+	pipeline, _ := builder.Build()
+	return pipeline.GetJobInfo(pipelineName, request.TaskId)
+
+	//job1.Result (IN_PROGRESS, SUCCESS , FAILED , ABORTED)
 }
