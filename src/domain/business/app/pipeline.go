@@ -173,9 +173,9 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: step.Name,
 					Command: fmt.Sprintf(`
 					sh '''
-					curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d "{"wholeImage": "${SGR_REPOSITORY_NAME}:v${BUILD_NUMBER}", "IsDiv":true , "dpId": %v, "tenantId": 0 }" https://%s/v1/deployment/executedeployment
+					curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d "{"wholeImage": "${SGR_REPOSITORY_NAME}:v${BUILD_NUMBER}", "IsDiv":true , "dpId": %v, "tenantId": 0 }" http://%s/v1/deployment/executedeployment
 					# echo "{"wholeImage": "${SGR_REPOSITORY_NAME}:v${BUILD_NUMBER}", "IsDiv":true , "dpId": 1, "tenantId": 0 }"
-					'''`, lilinHost, step.Content["depolyment"])})
+					'''`, step.Content["depolyment"], lilinHost)})
 				break
 			case "code_build":
 				// 添加编译环境,Dockerfile 文件位置
@@ -280,4 +280,10 @@ func (pipelineService *PipelineService) GetDetails(request *req.PipelineDetailsR
 	return pipeline.GetJobInfo(pipelineName, request.TaskId)
 
 	//job1.Result (IN_PROGRESS, SUCCESS , FAILED , ABORTED)
+}
+func (pipelineService *PipelineService) GetLogs(request *req.PipelineDetailsReq) (string, error) {
+	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
+	builder := pipelineService.jenkinsBuilder
+	pipeline, _ := builder.Build()
+	return pipeline.GetJobLogs(pipelineName, request.TaskId)
 }
