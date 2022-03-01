@@ -16,8 +16,11 @@ import (
 	appsapplymetav1 "k8s.io/client-go/applyconfigurations/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"sgr/api/req"
+	"sgr/api/res"
 	"sgr/domain/database/models"
+	"sgr/pkg/page"
 	"strconv"
+	"strings"
 )
 
 type K8sApiVersion string
@@ -82,6 +85,15 @@ func (ds *DeploymentSupervisor) ExecuteDeployment(execReq *req.ExecDeploymentReq
 		return nil, errors.New("请维护部署镜像信息")
 	}
 	//endregion
+	//记录发版记录
+
+	ds.ReleaseRecord(models.SgrTenantDeploymentRecord{
+		AppID:        dpDatum.AppID,
+		DeploymentID: execReq.DpId,
+		ApplyImage:   execReq.WholeImage,
+		OpsType:      execReq.OpsType,
+		Operator:     execReq.Operator,
+	})
 	return ds.InitDeploymentByApply(execReq.TenantId, &dpDatum, &dpcDatum)
 }
 
@@ -317,6 +329,33 @@ inner join  sgr_tenant_deployments std on t1.id=std.namespace_id and std.id=? `,
 	}
 
 	return namespace, nil
+}
+
+func (ds *DeploymentSupervisor) ReleaseRecord(record models.SgrTenantDeploymentRecord) error {
+	recordRes := ds.db.Model(models.SgrTenantDeploymentRecord{}).Create(&record)
+	if recordRes.Error != nil {
+		return recordRes.Error
+	}
+	return nil
+}
+
+func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, req *page.PageRequest) (error, *page.Page) {
+	var res []res.DeploymentReleaseRecordRes
+	condition := ds.db.Model(models.SgrTenantDeploymentRecord{})
+	var params []interface{}
+	params = append(params, appId)
+	sql := strings.Builder{}
+	sql.WriteString("select stdr.app_id,stdr.deployment_id,std.name as deployment_name,stdr.apply_image,stdr.ops_type,stu.user_name as operator_name,stdr.creation_time ")
+	sql.WriteString("from sgr_tenant_deployment_record as stdr ")
+	sql.WriteString("inner join sgr_tenant_deployments std on stdr.deployment_id = std.id ")
+	sql.WriteString("left join sgr_tenant_user as stu on stdr.operator=stu.id ")
+	sql.WriteString("where stdr.app_id=1 ")
+	if dpId != 0 {
+		sql.WriteString(" and stdr.deployment_id=?  ")
+		params = append(params, dpId)
+	}
+	err, page := page.StartPage(condition, req.PageIndex, req.PageSize).DoScan(&res, sql.String(), params...)
+	return err, page
 }
 
 //region 暂时弃用的代码，最开始的时候考虑为每个不通版本的k8s指定不通的api-version,最后发现可以统一用apps/v1
