@@ -172,10 +172,12 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 			case "app_deploy":
 				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: step.Name,
 					Command: fmt.Sprintf(`
-					sh '''
-					curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d "{"wholeImage": "${SGR_REPOSITORY_NAME}:v${BUILD_NUMBER}", "IsDiv":true , "dpId": %v, "tenantId": 0 }" http://%s/v1/deployment/executedeployment
-					# echo "{"wholeImage": "${SGR_REPOSITORY_NAME}:v${BUILD_NUMBER}", "IsDiv":true , "dpId": 1, "tenantId": 0 }"
-					'''`, step.Content["depolyment"], lilinHost)})
+				   script{
+					   def rbody = "{\"wholeImage\": \"${env.SGR_REPOSITORY_NAME}:v${env.BUILD_NUMBER}\", \"IsDiv\":true , \"dpId\": %v, \"tenantId\": 0 }"
+					   println rbody
+					   httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody:rbody , responseHandle: 'NONE', timeout: 30, url: '%s/v1/deployment/executedeployment'
+				   }
+				`, step.Content["depolyment"], lilinHost)})
 				break
 			case "code_build":
 				// 添加编译环境,Dockerfile 文件位置

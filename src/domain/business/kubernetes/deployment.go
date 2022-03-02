@@ -154,10 +154,11 @@ func (ds *DeploymentSupervisor) ApplyDeployment(clientSet *kubernetes.Clientset,
 	//strategy
 	spec.Strategy = &appsapplyv1.DeploymentStrategyApplyConfiguration{
 		RollingUpdate: &appsapplyv1.RollingUpdateDeploymentApplyConfiguration{
-			MaxUnavailable: &intstr.IntOrString{Type: intstr.Int, IntVal: 1},
-			MaxSurge:       &intstr.IntOrString{Type: intstr.Int, IntVal: 1},
+			MaxUnavailable: &intstr.IntOrString{Type: intstr.String, StrVal: "25%"},
+			MaxSurge:       &intstr.IntOrString{Type: intstr.String, StrVal: "25%"},
 		},
 	}
+
 	//selector
 	selectorMap := make(map[string]string)
 	selectorMap["k8s-app"] = dp.Name
