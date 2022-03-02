@@ -88,12 +88,15 @@ func (ds *DeploymentSupervisor) ExecuteDeployment(execReq *req.ExecDeploymentReq
 	//endregion
 	//记录发版记录
 	t := time.Now()
+	if execReq.OpsType == "" || execReq.OpsType == "manual" {
+		execReq.OpsType = "githook"
+	}
 	_ = ds.ReleaseRecord(models.SgrTenantDeploymentRecord{
 		AppID:        dpDatum.AppID,
 		DeploymentID: execReq.DpId,
 		ApplyImage:   execReq.WholeImage,
 		OpsType:      execReq.OpsType,
-		Operator:     execReq.Operator,
+		Operator:     &execReq.Operator,
 		CreationTime: &t,
 		UpdateTime:   &t,
 	})
@@ -343,7 +346,7 @@ func (ds *DeploymentSupervisor) ReleaseRecord(record models.SgrTenantDeploymentR
 	return nil
 }
 
-func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, req *page.PageRequest) (error, *page.Page) {
+func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, opsType string, req *page.PageRequest) (error, *page.Page) {
 	var res []res.DeploymentReleaseRecordRes
 	condition := ds.db.Model(models.SgrTenantDeploymentRecord{})
 	var params []interface{}
@@ -353,11 +356,17 @@ func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, req *page
 	sql.WriteString("from sgr_tenant_deployment_record as stdr ")
 	sql.WriteString("inner join sgr_tenant_deployments std on stdr.deployment_id = std.id ")
 	sql.WriteString("left join sgr_tenant_user as stu on stdr.operator=stu.id ")
-	sql.WriteString("where stdr.app_id=1 ")
+	sql.WriteString("where stdr.app_id=? ")
 	if dpId != 0 {
 		sql.WriteString(" and stdr.deployment_id=?  ")
 		params = append(params, dpId)
 	}
+	if opsType != "" {
+		sql.WriteString(" and stdr.ops_type=?  ")
+		params = append(params, opsType)
+	}
+
+	sql.WriteString("order by stdr.creation_time desc")
 	err, page := page.StartPage(condition, req.PageIndex, req.PageSize).DoScan(&res, sql.String(), params...)
 	return err, page
 }

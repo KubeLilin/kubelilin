@@ -23,8 +23,8 @@ func NewDeploymentController(deploymentService *app.DeploymentService, clusterSe
 }
 
 func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpContext, execReq *req.ExecDeploymentRequest) mvc.ApiResult {
-	//userInfo := req.GetUserInfo(ctx)
-	//execReq.TenantId = userInfo.TenantID
+	userInfo := req.GetUserInfo(ctx)
+	execReq.Operator = uint64(userInfo.UserId)
 	res, err := controller.deploymentSupervisor.ExecuteDeployment(execReq)
 	if err == nil {
 		return mvc.Success(res)
@@ -161,11 +161,12 @@ func (controller DeploymentController) GetYaml(ctx *context.HttpContext) mvc.Api
 
 func (controller DeploymentController) GetReleaseRecord(ctx *context.HttpContext) mvc.ApiResult {
 	dpIdStr := ctx.Input.Query("dpId")
+	opsTypeStr := ctx.Input.Query("opsType")
 	dpId, _ := strconv.ParseUint(dpIdStr, 10, 64)
 	appIdStr := ctx.Input.Query("appId")
 	appId, _ := strconv.ParseUint(appIdStr, 10, 64)
 	pgaeReq := page.InitPageByCtx(ctx)
-	err, res := controller.deploymentSupervisor.QueryReleaseRecord(appId, dpId, pgaeReq)
+	err, res := controller.deploymentSupervisor.QueryReleaseRecord(appId, dpId, opsTypeStr, pgaeReq)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}
