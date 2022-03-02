@@ -311,15 +311,14 @@ var SgrTenantClusterColumns = struct {
 
 // SgrTenantDeploymentRecord 部署发布记录
 type SgrTenantDeploymentRecord struct {
-	ID             uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
-	AppID          uint64     `gorm:"column:app_id;type:bigint unsigned;not null" json:"appId"`
-	DeploymentID   uint64     `gorm:"column:deployment_id;type:bigint unsigned;not null" json:"deploymentId"`
-	DeploymentName uint64     `gorm:"column:deployment_name;" json:"deploymentName"`
-	ApplyImage     string     `gorm:"column:apply_image;type:varchar(255);not null" json:"applyImage"`
-	OpsType        string     `gorm:"column:ops_type;type:char(20);not null" json:"opsType"`
-	Operator       *uint64    `gorm:"column:operator;type:bigint unsigned" json:"operator"`
-	CreationTime   *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
-	UpdateTime     *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
+	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	AppID        uint64     `gorm:"column:app_id;type:bigint unsigned;not null" json:"appId"`
+	DeploymentID uint64     `gorm:"column:deployment_id;type:bigint unsigned;not null" json:"deploymentId"`
+	ApplyImage   string     `gorm:"column:apply_image;type:varchar(255);not null" json:"applyImage"`
+	OpsType      string     `gorm:"column:ops_type;type:char(20);not null" json:"opsType"`
+	Operator     *uint64    `gorm:"column:operator;type:bigint unsigned" json:"operator"`
+	CreationTime *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
+	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
 }
 
 // TableName get sql table name.获取数据库表名

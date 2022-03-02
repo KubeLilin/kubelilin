@@ -22,7 +22,6 @@ yoyogo:
           "/v1/user/login",
           "/v1/pod/terminal",
           "/v1/deployment/executedeployment",
-          "/v1/application/pipelinestatus",
           "/actuator/health/liveness",
           "/actuator/health/readiness",
           "/actuator/health/detail"

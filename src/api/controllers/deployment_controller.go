@@ -23,8 +23,8 @@ func NewDeploymentController(deploymentService *app.DeploymentService, clusterSe
 }
 
 func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpContext, execReq *req.ExecDeploymentRequest) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
-	execReq.TenantId = userInfo.TenantID
+	//userInfo := req.GetUserInfo(ctx)
+	//execReq.TenantId = userInfo.TenantID
 	res, err := controller.deploymentSupervisor.ExecuteDeployment(execReq)
 	if err == nil {
 		return mvc.Success(res)
