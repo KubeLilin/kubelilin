@@ -21,6 +21,7 @@ import (
 	"sgr/pkg/page"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type K8sApiVersion string
@@ -86,15 +87,23 @@ func (ds *DeploymentSupervisor) ExecuteDeployment(execReq *req.ExecDeploymentReq
 	}
 	//endregion
 	//记录发版记录
-
-	ds.ReleaseRecord(models.SgrTenantDeploymentRecord{
+	exeRes, err := ds.InitDeploymentByApply(execReq.TenantId, &dpDatum, &dpcDatum)
+	record := models.SgrTenantDeploymentRecord{
 		AppID:        dpDatum.AppID,
 		DeploymentID: execReq.DpId,
 		ApplyImage:   execReq.WholeImage,
 		OpsType:      execReq.OpsType,
 		Operator:     execReq.Operator,
-	})
-	return ds.InitDeploymentByApply(execReq.TenantId, &dpDatum, &dpcDatum)
+		CreationTime: time.Now(),
+	}
+	if err != nil {
+		record.State = "失败"
+		record.Remark = err.Error()
+	} else {
+		record.State = "成功"
+	}
+	ds.ReleaseRecord(record)
+	return exeRes, err
 }
 
 // InitDeploymentByApply 使用apply的方式创建deployment/**

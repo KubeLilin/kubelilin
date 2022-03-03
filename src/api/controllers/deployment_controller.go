@@ -25,6 +25,10 @@ func NewDeploymentController(deploymentService *app.DeploymentService, clusterSe
 func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpContext, execReq *req.ExecDeploymentRequest) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
 	execReq.TenantId = userInfo.TenantID
+	var userId = uint64(userInfo.UserId)
+	execReq.Operator = &userId
+	fmt.Println("用户信息")
+	fmt.Println(userInfo)
 	res, err := controller.deploymentSupervisor.ExecuteDeployment(execReq)
 	if err == nil {
 		return mvc.Success(res)
@@ -164,8 +168,8 @@ func (controller DeploymentController) GetReleaseRecord(ctx *context.HttpContext
 	dpId, _ := strconv.ParseUint(dpIdStr, 10, 64)
 	appIdStr := ctx.Input.Query("appId")
 	appId, _ := strconv.ParseUint(appIdStr, 10, 64)
-	pgaeReq := page.InitPageByCtx(ctx)
-	err, res := controller.deploymentSupervisor.QueryReleaseRecord(appId, dpId, pgaeReq)
+	pageReq := page.InitPageByCtx(ctx)
+	err, res := controller.deploymentSupervisor.QueryReleaseRecord(appId, dpId, pageReq)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}
