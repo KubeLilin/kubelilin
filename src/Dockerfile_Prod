@@ -12,6 +12,8 @@ WORKDIR /publish
 
 COPY . .
 
+WORKDIR /src
+
 RUN go build -ldflags="-s -w" -o app .
 
 
