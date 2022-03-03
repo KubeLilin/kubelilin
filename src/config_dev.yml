@@ -22,7 +22,9 @@ yoyogo:
           "/v1/user/login",
           "/v1/pod/terminal",
           "/v1/deployment/executedeployment",
-          "/v1/application/pipelinestatus"
+          "/actuator/health/liveness",
+          "/actuator/health/readiness",
+          "/actuator/health/detail"
         ]
   datasource:
     pool:
@@ -61,5 +63,5 @@ pipeline:
     token: 11d32a54cd6150bd626d8ed73c3bfa02d6
 
 kubelilin:
-  host: localhost:8080 #api.kubelilin.com
+  host: http://47.100.213.49:28080 #api.kubelilin.com
 

@@ -27,8 +27,6 @@ func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpCo
 	execReq.TenantId = userInfo.TenantID
 	var userId = uint64(userInfo.UserId)
 	execReq.Operator = &userId
-	fmt.Println("用户信息")
-	fmt.Println(userInfo)
 	res, err := controller.deploymentSupervisor.ExecuteDeployment(execReq)
 	if err == nil {
 		return mvc.Success(res)

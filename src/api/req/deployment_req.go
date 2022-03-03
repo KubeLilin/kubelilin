@@ -107,7 +107,7 @@ type ExecDeploymentRequest struct {
 	TenantId   uint64 `json:"tenantId" uri:"tenantId"`
 	Memo       string `json:"memo"`
 	OpsType    string `json:"opsType"`
-	Operator   *uint64
+	Operator   uint64
 }
 
 type DeploymentEnv struct {

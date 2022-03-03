@@ -180,3 +180,13 @@ func (c *ApplicationController) GetPipelineDetails(httpContext *context.HttpCont
 	}
 	return mvc.Success(job)
 }
+
+func (c *ApplicationController) GetPipelineLogs(httpContext *context.HttpContext) mvc.ApiResult {
+	var request req.PipelineDetailsReq
+	_ = httpContext.BindWithUri(&request)
+	logs, err := c.pipelineService.GetLogs(&request)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(logs)
+}
