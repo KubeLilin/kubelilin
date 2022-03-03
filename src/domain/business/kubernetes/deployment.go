@@ -190,7 +190,7 @@ func (ds *DeploymentSupervisor) ApplyDeployment(clientSet *kubernetes.Clientset,
 	spec.Template = &specTemplate
 	//endregion
 	deploymentDatum.Spec = &spec
-	res, err := k8sDeployment.Apply(context.TODO(), deploymentDatum, metav1.ApplyOptions{Force: true, FieldManager: "apply patch"})
+	res, err := k8sDeployment.Apply(context.TODO(), deploymentDatum, metav1.ApplyOptions{Force: true, FieldManager: "deployment-apply-fields"})
 	return res, err
 }
 
