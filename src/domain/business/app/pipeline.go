@@ -133,11 +133,6 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 	if lilinHost == "" {
 		lilinHost = "localhost"
 	}
-	//// 	 jenkins config
-	//jenkinsUrl := pipelineService.config.GetString("pipeline.jenkins.url")
-	//jenkinsToken := pipelineService.config.GetString("pipeline.jenkins.token")
-	//jenkinsUser := pipelineService.config.GetString("pipeline.jenkins.username")
-	//jenkinsNamespace := pipelineService.config.GetString("pipeline.jenkins.k8s-namespace")
 	//	 harbor config
 	harborAddress := pipelineService.config.GetString("hub.harbor.url")
 	harborToken := pipelineService.config.GetString("hub.harbor.token")
@@ -160,7 +155,12 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 			switch step.Key { // git_pull  , code_build  ,  cmd_shell ,  app_deploy
 			case "git_pull":
 				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: step.Name,
-					Command: fmt.Sprintf("	git url: '%s', branch: '%s'", step.Content["git"], step.Content["branch"])})
+					Command: fmt.Sprintf(`
+					checkout([
+                    	$class: 'GitSCM', branches: [[name: "%s"]],
+                    	doGenerateSubmoduleConfigurations: false,extensions: [[$class:'CheckoutOption',timeout:30],[$class:'CloneOption',depth:0,noTags:false,reference:'',shallow:false,timeout:30]], submoduleCfg: [],
+                    	userRemoteConfigs: [[ url: "%s"]]
+                	])`, step.Content["branch"], step.Content["git"])})
 				break
 			case "cmd_shell":
 				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: step.Name,
