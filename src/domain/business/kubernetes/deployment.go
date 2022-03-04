@@ -360,7 +360,7 @@ func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, req *page
 	sql.WriteString("from sgr_tenant_deployment_record as stdr ")
 	sql.WriteString("inner join sgr_tenant_deployments std on stdr.deployment_id = std.id ")
 	sql.WriteString("left join sgr_tenant_user as stu on stdr.operator=stu.id ")
-	sql.WriteString("where stdr.app_id=1 ")
+	sql.WriteString("where stdr.app_id=? ")
 	if dpId != 0 {
 		sql.WriteString(" and stdr.deployment_id=?  ")
 		params = append(params, dpId)
