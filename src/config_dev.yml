@@ -63,5 +63,5 @@ pipeline:
     token: 11d32a54cd6150bd626d8ed73c3bfa02d6
 
 kubelilin:
-  host: http://prod-kubelilin-apiserver-cls-hbktlqm5-svc-cluster-sgr.yoyogo #api.kubelilin.com
-
+  deploy:
+    url: http://prod-kubelilin-apiserver-cls-hbktlqm5-svc-cluster-sgr.yoyogo #api.kubelilin.com

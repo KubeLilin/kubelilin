@@ -129,9 +129,9 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 	_ = json.Unmarshal([]byte(request.DSL), &pipelineStages)
 
 	// get config by configuration
-	lilinHost := pipelineService.config.GetString("kubelilin.host")
-	if lilinHost == "" {
-		lilinHost = "localhost"
+	deployUrl := pipelineService.config.GetString("kubelilin.deploy.url")
+	if deployUrl == "" {
+		deployUrl = "localhost"
 	}
 	//	 harbor config
 	harborAddress := pipelineService.config.GetString("hub.harbor.url")
@@ -177,7 +177,7 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 					   println rbody
 					   httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody:rbody , responseHandle: 'NONE', timeout: 30, url: '%s/v1/deployment/executedeployment'
 				   }
-				`, step.Content["depolyment"], lilinHost)})
+				`, step.Content["depolyment"], deployUrl)})
 				break
 			case "code_build":
 				// 添加编译环境,Dockerfile 文件位置
