@@ -365,6 +365,9 @@ func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, req *page
 		sql.WriteString(" and stdr.deployment_id=?  ")
 		params = append(params, dpId)
 	}
+
+	sql.WriteString("order by stdr.creation_time desc ")
+
 	err, page := page.StartPage(condition, req.PageIndex, req.PageSize).DoScan(&res, sql.String(), params...)
 	return err, page
 }
