@@ -139,7 +139,7 @@ type GitRepoNames struct {
 }
 
 func getRepoNames(gitAddr string) (*GitRepoNames, error) {
-	reg := regexp.MustCompile("^http.*/(\\w+)/(\\w+).git")
+	reg := regexp.MustCompile("^http.*/(\\w+)/([a-zA-Z-0-9]+).git")
 	groups := reg.FindStringSubmatch(gitAddr)
 
 	if len(groups) > 1 {
