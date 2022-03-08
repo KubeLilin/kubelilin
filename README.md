@@ -1,25 +1,25 @@
-# sgr-platform-api
-SGR cloud native backend .
+# Kubelilin ApiServer
+Kubelilin cloud native backend .
 
 ## PaaS 平台运行
 ### Backend & MySQL
 ```bash
-git clone https://github.com/yoyofxteam/sgr-platform-api.git
-cd sgr-platform-api/scripts
+git clone https://github.com/KubeLilin/kubelilin.git
+cd kubelilin/scripts
 docker-compose -f ./docker-compose.yaml up -d
 ```
 ### FrontEnd
 ```bash
-git clone https://github.com/yoyofxteam/sgr-platform-ui.git
-cd sgr-platform-ui/src
-npm install
+git clone https://github.com/KubeLilin/dashboard.git
+cd dashboard/src
+npm install --force
 npm run start
 ```
 
 # Todo:
 ## fix bugs
 1. [X] 为用户分配角色
-2. [ ] namespace分配配额 （cpu、内存、磁盘、pod）等
+2. [X] namespace分配配额 （cpu、内存、磁盘、pod）等
 
 ### 管理员能力 ：
 1. 集群管理： 导入集群 ， 导入的集群对所有租户可见
