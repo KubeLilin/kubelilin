@@ -6,8 +6,8 @@ import (
 	"github.com/yoyofx/yoyogo/web"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"sgr/api/req"
-	"sgr/domain/business/kubernetes"
+	"kubelilin/api/req"
+	"kubelilin/domain/business/kubernetes"
 )
 
 type PodController struct {

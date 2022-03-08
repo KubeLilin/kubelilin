@@ -5,9 +5,9 @@ import (
 	"github.com/yoyofx/yoyogo/utils/jwt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"sgr/api/req"
-	"sgr/domain/business/tenant"
-	dbmodels "sgr/domain/database/models"
+	"kubelilin/api/req"
+	"kubelilin/domain/business/tenant"
+	dbmodels "kubelilin/domain/database/models"
 	"strconv"
 	"time"
 )

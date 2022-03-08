@@ -74,6 +74,18 @@ stage('Checkout') {
 }
 `
 
+const CICD = `
+{{- range $i, $item := .pipelineStages }}
+		stage('{{ $item.Name }}') {
+			steps {
+			{{- range $j, $step := $item.Steps }}
+			 {{ $step.Command }}
+			{{- end }}
+			}
+		}
+{{- end }}
+`
+
 // Compile stage
 const Compile = `
 stage('Compile') {

@@ -5,12 +5,11 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/yoyofx/yoyogo/abstractions"
 	"gorm.io/gorm"
-	"sgr/api/req"
-	"sgr/domain/database/models"
-	"sgr/domain/dto"
-	"sgr/pkg/page"
+	"kubelilin/api/req"
+	"kubelilin/domain/database/models"
+	"kubelilin/domain/dto"
+	"kubelilin/pkg/page"
 	"strings"
-	"time"
 )
 
 type ApplicationService struct {
@@ -139,61 +138,4 @@ WHERE app.id = ?
 	var appInfo dto.ApplicationDisplayDTO
 	err := s.db.Raw(sql, appId).First(&appInfo).Error
 	return appInfo, err
-}
-
-func (s *ApplicationService) NewPipeline(req *req.AppNewPipelineReq) (error, *models.SgrTenantApplicationPipelines) {
-	var exitCount int64
-	s.db.Model(&models.SgrTenantApplicationPipelines{}).Where("appid=? and name=?", req.AppId, req.Name).Count(&exitCount)
-	if exitCount > 0 {
-		return errors.New("already have the same name pipeline"), nil
-	}
-
-	now := time.Now()
-	appModel := &models.SgrTenantApplicationPipelines{
-		Appid:        req.AppId,
-		Name:         req.Name,
-		Dsl:          "",
-		LastTaskID:   "",
-		Status:       uint8(1),
-		CreationTime: &now,
-		UpdateTime:   &now,
-	}
-	dbRes := s.db.Model(models.SgrTenantApplicationPipelines{}).Create(appModel)
-	if dbRes.Error != nil {
-		return nil, appModel
-	}
-
-	return nil, appModel
-}
-
-func (s *ApplicationService) GetAppPipelines(appId uint64) ([]dto.PipelineInfo, error) {
-	sql := `SELECT id,appid,name,dsl,taskStatus,lastTaskId FROM sgr_tenant_application_pipelines WHERE appid=?`
-	var pipelineInfoList []dto.PipelineInfo
-	err := s.db.Raw(sql, appId).Find(&pipelineInfoList).Error
-	return pipelineInfoList, err
-}
-
-func (s *ApplicationService) GetPipelineById(id uint64) (dto.PipelineInfo, error) {
-	sql := `SELECT id,appid,name,dsl,taskStatus,lastTaskId FROM sgr_tenant_application_pipelines WHERE id=?`
-	var pipelineInfo dto.PipelineInfo
-	err := s.db.Raw(sql, id).First(&pipelineInfo).Error
-	return pipelineInfo, err
-}
-
-func (s *ApplicationService) UpdatePipeline(request *req.EditPipelineReq) error {
-	var pipelineInfo models.SgrTenantApplicationPipelines
-	dbRes := s.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).First(&pipelineInfo)
-	if dbRes.Error != nil {
-		return dbRes.Error
-	}
-	pipelineInfo.Name = request.Name
-	pipelineInfo.Dsl = request.DSL
-	now := time.Now()
-	pipelineInfo.UpdateTime = &now
-
-	dbRes = s.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).Updates(pipelineInfo)
-	if dbRes.Error != nil {
-		return nil
-	}
-	return nil
 }

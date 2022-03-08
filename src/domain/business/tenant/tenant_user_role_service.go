@@ -3,10 +3,10 @@ package tenant
 import (
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
-	"sgr/api/req"
-	"sgr/api/res"
-	"sgr/domain/database/models"
-	"sgr/pkg/page"
+	"kubelilin/api/req"
+	"kubelilin/api/res"
+	"kubelilin/domain/database/models"
+	"kubelilin/pkg/page"
 )
 
 type TenantUserRoleService struct {

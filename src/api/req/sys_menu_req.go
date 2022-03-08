@@ -1,6 +1,6 @@
 package req
 
-import "sgr/pkg/page"
+import "kubelilin/pkg/page"
 
 type SysMenuReq struct {
 	ID       uint64 `json:"id" uri:"id"`

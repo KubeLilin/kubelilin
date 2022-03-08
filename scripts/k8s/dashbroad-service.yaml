@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-kubelilin-dashboard
+  namespace: kube-lilin
+  labels:
+    app: kubelilin-dashboard
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+  selector:
+    app: kubelilin-dashboard

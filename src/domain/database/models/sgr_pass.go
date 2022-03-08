@@ -221,7 +221,7 @@ var SgrTenantApplicationColumns = struct {
 	Labels:     "labels",
 }
 
-// SgrTenantApplicationPipelines [...]
+// SgrTenantApplicationPipelines 应用流水线
 type SgrTenantApplicationPipelines struct {
 	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"` // Pipeline ID
 	Appid        uint64     `gorm:"column:appid;type:bigint unsigned;not null" json:"appid"`      // 应用ID
@@ -309,6 +309,46 @@ var SgrTenantClusterColumns = struct {
 	UpdateTime:   "update_time",
 }
 
+// SgrTenantDeploymentRecord 部署发布记录
+type SgrTenantDeploymentRecord struct {
+	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	AppID        uint64     `gorm:"column:app_id;type:bigint unsigned;not null" json:"appId"`
+	DeploymentID uint64     `gorm:"column:deployment_id;type:bigint unsigned;not null" json:"deploymentId"`
+	ApplyImage   string     `gorm:"column:apply_image;type:varchar(255);not null" json:"applyImage"`
+	OpsType      string     `gorm:"column:ops_type;type:char(20);not null" json:"opsType"`
+	Operator     *uint64    `gorm:"column:operator;type:bigint unsigned" json:"operator"`
+	State        string     `gorm:"column:state;type:varchar(20)" json:"state"`
+	Remark       string     `gorm:"column:remark;type:varchar(500)" json:"state"`
+	CreationTime time.Time  `gorm:"column:creation_time;type:datetime" json:"creationTime"`
+	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *SgrTenantDeploymentRecord) TableName() string {
+	return "sgr_tenant_deployment_record"
+}
+
+// SgrTenantDeploymentRecordColumns get sql column name.获取数据库列名
+var SgrTenantDeploymentRecordColumns = struct {
+	ID           string
+	AppID        string
+	DeploymentID string
+	ApplyImage   string
+	OpsType      string
+	Operator     string
+	CreationTime string
+	UpdateTime   string
+}{
+	ID:           "id",
+	AppID:        "app_id",
+	DeploymentID: "deployment_id",
+	ApplyImage:   "apply_image",
+	OpsType:      "ops_type",
+	Operator:     "operator",
+	CreationTime: "creation_time",
+	UpdateTime:   "update_time",
+}
+
 // SgrTenantDeployments 集群部署
 type SgrTenantDeployments struct {
 	ID              uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
@@ -386,7 +426,7 @@ var SgrTenantDeploymentsColumns = struct {
 	Level:           "level",
 }
 
-// SgrTenantDeploymentsContainers [...]
+// SgrTenantDeploymentsContainers 应用部署容器配置
 type SgrTenantDeploymentsContainers struct {
 	ID                uint64  `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
 	Name              string  `gorm:"column:name;type:varchar(30);not null" json:"name"`

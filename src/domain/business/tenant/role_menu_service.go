@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
-	"sgr/api/req"
-	"sgr/domain/database/models"
+	"kubelilin/api/req"
+	"kubelilin/domain/database/models"
 )
 
 type RoleMenuService struct {

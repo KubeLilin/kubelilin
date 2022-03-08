@@ -1,4 +1,4 @@
-module sgr
+module kubelilin
 
 go 1.16
 

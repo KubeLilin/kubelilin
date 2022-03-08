@@ -21,6 +21,10 @@ yoyogo:
         skip_path: [
           "/v1/user/login",
           "/v1/pod/terminal",
+          "/v1/deployment/executedeployment",
+          "/actuator/health/liveness",
+          "/actuator/health/readiness",
+          "/actuator/health/detail"
         ]
   datasource:
     pool:
@@ -30,7 +34,7 @@ yoyogo:
     db:
       name: db1
       type: mysql
-      url: tcp(47.100.213.49:3306)/sgr_pass?charset=utf8&parseTime=True
+      url: tcp(47.100.213.49:3306)/sgr_pass?charset=utf8mb4&loc=Local&parseTime=True
       username: root
       password: P@ssW0rd
       debug: true
@@ -47,12 +51,17 @@ vcs:
     password: admin123
 hub:
   harbor:
-    url: https://harbor.xiaocui.site
+    url: harbor.xiaocui.site
     username: admin
     password: Harbor12345
     token: YWRtaW46SGFyYm9yMTIzNDU=
 pipeline:
   jenkins:
+    k8s-namespace: sgr-ci  # kube-lilin
+    url: http://152.136.141.235:32001
     username: jenkins
     token: 11d32a54cd6150bd626d8ed73c3bfa02d6
 
+kubelilin:
+  deploy:
+    url: http://prod-kubelilin-apiserver-cls-hbktlqm5-svc-cluster-sgr.yoyogo #api.kubelilin.com

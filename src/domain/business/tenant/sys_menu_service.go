@@ -3,10 +3,10 @@ package tenant
 import (
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
-	"sgr/api/req"
-	"sgr/domain/database/models"
-	"sgr/domain/dto"
-	"sgr/pkg/page"
+	"kubelilin/api/req"
+	"kubelilin/domain/database/models"
+	"kubelilin/domain/dto"
+	"kubelilin/pkg/page"
 	"sort"
 )
 

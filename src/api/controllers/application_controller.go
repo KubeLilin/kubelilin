@@ -4,20 +4,22 @@ import (
 	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"sgr/api/req"
-	"sgr/domain/business/app"
-	"sgr/utils"
+	"kubelilin/api/req"
+	"kubelilin/domain/business/app"
+	"kubelilin/utils"
 )
 
 type ApplicationController struct {
 	mvc.ApiController
-	service *app.ApplicationService
+	service         *app.ApplicationService
+	pipelineService *app.PipelineService
 }
 
-func NewApplicationController(service *app.ApplicationService) *ApplicationController {
-	return &ApplicationController{service: service}
+func NewApplicationController(service *app.ApplicationService, pipelineService *app.PipelineService) *ApplicationController {
+	return &ApplicationController{service: service, pipelineService: pipelineService}
 }
 
+// PostCreateApp new application.
 func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request *req.AppReq) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
@@ -28,6 +30,7 @@ func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request 
 	return mvc.Success(res)
 }
 
+// PutEditApp edit application information.
 func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *req.AppReq) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
@@ -38,9 +41,10 @@ func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *re
 	return mvc.Success(res)
 }
 
+// GetAppList get application list by tenant id.
 func (c *ApplicationController) GetAppList(ctx *context.HttpContext) mvc.ApiResult {
 	request := req.AppReq{}
-	ctx.BindWithUri(&request)
+	_ = ctx.BindWithUri(&request)
 
 	userInfo := req.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
@@ -52,16 +56,19 @@ func (c *ApplicationController) GetAppList(ctx *context.HttpContext) mvc.ApiResu
 	return mvc.Success(res)
 }
 
+// GetAppLanguage get language for application
 func (c *ApplicationController) GetAppLanguage() mvc.ApiResult {
 	res := c.service.QueryAppCodeLanguage()
 	return mvc.Success(res)
 }
 
+// GetAppLevel get level for application
 func (c *ApplicationController) GetAppLevel() mvc.ApiResult {
 	res := c.service.QueryAppLevel()
 	return mvc.Success(res)
 }
 
+// GetGitRepo get git address for application
 func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
 	appName := ctx.Input.Query("appName")
@@ -72,6 +79,7 @@ func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResu
 	return mvc.Success(cvsRes)
 }
 
+// GetInfo get application information
 func (c *ApplicationController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	info, err := c.service.GetAppInfo(appId)
@@ -81,68 +89,104 @@ func (c *ApplicationController) GetInfo(ctx *context.HttpContext) mvc.ApiResult 
 	return mvc.Success(info)
 }
 
+// GetGitBranches get git addresses & branches for pipeline
 func (c *ApplicationController) GetGitBranches(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	appInfo, _ := c.service.GetAppInfo(appId)
 	if appInfo.Git != "" {
 		names, _ := c.service.VCSService.GetGitBranches(appInfo.Git)
-		return mvc.Success(names)
+		return mvc.Success(context.H{
+			"git":      appInfo.Git,
+			"branches": names,
+		})
 	}
 	// appInfo.Git
 	return mvc.Fail("no data")
 }
 
-func (c *ApplicationController) GetBuildScripts(ctx *context.HttpContext) mvc.ApiResult {
-	return mvc.Success(
-		context.H{
-			"golang": `# 编译命令，注：当前已在代码根路径下
-go env -w GOPROXY=https://goproxy.cn,direct
-go build -ldflags="-s -w" -o app .
-`,
-			"java": `# 编译命令，注：当前已在代码根路径下
-mvn clean package                         
-`,
-			"nodejs": `# 编译命令，注：当前已在代码根路径下
-npm config set registry https://registry.npm.taobao.org --global
-npm install
-npm run build
-`,
-		})
+// GetBuildScripts get pipeline build scripts for code_build step.
+func (c *ApplicationController) GetBuildScripts() mvc.ApiResult {
+	return mvc.Success(c.pipelineService.GetBuildScripts())
 }
 
-func (c *ApplicationController) PostNewPipeline(ctx *context.HttpContext, req *req.AppNewPipelineReq) mvc.ApiResult {
-	err, pipeline := c.service.NewPipeline(req)
+// PostNewPipeline new pipeline only by name & id
+func (c *ApplicationController) PostNewPipeline(req *req.AppNewPipelineReq) mvc.ApiResult {
+	err, pipeline := c.pipelineService.NewPipeline(req)
 	if err != nil {
 		return mvc.Fail(err.Error())
 	}
 	return mvc.Success(pipeline.ID)
 }
 
+// GetPipelines get pipeline list by application id.
 func (c *ApplicationController) GetPipelines(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	if appId == 0 {
 		return mvc.Fail("没有找到应用")
 	}
-	pipelines, err := c.service.GetAppPipelines(appId)
+	pipelines, err := c.pipelineService.GetAppPipelines(appId)
 	if err != nil {
 		return mvc.Fail(err.Error())
 	}
 	return mvc.Success(pipelines)
 }
 
+// PostEditPipeline Save pipeline information and DSL.
 func (c *ApplicationController) PostEditPipeline(request *req.EditPipelineReq) mvc.ApiResult {
-	err := c.service.UpdatePipeline(request)
+	err := c.pipelineService.UpdatePipeline(request)
+	if err == nil {
+		err = c.pipelineService.UpdateDSL(request)
+	}
 	if err != nil {
 		return mvc.Fail(false)
 	}
+
 	return mvc.Success(true)
 }
 
+// GetPipeline get pipeline frontend json by id.
 func (c *ApplicationController) GetPipeline(ctx *context.HttpContext) mvc.ApiResult {
 	pipelineId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
-	pipeline, err := c.service.GetPipelineById(pipelineId)
+	pipeline, err := c.pipelineService.GetPipelineById(pipelineId)
 	if err != nil {
 		return mvc.Fail("not found pipeline!")
 	}
 	return mvc.Success(pipeline)
+}
+
+func (c *ApplicationController) PostRunPipeline(request *req.RunPipelineReq) mvc.ApiResult {
+	taskId, err := c.pipelineService.RunPipeline(request)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(taskId)
+}
+
+func (c *ApplicationController) PostPipelineStatus(request *req.PipelineStatusReq) mvc.ApiResult {
+	err := c.pipelineService.UpdatePipelineStatus(request)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(true)
+
+}
+
+func (c *ApplicationController) GetPipelineDetails(httpContext *context.HttpContext) mvc.ApiResult {
+	var request req.PipelineDetailsReq
+	_ = httpContext.BindWithUri(&request)
+	job, err := c.pipelineService.GetDetails(&request)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(job)
+}
+
+func (c *ApplicationController) GetPipelineLogs(httpContext *context.HttpContext) mvc.ApiResult {
+	var request req.PipelineDetailsReq
+	_ = httpContext.BindWithUri(&request)
+	logs, err := c.pipelineService.GetLogs(&request)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(logs)
 }

@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	applycorev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"sgr/domain/database/models"
+	"kubelilin/domain/database/models"
 	"strings"
 )
 
@@ -68,5 +68,5 @@ func (svc *ServiceSupervisor) ApplyService(client corev1.CoreV1Interface, dp *mo
 	ports = append(ports, port)
 	spec.Ports = ports
 	serviceInfo.Spec = &spec
-	return k8sService.Apply(context.TODO(), serviceInfo, metav1.ApplyOptions{FieldManager: "apply patch"})
+	return k8sService.Apply(context.TODO(), serviceInfo, metav1.ApplyOptions{Force: true, FieldManager: "service-apply-fields"})
 }

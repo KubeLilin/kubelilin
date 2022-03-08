@@ -5,8 +5,8 @@ import (
 	"github.com/yoyofx/yoyogo/utils/jwt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"sgr/pkg/global"
-	"sgr/pkg/page"
+	"kubelilin/pkg/global"
+	"kubelilin/pkg/page"
 	"strconv"
 )
 

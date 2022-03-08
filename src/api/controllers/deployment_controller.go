@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"sgr/api/req"
-	"sgr/domain/business/app"
-	"sgr/domain/business/kubernetes"
+	"kubelilin/api/req"
+	"kubelilin/domain/business/app"
+	"kubelilin/domain/business/kubernetes"
+	"kubelilin/pkg/page"
 	"strconv"
 )
 
@@ -24,6 +25,7 @@ func NewDeploymentController(deploymentService *app.DeploymentService, clusterSe
 func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpContext, execReq *req.ExecDeploymentRequest) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
 	execReq.TenantId = userInfo.TenantID
+	execReq.Operator = uint64(userInfo.UserId)
 	res, err := controller.deploymentSupervisor.ExecuteDeployment(execReq)
 	if err == nil {
 		return mvc.Success(res)
@@ -46,6 +48,7 @@ func (controller *DeploymentController) PostCreateDeploymentStep1(ctx *context.H
 }
 
 func (controller *DeploymentController) PostCreateDeploymentStep2(deployModel *req.DeploymentStepRequest) mvc.ApiResult {
+	fmt.Println(deployModel)
 	err, res := controller.deploymentService.CreateDeploymentStep2(deployModel)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
@@ -155,4 +158,17 @@ func (controller DeploymentController) GetYaml(ctx *context.HttpContext) mvc.Api
 		return mvc.FailWithMsg(nil, err.Error())
 	}
 	return mvc.Success(yamlStr)
+}
+
+func (controller DeploymentController) GetReleaseRecord(ctx *context.HttpContext) mvc.ApiResult {
+	dpIdStr := ctx.Input.Query("dpId")
+	dpId, _ := strconv.ParseUint(dpIdStr, 10, 64)
+	appIdStr := ctx.Input.Query("appId")
+	appId, _ := strconv.ParseUint(appIdStr, 10, 64)
+	pageReq := page.InitPageByCtx(ctx)
+	err, res := controller.deploymentSupervisor.QueryReleaseRecord(appId, dpId, pageReq)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(res)
 }

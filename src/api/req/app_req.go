@@ -2,7 +2,7 @@ package req
 
 import (
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"sgr/pkg/page"
+	"kubelilin/pkg/page"
 )
 
 type AppReq struct {
@@ -31,4 +31,23 @@ type EditPipelineReq struct {
 	AppId uint64 `json:"appid"`
 	Name  string `gorm:"json:"name"`
 	DSL   string `json:"dsl"`
+}
+
+type RunPipelineReq struct {
+	mvc.RequestBody
+	Id    uint64 `json:"id"`
+	AppId uint64 `json:"appid"`
+}
+
+type PipelineStatusReq struct {
+	mvc.RequestBody
+	Id     uint64 `json:"id"`
+	Status int8   `json:"status" uri:"status"`
+}
+
+type PipelineDetailsReq struct {
+	mvc.RequestBody
+	Id     uint64 `json:"id" uri:"id"`
+	AppId  uint64 `json:"appId" uri:"appId"`
+	TaskId int64  `json:"taskId" uri:"taskId"`
 }

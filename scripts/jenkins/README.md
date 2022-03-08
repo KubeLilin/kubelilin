@@ -15,7 +15,7 @@
 
 #3. 配置Kubernetes cloud
 * 创建RABC账号ServiceAccount
-* 注意默认授权的命名空间 **sgr-ci** .
+* 注意默认授权的命名空间 **kube-lilin** .
 ## 获取ServiceAccount Auth
 ```bash
 $ kubectl -n devops describe serviceaccount jenkins-admin
@@ -29,7 +29,7 @@ $ kubectl -n devops describe secret [jenkins-admin-token-name]
 ## Jenkins URL
 配置Jenkins url为对应 {ServiceName}.{Namespace}:{TargetPort}
 
-例如:  http://jenkins.sgr-ci:8080/
+例如:  http://jenkins.kube-lilin:8080/
 
 注意: 这里使用的Kubernetes Namespace 注意要和创建的 ServiceAccount的 Namespace 保持一致。
 

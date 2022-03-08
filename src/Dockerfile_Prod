@@ -10,8 +10,8 @@ ENV GO111MODULE=on \
 
 WORKDIR /publish
 
-COPY . .
-
+COPY src/ .
+RUN go mod tidy
 RUN go build -ldflags="-s -w" -o app .
 
 

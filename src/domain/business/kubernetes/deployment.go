@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
 	v1 "k8s.io/api/core/v1"
@@ -14,9 +15,13 @@ import (
 	corev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	appsapplymetav1 "k8s.io/client-go/applyconfigurations/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"sgr/api/req"
-	"sgr/domain/database/models"
+	"kubelilin/api/req"
+	"kubelilin/api/res"
+	"kubelilin/domain/database/models"
+	"kubelilin/pkg/page"
 	"strconv"
+	"strings"
+	"time"
 )
 
 type K8sApiVersion string
@@ -81,13 +86,33 @@ func (ds *DeploymentSupervisor) ExecuteDeployment(execReq *req.ExecDeploymentReq
 		return nil, errors.New("请维护部署镜像信息")
 	}
 	//endregion
-	return ds.InitDeploymentByApply(execReq.TenantId, &dpDatum, &dpcDatum)
+	//记录发版记录
+	exeRes, err := ds.InitDeploymentByApply(execReq.TenantId, &dpDatum, &dpcDatum)
+	record := models.SgrTenantDeploymentRecord{AppID: dpDatum.AppID,
+		DeploymentID: execReq.DpId,
+		ApplyImage:   execReq.WholeImage,
+		OpsType:      execReq.OpsType,
+		Operator:     &execReq.Operator,
+		CreationTime: time.Now(),
+	}
+	if execReq.OpsType == "" || execReq.OpsType == "manual" {
+		execReq.OpsType = "githook"
+	}
+	if err != nil {
+		record.State = "失败"
+		record.Remark = err.Error()
+	} else {
+		record.State = "成功"
+	}
+	ds.ReleaseRecord(record)
+	return exeRes, err
 }
 
 // InitDeploymentByApply 使用apply的方式创建deployment/**
 func (ds *DeploymentSupervisor) InitDeploymentByApply(tenantId uint64, dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers) (interface{}, error) {
 	clusterInfo := &models.SgrTenantCluster{}
-	dbErr := ds.db.Model(&models.SgrTenantCluster{}).Where("id=? and tenant_id=?", dp.ClusterID, tenantId).First(clusterInfo)
+	//and tenant_id=?   ,tenantId
+	dbErr := ds.db.Model(&models.SgrTenantCluster{}).Where("id=?", dp.ClusterID).First(clusterInfo)
 	if dbErr.Error != nil {
 		return nil, errors.New("未找到集群信息")
 	}
@@ -140,8 +165,8 @@ func (ds *DeploymentSupervisor) ApplyDeployment(clientSet *kubernetes.Clientset,
 	//strategy
 	spec.Strategy = &appsapplyv1.DeploymentStrategyApplyConfiguration{
 		RollingUpdate: &appsapplyv1.RollingUpdateDeploymentApplyConfiguration{
-			MaxUnavailable: &intstr.IntOrString{Type: intstr.Int, IntVal: 1},
-			MaxSurge:       &intstr.IntOrString{Type: intstr.Int, IntVal: 1},
+			MaxUnavailable: &intstr.IntOrString{Type: intstr.String, StrVal: "25%"},
+			MaxSurge:       &intstr.IntOrString{Type: intstr.String, StrVal: "25%"},
 		},
 	}
 	//selector
@@ -165,7 +190,7 @@ func (ds *DeploymentSupervisor) ApplyDeployment(clientSet *kubernetes.Clientset,
 	spec.Template = &specTemplate
 	//endregion
 	deploymentDatum.Spec = &spec
-	res, err := k8sDeployment.Apply(context.TODO(), deploymentDatum, metav1.ApplyOptions{FieldManager: "apply patch"})
+	res, err := k8sDeployment.Apply(context.TODO(), deploymentDatum, metav1.ApplyOptions{Force: true, FieldManager: "deployment-apply-fields"})
 	return res, err
 }
 
@@ -226,13 +251,13 @@ func (ds *DeploymentSupervisor) AssemblingContainerForApply(dp *models.SgrTenant
 	})
 	container.Ports = ports
 
-	container.Env = injectionContainerEnv()
+	container.Env = injectionContainerEnv(dpc.Environments)
 
 	containerArr = append(containerArr, container)
 	return containerArr, nil
 }
 
-func injectionContainerEnv() []corev1.EnvVarApplyConfiguration {
+func injectionContainerEnv(envJson string) []corev1.EnvVarApplyConfiguration {
 	var envs []corev1.EnvVarApplyConfiguration
 	envs = append(envs,
 		*corev1.EnvVar().WithName("MY_NODE_NAME").WithValueFrom(
@@ -252,6 +277,20 @@ func injectionContainerEnv() []corev1.EnvVarApplyConfiguration {
 			corev1.EnvVarSource().WithFieldRef(corev1.ObjectFieldSelector().WithFieldPath("status.podIP")),
 		))
 
+	//region 添加录入对系统环境变量
+	if envJson != "" {
+		var envArr []req.DeploymentEnv
+		envJsonErr := json.Unmarshal([]byte(envJson), &envArr)
+		if envJsonErr == nil {
+			for _, x := range envArr {
+				envs = append(envs,
+					*corev1.EnvVar().WithName(x.Key).WithValue(x.Value),
+				)
+			}
+		}
+	}
+
+	//endregion
 	return envs
 }
 
@@ -301,6 +340,36 @@ inner join  sgr_tenant_deployments std on t1.id=std.namespace_id and std.id=? `,
 	}
 
 	return namespace, nil
+}
+
+func (ds *DeploymentSupervisor) ReleaseRecord(record models.SgrTenantDeploymentRecord) error {
+	recordRes := ds.db.Model(models.SgrTenantDeploymentRecord{}).Create(&record)
+	if recordRes.Error != nil {
+		return recordRes.Error
+	}
+	return nil
+}
+
+func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, req *page.PageRequest) (error, *page.Page) {
+	var res []res.DeploymentReleaseRecordRes
+	condition := ds.db.Model(models.SgrTenantDeploymentRecord{})
+	var params []interface{}
+	params = append(params, appId)
+	sql := strings.Builder{}
+	sql.WriteString("select stdr.app_id,stdr.deployment_id,std.name as deployment_name,stdr.apply_image,stdr.ops_type,stu.user_name as operator_name,stdr.creation_time ")
+	sql.WriteString("from sgr_tenant_deployment_record as stdr ")
+	sql.WriteString("inner join sgr_tenant_deployments std on stdr.deployment_id = std.id ")
+	sql.WriteString("left join sgr_tenant_user as stu on stdr.operator=stu.id ")
+	sql.WriteString("where stdr.app_id=? ")
+	if dpId != 0 {
+		sql.WriteString(" and stdr.deployment_id=?  ")
+		params = append(params, dpId)
+	}
+
+	sql.WriteString("order by stdr.creation_time desc ")
+
+	err, page := page.StartPage(condition, req.PageIndex, req.PageSize).DoScan(&res, sql.String(), params...)
+	return err, page
 }
 
 //region 暂时弃用的代码，最开始的时候考虑为每个不通版本的k8s指定不通的api-version,最后发现可以统一用apps/v1

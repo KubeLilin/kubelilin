@@ -4,10 +4,11 @@ import (
 	"github.com/yoyofx/yoyogo/abstractions"
 	"github.com/yoyofx/yoyogo/pkg/configuration"
 	"github.com/yoyofxteam/dependencyinjection"
-	"sgr/domain/business/app"
-	"sgr/domain/business/kubernetes"
-	"sgr/domain/business/tenant"
-	"sgr/domain/conf"
+	"kubelilin/domain/business/app"
+	"kubelilin/domain/business/kubernetes"
+	"kubelilin/domain/business/tenant"
+	"kubelilin/domain/conf"
+	pipelineV1 "kubelilin/pkg/pipeline"
 )
 
 // init 所有业务对象的IOC容器注入入口
@@ -32,7 +33,22 @@ func init() {
 			serviceCollection.AddTransient(kubernetes.NewDeploymentSupervisor)
 			serviceCollection.AddTransient(kubernetes.NewServiceSupervisor)
 			serviceCollection.AddTransient(app.NewVcsService)
+			serviceCollection.AddTransient(app.NewPipelineService)
+
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
+			injectionJenkinsBuilder(config, serviceCollection)
 
 		})
+}
+
+func injectionJenkinsBuilder(config abstractions.IConfiguration, serviceCollection *dependencyinjection.ServiceCollection) {
+	jenkinsUrl := config.GetString("pipeline.jenkins.url")
+	jenkinsToken := config.GetString("pipeline.jenkins.token")
+	jenkinsUser := config.GetString("pipeline.jenkins.username")
+	jenkinsNamespace := config.GetString("pipeline.jenkins.k8s-namespace")
+
+	serviceCollection.AddSingleton(func() *pipelineV1.Builder {
+		return pipelineV1.NewBuilder().UseJenkins(jenkinsUrl, jenkinsUser, jenkinsToken).
+			UseKubernetes(jenkinsNamespace)
+	})
 }

@@ -15,8 +15,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/client-go/util/homedir"
+	"kubelilin/domain/dto"
 	"path/filepath"
-	"sgr/domain/dto"
 	"sort"
 	"strconv"
 	"time"
@@ -93,7 +93,12 @@ func GetPodList(client *kubernetes.Clientset, namespace string, node string, app
 			}
 			podRestartCount = podRestartCount + int(containerStatus.RestartCount)
 		}
-
+		st := ""
+		var age time.Duration
+		if item.Status.StartTime != nil {
+			st = item.Status.StartTime.Time.Format("2006-01-02 15:04:05")
+			age = time.Now().Sub(item.Status.StartTime.Time)
+		}
 		podInfo := dto.Pod{
 			Namespace:     item.Namespace,
 			PodName:       item.Name,
@@ -102,8 +107,8 @@ func GetPodList(client *kubernetes.Clientset, namespace string, node string, app
 			ClusterName:   item.ClusterName,
 			Count:         podCount,
 			Ready:         podReadyCount,
-			StartTime:     item.Status.StartTime.Time.Format("2006-01-02 15:04:05"),
-			Age:           time.Now().Sub(item.Status.StartTime.Time),
+			StartTime:     st,
+			Age:           age,
 			Status:        string(item.Status.Phase),
 			Restarts:      podRestartCount,
 			ContainerList: containerList,
