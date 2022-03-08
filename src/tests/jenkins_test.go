@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"sgr/domain/dto"
-	pipelineV1 "sgr/pkg/pipeline"
+	"kubelilin/domain/dto"
+	pipelineV1 "kubelilin/pkg/pipeline"
 	"testing"
 	"time"
 )

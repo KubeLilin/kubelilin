@@ -8,9 +8,9 @@ import (
 	"github.com/yoyofx/yoyogo/web"
 	"github.com/yoyofx/yoyogo/web/actionresult/extension"
 	"github.com/yoyofxteam/dependencyinjection"
-	"sgr/api"
-	_ "sgr/domain"
-	"sgr/pkg/global"
+	"kubelilin/api"
+	_ "kubelilin/domain"
+	"kubelilin/pkg/global"
 )
 
 func main() {

@@ -5,8 +5,8 @@ import (
 	"github.com/gogs/go-gogs-client"
 	"github.com/yoyofx/yoyogo/abstractions"
 	"gorm.io/gorm"
+	"kubelilin/domain/database/models"
 	"regexp"
-	"sgr/domain/database/models"
 )
 
 const (

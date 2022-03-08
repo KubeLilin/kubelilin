@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"kubelilin/pkg/pipeline/templates"
 	"net/http"
-	"sgr/pkg/pipeline/templates"
 	"strings"
 	"text/template"
 )

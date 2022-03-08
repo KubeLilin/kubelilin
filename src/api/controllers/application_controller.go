@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"sgr/api/req"
-	"sgr/domain/business/app"
-	"sgr/utils"
+	"kubelilin/api/req"
+	"kubelilin/domain/business/app"
+	"kubelilin/utils"
 )
 
 type ApplicationController struct {

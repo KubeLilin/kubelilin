@@ -5,7 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"sgr/domain/business/tenant"
+	"kubelilin/domain/business/tenant"
 	"testing"
 )
 

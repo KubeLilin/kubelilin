@@ -2,8 +2,8 @@ package pipeline
 
 import (
 	"fmt"
+	"kubelilin/pkg/pipeline/templates"
 	"log"
-	"sgr/pkg/pipeline/templates"
 	"strings"
 )
 

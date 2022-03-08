@@ -3,7 +3,7 @@ package controllers
 import (
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"gorm.io/gorm"
-	dbmodels "sgr/domain/database/models"
+	dbmodels "kubelilin/domain/database/models"
 )
 
 type DemoController struct {

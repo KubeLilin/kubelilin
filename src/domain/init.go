@@ -4,11 +4,11 @@ import (
 	"github.com/yoyofx/yoyogo/abstractions"
 	"github.com/yoyofx/yoyogo/pkg/configuration"
 	"github.com/yoyofxteam/dependencyinjection"
-	"sgr/domain/business/app"
-	"sgr/domain/business/kubernetes"
-	"sgr/domain/business/tenant"
-	"sgr/domain/conf"
-	pipelineV1 "sgr/pkg/pipeline"
+	"kubelilin/domain/business/app"
+	"kubelilin/domain/business/kubernetes"
+	"kubelilin/domain/business/tenant"
+	"kubelilin/domain/conf"
+	pipelineV1 "kubelilin/pkg/pipeline"
 )
 
 // init 所有业务对象的IOC容器注入入口

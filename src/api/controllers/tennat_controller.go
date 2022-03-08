@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"sgr/api/req"
-	"sgr/domain/business/tenant"
-	"sgr/domain/database/models"
+	"kubelilin/api/req"
+	"kubelilin/domain/business/tenant"
+	"kubelilin/domain/database/models"
 )
 
 type TenantController struct {

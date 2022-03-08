@@ -2,9 +2,9 @@ package tenant
 
 import (
 	"gorm.io/gorm"
-	"sgr/api/req"
-	dbmodels "sgr/domain/database/models"
-	"sgr/pkg/page"
+	"kubelilin/api/req"
+	dbmodels "kubelilin/domain/database/models"
+	"kubelilin/pkg/page"
 )
 
 type UserService struct {

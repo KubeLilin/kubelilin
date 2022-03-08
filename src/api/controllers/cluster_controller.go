@@ -3,10 +3,10 @@ package controllers
 import (
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"sgr/api/req"
-	"sgr/domain/business/kubernetes"
-	"sgr/domain/dto"
-	"sgr/utils"
+	"kubelilin/api/req"
+	"kubelilin/domain/business/kubernetes"
+	"kubelilin/domain/dto"
+	"kubelilin/utils"
 	"strconv"
 )
 

@@ -4,7 +4,7 @@ import (
 	"github.com/yoyofx/yoyogo/web/endpoints"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"github.com/yoyofx/yoyogo/web/router"
-	"sgr/api/controllers"
+	"kubelilin/api/controllers"
 )
 
 func ConfigureApi(builder router.IRouterBuilder) {

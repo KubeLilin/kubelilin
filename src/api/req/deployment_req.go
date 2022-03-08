@@ -2,7 +2,7 @@ package req
 
 import (
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"sgr/pkg/page"
+	"kubelilin/pkg/page"
 )
 
 type DeploymentGetListRequest struct {

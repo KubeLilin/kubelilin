@@ -2,7 +2,7 @@ package req
 
 import (
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"sgr/domain/database/models"
+	"kubelilin/domain/database/models"
 )
 
 type ImportClusterReq struct {

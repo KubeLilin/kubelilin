@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"sgr/api/req"
-	"sgr/domain/business/app"
-	"sgr/domain/business/kubernetes"
-	"sgr/pkg/page"
+	"kubelilin/api/req"
+	"kubelilin/domain/business/app"
+	"kubelilin/domain/business/kubernetes"
+	"kubelilin/pkg/page"
 	"strconv"
 )
 
