@@ -317,13 +317,17 @@ func Exec(client *kubernetes.Clientset, cfg *rest.Config, terminal *WebTerminal,
 	return err
 }
 
-func CreateNamespace(client *kubernetes.Clientset, namespace string) error {
+func CreateNamespace(client *kubernetes.Clientset, namespace string, lables map[string]string) error {
 	nsClient := client.CoreV1().Namespaces()
 	ns := &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: namespace,
 		},
 	}
+	if lables != nil {
+		ns.Labels = lables
+	}
+
 	_, err := nsClient.Create(context.TODO(), ns, metav1.CreateOptions{})
 	return err
 }
@@ -370,6 +374,11 @@ func CreateResourceQuotasByNamespace(client *kubernetes.Clientset, quotas dto.Qu
 		resourceQuotas = &v1.ResourceQuota{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "quota-" + quotas.Namespace,
+				Labels: map[string]string{
+					"kubelilin-default": "true",
+					"tenantId":          strconv.FormatUint(quotas.TenantID, 10),
+					"clusterId":         strconv.FormatUint(quotas.ClusterId, 10),
+					"namespace":         quotas.Namespace},
 			},
 			Spec: v1.ResourceQuotaSpec{
 				Hard: resourceHard,
@@ -377,6 +386,11 @@ func CreateResourceQuotasByNamespace(client *kubernetes.Clientset, quotas dto.Qu
 		}
 		_, err = quotaClient.Create(context.TODO(), resourceQuotas, metav1.CreateOptions{})
 	} else { // founded for update
+		resourceQuotas.Labels = map[string]string{
+			"kubelilin-default": "true",
+			"tenantId":          strconv.FormatUint(quotas.TenantID, 10),
+			"clusterId":         strconv.FormatUint(quotas.ClusterId, 10),
+			"namespace":         quotas.Namespace}
 		resourceQuotas.Spec.Hard = resourceHard
 		_, err = quotaClient.Update(context.TODO(), resourceQuotas, metav1.UpdateOptions{})
 	}

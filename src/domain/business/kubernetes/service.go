@@ -10,6 +10,7 @@ import (
 	applycorev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"kubelilin/domain/database/models"
+	"strconv"
 	"strings"
 )
 
@@ -39,10 +40,19 @@ func (svc *ServiceSupervisor) ApplyService(client corev1.CoreV1Interface, dp *mo
 	serviceInfo.APIVersion = &apiVersion
 	serviceInfo.Kind = &kind
 	//匹配dp的label
-	metaLabel := make(map[string]string)
-	metaLabel["k8s-app"] = dp.Name
+	//metaLabel := make(map[string]string)
+	//metaLabel["k8s-app"] = dp.Name
+	metaLabels := map[string]string{
+		"kubelilin-default": "true",
+		"appId":             strconv.FormatUint(dp.AppID, 10),
+		"tenantId":          strconv.FormatUint(dp.TenantID, 10),
+		"clusterId":         strconv.FormatUint(dp.ClusterID, 10),
+		"namespaceId":       strconv.FormatUint(dp.NamespaceID, 10),
+		"namespace":         namespace.Namespace,
+		"k8s-app":           dp.Name,
+	}
 	spec := applycorev1.ServiceSpecApplyConfiguration{}
-	spec.Selector = metaLabel
+	spec.Selector = metaLabels
 	//构造端口数据
 	var ports []applycorev1.ServicePortApplyConfiguration
 	portNumber := int32(dp.ServicePort)
