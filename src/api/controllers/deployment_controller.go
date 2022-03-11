@@ -8,6 +8,7 @@ import (
 	"kubelilin/domain/business/app"
 	"kubelilin/domain/business/kubernetes"
 	"kubelilin/pkg/page"
+	"kubelilin/utils"
 	"strconv"
 )
 
@@ -89,6 +90,20 @@ func (controller DeploymentController) GetDeploymentFormInfo(ctx *context.HttpCo
 		return mvc.FailWithMsg(nil, resErr.Error())
 	}
 	return mvc.Success(res)
+}
+
+func (controller DeploymentController) DeleteDeployment(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	deploymentId, err := utils.StringToUInt64(ctx.Input.QueryDefault("dpId", "0"))
+	if err != nil {
+		return mvc.FailWithMsg(nil, "部署id无效或者未接收到部署id")
+	}
+	err = controller.deploymentSupervisor.DeleteDeployment(userInfo.TenantID, deploymentId)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(true)
+
 }
 
 func (controller DeploymentController) PostReplicas(request *req.ScaleRequest, ctx *context.HttpContext) mvc.ApiResult {
