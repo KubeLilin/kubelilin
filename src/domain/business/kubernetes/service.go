@@ -50,6 +50,7 @@ func (svc *ServiceSupervisor) ApplyService(client corev1.CoreV1Interface, dp *mo
 		"namespaceId":       strconv.FormatUint(dp.NamespaceID, 10),
 		"namespace":         namespace.Namespace,
 		"k8s-app":           dp.Name,
+		"profileLevel":      dp.Level,
 	}
 	spec := applycorev1.ServiceSpecApplyConfiguration{}
 	spec.Selector = metaLabels

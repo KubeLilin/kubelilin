@@ -163,6 +163,7 @@ func (ds *DeploymentSupervisor) ApplyDeployment(clientSet *kubernetes.Clientset,
 		"namespaceId":       strconv.FormatUint(dp.NamespaceID, 10),
 		"namespace":         namespace.Namespace,
 		"k8s-app":           dp.Name,
+		"profileLevel":      dp.Level,
 	}
 
 	//metalabel := make(map[string]string)

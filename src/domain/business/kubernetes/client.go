@@ -141,21 +141,22 @@ func GetNodeList(client *kubernetes.Clientset) []dto.Node {
 		for _, addr := range nd.Status.Addresses {
 			address = append(address, dto.NodeAddress{Type: string(addr.Type), Address: addr.Address})
 		}
-
 		node := dto.Node{
 			Uid:       string(nd.UID),
 			Name:      nd.Name,
 			PodCIDR:   nd.Spec.PodCIDR,
 			Addresses: address,
 			Capacity: dto.NodeStatus{
-				CPU:    nd.Status.Capacity.Cpu().AsApproximateFloat64(),
-				Memory: nd.Status.Capacity.Memory().AsApproximateFloat64(),
-				Pods:   nd.Status.Capacity.Pods().Size(),
+				CPU:     nd.Status.Capacity.Cpu().AsApproximateFloat64(),
+				Memory:  nd.Status.Capacity.Memory().AsApproximateFloat64(),
+				Pods:    nd.Status.Capacity.Pods().Size(),
+				Storage: nd.Status.Capacity.StorageEphemeral().AsApproximateFloat64(),
 			},
 			Allocatable: dto.NodeStatus{
-				CPU:    nd.Status.Allocatable.Cpu().AsApproximateFloat64(),
-				Memory: nd.Status.Allocatable.Memory().AsApproximateFloat64(),
-				Pods:   nd.Status.Allocatable.Pods().Size(),
+				CPU:     nd.Status.Allocatable.Cpu().AsApproximateFloat64(),
+				Memory:  nd.Status.Allocatable.Memory().AsApproximateFloat64(),
+				Pods:    nd.Status.Allocatable.Pods().Size(),
+				Storage: nd.Status.Allocatable.StorageEphemeral().AsApproximateFloat64(),
 			},
 			OSImage:                 nd.Status.NodeInfo.OSImage,
 			ContainerRuntimeVersion: nd.Status.NodeInfo.ContainerRuntimeVersion,

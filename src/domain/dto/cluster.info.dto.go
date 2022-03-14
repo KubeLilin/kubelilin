@@ -51,6 +51,7 @@ type Node struct {
 	Addresses               []NodeAddress `json:"addresses"`
 	Capacity                NodeStatus    `json:"capacity"`
 	Allocatable             NodeStatus    `json:"allocatable"`
+	Usage                   NodeStatus    `json:"usage"`
 	OSImage                 string        `json:"osImage"`
 	ContainerRuntimeVersion string        `json:"containerRuntimeVersion"`
 	KubeletVersion          string        `json:"kubeletVersion"`

@@ -30,4 +30,5 @@ func ConfigureMvc(builder *mvc.ControllerBuilder) {
 	builder.AddController(controllers.NewApplicationController)
 	builder.AddController(controllers.NewDeploymentController)
 	builder.AddController(controllers.NewPodController)
+	builder.AddController(controllers.NewMetricsController)
 }
