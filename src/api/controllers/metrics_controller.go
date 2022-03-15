@@ -26,3 +26,12 @@ func (controller MetricsController) GetStatistics(ctx *context.HttpContext) mvc.
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
 	return mvc.Success(controller.metricsService.GetStatistics(clusterId))
 }
+
+func (controller MetricsController) GetWorkloads(ctx *context.HttpContext) mvc.ApiResult {
+	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
+	return mvc.Success(controller.metricsService.GetResourceMetrics(clusterId))
+}
+
+func (controller MetricsController) GetProjects(ctx *context.HttpContext) mvc.ApiResult {
+	return mvc.Success(controller.metricsService.GetProjectsMetrics())
+}

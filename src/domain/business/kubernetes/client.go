@@ -149,13 +149,13 @@ func GetNodeList(client *kubernetes.Clientset) []dto.Node {
 			Capacity: dto.NodeStatus{
 				CPU:     nd.Status.Capacity.Cpu().AsApproximateFloat64(),
 				Memory:  nd.Status.Capacity.Memory().AsApproximateFloat64(),
-				Pods:    nd.Status.Capacity.Pods().Size(),
+				Pods:    nd.Status.Capacity.Pods().Value(),
 				Storage: nd.Status.Capacity.StorageEphemeral().AsApproximateFloat64(),
 			},
 			Allocatable: dto.NodeStatus{
 				CPU:     nd.Status.Allocatable.Cpu().AsApproximateFloat64(),
 				Memory:  nd.Status.Allocatable.Memory().AsApproximateFloat64(),
-				Pods:    nd.Status.Allocatable.Pods().Size(),
+				Pods:    nd.Status.Allocatable.Pods().Value(),
 				Storage: nd.Status.Allocatable.StorageEphemeral().AsApproximateFloat64(),
 			},
 			OSImage:                 nd.Status.NodeInfo.OSImage,
