@@ -17,6 +17,8 @@ require (
 	k8s.io/apimachinery v0.22.0
 	k8s.io/cli-runtime v0.22.0
 	k8s.io/client-go v0.22.0
+	k8s.io/metrics v0.22.0
+
 )
 
 replace gorm.io/gorm v1.21.11 => github.com/go-gorm/gorm v1.21.11

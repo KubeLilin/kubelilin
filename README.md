@@ -1,25 +1,33 @@
-# sgr-platform-api
-SGR cloud native backend .
+# Kubelilin ApiServer
+Kubelilin cloud native backend .
 
 ## PaaS 平台运行
 ### Backend & MySQL
 ```bash
-git clone https://github.com/yoyofxteam/sgr-platform-api.git
-cd sgr-platform-api/scripts
+git clone https://github.com/KubeLilin/kubelilin.git
+cd kubelilin/scripts
 docker-compose -f ./docker-compose.yaml up -d
 ```
 ### FrontEnd
 ```bash
-git clone https://github.com/yoyofxteam/sgr-platform-ui.git
-cd sgr-platform-ui/src
-npm install
+git clone https://github.com/KubeLilin/dashboard.git
+cd dashboard/src
+npm install --force
 npm run start
 ```
 
 # Todo:
-## fix bugs
+
+## v0.1.2
+1. [] 资源大盘
+2. [] 服务治理 (注册中心，配置管理)
+3. [] 网关 （apisix & service）
+4. [] 卷管理&绑定
+
+
+## 0.1.1 fix bugs
 1. [X] 为用户分配角色
-2. [ ] namespace分配配额 （cpu、内存、磁盘、pod）等
+2. [X] namespace分配配额 （cpu、内存、磁盘、pod）等
 
 ### 管理员能力 ：
 1. 集群管理： 导入集群 ， 导入的集群对所有租户可见
@@ -44,20 +52,12 @@ npm run start
 -  网关绑定 apixsix admin api ,添加默认路由并绑定 k8s service name
 
 --------
+未来：
     服务治理：（不在本期范围）
-    配置管理：（不在本期范围）
-    
     运维中心：（不在本期范围）
     链路分析
     服务监控
     日志服务
-    注册中心： 导入 nacos 信息
-    
-    第一期就是管理中心和集群管理，其它不做
-
-## 资源大盘
-没想好 显示点啥
-
 
 # 已完成功能：
 ## 管理中心(SAAS功能)  （已完成）

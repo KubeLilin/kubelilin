@@ -133,8 +133,14 @@ func (controller ClusterController) PutNewNamespace(ctx *context.HttpContext) mv
 	//只能导入到 平台租户中，再进行分配
 	created, err := controller.clusterService.CreateNamespace(tenantId, clusterId, namespace)
 	if created {
+		labels := map[string]string{
+			"kubelilin-default": "true",
+			"tenantId":          strconv.FormatUint(tenantId, 10),
+			"clusterId":         strconv.FormatUint(clusterId, 10),
+			"namespace":         namespace}
+
 		clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(0, clusterId)
-		err = kubernetes.CreateNamespace(clientSet, namespace)
+		err = kubernetes.CreateNamespace(clientSet, namespace, labels)
 		if err != nil {
 			return controller.Fail(err.Error())
 		}
@@ -144,10 +150,18 @@ func (controller ClusterController) PutNewNamespace(ctx *context.HttpContext) mv
 }
 
 func (controller ClusterController) PutNewK8sNamespace(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
 	namespace := ctx.Input.QueryDefault("namespace", "")
+
+	labels := map[string]string{
+		"kubelilin-default": "true",
+		"tenantId":          strconv.FormatUint(userInfo.TenantID, 10),
+		"clusterId":         strconv.FormatUint(clusterId, 10),
+		"namespace":         namespace}
+
 	clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(0, clusterId)
-	err := kubernetes.CreateNamespace(clientSet, namespace)
+	err := kubernetes.CreateNamespace(clientSet, namespace, labels)
 	if err != nil {
 		return controller.Fail(err.Error())
 	}
@@ -163,14 +177,13 @@ func (controller ClusterController) GetResourceQuota(ctx *context.HttpContext) m
 }
 
 func (controller ClusterController) PostResourceQuota(ctx *context.HttpContext) mvc.ApiResult {
-	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
-	clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(0, clusterId)
 	var quotas dto.QuotasSpec
 	err := ctx.Bind(&quotas)
 	if err != nil {
 		return controller.Fail(err.Error())
 	}
 
+	clientSet, _ := controller.clusterService.GetClusterClientByTenantAndId(0, quotas.ClusterId)
 	err = kubernetes.CreateResourceQuotasByNamespace(clientSet, quotas)
 	if err != nil {
 		return controller.Fail(err.Error())

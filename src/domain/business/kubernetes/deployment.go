@@ -104,7 +104,7 @@ func (ds *DeploymentSupervisor) ExecuteDeployment(execReq *req.ExecDeploymentReq
 	} else {
 		record.State = "成功"
 	}
-	ds.ReleaseRecord(record)
+	_ = ds.ReleaseRecord(record)
 	return exeRes, err
 }
 
@@ -155,9 +155,20 @@ func (ds *DeploymentSupervisor) ApplyDeployment(clientSet *kubernetes.Clientset,
 	deploymentDatum.APIVersion = &apiVersion
 	deploymentDatum.Kind = &kind
 
-	metalabel := make(map[string]string)
-	metalabel["k8s-app"] = dp.Name
-	deploymentDatum.Labels = metalabel
+	metaLabels := map[string]string{
+		"kubelilin-default": "true",
+		"appId":             strconv.FormatUint(dp.AppID, 10),
+		"tenantId":          strconv.FormatUint(dp.TenantID, 10),
+		"clusterId":         strconv.FormatUint(dp.ClusterID, 10),
+		"namespaceId":       strconv.FormatUint(dp.NamespaceID, 10),
+		"namespace":         namespace.Namespace,
+		"k8s-app":           dp.Name,
+		"profileLevel":      dp.Level,
+	}
+
+	//metalabel := make(map[string]string)
+	//metalabel["k8s-app"] = dp.Name
+	deploymentDatum.Labels = metaLabels
 	//spec
 	spec := appsapplyv1.DeploymentSpecApplyConfiguration{}
 	replicas := int32(dp.Replicas)
@@ -170,15 +181,15 @@ func (ds *DeploymentSupervisor) ApplyDeployment(clientSet *kubernetes.Clientset,
 		},
 	}
 	//selector
-	selectorMap := make(map[string]string)
-	selectorMap["k8s-app"] = dp.Name
+	//selectorMap := make(map[string]string)
+	//selectorMap["k8s-app"] = dp.Name
 	spec.Selector = &appsapplymetav1.LabelSelectorApplyConfiguration{
-		MatchLabels: selectorMap,
+		MatchLabels: metaLabels,
 	}
 	//region  template
 	specTemplate := corev1.PodTemplateSpecApplyConfiguration{}
 	specTemplate.WithNamespace(namespace.Namespace)
-	specTemplate.Labels = selectorMap
+	specTemplate.Labels = metaLabels
 	//PodSpec
 	podSpec := corev1.PodSpecApplyConfiguration{}
 	containers, containerErr := ds.AssemblingContainerForApply(dp, dpc)
@@ -292,6 +303,23 @@ func injectionContainerEnv(envJson string) []corev1.EnvVarApplyConfiguration {
 
 	//endregion
 	return envs
+}
+
+func (ds *DeploymentSupervisor) DeleteDeployment(tenantId, dpId uint64) error {
+	dpDatum := models.SgrTenantDeployments{}
+	dbErr := ds.db.Model(&models.SgrTenantDeployments{}).Where("id=?", dpId).First(&dpDatum)
+	if dbErr.Error != nil {
+		return errors.New("未找到相应的部署")
+	}
+	namespace, err := ds.GetNameSpaceByDpId(dpId)
+	if err != nil {
+		return err
+	}
+	clientSet, clientSetErr := ds.clusterService.GetClusterClientByTenantAndId(tenantId, dpDatum.ClusterID)
+	if clientSetErr != nil {
+		return clientSetErr
+	}
+	return clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), dpDatum.Name, metav1.DeleteOptions{})
 }
 
 func (ds *DeploymentSupervisor) GetDeploymentYaml(tenantId, dpId uint64) (string, error) {
