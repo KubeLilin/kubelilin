@@ -19,15 +19,15 @@ npm run start
 # Todo:
 ## v0.1.3
 1. [] 服务治理 (注册中心，配置管理)
-2. [] 网关 （apisix & service）
+2. [] 网络中心:微服务网关集成 （apisix & service）
 3. [] 运维中心: 命名空间、卷、configmap
 4. [] 应用：部署绑定数据卷
    
 
 ## v0.1.2
 1. [X] 资源大盘
-2. [] 发布记录-> 回滚
-3. [] 命名空间-> 变成团队空间(team space 用于按集群管理团队租户下的 k8s namespace) 部署、分配配额( cpu ,memory ,pods ,storage).
+2. [] 应用中心：发布记录-> 回滚
+3. [] 资源中心：命名空间-> 变成团队空间(team space 用于按集群管理团队租户下的 k8s namespace) 部署、分配配额( cpu ,memory ,pods ,storage).
 
 
 ## 0.1.1 fix bugs
