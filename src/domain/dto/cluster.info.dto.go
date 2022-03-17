@@ -26,6 +26,7 @@ type Pod struct {
 	Status        string        `json:"status"`
 	Restarts      int           `json:"restarts"`
 	ContainerList []Container   `json:"containers"`
+	Usage         NodeStatus    `json:"usage"`
 }
 
 type Container struct {
