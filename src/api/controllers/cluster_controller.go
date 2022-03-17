@@ -57,14 +57,22 @@ func (controller ClusterController) GetNamespacesFromDB(ctx *context.HttpContext
 }
 
 func (controller ClusterController) GetNamespaceList(ctx *context.HttpContext) mvc.ApiResult {
-	strCid := ctx.Input.QueryDefault("cid", "0")
+	userInfo := req.GetUserInfo(ctx)
+	cid, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
 	tenantName := ctx.Input.QueryDefault("tenant", "")
 	pageIndex, _ := utils.StringToInt(ctx.Input.QueryDefault("current", "0"))
 	pageSize, _ := utils.StringToInt(ctx.Input.QueryDefault("pageSize", "0"))
-	cid, _ := strconv.Atoi(strCid)
 	err, res := controller.clusterService.GetNameSpacesListForDB(cid, tenantName, pageIndex, pageSize)
 	if err != nil {
 		return controller.Fail(err.Error())
+	}
+	if cid > 0 {
+		client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
+		resourceQuotasMaps := kubernetes.GetAllNamespaceResourceQuotas(client)
+		nsList := res.Data.(*[]dto.NamespaceInfo)
+		for i, nsItem := range *nsList {
+			(*nsList)[i].QuotasSpec = resourceQuotasMaps["ns-"+nsItem.Namespace]
+		}
 	}
 	return controller.OK(res)
 }

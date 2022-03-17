@@ -9,6 +9,7 @@ import (
 	"k8s.io/api/core/v1"
 	resourcev1 "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -333,33 +334,54 @@ func CreateNamespace(client *kubernetes.Clientset, namespace string, lables map[
 	return err
 }
 
-func GetResourceQuotasByNamespace(client *kubernetes.Clientset, namespace string) ([]dto.ResourceQuotas, error) {
-	quotaClient := client.CoreV1().ResourceQuotas(namespace)
-	resourceQuotas, err := quotaClient.Get(context.TODO(), "quota-"+namespace, metav1.GetOptions{})
-	var resourceQuotaInfo []dto.ResourceQuotas
-
+func MapResourceQuotas(resourceQuotas *v1.ResourceQuota) dto.ResourceQuotas {
+	resourceQuotasInfo := dto.ResourceQuotas{Labels: resourceQuotas.Labels}
+	var resourceQuotaItemList []dto.ResourceQuotasItem
 	resource := "limits.cpu"
 	Limit := resourceQuotas.Status.Hard.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
 	Used := resourceQuotas.Status.Used.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
-	resourceQuotaInfo = append(resourceQuotaInfo,
-		dto.ResourceQuotas{Name: resource,
+	resourceQuotaItemList = append(resourceQuotaItemList,
+		dto.ResourceQuotasItem{Name: resource,
 			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.Value(), UsedValue: Used.Value()})
 
 	resource = "limits.memory"
 	Limit = resourceQuotas.Status.Hard.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
 	Used = resourceQuotas.Status.Used.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
-	resourceQuotaInfo = append(resourceQuotaInfo,
-		dto.ResourceQuotas{Name: resource,
+	resourceQuotaItemList = append(resourceQuotaItemList,
+		dto.ResourceQuotasItem{Name: resource,
 			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.Value(), UsedValue: Used.Value()})
 
 	resource = "pods"
 	Limit = resourceQuotas.Status.Hard.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
 	Used = resourceQuotas.Status.Used.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
-	resourceQuotaInfo = append(resourceQuotaInfo,
-		dto.ResourceQuotas{Name: resource,
+	resourceQuotaItemList = append(resourceQuotaItemList,
+		dto.ResourceQuotasItem{Name: resource,
 			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.Value(), UsedValue: Used.Value()})
 
-	return resourceQuotaInfo, err
+	resourceQuotasInfo.Items = resourceQuotaItemList
+	return resourceQuotasInfo
+}
+
+func GetResourceQuotasByNamespace(client *kubernetes.Clientset, namespace string) ([]dto.ResourceQuotasItem, error) {
+	quotaClient := client.CoreV1().ResourceQuotas(namespace)
+	resourceQuotas, err := quotaClient.Get(context.TODO(), "quota-"+namespace, metav1.GetOptions{})
+	return MapResourceQuotas(resourceQuotas).Items, err
+}
+
+func GetAllNamespaceResourceQuotas(client *kubernetes.Clientset) map[string][]dto.ResourceQuotasItem {
+	quotaClient := client.CoreV1().ResourceQuotas("")
+	resourceQuotasList, err := quotaClient.List(context.TODO(), metav1.ListOptions{
+		LabelSelector: labels.SelectorFromSet(map[string]string{"kubelilin-default": "true"}).String(),
+	})
+	mapResourceQuotasList := make(map[string][]dto.ResourceQuotasItem)
+	if err == nil {
+		for _, rqItem := range resourceQuotasList.Items {
+			rq := MapResourceQuotas(&rqItem)
+			rqNs := rq.Labels["namespace"]
+			mapResourceQuotasList["ns-"+rqNs] = rq.Items
+		}
+	}
+	return mapResourceQuotasList
 }
 
 func CreateResourceQuotasByNamespace(client *kubernetes.Clientset, quotas dto.QuotasSpec) error {
