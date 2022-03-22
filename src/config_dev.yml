@@ -22,6 +22,7 @@ yoyogo:
           "/v1/user/login",
           "/v1/pod/terminal",
           "/v1/deployment/executedeployment",
+          "/v1/deployment/notify",
           "/actuator/health/liveness",
           "/actuator/health/readiness",
           "/actuator/health/detail"
@@ -64,4 +65,4 @@ pipeline:
 
 kubelilin:
   deploy:
-    url: http://prod-kubelilin-apiserver-cls-hbktlqm5-svc-cluster-sgr.yoyogo #api.kubelilin.com
+    url: http://prod-kubelilin-apiserver-cls-hbktlqm5-svc-cluster-sgr.yoyogo:8080 #api.kubelilin.com
