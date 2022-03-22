@@ -1,15 +1,12 @@
 package notice
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
+	"kubelilin/utils"
 	"log"
-	"net/http"
 )
 
-type markdownMessage struct {
+type wechatMarkdownMessage struct {
 	Markdown struct {
 		Content string `json:"content"`
 	} `json:"markdown"`
@@ -21,14 +18,13 @@ type Wechat struct {
 }
 
 func NewWechat(key string) Notifier {
-	//428c53f6-261a-404d-8315-7ca368598a06
 	return &Wechat{key: key}
 }
 
-func (w Wechat) PostMessage(message Message) error {
-	url := "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=" + w.key
+func (wechat Wechat) PostMessage(message Message) error {
+	url := "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=" + wechat.key
 
-	mkMessage := &markdownMessage{
+	mkMessage := &wechatMarkdownMessage{
 		Markdown: struct {
 			Content string `json:"content"`
 		}{
@@ -48,24 +44,7 @@ func (w Wechat) PostMessage(message Message) error {
 	msg, err := json.Marshal(mkMessage)
 	msgStr := string(msg)
 
-	response := postWechatMessage(url, msgStr)
+	response := utils.PostHttpMessage(url, msgStr)
 	log.Println(response)
 	return err
-}
-
-func postWechatMessage(sendUrl, msg string) string {
-	client := &http.Client{}
-	req, _ := http.NewRequest("POST", sendUrl, bytes.NewBuffer([]byte(msg)))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("charset", "UTF-8")
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	fmt.Println("response Status:", resp.Status)
-	body, _ := ioutil.ReadAll(resp.Body)
-	strBody := string(body)
-	fmt.Println("response Body:", strBody)
-	return strBody
 }
