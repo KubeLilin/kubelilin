@@ -147,7 +147,8 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 		{Key: "SGR_REGISTRY_CONFIG", Value: "/kaniko/.docker"},
 	}
 	var buildImage string
-
+	var branch string
+	var deployId uint64
 	var dslStageList []pipelineV1.StageItem
 	for _, stage := range pipelineStages {
 		dslStageItem := pipelineV1.StageItem{Name: stage.Name}
@@ -161,6 +162,7 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
                     	doGenerateSubmoduleConfigurations: false,extensions: [[$class:'CheckoutOption',timeout:30],[$class:'CloneOption',depth:0,noTags:false,reference:'',shallow:false,timeout:30]], submoduleCfg: [],
                     	userRemoteConfigs: [[ url: "%s"]]
                 	])`, step.Content["branch"], step.Content["git"])})
+				branch = step.Content["branch"].(string)
 				break
 			case "cmd_shell":
 				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: step.Name,
@@ -178,6 +180,7 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 					   httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody:rbody , responseHandle: 'NONE', timeout: 30, url: '%s/v1/deployment/executedeployment'
 				   }
 				`, step.Content["depolyment"], deployUrl)})
+				deployId = uint64(step.Content["depolyment"].(float64))
 				break
 			case "code_build":
 				// 添加编译环境,Dockerfile 文件位置
@@ -205,6 +208,16 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 							/kaniko/executor -f $SGR_DOCKER_FILE -c . --destination=$SGR_REPOSITORY_NAME:v$BUILD_NUMBER  --insecure --skip-tls-verify -v=debug
 						''' 
 					}`})
+				break
+			case "publish_notify":
+				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: step.Name,
+					Command: fmt.Sprintf(`
+				   script{
+					   def rbody = "{\"version\": \"v${env.BUILD_NUMBER}\",  \"dpId\": %v, \"branch\": \"%s\" , \"notifyType\": \"%s\" , \"notifyKey\": \"%s\" }"
+					   println rbody
+					   httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody:rbody , responseHandle: 'NONE', timeout: 30, url: '%s/v1/deployment/notify'
+				   }
+				`, deployId, branch, step.Content["notifyType"], step.Content["notifyKey"], deployUrl)})
 				break
 			}
 		}

@@ -114,3 +114,12 @@ type DeploymentEnv struct {
 	Key   string `json:"key" uri:"key"`
 	Value string `json:"value" uri:"value"`
 }
+
+type DeployNotifyRequest struct {
+	mvc.RequestBody
+	Version    string `json:"version"`
+	DeployId   uint64 `json:"dpId"`
+	Branch     string `json:"branch"`
+	NotifyType string `json:"notifyType"`
+	NotifyKey  string `json:"notifyKey"`
+}

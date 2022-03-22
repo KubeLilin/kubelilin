@@ -35,7 +35,7 @@ func (ding DingTalk) PostMessage(message Message) error {
 			Text: fmt.Sprintf(`
  > [应　用] :  %s
 
- > [流水线] :  %s
+ > [服　务] :  %s
 
  > [环　境] :  %s
 
@@ -49,7 +49,7 @@ func (ding DingTalk) PostMessage(message Message) error {
 
 
  > [详情请在Kubelilin平台应用中心查看](https://www.kubelilin.com)`,
-				message.App, message.Pipeline, message.Environment,
+				message.App, message.Service, message.Environment,
 				message.Version, message.Branch, message.Timestamp, message.Success),
 		},
 		Msgtype: "markdown",

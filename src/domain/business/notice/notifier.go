@@ -3,7 +3,7 @@ package notice
 type Message struct {
 	// 应用名称
 	App         string `json:"app"`
-	Pipeline    string `json:"pipeline"`    // 流水线名称
+	Service     string `json:"service"`     // 网络名称
 	Environment string `json:"environment"` // 部署环境
 	Version     string `json:"version"`     // 版本号
 	Branch      string `json:"branch"`

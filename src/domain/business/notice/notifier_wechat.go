@@ -30,7 +30,7 @@ func (wechat Wechat) PostMessage(message Message) error {
 		}{
 			Content: "# Kubelilin 部署通知 \n" +
 				" > [应　用] : " + message.App + "\n" +
-				" > [流水线] : " + message.Pipeline + "\n" +
+				" > [服　务] : " + message.Service + "\n" +
 				" > [环　境] : " + message.Environment + "\n" +
 				" > [版　本] : " + message.Version + "\n" +
 				" > [分　支] : " + message.Branch + "\n" +

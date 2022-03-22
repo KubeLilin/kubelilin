@@ -11,7 +11,7 @@ func Test_WechatNotification(t *testing.T) {
 	notifier := notice.NewWechat("428c53f6-261a-404d-8315-7ca368598a06")
 	message := notice.Message{
 		App:         "ApiServer",
-		Pipeline:    "pipeline-1-app-13",
+		Service:     "pipeline-1-app-13",
 		Environment: "dev-apiserver-microk8s",
 		Version:     "v1.0.3",
 		Branch:      "dev",
@@ -27,7 +27,7 @@ func Test_DingTalkNotification(t *testing.T) {
 	notifier := notice.NewDingTalk("a5e6519d74b1b3f9486d05e3ab765ec7bda31ea6fa4051b39e29a5bfde1a6b59")
 	message := notice.Message{
 		App:         "ApiServer",
-		Pipeline:    "pipeline-1-app-13",
+		Service:     "pipeline-1-app-13",
 		Environment: "dev-apiserver-microk8s",
 		Version:     "v1.0.3",
 		Branch:      "dev",
