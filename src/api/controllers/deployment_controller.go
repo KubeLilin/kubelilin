@@ -220,3 +220,14 @@ func (controller DeploymentController) PostNotify(notifyReq *req.DeployNotifyReq
 	return mvc.Success(true)
 
 }
+
+func (c DeploymentController) PostRollBackByReleaseRecord(ctx *context.HttpContext, execReq *req.ExecDeploymentRequest) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	execReq.TenantId = userInfo.TenantID
+	execReq.Operator = uint64(userInfo.UserId)
+	res, err := c.deploymentSupervisor.ExecuteDeployment(execReq)
+	if err == nil {
+		return mvc.Success(res)
+	}
+	return mvc.Fail(err.Error())
+}
