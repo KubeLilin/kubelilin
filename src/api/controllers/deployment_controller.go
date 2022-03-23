@@ -201,10 +201,10 @@ func (controller DeploymentController) PostNotify(notifyReq *req.DeployNotifyReq
 		break
 	}
 
-	deployment, _ := controller.deploymentService.GetDeploymentByID(notifyReq.DeployId)
+	_, deployment := controller.deploymentService.GetDeploymentForm(notifyReq.DeployId)
 	message := notice.Message{
-		App:         deployment.AppName,
-		Service:     deployment.ServiceName + ":" + deployment.NameSpace,
+		App:         deployment.Nickname,
+		Level:       deployment.Level,
 		Environment: deployment.Name,
 		Version:     notifyReq.Version,
 		Branch:      notifyReq.Branch,

@@ -33,9 +33,9 @@ func (ding DingTalk) PostMessage(message Message) error {
 		}{
 			Title: "Kubelilin 部署通知",
 			Text: fmt.Sprintf(`
- > [应　用] :  %s
+ > [部　署] :  %s
 
- > [服　务] :  %s
+ > [级　别] :  %s
 
  > [环　境] :  %s
 
@@ -49,7 +49,7 @@ func (ding DingTalk) PostMessage(message Message) error {
 
 
  > [详情请在Kubelilin平台应用中心查看](https://www.kubelilin.com)`,
-				message.App, message.Service, message.Environment,
+				message.App, message.Level, message.Environment,
 				message.Version, message.Branch, message.Timestamp, message.Success),
 		},
 		Msgtype: "markdown",

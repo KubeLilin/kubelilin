@@ -29,8 +29,8 @@ func (wechat Wechat) PostMessage(message Message) error {
 			Content string `json:"content"`
 		}{
 			Content: "# Kubelilin 部署通知 \n" +
-				" > [应　用] : " + message.App + "\n" +
-				" > [服　务] : " + message.Service + "\n" +
+				" > [部　署] : " + message.App + "\n" +
+				" > [级　别] : " + message.Level + "\n" +
 				" > [环　境] : " + message.Environment + "\n" +
 				" > [版　本] : " + message.Version + "\n" +
 				" > [分　支] : " + message.Branch + "\n" +

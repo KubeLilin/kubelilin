@@ -3,6 +3,7 @@ package notice
 type Message struct {
 	// 应用名称
 	App         string `json:"app"`
+	Level       string `json:"level"`
 	Service     string `json:"service"`     // 网络名称
 	Environment string `json:"environment"` // 部署环境
 	Version     string `json:"version"`     // 版本号
