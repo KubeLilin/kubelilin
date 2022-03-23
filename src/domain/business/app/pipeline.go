@@ -255,6 +255,13 @@ func getBuildImageByLanguage(languageName string) string {
 	return buildImage
 }
 
+func (pipelineService *PipelineService) AbortPipeline(request *req.AbortPipelineReq) error {
+	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
+	builder := pipelineService.jenkinsBuilder
+	pipeline, _ := builder.Build()
+	return pipeline.Abort(pipelineName, request.TaskId)
+}
+
 func (pipelineService *PipelineService) RunPipeline(request *req.RunPipelineReq) (int64, error) {
 	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
 	builder := pipelineService.jenkinsBuilder

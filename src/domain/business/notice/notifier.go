@@ -15,3 +15,12 @@ type Message struct {
 type Notifier interface {
 	PostMessage(message Message) error
 }
+
+type NotifierFactory interface {
+}
+
+// Plugins 扩展通知接口
+var Plugins = []Plugin{
+	{Label: "企业微信机器人", Value: "wechat", New: NewWechat},
+	{Label: "钉钉机器人", Value: "dingtalk", New: NewDingTalk},
+}

@@ -154,6 +154,14 @@ func (c *ApplicationController) GetPipeline(ctx *context.HttpContext) mvc.ApiRes
 	return mvc.Success(pipeline)
 }
 
+func (c *ApplicationController) PostAbortPipeline(request *req.AbortPipelineReq) mvc.ApiResult {
+	err := c.pipelineService.AbortPipeline(request)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(true)
+}
+
 func (c *ApplicationController) PostRunPipeline(request *req.RunPipelineReq) mvc.ApiResult {
 	taskId, err := c.pipelineService.RunPipeline(request)
 	if err != nil {
