@@ -176,7 +176,15 @@ func (c *ApplicationController) PostPipelineStatus(request *req.PipelineStatusRe
 		return mvc.Fail(err.Error())
 	}
 	return mvc.Success(true)
+}
 
+func (c *ApplicationController) DeletePipeline(ctx *context.HttpContext) mvc.ApiResult {
+	pipelineId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
+	err := c.pipelineService.DeletePipeline(pipelineId)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(true)
 }
 
 func (c *ApplicationController) GetPipelineDetails(httpContext *context.HttpContext) mvc.ApiResult {

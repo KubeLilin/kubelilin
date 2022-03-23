@@ -81,7 +81,7 @@ func (pipelineService *PipelineService) NewPipeline(req *req.AppNewPipelineReq) 
 GetAppPipelines 获取流水线列表
 */
 func (pipelineService *PipelineService) GetAppPipelines(appId uint64) ([]dto.PipelineInfo, error) {
-	sql := `SELECT id,appid,name,dsl,taskStatus,lastTaskId FROM sgr_tenant_application_pipelines WHERE appid=?`
+	sql := `SELECT id,appid,name,dsl,taskStatus,lastTaskId FROM sgr_tenant_application_pipelines WHERE status=1 AND appid=?`
 	var pipelineInfoList []dto.PipelineInfo
 	err := pipelineService.db.Raw(sql, appId).Find(&pipelineInfoList).Error
 	return pipelineInfoList, err
@@ -291,6 +291,11 @@ func (pipelineService *PipelineService) UpdatePipelineStatus(request *req.Pipeli
 	pipelineInfo.TaskStatus = &taskStatus
 	dbRes := pipelineService.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).Updates(pipelineInfo)
 	return dbRes.Error
+}
+
+func (pipelineService *PipelineService) DeletePipeline(pipelineId uint64) error {
+	sql := `update sgr_tenant_application_pipelines SET status=0 where id=?`
+	return pipelineService.db.Exec(sql, pipelineId).Error
 }
 
 func (pipelineService *PipelineService) GetDetails(request *req.PipelineDetailsReq) (*pipelineV1.JobInfo, error) {
