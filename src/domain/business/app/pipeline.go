@@ -176,7 +176,6 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 					Command: fmt.Sprintf(`
 				   script{
 					   def rbody = "{\"wholeImage\": \"${env.SGR_REPOSITORY_NAME}:v${env.BUILD_NUMBER}\", \"IsDiv\":true , \"dpId\": %v, \"tenantId\": 0 }"
-					   println rbody
 					   httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody:rbody , responseHandle: 'NONE', timeout: 30, url: '%s/v1/deployment/executedeployment'
 				   }
 				`, step.Content["depolyment"], deployUrl)})
@@ -214,7 +213,6 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 					Command: fmt.Sprintf(`
 				   script{
 					   def rbody = "{\"version\": \"v${env.BUILD_NUMBER}\",  \"dpId\": %v, \"branch\": \"%s\" , \"notifyType\": \"%s\" , \"notifyKey\": \"%s\" }"
-					   println rbody
 					   httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody:rbody , responseHandle: 'NONE', timeout: 30, url: '%s/v1/deployment/notify'
 				   }
 				`, deployId, branch, step.Content["notifyType"], step.Content["notifyKey"], deployUrl)})
