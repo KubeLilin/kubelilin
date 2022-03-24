@@ -33,7 +33,7 @@ func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpCo
 	if err == nil {
 		return mvc.Success(res)
 	}
-	return mvc.Fail(err.Error())
+	return controller.ApiResult().StatusCode(500).Build()
 }
 
 func (controller *DeploymentController) PostCreateDeploymentStep1(ctx *context.HttpContext, deployModel *req.DeploymentStepRequest) mvc.ApiResult {
