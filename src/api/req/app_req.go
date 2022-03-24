@@ -39,6 +39,13 @@ type RunPipelineReq struct {
 	AppId uint64 `json:"appid"`
 }
 
+type AbortPipelineReq struct {
+	mvc.RequestBody
+	Id     uint64 `json:"id"`
+	AppId  uint64 `json:"appid"`
+	TaskId int64  `json:"taskId"`
+}
+
 type PipelineStatusReq struct {
 	mvc.RequestBody
 	Id     uint64 `json:"id"`

@@ -25,7 +25,7 @@ func (d Driver) String() (s string) {
 // Pipeline ..
 type Pipeline interface {
 	Ping() (string, error)
-	Abort(RunID int64) error
+	Abort(jobName string, RunID int64) error
 	GetJobInfo(jobName string, runID int64) (*JobInfo, error)
 	GetJobLogs(jobName string, runID int64) (string, error)
 	RunJob(jobName string) (int64, error)

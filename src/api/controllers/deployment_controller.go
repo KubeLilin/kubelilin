@@ -231,3 +231,7 @@ func (c DeploymentController) PostRollBackByReleaseRecord(ctx *context.HttpConte
 	}
 	return mvc.Fail(err.Error())
 }
+
+func (controller DeploymentController) GetNotifications() mvc.ApiResult {
+	return mvc.Success(notice.Plugins)
+}

@@ -128,11 +128,12 @@ func (w *Jenkins) getCrumbRequestHeader() (http.Header, *crumbIssuerResp, error)
 }
 
 // Abort jenkins build job
-func (w *Jenkins) Abort(runID int64) error {
+func (w *Jenkins) Abort(jobName string, runID int64) error {
 	if err := w.crumbHeaderVerify(); err != nil {
 		return err
 	}
-	url := fmt.Sprintf("%v/job/%v/%v/stop", strings.TrimSuffix(w.url, "/"), w.jobName, runID)
+	w.jobName = jobName
+	url := fmt.Sprintf("%v/job/%v/%v/stop", strings.TrimSuffix(w.url, "/"), jobName, runID)
 	_, _, err := sentHTTPRequest("POST", w.user, w.token, w.crumbKey, w.crumbValue, url, nil)
 	if err != nil {
 		return err
