@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/ahmetb/go-linq/v3"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"kubelilin/api/req"
@@ -191,15 +192,11 @@ func (controller DeploymentController) GetReleaseRecord(ctx *context.HttpContext
 }
 
 func (controller DeploymentController) PostNotify(notifyReq *req.DeployNotifyRequest) mvc.ApiResult {
-	var notifier notice.Notifier
-	switch notifyReq.NotifyType {
-	case "wechat":
-		notifier = notice.NewWechat(notifyReq.NotifyKey)
-		break
-	case "dingtalk":
-		notifier = notice.NewDingTalk(notifyReq.NotifyKey)
-		break
-	}
+	notifyPlugin := linq.From(notice.Plugins).WhereT(func(item notice.Plugin) bool {
+		return item.Value == notifyReq.NotifyType
+	}).First().(notice.Plugin)
+
+	notifier := notifyPlugin.New(notifyReq.NotifyKey)
 
 	_, deployment := controller.deploymentService.GetDeploymentForm(notifyReq.DeployId)
 	message := notice.Message{

@@ -384,7 +384,7 @@ func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, req *page
 	var params []interface{}
 	params = append(params, appId)
 	sql := strings.Builder{}
-	sql.WriteString("select stdr.app_id,stdr.deployment_id,std.name as deployment_name,stdr.apply_image,stdr.ops_type,stu.user_name as operator_name,stdr.creation_time ")
+	sql.WriteString("select stdr.app_id,stdr.deployment_id,std.name as deployment_name,std.level,stdr.apply_image,stdr.ops_type,stu.user_name as operator_name,stdr.creation_time ")
 	sql.WriteString("from sgr_tenant_deployment_record as stdr ")
 	sql.WriteString("inner join sgr_tenant_deployments std on stdr.deployment_id = std.id ")
 	sql.WriteString("left join sgr_tenant_user as stu on stdr.operator=stu.id ")

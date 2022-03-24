@@ -6,6 +6,7 @@ type DeploymentReleaseRecordRes struct {
 	ID             uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
 	AppID          uint64     `gorm:"column:app_id;type:bigint unsigned;not null" json:"appId"`
 	DeploymentID   uint64     `gorm:"column:deployment_id;type:bigint unsigned;not null" json:"deploymentId"`
+	Level          string     `gorm:"column:level;"`
 	DeploymentName string     `gorm:"column:deployment_name;"`
 	ApplyImage     string     `gorm:"column:apply_image;type:varchar(255);not null" json:"applyImage"`
 	OpsType        string     `gorm:"column:ops_type;type:char(20);not null" json:"opsType"`
