@@ -56,7 +56,7 @@ func (cluster *ClusterService) GetNameSpacesFromDB(tenantId uint64, clusterId in
 	return res
 }
 
-func (cluster *ClusterService) GetNameSpacesListForDB(clusterId int, tenantName string, PageIndex int, PageSize int) (error, *page.Page) {
+func (cluster *ClusterService) GetNameSpacesListForDB(clusterId uint64, tenantName string, PageIndex int, PageSize int) (error, *page.Page) {
 	var res []dto.NamespaceInfo
 	sqlBuilder := strings.Builder{}
 	sqlBuilder.WriteString(`select ns.id,ns.tenant_id tenantId,ns.cluster_id clusterId,ns.namespace , clr.name clusterName ,tt.t_code tenantCode, tt.t_name tenantName from sgr_tenant_namespace ns 

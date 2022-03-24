@@ -81,7 +81,7 @@ func (pipelineService *PipelineService) NewPipeline(req *req.AppNewPipelineReq) 
 GetAppPipelines 获取流水线列表
 */
 func (pipelineService *PipelineService) GetAppPipelines(appId uint64) ([]dto.PipelineInfo, error) {
-	sql := `SELECT id,appid,name,dsl,taskStatus,lastTaskId FROM sgr_tenant_application_pipelines WHERE appid=?`
+	sql := `SELECT id,appid,name,dsl,taskStatus,lastTaskId FROM sgr_tenant_application_pipelines WHERE status=1 AND appid=?`
 	var pipelineInfoList []dto.PipelineInfo
 	err := pipelineService.db.Raw(sql, appId).Find(&pipelineInfoList).Error
 	return pipelineInfoList, err
@@ -147,7 +147,8 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 		{Key: "SGR_REGISTRY_CONFIG", Value: "/kaniko/.docker"},
 	}
 	var buildImage string
-
+	var branch string
+	var deployId uint64
 	var dslStageList []pipelineV1.StageItem
 	for _, stage := range pipelineStages {
 		dslStageItem := pipelineV1.StageItem{Name: stage.Name}
@@ -161,6 +162,7 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
                     	doGenerateSubmoduleConfigurations: false,extensions: [[$class:'CheckoutOption',timeout:30],[$class:'CloneOption',depth:0,noTags:false,reference:'',shallow:false,timeout:30]], submoduleCfg: [],
                     	userRemoteConfigs: [[ url: "%s"]]
                 	])`, step.Content["branch"], step.Content["git"])})
+				branch = step.Content["branch"].(string)
 				break
 			case "cmd_shell":
 				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: step.Name,
@@ -174,10 +176,10 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 					Command: fmt.Sprintf(`
 				   script{
 					   def rbody = "{\"wholeImage\": \"${env.SGR_REPOSITORY_NAME}:v${env.BUILD_NUMBER}\", \"IsDiv\":true , \"dpId\": %v, \"tenantId\": 0 }"
-					   println rbody
 					   httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody:rbody , responseHandle: 'NONE', timeout: 30, url: '%s/v1/deployment/executedeployment'
 				   }
 				`, step.Content["depolyment"], deployUrl)})
+				deployId = uint64(step.Content["depolyment"].(float64))
 				break
 			case "code_build":
 				// 添加编译环境,Dockerfile 文件位置
@@ -205,6 +207,15 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 							/kaniko/executor -f $SGR_DOCKER_FILE -c . --destination=$SGR_REPOSITORY_NAME:v$BUILD_NUMBER  --insecure --skip-tls-verify -v=debug
 						''' 
 					}`})
+				break
+			case "publish_notify":
+				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: step.Name,
+					Command: fmt.Sprintf(`
+				   script{
+					   def rbody = "{\"version\": \"v${env.BUILD_NUMBER}\",  \"dpId\": %v, \"branch\": \"%s\" , \"notifyType\": \"%s\" , \"notifyKey\": \"%s\" }"
+					   httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody:rbody , responseHandle: 'NONE', timeout: 30, url: '%s/v1/deployment/notify'
+				   }
+				`, deployId, branch, step.Content["notifyType"], step.Content["notifyKey"], deployUrl)})
 				break
 			}
 		}
@@ -244,6 +255,13 @@ func getBuildImageByLanguage(languageName string) string {
 	return buildImage
 }
 
+func (pipelineService *PipelineService) AbortPipeline(request *req.AbortPipelineReq) error {
+	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
+	builder := pipelineService.jenkinsBuilder
+	pipeline, _ := builder.Build()
+	return pipeline.Abort(pipelineName, request.TaskId)
+}
+
 func (pipelineService *PipelineService) RunPipeline(request *req.RunPipelineReq) (int64, error) {
 	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
 	builder := pipelineService.jenkinsBuilder
@@ -273,6 +291,11 @@ func (pipelineService *PipelineService) UpdatePipelineStatus(request *req.Pipeli
 	pipelineInfo.TaskStatus = &taskStatus
 	dbRes := pipelineService.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).Updates(pipelineInfo)
 	return dbRes.Error
+}
+
+func (pipelineService *PipelineService) DeletePipeline(pipelineId uint64) error {
+	sql := `update sgr_tenant_application_pipelines SET status=0 where id=?`
+	return pipelineService.db.Exec(sql, pipelineId).Error
 }
 
 func (pipelineService *PipelineService) GetDetails(request *req.PipelineDetailsReq) (*pipelineV1.JobInfo, error) {

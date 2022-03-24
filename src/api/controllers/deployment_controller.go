@@ -7,9 +7,11 @@ import (
 	"kubelilin/api/req"
 	"kubelilin/domain/business/app"
 	"kubelilin/domain/business/kubernetes"
+	"kubelilin/domain/business/notice"
 	"kubelilin/pkg/page"
 	"kubelilin/utils"
 	"strconv"
+	"time"
 )
 
 type DeploymentController struct {
@@ -186,4 +188,50 @@ func (controller DeploymentController) GetReleaseRecord(ctx *context.HttpContext
 		return mvc.FailWithMsg(nil, err.Error())
 	}
 	return mvc.Success(res)
+}
+
+func (controller DeploymentController) PostNotify(notifyReq *req.DeployNotifyRequest) mvc.ApiResult {
+	var notifier notice.Notifier
+	switch notifyReq.NotifyType {
+	case "wechat":
+		notifier = notice.NewWechat(notifyReq.NotifyKey)
+		break
+	case "dingtalk":
+		notifier = notice.NewDingTalk(notifyReq.NotifyKey)
+		break
+	}
+
+	_, deployment := controller.deploymentService.GetDeploymentForm(notifyReq.DeployId)
+	message := notice.Message{
+		App:         deployment.Nickname,
+		Level:       deployment.Level,
+		Environment: deployment.Name,
+		Version:     notifyReq.Version,
+		Branch:      notifyReq.Branch,
+		Timestamp:   time.Now().Format("2006-01-02 15:04:05"),
+		Success:     "发布成功",
+	}
+
+	err := notifier.PostMessage(message)
+	if err != nil {
+		return mvc.ApiResult{Message: err.Error(), Status: 500}
+	}
+
+	return mvc.Success(true)
+
+}
+
+func (c DeploymentController) PostRollBackByReleaseRecord(ctx *context.HttpContext, execReq *req.ExecDeploymentRequest) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	execReq.TenantId = userInfo.TenantID
+	execReq.Operator = uint64(userInfo.UserId)
+	res, err := c.deploymentSupervisor.ExecuteDeployment(execReq)
+	if err == nil {
+		return mvc.Success(res)
+	}
+	return mvc.Fail(err.Error())
+}
+
+func (controller DeploymentController) GetNotifications() mvc.ApiResult {
+	return mvc.Success(notice.Plugins)
 }
