@@ -109,6 +109,12 @@ func (s *ApplicationService) QueryAppLevel() []models.SgrCodeApplicationLevel {
 	return levelList
 }
 
+func (s *ApplicationService) QueryDeployLevel() []models.SgrCodeDeploymentLevel {
+	var levelList []models.SgrCodeDeploymentLevel
+	s.db.Model(&models.SgrCodeDeploymentLevel{}).Find(&levelList)
+	return levelList
+}
+
 func (s *ApplicationService) InitGitRepository(tenantId uint64, appName string) (string, error) {
 	tenant := models.SgrTenant{}
 	dberr := s.db.Model(models.SgrTenant{}).Where("id=?", tenantId).First(&tenant)

@@ -16,6 +16,7 @@ type DeploymentItemDto struct {
 	ServiceIP   string `gorm:"column:serviceIP"  json:"serviceIP"`
 	ServiceName string `gorm:"column:serviceName" json:"serviceName"`
 	AppName     string `gorm:"column:appName" json:"appName"`
+	Level       string `gorm:"column:level" json:"level"`
 }
 
 type EventItemDto struct {

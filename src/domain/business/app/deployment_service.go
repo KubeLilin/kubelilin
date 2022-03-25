@@ -136,13 +136,14 @@ func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint6
 	deployName string, appName string, clusterId uint64, pageIndex int, pageSize int) (error, *page.Page) {
 
 	dataSql := strings.Builder{}
-	dataSql.WriteString(`SELECT d.id, d.nickname ,d.name, c.name  as 'clusterName' ,app.name as 'appName',
+	dataSql.WriteString(`SELECT d.id, d.nickname ,d.name,lev.name level, c.name  as 'clusterName' ,app.name as 'appName',
   d.cluster_id as 'clusterId' , n.namespace ,d.last_image as 'lastImage', 0 'running' , 
   d.replicas 'expected', '0.0.0.0' as 'serviceIP', d.service_name as 'serviceName'
   FROM sgr_tenant_deployments d
   INNER JOIN sgr_tenant_cluster c on c.id = d.cluster_id
   INNER JOIN sgr_tenant_namespace n on n.id = d.namespace_id
   INNER JOIN sgr_tenant_application app on  app.id = d.app_id
+  INNER JOIN sgr_code_deployment_level lev on lev.code = d.level
   WHERE d.tenant_id =? `)
 
 	if deployName != "" {
