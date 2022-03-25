@@ -54,6 +54,32 @@ var SgrCodeApplicationLevelColumns = struct {
 	Sort: "sort",
 }
 
+// SgrCodeDeploymentLevel [...]
+type SgrCodeDeploymentLevel struct {
+	ID   uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	Code string `gorm:"column:code;type:varchar(10);not null" json:"code"`
+	Name string `gorm:"column:name;type:varchar(50);not null" json:"name"`
+	Sort int16  `gorm:"column:sort;type:smallint;not null" json:"sort"`
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *SgrCodeDeploymentLevel) TableName() string {
+	return "sgr_code_deployment_level"
+}
+
+// SgrCodeDeploymentLevelColumns get sql column name.获取数据库列名
+var SgrCodeDeploymentLevelColumns = struct {
+	ID   string
+	Code string
+	Name string
+	Sort string
+}{
+	ID:   "id",
+	Code: "code",
+	Name: "name",
+	Sort: "sort",
+}
+
 // SgrRoleMenuMap 角色菜单权限影射
 type SgrRoleMenuMap struct {
 	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
@@ -317,10 +343,10 @@ type SgrTenantDeploymentRecord struct {
 	ApplyImage   string     `gorm:"column:apply_image;type:varchar(255);not null" json:"applyImage"`
 	OpsType      string     `gorm:"column:ops_type;type:char(20);not null" json:"opsType"`
 	Operator     *uint64    `gorm:"column:operator;type:bigint unsigned" json:"operator"`
+	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"creationTime"`
 	State        string     `gorm:"column:state;type:varchar(20)" json:"state"`
-	Remark       string     `gorm:"column:remark;type:varchar(500)" json:"state"`
-	CreationTime time.Time  `gorm:"column:creation_time;type:datetime" json:"creationTime"`
-	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
+	Remark       string     `gorm:"column:remark;type:varchar(500)" json:"remark"`
+	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime;default:CURRENT_TIMESTAMP" json:"updateTime"`
 }
 
 // TableName get sql table name.获取数据库表名
@@ -337,6 +363,8 @@ var SgrTenantDeploymentRecordColumns = struct {
 	OpsType      string
 	Operator     string
 	CreationTime string
+	State        string
+	Remark       string
 	UpdateTime   string
 }{
 	ID:           "id",
@@ -346,6 +374,8 @@ var SgrTenantDeploymentRecordColumns = struct {
 	OpsType:      "ops_type",
 	Operator:     "operator",
 	CreationTime: "creation_time",
+	State:        "state",
+	Remark:       "remark",
 	UpdateTime:   "update_time",
 }
 
@@ -371,7 +401,7 @@ type SgrTenantDeployments struct {
 	ServicePort     uint       `gorm:"column:service_port;type:int unsigned;not null;default:0" json:"servicePort"`
 	ServicePortType string     `gorm:"column:service_port_type;type:varchar(8)" json:"servicePortType"`
 	LastImage       string     `gorm:"column:last_image;type:varchar(350)" json:"lastImage"`
-	Level           string     `gorm:"column:level;type:varchar(8)" json:"level"`
+	Level           string     `gorm:"index:levev_idx;column:level;type:varchar(8)" json:"level"`
 }
 
 // TableName get sql table name.获取数据库表名

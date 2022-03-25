@@ -88,12 +88,13 @@ func (ds *DeploymentSupervisor) ExecuteDeployment(execReq *req.ExecDeploymentReq
 	//endregion
 	//记录发版记录
 	exeRes, err := ds.InitDeploymentByApply(execReq.TenantId, &dpDatum, &dpcDatum)
+	t := time.Now()
 	record := models.SgrTenantDeploymentRecord{AppID: dpDatum.AppID,
 		DeploymentID: execReq.DpId,
 		ApplyImage:   execReq.WholeImage,
 		OpsType:      execReq.OpsType,
 		Operator:     &execReq.Operator,
-		CreationTime: time.Now(),
+		CreationTime: &t,
 	}
 	if execReq.OpsType == "" || execReq.OpsType == "manual" {
 		execReq.OpsType = "githook"
