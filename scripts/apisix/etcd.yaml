@@ -1,0 +1,197 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: apisix-etcd
+  namespace: default
+  labels:
+    app.kubernetes.io/instance: apisix-etcd
+    app.kubernetes.io/name: apisix-etcd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: apisix-etcd
+      app.kubernetes.io/name: apisix-etcd
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/instance: apisix-etcd
+        app.kubernetes.io/name: apisix-etcd
+    spec:
+      containers:
+        - name: apisix-etcd
+          image: docker.io/bitnami/etcd:3.5.1-debian-10-r31
+          ports:
+            - name: client
+              containerPort: 2379
+              protocol: TCP
+            - name: peer
+              containerPort: 2380
+              protocol: TCP
+          env:
+            - name: BITNAMI_DEBUG
+              value: 'false'
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: ETCDCTL_API
+              value: '3'
+            - name: ETCD_ON_K8S
+              value: 'yes'
+            - name: ETCD_START_FROM_SNAPSHOT
+              value: 'no'
+            - name: ETCD_DISASTER_RECOVERY
+              value: 'no'
+            - name: ETCD_NAME
+              value: $(MY_POD_NAME)
+            - name: ETCD_DATA_DIR
+              value: /bitnami/etcd/data
+            - name: ETCD_LOG_LEVEL
+              value: info
+            - name: ALLOW_NONE_AUTHENTICATION
+              value: 'yes'
+            - name: ETCD_ADVERTISE_CLIENT_URLS
+              value: >-
+                http://$(MY_POD_NAME).apisix-etcd-headless.default.svc.cluster.local:2379,http://apisix-etcd.default.svc.cluster.local:2379
+            - name: ETCD_LISTEN_CLIENT_URLS
+              value: http://0.0.0.0:2379
+            - name: ETCD_INITIAL_ADVERTISE_PEER_URLS
+              value: >-
+                http://$(MY_POD_NAME).apisix-etcd-headless.default.svc.cluster.local:2380
+            - name: ETCD_LISTEN_PEER_URLS
+              value: http://0.0.0.0:2380
+          resources: {}
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/etcd
+          livenessProbe:
+            exec:
+              command:
+                - /opt/bitnami/scripts/etcd/healthcheck.sh
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command:
+                - /opt/bitnami/scripts/etcd/healthcheck.sh
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 5
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 1001
+            runAsNonRoot: true
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      serviceAccountName: default
+      serviceAccount: default
+      securityContext:
+        fsGroup: 1001
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/instance: apisix-etcd
+                    app.kubernetes.io/name: apisix-etcd
+                namespaces:
+                  - default
+                topologyKey: kubernetes.io/hostname
+      schedulerName: default-scheduler
+  volumeClaimTemplates:
+    - kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: data
+        creationTimestamp: null
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        volumeMode: Filesystem
+  serviceName: apisix-etcd-headless
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  revisionHistoryLimit: 10
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: apisix-etcd-headless
+  namespace: default
+  labels:
+    app.kubernetes.io/instance: apisix-etcd
+    app.kubernetes.io/name: apisix-etcd
+  annotations:
+    meta.helm.sh/release-name: apisix-etcd
+    meta.helm.sh/release-namespace: default
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: 'true'
+spec:
+  ports:
+    - name: client
+      protocol: TCP
+      port: 2379
+      targetPort: client
+    - name: peer
+      protocol: TCP
+      port: 2380
+      targetPort: peer
+  selector:
+    app.kubernetes.io/instance: apisix-etcd
+    app.kubernetes.io/name: apisix-etcd
+  clusterIP: None
+  clusterIPs:
+    - None
+  type: ClusterIP
+  sessionAffinity: None
+  publishNotReadyAddresses: true
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: apisix-etcd
+  namespace: default
+  labels:
+    app.kubernetes.io/instance: apisix-etcd
+    app.kubernetes.io/name: apisix-etcd
+  annotations:
+    meta.helm.sh/release-name: apisix-etcd
+    meta.helm.sh/release-namespace: default
+spec:
+  ports:
+    - name: client
+      protocol: TCP
+      port: 2379
+      targetPort: client
+    - name: peer
+      protocol: TCP
+      port: 2380
+      targetPort: peer
+  selector:
+    app.kubernetes.io/instance: apisix-etcd
+    app.kubernetes.io/name: apisix-etcd
+  type: ClusterIP
