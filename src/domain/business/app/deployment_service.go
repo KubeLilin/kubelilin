@@ -132,7 +132,7 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.Depl
 	return nil, &dpModel
 }
 
-func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint64,
+func (deployment *DeploymentService) GetDeployments(profile string, appId uint64, tenantId uint64,
 	deployName string, appName string, clusterId uint64, pageIndex int, pageSize int) (error, *page.Page) {
 
 	dataSql := strings.Builder{}
@@ -165,6 +165,11 @@ func (deployment *DeploymentService) GetDeployments(appId uint64, tenantId uint6
 		dataSql.WriteString(" AND c.id = ? ")
 		params = append(params, clusterId)
 	}
+	if profile != "" {
+		dataSql.WriteString("AND lev.code = ?")
+		params = append(params, profile)
+	}
+
 	var deploymentList []dto.DeploymentItemDto
 	return page.StartPage(deployment.db, pageIndex, pageSize).DoScan(&deploymentList, dataSql.String(), params...)
 	//dataRes := deployment.db.Raw(dataSql.String(), params...).Scan(&deploymentList)

@@ -61,11 +61,6 @@ func (controller *DeploymentController) PostCreateDeploymentStep2(deployModel *r
 }
 
 func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.ApiResult {
-	//strAppId := ctx.Input.QueryDefault("appid", "0")
-	//deployName := ctx.Input.QueryDefault("nickname", "")
-	//appName := ctx.Input.QueryDefault("appName", "")
-	//clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
-	//appid, _ := strconv.ParseUint(strAppId, 10, 64)
 	var request req.DeploymentGetListRequest
 	_ = ctx.BindWithUri(&request)
 	userInfo := req.GetUserInfo(ctx)
@@ -73,7 +68,7 @@ func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.Api
 	if userInfo != nil {
 		tenantID = userInfo.TenantID
 	}
-	err, deploymentList := controller.deploymentService.GetDeployments(request.AppID, tenantID,
+	err, deploymentList := controller.deploymentService.GetDeployments(request.Profile, request.AppID, tenantID,
 		request.DeployName, request.AppName, request.ClusterId, request.CurrentPage, request.PageSize)
 	if err != nil {
 		return mvc.Fail(err.Error())
