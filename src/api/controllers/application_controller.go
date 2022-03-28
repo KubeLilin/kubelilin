@@ -73,6 +73,12 @@ func (c *ApplicationController) GetDeployLevel() mvc.ApiResult {
 	return mvc.Success(res)
 }
 
+func (c *ApplicationController) GetDeployLevelCounts(ctx *context.HttpContext) mvc.ApiResult {
+	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
+	res, _ := c.service.GetAppCountByDeployLevel(appId)
+	return mvc.Success(res)
+}
+
 // GetGitRepo get git address for application
 func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)

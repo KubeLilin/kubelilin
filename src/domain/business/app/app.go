@@ -145,3 +145,14 @@ WHERE app.id = ?
 	err := s.db.Raw(sql, appId).First(&appInfo).Error
 	return appInfo, err
 }
+
+func (s *ApplicationService) GetAppCountByDeployLevel(appId uint64) ([]dto.DeployLeveLCountInfo, error) {
+	sql := `SELECT lev.name label,lev.code  value,IFNULL(dep.count,0) count FROM sgr_code_deployment_level lev
+LEFT JOIN (
+   SELECT  level,COUNT(level) count FROM sgr_tenant_deployments WHERE app_id = ? 
+	 GROUP BY level
+) dep on dep.level = lev.code`
+	var list []dto.DeployLeveLCountInfo
+	err := s.db.Raw(sql, appId).Find(&list).Error
+	return list, err
+}
