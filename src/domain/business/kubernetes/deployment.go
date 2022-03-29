@@ -379,7 +379,7 @@ func (ds *DeploymentSupervisor) ReleaseRecord(record models.SgrTenantDeploymentR
 	return nil
 }
 
-func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, req *page.PageRequest) (error, *page.Page) {
+func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, level string, req *page.PageRequest) (error, *page.Page) {
 	var res []res.DeploymentReleaseRecordRes
 	condition := ds.db.Model(models.SgrTenantDeploymentRecord{})
 	var params []interface{}
@@ -394,6 +394,11 @@ func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, req *page
 		sql.WriteString(" and stdr.deployment_id=?  ")
 		params = append(params, dpId)
 	}
+	if level != "" {
+		sql.WriteString(" and std.level=?  ")
+		params = append(params, level)
+	}
+
 	sql.WriteString("order by stdr.creation_time desc ")
 	err, page := page.StartPage(condition, req.PageIndex, req.PageSize).DoScan(&res, sql.String(), params...)
 	return err, page

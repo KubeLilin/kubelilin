@@ -174,12 +174,11 @@ func (controller DeploymentController) GetYaml(ctx *context.HttpContext) mvc.Api
 }
 
 func (controller DeploymentController) GetReleaseRecord(ctx *context.HttpContext) mvc.ApiResult {
-	dpIdStr := ctx.Input.Query("dpId")
-	dpId, _ := strconv.ParseUint(dpIdStr, 10, 64)
-	appIdStr := ctx.Input.Query("appId")
-	appId, _ := strconv.ParseUint(appIdStr, 10, 64)
+	dpId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("dpId", "0"))
+	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appId", "0"))
+	level := ctx.Input.QueryDefault("level", "")
 	pageReq := page.InitPageByCtx(ctx)
-	err, res := controller.deploymentSupervisor.QueryReleaseRecord(appId, dpId, pageReq)
+	err, res := controller.deploymentSupervisor.QueryReleaseRecord(appId, dpId, level, pageReq)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}
