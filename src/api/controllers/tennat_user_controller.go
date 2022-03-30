@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/yoyofx/yoyogo/abstractions"
+	fxutils "github.com/yoyofx/yoyogo/utils"
 	"github.com/yoyofx/yoyogo/utils/jwt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
@@ -37,7 +38,8 @@ func (user *UserController) PostLogin(ctx *context.HttpContext, loginRequest *re
 		ctx.Output.SetStatus(401)
 		return user.Fail("no username or password")
 	}
-	queryUser := user.Service.GetUserByNameAndPassword(loginRequest.UserName, loginRequest.Password)
+	pwd := fxutils.Md5String(loginRequest.Password)
+	queryUser := user.Service.GetUserByNameAndPassword(loginRequest.UserName, pwd)
 
 	if queryUser == nil {
 		return mvc.ApiResult{Success: true, Message: "can not find user be", Data: req.LoginResult{Status: "false"}}
@@ -104,6 +106,7 @@ func (user *UserController) PostRegister(ctx *context.HttpContext) mvc.ApiResult
 		registerUser.Status = 1
 		registerUser.CreationTime = &t
 		registerUser.UpdateTime = &t
+		registerUser.Password = fxutils.Md5String(registerUser.Password)
 		ok = user.Service.Register(registerUser)
 	} else {
 		retMessage = "注册失败"
@@ -120,6 +123,13 @@ func (user *UserController) PostUpdate(ctx *context.HttpContext) mvc.ApiResult {
 	_ = ctx.Bind(&modifyUser)
 	t := time.Now()
 	modifyUser.UpdateTime = &t
+	exitsUser := user.Service.GetUserByName(modifyUser.UserName)
+	if exitsUser != nil {
+		if modifyUser.Password != exitsUser.Password {
+			modifyUser.Password = fxutils.Md5String(modifyUser.Password)
+		}
+	}
+
 	ok := user.Service.Update(modifyUser)
 	return mvc.ApiResult{
 		Success: ok,

@@ -2,6 +2,7 @@ package tenant
 
 import (
 	"github.com/jinzhu/copier"
+	fxutils "github.com/yoyofx/yoyogo/utils"
 	"gorm.io/gorm"
 	"kubelilin/api/req"
 	"kubelilin/domain/database/models"
@@ -34,7 +35,7 @@ func (ts *TenantService) CreateTenant(tenant *models.SgrTenant) bool {
 			TenantID: tenant.ID,
 			Account:  tenant.TName + "admin",
 			UserName: tenant.TCode + "-admin",
-			Password: "1234abcd",
+			Password: fxutils.Md5String("123456"),
 		}
 		if err := ts.db.Create(tenantAdmin).Error; err != nil {
 			return err
