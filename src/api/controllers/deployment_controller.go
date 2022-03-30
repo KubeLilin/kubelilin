@@ -176,7 +176,7 @@ func (controller DeploymentController) GetYaml(ctx *context.HttpContext) mvc.Api
 func (controller DeploymentController) GetReleaseRecord(ctx *context.HttpContext) mvc.ApiResult {
 	dpId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("dpId", "0"))
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appId", "0"))
-	level := ctx.Input.QueryDefault("level", "")
+	level := ctx.Input.QueryDefault("dpLevel", "")
 	pageReq := page.InitPageByCtx(ctx)
 	err, res := controller.deploymentSupervisor.QueryReleaseRecord(appId, dpId, level, pageReq)
 	if err != nil {
