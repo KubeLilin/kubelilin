@@ -63,8 +63,8 @@ var ServiceConnectionDetailsColumns = struct {
 	UpdateTime:   "update_time",
 }
 
-// ServiceConnetctionCredentials 常用的连接凭证，例如token
-type ServiceConnetctionCredentials struct {
+// ServiceConnectionCredentials 常用的连接凭证，例如token
+type ServiceConnectionCredentials struct {
 	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
 	Type         int        `gorm:"column:type;type:int;not null" json:"type"`              // 凭证类型 1.github 2..gitlab 3.gogos 4.gitee
 	Detail       string     `gorm:"column:detail;type:varchar(500);not null" json:"detail"` // 凭证信息
@@ -73,12 +73,12 @@ type ServiceConnetctionCredentials struct {
 }
 
 // TableName get sql table name.获取数据库表名
-func (m *ServiceConnetctionCredentials) TableName() string {
-	return "service_connetction_credentials"
+func (m *ServiceConnectionCredentials) TableName() string {
+	return "service_connection_credentials"
 }
 
-// ServiceConnetctionCredentialsColumns get sql column name.获取数据库列名
-var ServiceConnetctionCredentialsColumns = struct {
+// ServiceConnectionCredentialsColumns get sql column name.获取数据库列名
+var ServiceConnectionCredentialsColumns = struct {
 	ID           string
 	Type         string
 	Detail       string
