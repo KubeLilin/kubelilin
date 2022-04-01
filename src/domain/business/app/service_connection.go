@@ -6,6 +6,8 @@ import (
 	"kubelilin/api/req"
 	"kubelilin/api/res"
 	"kubelilin/domain/database/models"
+	"kubelilin/pkg/page"
+	"strings"
 	"time"
 )
 
@@ -107,6 +109,47 @@ func (scs *ServiceConnectionService) UpdateServiceConnection(req req.ServiceConn
 	return &req, nil
 }
 
-func (scs *ServiceConnectionService) QueryServiceConnections(req req.ServiceConnectionPageReq) ([]res.ServiceConnectionPageRes, error) {
-	return nil, nil
+func (scs *ServiceConnectionService) QueryServiceConnections(req req.ServiceConnectionPageReq) (*page.Page, error) {
+	var data []models.ServiceConnection
+	var params []interface{}
+	sql := strings.Builder{}
+	sql.WriteString("select * from service_connection")
+	sql.WriteString(" where tenant_id=? ")
+	params = append(params, req.TenantID)
+	if len(req.Name) > 0 {
+		sql.WriteString(" and name=?")
+		params = append(params, req.Name)
+	}
+	err, pageRes := page.StartPage(scs.db, req.PageIndex, req.PageSize).DoScan(&data, sql.String(), params)
+	return pageRes, err
+}
+
+func (scs *ServiceConnectionService) QueryServiceConnectionInfo(id uint64) (*res.ServiceConnectionRes, error) {
+	var datum res.ServiceConnectionRes
+	var mainDatum models.ServiceConnection
+	mainErr := scs.db.Model(&models.ServiceConnection{}).Where("id=?", id).First(&mainDatum)
+	if mainErr.Error == nil {
+		return nil, mainErr.Error
+	}
+	datum.ID = id
+	datum.Name = mainDatum.Name
+	datum.ServiceType = mainDatum.ServiceType
+	if mainDatum.ServiceType == 1 {
+		var serviceConnectionDatum models.ServiceConnectionDetails
+		err := scs.db.Model(&models.ServiceConnectionDetails{}).Where("main_id=?", id).First(&serviceConnectionDatum)
+		if err.Error == nil {
+			return nil, err.Error
+		}
+		datum.Type = serviceConnectionDatum.Type
+		datum.Detail = serviceConnectionDatum.Detail
+	} else {
+		var credentialDatum models.ServiceConnectionCredentials
+		err := scs.db.Model(&models.ServiceConnectionCredentials{}).Where("main_id=?", id).First(&credentialDatum)
+		if err.Error == nil {
+			return nil, err.Error
+		}
+		datum.Type = credentialDatum.Type
+		datum.Detail = credentialDatum.Detail
+	}
+	return &datum, nil
 }

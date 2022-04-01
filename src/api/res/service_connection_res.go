@@ -1,6 +1,6 @@
 package res
 
-type ServiceConnectionPageRes struct {
+type ServiceConnectionRes struct {
 	ID          uint64 `json:"id"`
 	TenantID    int64  `json:"tenantId"`    // 租户id
 	Name        string `json:"name"`        // 连接名称
