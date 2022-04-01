@@ -29,29 +29,32 @@ func (controller ClusterController) GetPods(ctx *context.HttpContext) mvc.ApiRes
 
 	userInfo := req.GetUserInfo(ctx)
 	cid, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
-	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
-
+	client, clientErr := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
+	if clientErr != nil {
+		return mvc.FailWithMsg(nil, "Can't create cluster client")
+	}
 	podList := kubernetes.GetPodList(client, namespace, k8snode, k8sapp)
 
-	config, _ := controller.clusterService.GetClusterConfig(0, cid)
-	metricsClient, _ := metricsv.NewForConfig(config)
-
-	emptyOptions := metav1.ListOptions{}
-	if k8sapp != "" {
-		emptyOptions.LabelSelector = "k8s-app=" + k8sapp
-	}
-	if k8snode != "" {
-		emptyOptions.FieldSelector = "spec.nodeName=" + k8snode
-	}
-	podsMetricsList, err := metricsClient.MetricsV1beta1().PodMetricses(namespace).List(contextV1.TODO(), emptyOptions)
-	if err == nil {
-		for _, podsMetricsItem := range podsMetricsList.Items {
-			for podindex, podItem := range podList {
-				if podsMetricsItem.Name == podItem.PodName {
-					podList[podindex].Usage = dto.NodeStatus{}
-					for _, cmst := range podsMetricsItem.Containers {
-						podList[podindex].Usage.CPU += cmst.Usage.Cpu().AsApproximateFloat64()
-						podList[podindex].Usage.Memory += cmst.Usage.Memory().AsApproximateFloat64()
+	config, err1 := controller.clusterService.GetClusterConfig(0, cid)
+	if err1 == nil {
+		metricsClient, _ := metricsv.NewForConfig(config)
+		emptyOptions := metav1.ListOptions{}
+		if k8sapp != "" {
+			emptyOptions.LabelSelector = "k8s-app=" + k8sapp
+		}
+		if k8snode != "" {
+			emptyOptions.FieldSelector = "spec.nodeName=" + k8snode
+		}
+		podsMetricsList, err := metricsClient.MetricsV1beta1().PodMetricses(namespace).List(contextV1.TODO(), emptyOptions)
+		if err == nil {
+			for _, podsMetricsItem := range podsMetricsList.Items {
+				for podindex, podItem := range podList {
+					if podsMetricsItem.Name == podItem.PodName {
+						podList[podindex].Usage = dto.NodeStatus{}
+						for _, cmst := range podsMetricsItem.Containers {
+							podList[podindex].Usage.CPU += cmst.Usage.Cpu().AsApproximateFloat64()
+							podList[podindex].Usage.Memory += cmst.Usage.Memory().AsApproximateFloat64()
+						}
 					}
 				}
 			}

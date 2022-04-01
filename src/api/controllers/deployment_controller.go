@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/ahmetb/go-linq/v3"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"kubelilin/api/req"
@@ -33,7 +34,7 @@ func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpCo
 	if err == nil {
 		return mvc.Success(res)
 	}
-	return mvc.Fail(err.Error())
+	return controller.ApiResult().StatusCode(500).Build()
 }
 
 func (controller *DeploymentController) PostCreateDeploymentStep1(ctx *context.HttpContext, deployModel *req.DeploymentStepRequest) mvc.ApiResult {
@@ -60,11 +61,6 @@ func (controller *DeploymentController) PostCreateDeploymentStep2(deployModel *r
 }
 
 func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.ApiResult {
-	//strAppId := ctx.Input.QueryDefault("appid", "0")
-	//deployName := ctx.Input.QueryDefault("nickname", "")
-	//appName := ctx.Input.QueryDefault("appName", "")
-	//clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
-	//appid, _ := strconv.ParseUint(strAppId, 10, 64)
 	var request req.DeploymentGetListRequest
 	_ = ctx.BindWithUri(&request)
 	userInfo := req.GetUserInfo(ctx)
@@ -72,7 +68,7 @@ func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.Api
 	if userInfo != nil {
 		tenantID = userInfo.TenantID
 	}
-	err, deploymentList := controller.deploymentService.GetDeployments(request.AppID, tenantID,
+	err, deploymentList := controller.deploymentService.GetDeployments(request.Profile, request.AppID, tenantID,
 		request.DeployName, request.AppName, request.ClusterId, request.CurrentPage, request.PageSize)
 	if err != nil {
 		return mvc.Fail(err.Error())
@@ -178,12 +174,11 @@ func (controller DeploymentController) GetYaml(ctx *context.HttpContext) mvc.Api
 }
 
 func (controller DeploymentController) GetReleaseRecord(ctx *context.HttpContext) mvc.ApiResult {
-	dpIdStr := ctx.Input.Query("dpId")
-	dpId, _ := strconv.ParseUint(dpIdStr, 10, 64)
-	appIdStr := ctx.Input.Query("appId")
-	appId, _ := strconv.ParseUint(appIdStr, 10, 64)
+	dpId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("dpId", "0"))
+	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appId", "0"))
+	level := ctx.Input.QueryDefault("dpLevel", "")
 	pageReq := page.InitPageByCtx(ctx)
-	err, res := controller.deploymentSupervisor.QueryReleaseRecord(appId, dpId, pageReq)
+	err, res := controller.deploymentSupervisor.QueryReleaseRecord(appId, dpId, level, pageReq)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}
@@ -191,15 +186,11 @@ func (controller DeploymentController) GetReleaseRecord(ctx *context.HttpContext
 }
 
 func (controller DeploymentController) PostNotify(notifyReq *req.DeployNotifyRequest) mvc.ApiResult {
-	var notifier notice.Notifier
-	switch notifyReq.NotifyType {
-	case "wechat":
-		notifier = notice.NewWechat(notifyReq.NotifyKey)
-		break
-	case "dingtalk":
-		notifier = notice.NewDingTalk(notifyReq.NotifyKey)
-		break
-	}
+	notifyPlugin := linq.From(notice.Plugins).WhereT(func(item notice.Plugin) bool {
+		return item.Value == notifyReq.NotifyType
+	}).First().(notice.Plugin)
+
+	notifier := notifyPlugin.New(notifyReq.NotifyKey)
 
 	_, deployment := controller.deploymentService.GetDeploymentForm(notifyReq.DeployId)
 	message := notice.Message{

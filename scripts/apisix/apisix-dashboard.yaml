@@ -1,0 +1,132 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: apisix-dashboard
+  namespace: default
+  labels:
+    app.kubernetes.io/instance: apisix-dashboard
+    app.kubernetes.io/name: apisix-dashboard
+    app.kubernetes.io/version: 2.9.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: apisix-dashboard
+      app.kubernetes.io/name: apisix-dashboard
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/instance: apisix-dashboard
+        app.kubernetes.io/name: apisix-dashboard
+    spec:
+      volumes:
+        - name: apisix-dashboard-config
+          configMap:
+            name: apisix-dashboard
+            defaultMode: 420
+      containers:
+        - name: apisix-dashboard
+          image: apache/apisix-dashboard:2.9.0
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - name: apisix-dashboard-config
+              mountPath: /usr/local/apisix-dashboard/conf/conf.yaml
+              subPath: conf.yaml
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: http
+              scheme: HTTP
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: http
+              scheme: HTTP
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+          securityContext: {}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      serviceAccountName: apisix-dashboard
+      serviceAccount: apisix-dashboard
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: apisix-dashboard
+  namespace: default
+  labels:
+    app.kubernetes.io/instance: apisix-dashboard
+    app.kubernetes.io/name: apisix-dashboard
+    app.kubernetes.io/version: 2.9.0
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: http
+  selector:
+    app.kubernetes.io/instance: apisix-dashboard
+    app.kubernetes.io/name: apisix-dashboard
+  type: ClusterIP
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: apisix-dashboard
+  namespace: default
+  labels:
+    app.kubernetes.io/instance: apisix-dashboard
+    app.kubernetes.io/name: apisix-dashboard
+    app.kubernetes.io/version: 2.9.0
+data:
+  conf.yaml: |-
+    conf:
+      listen:
+        host: 0.0.0.0
+        port: 9000
+      etcd:
+        endpoints:
+          - apisix-etcd:2379
+      log:
+        error_log:
+          level: warn
+          file_path: /dev/stderr
+        access_log:
+          file_path: /dev/stdout
+    authentication:
+      secert: secert
+      expire_time: 3600
+      users:
+        - username: admin
+          password: admin
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: apisix-dashboard
+  namespace: default

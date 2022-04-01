@@ -18,8 +18,10 @@ import (
 	"time"
 )
 
-var k8sClientMemoryCache = map[string]*kubernetes.Clientset{}
-var mutex sync.RWMutex
+var k8sClientMemoryCache sync.Map
+
+//var k8sClientMemoryCache = map[string]*kubernetes.Clientset{}
+var mutex sync.Mutex
 
 type ClusterService struct {
 	db *gorm.DB
@@ -32,14 +34,7 @@ func NewClusterService(db *gorm.DB) *ClusterService {
 func (cluster *ClusterService) GetClustersByTenant(tenantId uint64, clusterName string) ([]dto.ClusterInfo, error) {
 	var data []models.SgrTenantCluster
 	var clusterList []dto.ClusterInfo
-	//sb := strings.Builder{}
-	//var params []interface{}
-	//sb.WriteString(" 1=1 ")
-	//sb.WriteString("tenant_id = ?")
-	//if clusterName != "" {
-	//	sb.WriteString(" and name=? ")
-	//	params = append(params, clusterName)
-	//}
+
 	cluster.db.Model(&models.SgrTenantCluster{}).Find(&data)
 	//cluster.db.Model(&models.SgrTenantCluster{}).Where(sb.String(), tenantId, clusterName).Find(&data)
 	for _, item := range data {
@@ -100,30 +95,33 @@ func (cluster *ClusterService) CreateNamespace(tenantID uint64, clusterId uint64
 
 func (cluster *ClusterService) GetClusterClientByTenantAndId(tenantId uint64, clusterId uint64) (*kubernetes.Clientset, error) {
 	//判断缓存是否存在
+	//mutex.Lock()
+	//defer mutex.Unlock()
 	key := "c" + string(clusterId)
-	clientValue, ok := k8sClientMemoryCache[key]
+	clientValue, ok := k8sClientMemoryCache.Load(key)
+	//clientValue, ok := k8sClientMemoryCache[key]
 	if ok {
-		healthy, healthyErr := cluster.ClientHealthCheck(clientValue)
+		healthy, healthyErr := cluster.ClientHealthCheck(clientValue.(*kubernetes.Clientset))
 		if ok && healthy {
-			return clientValue, nil
+			return clientValue.(*kubernetes.Clientset), nil
 		}
 		return nil, healthyErr
 	} else {
-		mutex.Lock()
 		var data models.SgrTenantCluster
 		cluster.db.Model(&models.SgrTenantCluster{}).Where(" id = ?", clusterId).First(&data)
 		client, err := NewClientSetWithFileContent(data.Config)
 		if err == nil {
 			healthy, healthyErr := cluster.ClientHealthCheck(client)
 			if healthy {
-				k8sClientMemoryCache[key] = client
+				k8sClientMemoryCache.Store(key, client)
+				//k8sClientMemoryCache[key] = client
 			} else {
 				return nil, healthyErr
 			}
 		}
-		mutex.Unlock()
 		return client, err
 	}
+
 }
 
 func (cluster *ClusterService) GetClusterConfig(tenantId uint64, clusterId uint64) (*rest.Config, error) {

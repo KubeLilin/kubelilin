@@ -88,12 +88,13 @@ func (ds *DeploymentSupervisor) ExecuteDeployment(execReq *req.ExecDeploymentReq
 	//endregion
 	//记录发版记录
 	exeRes, err := ds.InitDeploymentByApply(execReq.TenantId, &dpDatum, &dpcDatum)
+	t := time.Now()
 	record := models.SgrTenantDeploymentRecord{AppID: dpDatum.AppID,
 		DeploymentID: execReq.DpId,
 		ApplyImage:   execReq.WholeImage,
 		OpsType:      execReq.OpsType,
 		Operator:     &execReq.Operator,
-		CreationTime: time.Now(),
+		CreationTime: &t,
 	}
 	if execReq.OpsType == "" || execReq.OpsType == "manual" {
 		execReq.OpsType = "githook"
@@ -378,13 +379,13 @@ func (ds *DeploymentSupervisor) ReleaseRecord(record models.SgrTenantDeploymentR
 	return nil
 }
 
-func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, req *page.PageRequest) (error, *page.Page) {
+func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, level string, req *page.PageRequest) (error, *page.Page) {
 	var res []res.DeploymentReleaseRecordRes
 	condition := ds.db.Model(models.SgrTenantDeploymentRecord{})
 	var params []interface{}
 	params = append(params, appId)
 	sql := strings.Builder{}
-	sql.WriteString("select stdr.app_id,stdr.deployment_id,std.name as deployment_name,stdr.apply_image,stdr.ops_type,stu.user_name as operator_name,stdr.creation_time ")
+	sql.WriteString("select stdr.app_id,stdr.deployment_id,std.name as deployment_name,std.level,stdr.apply_image,stdr.ops_type,stu.user_name as operator_name,stdr.creation_time ")
 	sql.WriteString("from sgr_tenant_deployment_record as stdr ")
 	sql.WriteString("inner join sgr_tenant_deployments std on stdr.deployment_id = std.id ")
 	sql.WriteString("left join sgr_tenant_user as stu on stdr.operator=stu.id ")
@@ -393,6 +394,11 @@ func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, req *page
 		sql.WriteString(" and stdr.deployment_id=?  ")
 		params = append(params, dpId)
 	}
+	if level != "" {
+		sql.WriteString(" and std.level=?  ")
+		params = append(params, level)
+	}
+
 	sql.WriteString("order by stdr.creation_time desc ")
 	err, page := page.StartPage(condition, req.PageIndex, req.PageSize).DoScan(&res, sql.String(), params...)
 	return err, page

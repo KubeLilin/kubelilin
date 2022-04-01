@@ -11,7 +11,7 @@ yoyogo:
       cors:
         allow_origins: ["*"]
         allow_methods: ["*"]
-        allow_credentials: true
+        allow_credentials: false
       jwt:
         header: "Authorization"
         secret: "12391JdeOW^%$#@"
@@ -19,8 +19,13 @@ yoyogo:
         expires: 360000
         enable: true
         skip_path: [
-            "/v1/user/login",
-            "/v1/pod/terminal",
+          "/v1/user/login",
+          "/v1/pod/terminal",
+          "/v1/deployment/executedeployment",
+          "/v1/deployment/notify",
+          "/actuator/health/liveness",
+          "/actuator/health/readiness",
+          "/actuator/health/detail"
         ]
   datasource:
     pool:
@@ -34,3 +39,26 @@ yoyogo:
       username: root
       password: P@ssW0rd
       debug: true
+
+vcs:
+  git:
+    url: https://localhost:3000
+    token: d2911632a4ac8db4ce13a3135700b58a5c8d7772
+    username: admin
+    password: admin123
+hub:
+  harbor:
+    url: localhost:3001
+    username: admin
+    password: Harbor12345
+    token: YWRtaW46SGFyYm9yMTIzNDU=
+pipeline:
+  jenkins:
+    k8s-namespace: sgr-ci  # kube-lilin
+    url: http://localhost:32001
+    username: jenkins
+    token: 11d32a54cd6150bd626d8ed73c3bfa02d6
+
+kubelilin:
+  deploy:
+    url: http://localhost:8080 #api.kubelilin.com

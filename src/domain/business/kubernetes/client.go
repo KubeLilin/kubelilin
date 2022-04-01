@@ -342,21 +342,21 @@ func MapResourceQuotas(resourceQuotas *v1.ResourceQuota) dto.ResourceQuotas {
 	Used := resourceQuotas.Status.Used.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
 	resourceQuotaItemList = append(resourceQuotaItemList,
 		dto.ResourceQuotasItem{Name: resource,
-			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.Value(), UsedValue: Used.Value()})
+			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.AsApproximateFloat64(), UsedValue: Used.AsApproximateFloat64()})
 
 	resource = "limits.memory"
 	Limit = resourceQuotas.Status.Hard.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
 	Used = resourceQuotas.Status.Used.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
 	resourceQuotaItemList = append(resourceQuotaItemList,
 		dto.ResourceQuotasItem{Name: resource,
-			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.Value(), UsedValue: Used.Value()})
+			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.AsApproximateFloat64(), UsedValue: Used.AsApproximateFloat64()})
 
 	resource = "pods"
 	Limit = resourceQuotas.Status.Hard.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
 	Used = resourceQuotas.Status.Used.Name(v1.ResourceName(resource), resourcev1.DecimalExponent)
 	resourceQuotaItemList = append(resourceQuotaItemList,
 		dto.ResourceQuotasItem{Name: resource,
-			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.Value(), UsedValue: Used.Value()})
+			DisplayValue: Limit.String(), DisplayUsedValue: Used.String(), LimitValue: Limit.AsApproximateFloat64(), UsedValue: Used.AsApproximateFloat64()})
 
 	resourceQuotasInfo.Items = resourceQuotaItemList
 	return resourceQuotasInfo

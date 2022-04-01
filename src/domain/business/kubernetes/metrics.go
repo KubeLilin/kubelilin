@@ -119,3 +119,44 @@ func (metrics *MetricsServer) GetProjectsMetrics() dto.ProjectCountMetrics {
 		Deploys:      depolyCount,
 	}
 }
+
+// GetTeamSpacesByTenantId 所在团队的命名空间数量
+//  label,value,count
+//	cls-hbktlqm        3 	2
+//	microk8s-cluster   4    2
+//	kind-kind	       5	1
+func (metrics *MetricsServer) GetTeamSpacesByTenantId(tenantId uint64) ([]dto.DeployLeveLCountInfo, error) {
+	var sqlParams []interface{}
+	where := ""
+	if tenantId > 0 {
+		where = "WHERE ns.tenant_id = ?"
+		sqlParams = append(sqlParams, tenantId)
+	}
+	sql := `SELECT clu.name label,ns.cluster_id value ,COUNT(ns.cluster_id) count FROM sgr_tenant_namespace ns
+INNER JOIN sgr_tenant_cluster clu on clu.id = ns.cluster_id` + where + `GROUP BY ns.cluster_id`
+	var list []dto.DeployLeveLCountInfo
+	err := metrics.db.Raw(sql, sqlParams).Find(&list).Error
+	return list, err
+}
+
+// GetDeployLevelCountByTenantId 团队环境级别的部署数量
+//	开发环境		dev	       4
+//	测试环境		test	   3
+//	预发布环境	release	   0
+//	生产环境		prod	   4
+func (metrics *MetricsServer) GetDeployLevelCountByTenantId(tenantId uint64) ([]dto.DeployLeveLCountInfo, error) {
+	var sqlParams []interface{}
+	where := ""
+	if tenantId > 0 {
+		where = "WHERE tenant_Id = ?"
+		sqlParams = append(sqlParams, tenantId)
+	}
+	sql := `SELECT lev.name label,lev.code  value,IFNULL(dep.count,0) count FROM sgr_code_deployment_level lev
+LEFT JOIN (
+   SELECT  level,COUNT(level) count FROM sgr_tenant_deployments ` + where +
+		`	 GROUP BY level
+) dep on dep.level = lev.code`
+	var list []dto.DeployLeveLCountInfo
+	err := metrics.db.Raw(sql, sqlParams).Find(&list).Error
+	return list, err
+}
