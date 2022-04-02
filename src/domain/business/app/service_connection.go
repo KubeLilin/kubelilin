@@ -15,7 +15,7 @@ type ServiceConnectionService struct {
 	db *gorm.DB
 }
 
-func (scs *ServiceConnectionService) CreateServiceConnection(req req.ServiceConnectionReq) (*req.ServiceConnectionReq, error) {
+func (scs *ServiceConnectionService) CreateServiceConnection(req *req.ServiceConnectionReq) (*req.ServiceConnectionReq, error) {
 	if req.ServiceType != 1 && req.ServiceType != 2 {
 		return nil, errors.New("请选择正确的连接类型")
 	}
@@ -53,7 +53,7 @@ func (scs *ServiceConnectionService) CreateServiceConnection(req req.ServiceConn
 	if dbErr != nil {
 		return nil, dbErr
 	}
-	return &req, nil
+	return req, nil
 }
 
 func (scs *ServiceConnectionService) UpdateServiceConnection(req req.ServiceConnectionReq) (*req.ServiceConnectionReq, error) {
