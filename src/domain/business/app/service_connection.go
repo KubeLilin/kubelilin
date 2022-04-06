@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"kubelilin/api/req"
 	"kubelilin/api/res"
@@ -13,6 +14,12 @@ import (
 
 type ServiceConnectionService struct {
 	db *gorm.DB
+}
+
+func NewServiceConnectionService(db *gorm.DB) *ServiceConnectionService {
+	return &ServiceConnectionService{
+		db: db,
+	}
 }
 
 func (scs *ServiceConnectionService) CreateServiceConnection(req *req.ServiceConnectionReq) (*req.ServiceConnectionReq, error) {
@@ -109,7 +116,7 @@ func (scs *ServiceConnectionService) UpdateServiceConnection(req *req.ServiceCon
 	return req, nil
 }
 
-func (scs *ServiceConnectionService) QueryServiceConnections(req req.ServiceConnectionPageReq) (*page.Page, error) {
+func (scs *ServiceConnectionService) QueryServiceConnections(req *req.ServiceConnectionPageReq) (*page.Page, error) {
 	var data []models.ServiceConnection
 	var params []interface{}
 	sql := strings.Builder{}
@@ -121,6 +128,7 @@ func (scs *ServiceConnectionService) QueryServiceConnections(req req.ServiceConn
 		params = append(params, req.Name)
 	}
 	err, pageRes := page.StartPage(scs.db, req.PageIndex, req.PageSize).DoScan(&data, sql.String(), params)
+	fmt.Println(pageRes.Data)
 	return pageRes, err
 }
 

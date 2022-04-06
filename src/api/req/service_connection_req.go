@@ -1,6 +1,9 @@
 package req
 
-import "kubelilin/pkg/page"
+import (
+	"github.com/yoyofx/yoyogo/web/mvc"
+	"kubelilin/pkg/page"
+)
 
 type ServiceConnectionReq struct {
 	ID          uint64 `json:"id"`
@@ -12,7 +15,8 @@ type ServiceConnectionReq struct {
 }
 
 type ServiceConnectionPageReq struct {
+	mvc.RequestBody
 	Name     string `json:"name" uri:"name"`
-	TenantID int64  `json:"tenantId" uri:"tenantId"`
-	*page.Page
+	TenantID uint64 `json:"tenantId" uri:"tenantId"`
+	page.Page
 }

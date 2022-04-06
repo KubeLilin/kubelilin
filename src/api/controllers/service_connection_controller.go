@@ -8,10 +8,17 @@ import (
 )
 
 type ServiceConnectionController struct {
-	svc app.ServiceConnectionService
+	mvc.ApiController
+	svc *app.ServiceConnectionService
 }
 
-func (controller *ServiceConnectionController) CreateServiceConnection(ctx *context.HttpContext, request *req.ServiceConnectionReq) mvc.ApiResult {
+func NewServiceConnectionController(svc *app.ServiceConnectionService) *ServiceConnectionController {
+	return &ServiceConnectionController{
+		svc: svc,
+	}
+}
+
+func (controller *ServiceConnectionController) PostCreateServiceConnection(ctx *context.HttpContext, request *req.ServiceConnectionReq) mvc.ApiResult {
 
 	userInfo := req.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
@@ -22,7 +29,7 @@ func (controller *ServiceConnectionController) CreateServiceConnection(ctx *cont
 	return mvc.Success(res)
 }
 
-func (controller *ServiceConnectionController) UpdateServiceConnection(req *req.ServiceConnectionReq) mvc.ApiResult {
+func (controller *ServiceConnectionController) PostUpdateServiceConnection(req *req.ServiceConnectionReq) mvc.ApiResult {
 	res, err := controller.svc.UpdateServiceConnection(req)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
@@ -30,9 +37,10 @@ func (controller *ServiceConnectionController) UpdateServiceConnection(req *req.
 	return mvc.Success(res)
 }
 
-func (controller *ServiceConnectionController) QueryServiceConnections(ctx *context.HttpContext) mvc.ApiResult {
+func (controller *ServiceConnectionController) GetQueryServiceConnections(ctx *context.HttpContext, pageReq *req.ServiceConnectionPageReq) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
-	res, err := controller.svc.QueryServiceConnectionInfo(userInfo.TenantID)
+	pageReq.TenantID = userInfo.TenantID
+	res, err := controller.svc.QueryServiceConnections(pageReq)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}
