@@ -35,6 +35,7 @@ func init() {
 			serviceCollection.AddTransient(app.NewDeploymentService)
 			serviceCollection.AddTransient(app.NewVcsService)
 			serviceCollection.AddTransient(app.NewPipelineService)
+			serviceCollection.AddTransient(app.NewServiceConnectionService)
 
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
 			injectionJenkinsBuilder(config, serviceCollection)

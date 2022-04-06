@@ -1,10 +1,13 @@
 package req
 
-import "kubelilin/pkg/page"
+import (
+	"github.com/yoyofx/yoyogo/web/mvc"
+	"kubelilin/pkg/page"
+)
 
 type ServiceConnectionReq struct {
 	ID          uint64 `json:"id"`
-	TenantID    int64  `json:"tenantId"`                                               // 租户id
+	TenantID    uint64 `json:"tenantId"`                                               // 租户id
 	Name        string `json:"name"`                                                   // 连接名称
 	ServiceType int    `json:"serviceType"`                                            // 连接类型 1凭证 2连接
 	Type        int    `gorm:"column:type;type:int;not null" json:"type"`              // 凭证类型 1.github 2..gitlab 3.gogos 4.gitee
@@ -12,7 +15,8 @@ type ServiceConnectionReq struct {
 }
 
 type ServiceConnectionPageReq struct {
+	mvc.RequestBody
 	Name     string `json:"name" uri:"name"`
-	TenantID int64  `json:"tenantId" uri:"tenantId"`
-	*page.Page
+	TenantID uint64 `json:"tenantId" uri:"tenantId"`
+	page.Page
 }

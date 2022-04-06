@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"kubelilin/api/req"
 	"kubelilin/api/res"
@@ -15,7 +16,13 @@ type ServiceConnectionService struct {
 	db *gorm.DB
 }
 
-func (scs *ServiceConnectionService) CreateServiceConnection(req req.ServiceConnectionReq) (*req.ServiceConnectionReq, error) {
+func NewServiceConnectionService(db *gorm.DB) *ServiceConnectionService {
+	return &ServiceConnectionService{
+		db: db,
+	}
+}
+
+func (scs *ServiceConnectionService) CreateServiceConnection(req *req.ServiceConnectionReq) (*req.ServiceConnectionReq, error) {
 	if req.ServiceType != 1 && req.ServiceType != 2 {
 		return nil, errors.New("请选择正确的连接类型")
 	}
@@ -53,10 +60,10 @@ func (scs *ServiceConnectionService) CreateServiceConnection(req req.ServiceConn
 	if dbErr != nil {
 		return nil, dbErr
 	}
-	return &req, nil
+	return req, nil
 }
 
-func (scs *ServiceConnectionService) UpdateServiceConnection(req req.ServiceConnectionReq) (*req.ServiceConnectionReq, error) {
+func (scs *ServiceConnectionService) UpdateServiceConnection(req *req.ServiceConnectionReq) (*req.ServiceConnectionReq, error) {
 	if req.ID == 0 {
 		return nil, errors.New("非法标识")
 	}
@@ -106,10 +113,10 @@ func (scs *ServiceConnectionService) UpdateServiceConnection(req req.ServiceConn
 	if dbErr != nil {
 		return nil, dbErr
 	}
-	return &req, nil
+	return req, nil
 }
 
-func (scs *ServiceConnectionService) QueryServiceConnections(req req.ServiceConnectionPageReq) (*page.Page, error) {
+func (scs *ServiceConnectionService) QueryServiceConnections(req *req.ServiceConnectionPageReq) (*page.Page, error) {
 	var data []models.ServiceConnection
 	var params []interface{}
 	sql := strings.Builder{}
@@ -121,6 +128,7 @@ func (scs *ServiceConnectionService) QueryServiceConnections(req req.ServiceConn
 		params = append(params, req.Name)
 	}
 	err, pageRes := page.StartPage(scs.db, req.PageIndex, req.PageSize).DoScan(&data, sql.String(), params)
+	fmt.Println(pageRes.Data)
 	return pageRes, err
 }
 
