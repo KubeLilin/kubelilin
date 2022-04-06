@@ -21,3 +21,20 @@ func (controller *ServiceConnectionController) CreateServiceConnection(ctx *cont
 	}
 	return mvc.Success(res)
 }
+
+func (controller *ServiceConnectionController) UpdateServiceConnection(req *req.ServiceConnectionReq) mvc.ApiResult {
+	res, err := controller.svc.UpdateServiceConnection(req)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(res)
+}
+
+func (controller *ServiceConnectionController) QueryServiceConnections(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	res, err := controller.svc.QueryServiceConnectionInfo(userInfo.TenantID)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(res)
+}

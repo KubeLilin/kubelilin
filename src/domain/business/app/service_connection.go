@@ -56,7 +56,7 @@ func (scs *ServiceConnectionService) CreateServiceConnection(req *req.ServiceCon
 	return req, nil
 }
 
-func (scs *ServiceConnectionService) UpdateServiceConnection(req req.ServiceConnectionReq) (*req.ServiceConnectionReq, error) {
+func (scs *ServiceConnectionService) UpdateServiceConnection(req *req.ServiceConnectionReq) (*req.ServiceConnectionReq, error) {
 	if req.ID == 0 {
 		return nil, errors.New("非法标识")
 	}
@@ -106,7 +106,7 @@ func (scs *ServiceConnectionService) UpdateServiceConnection(req req.ServiceConn
 	if dbErr != nil {
 		return nil, dbErr
 	}
-	return &req, nil
+	return req, nil
 }
 
 func (scs *ServiceConnectionService) QueryServiceConnections(req req.ServiceConnectionPageReq) (*page.Page, error) {
