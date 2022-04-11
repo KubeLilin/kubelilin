@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"kubelilin/api/req"
@@ -23,6 +24,8 @@ func (controller *ServiceConnectionController) PostCreateServiceConnection(ctx *
 	userInfo := req.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
 	res, err := controller.svc.CreateServiceConnection(request)
+	fmt.Println(request)
+	fmt.Println(request.TenantID)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}
@@ -37,10 +40,12 @@ func (controller *ServiceConnectionController) PostUpdateServiceConnection(req *
 	return mvc.Success(res)
 }
 
-func (controller *ServiceConnectionController) GetQueryServiceConnections(ctx *context.HttpContext, pageReq *req.ServiceConnectionPageReq) mvc.ApiResult {
+func (controller *ServiceConnectionController) GetQueryServiceConnections(ctx *context.HttpContext) mvc.ApiResult {
+	var pageReq req.ServiceConnectionPageReq
 	userInfo := req.GetUserInfo(ctx)
+	ctx.BindWithUri(&pageReq)
 	pageReq.TenantID = userInfo.TenantID
-	res, err := controller.svc.QueryServiceConnections(pageReq)
+	res, err := controller.svc.QueryServiceConnections(&pageReq)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}

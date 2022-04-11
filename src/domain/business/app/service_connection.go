@@ -23,6 +23,7 @@ func NewServiceConnectionService(db *gorm.DB) *ServiceConnectionService {
 }
 
 func (scs *ServiceConnectionService) CreateServiceConnection(req *req.ServiceConnectionReq) (*req.ServiceConnectionReq, error) {
+	fmt.Println(req.ServiceType)
 	if req.ServiceType != 1 && req.ServiceType != 2 {
 		return nil, errors.New("请选择正确的连接类型")
 	}
@@ -31,6 +32,7 @@ func (scs *ServiceConnectionService) CreateServiceConnection(req *req.ServiceCon
 	var connectionDatum = models.ServiceConnectionDetails{}
 	mainDatum.ServiceType = req.ServiceType
 	mainDatum.Name = req.Name
+	mainDatum.TenantID = req.TenantID
 	if req.ServiceType == 1 {
 		connectionDatum.Type = req.Type
 		connectionDatum.Detail = req.Detail
@@ -44,13 +46,13 @@ func (scs *ServiceConnectionService) CreateServiceConnection(req *req.ServiceCon
 			return mainErr.Error
 		}
 		if req.ServiceType == 1 {
-			connErr := tx.Model(models.ServiceConnectionDetails{}).Create(connectionDatum)
+			connErr := tx.Model(models.ServiceConnectionDetails{}).Create(&connectionDatum)
 			if connErr.Error != nil {
 				return connErr.Error
 			}
 		}
 		if req.ServiceType == 2 {
-			credentialErr := tx.Model(models.ServiceConnectionCredentials{}).Create(credentialDatum)
+			credentialErr := tx.Model(models.ServiceConnectionCredentials{}).Create(&credentialDatum)
 			if credentialErr.Error != nil {
 				return credentialErr.Error
 			}
@@ -117,7 +119,7 @@ func (scs *ServiceConnectionService) UpdateServiceConnection(req *req.ServiceCon
 }
 
 func (scs *ServiceConnectionService) QueryServiceConnections(req *req.ServiceConnectionPageReq) (*page.Page, error) {
-	var data []models.ServiceConnection
+	var data []res.ServiceConnectionRes
 	var params []interface{}
 	sql := strings.Builder{}
 	sql.WriteString("select * from service_connection")
