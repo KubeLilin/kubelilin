@@ -6,6 +6,7 @@ import (
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"kubelilin/api/req"
 	"kubelilin/domain/business/app"
+	"strconv"
 )
 
 type ServiceConnectionController struct {
@@ -24,8 +25,6 @@ func (controller *ServiceConnectionController) PostCreateServiceConnection(ctx *
 	userInfo := req.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
 	res, err := controller.svc.CreateServiceConnection(request)
-	fmt.Println(request)
-	fmt.Println(request.TenantID)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}
@@ -33,6 +32,7 @@ func (controller *ServiceConnectionController) PostCreateServiceConnection(ctx *
 }
 
 func (controller *ServiceConnectionController) PostUpdateServiceConnection(req *req.ServiceConnectionReq) mvc.ApiResult {
+	fmt.Println(req)
 	res, err := controller.svc.UpdateServiceConnection(req)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
@@ -50,4 +50,16 @@ func (controller *ServiceConnectionController) GetQueryServiceConnections(ctx *c
 		return mvc.FailWithMsg(nil, err.Error())
 	}
 	return mvc.Success(res)
+}
+
+func (controller *ServiceConnectionController) GetServiceConnectionInfo(ctx *context.HttpContext) mvc.ApiResult {
+	id, _ := strconv.ParseInt(ctx.Input.Query("id"), 10, 64)
+	fmt.Println(id)
+	res, err := controller.svc.QueryServiceConnectionInfo(id)
+	fmt.Println(res)
+	fmt.Println(err)
+	if err == nil {
+		return mvc.Success(res)
+	}
+	return mvc.FailWithMsg(nil, err.Error())
 }
