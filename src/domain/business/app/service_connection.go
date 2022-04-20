@@ -177,15 +177,15 @@ func (scs *ServiceConnectionService) QueryServiceConnectionInfo(id int64) (*res.
 
 func (svc *ServiceConnectionService) QueryRepoListByType(tenantId uint64, repoType string) ([]res.ServiceConnectionRes, error) {
 	var sb strings.Builder
-	data := &[]res.ServiceConnectionRes{}
+	data := make([]res.ServiceConnectionRes, 0)
 	sb.WriteString("select t1.id,t1.name,t2.detail from service_connection as t1 ")
 	sb.WriteString("inner join service_connection_details as t2 ON  t1.id=t2.main_id and t1.tenant_id=? and t2.type=?")
 	serviceType := svc.switchServiceType(repoType)
-	dbErr := svc.db.Raw(sb.String(), tenantId, serviceType).Scan(data)
+	dbErr := svc.db.Raw(sb.String(), tenantId, serviceType).Scan(&data)
 	if dbErr.Error != nil {
 		return nil, dbErr.Error
 	}
-	return *data, nil
+	return data, nil
 }
 
 func (svc *ServiceConnectionService) switchServiceType(name string) int {
