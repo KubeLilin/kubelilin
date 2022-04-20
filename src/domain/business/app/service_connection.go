@@ -16,6 +16,14 @@ type ServiceConnectionService struct {
 	db *gorm.DB
 }
 
+//1.github 2..gitlab 3.gogos 4.gitee
+const (
+	GITHUB = 1
+	GITLAB = 2
+	GOGS   = 3
+	GITEE  = 4
+)
+
 func NewServiceConnectionService(db *gorm.DB) *ServiceConnectionService {
 	return &ServiceConnectionService{
 		db: db,
@@ -165,4 +173,36 @@ func (scs *ServiceConnectionService) QueryServiceConnectionInfo(id int64) (*res.
 		datum.Detail = credentialDatum.Detail
 	}
 	return &datum, nil
+}
+
+func (svc *ServiceConnectionService) QueryRepoListByType(tenantId uint64, repoType string) ([]res.ServiceConnectionRes, error) {
+	var sb strings.Builder
+	var data []res.ServiceConnectionRes
+	sb.WriteString("select t1.id,t1.name,t2.detail from service_connection as t1 ")
+	sb.WriteString("inner join service_connection_details as t2 ON  t1.id=t2.main_id and t1.tenant_id=? and t2.type=?")
+	serviceType := svc.switchServiceType(repoType)
+	dbErr := svc.db.Raw(sb.String(), tenantId, serviceType).Scan(&data)
+	if dbErr.Error != nil {
+		return nil, dbErr.Error
+	}
+	return data, nil
+}
+
+func (svc *ServiceConnectionService) switchServiceType(name string) int {
+
+	switch name {
+	case "github":
+		return GITHUB
+		break
+	case "gitlab":
+		return GITLAB
+		break
+	case "gogs":
+		return GOGS
+		break
+	case "gitee":
+		return GITEE
+		break
+	}
+	return 0
 }
