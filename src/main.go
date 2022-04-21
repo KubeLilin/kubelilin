@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/yoyofx/yoyogo/abstractions"
 	"github.com/yoyofx/yoyogo/abstractions/xlog"
 	_ "github.com/yoyofx/yoyogo/pkg/datasources/mysql"
@@ -21,7 +22,7 @@ func main() {
 	config := abstractions.NewConfigurationBuilder().
 		AddEnvironment().
 		AddYamlFile("config").Build()
-
+	ShowLogo()
 	web.NewWebHostBuilder().
 		UseConfiguration(config).
 		Configure(func(app *web.ApplicationBuilder) {
@@ -44,4 +45,18 @@ func main() {
 func Bootstrap(container *dependencyinjection.ServiceCollection) {
 	// 注册 Nacos 服务发现
 	//nacos.UseServiceDiscovery(container)
+}
+
+func ShowLogo() {
+	logo := `
+                                       ##         .
+                                 ## ## ##        ==
+                              ## ## ## ## ##    ===
+                           /""""""""""""""""\___/ ===
+                      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+                           \______ o          _,/
+                            \      \       _,'
+                              '--.._\..--''
+	`
+	fmt.Println(logo)
 }
