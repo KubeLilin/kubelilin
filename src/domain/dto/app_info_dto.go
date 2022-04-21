@@ -16,6 +16,8 @@ type ApplicationInfoDTO struct {
 	Status       int8       `gorm:"column:status;type:tinyint(4);not null;default:0" ` // 状态
 	CreateTime   *time.Time `gorm:"column:create_time;type:datetime" `                 // 创建时间
 	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" `                 // 更新时间
+	SourceType   string     `gorm:"column:git_type" `
+	SCID         uint64     `gorm:"column:sc_id"`
 }
 
 type ApplicationDisplayDTO struct {
@@ -27,5 +29,6 @@ type ApplicationDisplayDTO struct {
 	Level      string `gorm:"column:level;" `
 	Language   string `gorm:"column:language;" `                                 // 开发语言
 	Status     int8   `gorm:"column:status;type:tinyint(4);not null;default:0" ` // 状态
-
+	SourceType string `gorm:"column:git_type" `
+	SCID       uint64 `gorm:"column:sc_id"`
 }

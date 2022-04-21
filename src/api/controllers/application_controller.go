@@ -105,7 +105,7 @@ func (c *ApplicationController) GetGitBranches(ctx *context.HttpContext) mvc.Api
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	appInfo, _ := c.service.GetAppInfo(appId)
 	if appInfo.Git != "" {
-		names, _ := c.service.VCSService.GetGitBranches(appInfo.Git)
+		names, _ := c.service.VCSService.GetGitBranches(appInfo.Git, appInfo.SourceType)
 		return mvc.Success(context.H{
 			"git":      appInfo.Git,
 			"branches": names,

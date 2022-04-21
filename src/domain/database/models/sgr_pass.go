@@ -2,12 +2,36 @@ package models
 
 import "time"
 
+// CodeServiceConnection [...]
+type CodeServiceConnection struct {
+	ID   uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	Code string `gorm:"column:code;type:varchar(20);not null" json:"code"`
+	Name string `gorm:"column:name;type:varchar(255);not null" json:"name"`
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *CodeServiceConnection) TableName() string {
+	return "code_service_connection"
+}
+
+// CodeServiceConnectionColumns get sql column name.获取数据库列名
+var CodeServiceConnectionColumns = struct {
+	ID   string
+	Code string
+	Name string
+}{
+	ID:   "id",
+	Code: "code",
+	Name: "name",
+}
+
 // ServiceConnection 用于保存其他服务或者第三方组件所依赖的资源，例如连接字符串，ssh秘钥，git连接等等
 type ServiceConnection struct {
 	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
 	TenantID     uint64     `gorm:"column:tenant_id;type:bigint unsigned;not null" json:"tenantId"` // 租户id
 	Name         string     `gorm:"column:name;type:varchar(50);not null" json:"name"`              // 连接名称
-	ServiceType  int        `gorm:"column:service_type;type:int;not null" json:"serviceType"`       // 连接类型 1凭证 2连接
+	ServiceURL   string     `gorm:"column:service_url;type:varchar(255)" json:"serviceUrl"`         // 服务连接地址
+	ServiceType  int        `gorm:"column:service_type;type:int;not null" json:"serviceType"`       // 连接类型: 1: vcs 2. hub 3. pipline 4.url
 	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime;default:CURRENT_TIMESTAMP" json:"updateTime"`
 	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;default:CURRENT_TIMESTAMP" json:"creationTime"`
 }
@@ -22,6 +46,7 @@ var ServiceConnectionColumns = struct {
 	ID           string
 	TenantID     string
 	Name         string
+	ServiceURL   string
 	ServiceType  string
 	UpdateTime   string
 	CreationTime string
@@ -29,6 +54,7 @@ var ServiceConnectionColumns = struct {
 	ID:           "id",
 	TenantID:     "tenant_id",
 	Name:         "name",
+	ServiceURL:   "service_url",
 	ServiceType:  "service_type",
 	UpdateTime:   "update_time",
 	CreationTime: "creation_time",
@@ -37,11 +63,13 @@ var ServiceConnectionColumns = struct {
 // ServiceConnectionCredentials 常用的连接凭证，例如token
 type ServiceConnectionCredentials struct {
 	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
-	MainID       uint64     `gorm:"column:main_id;type:bigint unsigned;not null" json:"mainId"` // 主数据id
-	Type         int        `gorm:"column:type;type:int;not null" json:"type"`                  // 凭证类型 1.github 2..gitlab 3.gogos 4.gitee
-	Detail       string     `gorm:"column:detail;type:varchar(500);not null" json:"detail"`     // 凭证信息
-	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;default:CURRENT_TIMESTAMP" json:"creationTime"`
-	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime;default:CURRENT_TIMESTAMP" json:"updateTime"`
+	Name         string     `gorm:"column:name;type:varchar(20);not null" json:"name"`         // 凭据名称
+	Type         int        `gorm:"column:type;type:int;not null" json:"type"`                 // 凭证类型 1. 用户密码 2.token
+	Username     string     `gorm:"column:username;type:varchar(50);not null" json:"username"` // 凭证用户名
+	Password     string     `gorm:"column:password;type:varchar(50);not null" json:"password"` // 凭证密码
+	Token        string     `gorm:"column:token;type:varchar(255);not null" json:"token"`      // 凭证TOKEN
+	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"creationTime"`
+	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"updateTime"`
 }
 
 // TableName get sql table name.获取数据库表名
@@ -52,16 +80,20 @@ func (m *ServiceConnectionCredentials) TableName() string {
 // ServiceConnectionCredentialsColumns get sql column name.获取数据库列名
 var ServiceConnectionCredentialsColumns = struct {
 	ID           string
-	MainID       string
+	Name         string
 	Type         string
-	Detail       string
+	Username     string
+	Password     string
+	Token        string
 	CreationTime string
 	UpdateTime   string
 }{
 	ID:           "id",
-	MainID:       "main_id",
+	Name:         "name",
 	Type:         "type",
-	Detail:       "detail",
+	Username:     "username",
+	Password:     "password",
+	Token:        "token",
 	CreationTime: "creation_time",
 	UpdateTime:   "update_time",
 }
@@ -305,6 +337,8 @@ type SgrTenantApplication struct {
 	CreateTime *time.Time `gorm:"column:create_time;type:datetime" json:"createTime"`              // 创建时间
 	UpdateTime *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`              // 更新时间
 	Labels     string     `gorm:"column:labels;type:varchar(100)" json:"labels"`                   // 应用标签
+	GitType    string     `gorm:"column:git_type;type:varchar(20);not null" json:"gitType"`        // git类型 github/ gitee/ gogs/gitlab
+	ScID       *uint64    `gorm:"column:sc_id;type:bigint unsigned;default:0" json:"scId"`         // 服务连接git类型的凭据ID
 }
 
 // TableName get sql table name.获取数据库表名
@@ -327,6 +361,8 @@ var SgrTenantApplicationColumns = struct {
 	CreateTime string
 	UpdateTime string
 	Labels     string
+	GitType    string
+	ScID       string
 }{
 	ID:         "id",
 	TenantID:   "tenant_Id",
@@ -341,6 +377,8 @@ var SgrTenantApplicationColumns = struct {
 	CreateTime: "create_time",
 	UpdateTime: "update_time",
 	Labels:     "labels",
+	GitType:    "git_type",
+	ScID:       "sc_id",
 }
 
 // SgrTenantApplicationPipelines 应用流水线

@@ -122,23 +122,14 @@ func (scs *ServiceConnectionService) QueryServiceConnectionInfo(id int64) (*res.
 	datum.ID = mainDatum.ID
 	datum.Name = mainDatum.Name
 	datum.ServiceType = mainDatum.ServiceType
-	if mainDatum.ServiceType == 1 {
-		var serviceConnectionDatum models.ServiceConnectionDetails
-		err := scs.db.Model(&models.ServiceConnectionDetails{}).Where("main_id=?", id).First(&serviceConnectionDatum)
-		if err.Error != nil {
-			return nil, err.Error
-		}
-		datum.Type = serviceConnectionDatum.Type
-		datum.Detail = serviceConnectionDatum.Detail
-	} else {
-		var credentialDatum models.ServiceConnectionCredentials
-		err := scs.db.Model(&models.ServiceConnectionCredentials{}).Where("main_id=?", id).First(&credentialDatum)
-		if err.Error != nil {
-			return nil, err.Error
-		}
-		datum.Type = credentialDatum.Type
-		datum.Detail = credentialDatum.Detail
+	var serviceConnectionDatum models.ServiceConnectionDetails
+	err := scs.db.Model(&models.ServiceConnectionDetails{}).Where("main_id=?", id).First(&serviceConnectionDatum)
+	if err.Error != nil {
+		return nil, err.Error
 	}
+	datum.Type = serviceConnectionDatum.Type
+	datum.Detail = serviceConnectionDatum.Detail
+
 	return &datum, nil
 }
 
