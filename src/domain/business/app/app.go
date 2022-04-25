@@ -150,6 +150,12 @@ WHERE app.id = ?
 	return appInfo, err
 }
 
+func (s *ApplicationService) GetServiceConnectionById(Id uint64) (models.ServiceConnectionDetails, error) {
+	var model models.ServiceConnectionDetails
+	res := s.db.Model(&models.ServiceConnectionDetails{}).Where("main_id=?", Id).First(&model)
+	return model, res.Error
+}
+
 func (s *ApplicationService) GetAppCountByDeployLevel(appId uint64) ([]dto.DeployLeveLCountInfo, error) {
 	sql := `SELECT lev.name label,lev.code  value,IFNULL(dep.count,0) count FROM sgr_code_deployment_level lev
 LEFT JOIN (

@@ -7,7 +7,7 @@ type VcsService interface {
 	CreateRepository(repoName string) (*VcsRepository, error)
 	CreateRepositoryByOrg(orgName, repoName string) (*VcsRepository, error)
 	CreateTenantRepository(tenantId uint64, repoName string) (*VcsRepository, error)
-	GetGitBranches(gitAddr string, sourceType string) ([]string, error)
+	GetGitBranches(gitAddr string, sourceType string, gitToken string) ([]string, error)
 }
 
 type VcsOrganization struct {

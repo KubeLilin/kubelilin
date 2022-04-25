@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"kubelilin/api/req"
 	"kubelilin/domain/business/app"
+	"kubelilin/domain/dto"
 	"kubelilin/utils"
 )
 
@@ -104,8 +106,16 @@ func (c *ApplicationController) GetInfo(ctx *context.HttpContext) mvc.ApiResult 
 func (c *ApplicationController) GetGitBranches(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	appInfo, _ := c.service.GetAppInfo(appId)
+	token := ""
+	if appInfo.SCID > 0 {
+		scInfo, _ := c.service.GetServiceConnectionById(appInfo.SCID)
+		var detail dto.ServiceConnectionDetails
+		_ = json.Unmarshal([]byte(scInfo.Detail), &detail)
+		token = detail.Token
+	}
+
 	if appInfo.Git != "" {
-		names, _ := c.service.VCSService.GetGitBranches(appInfo.Git, appInfo.SourceType)
+		names, _ := c.service.VCSService.GetGitBranches(appInfo.Git, appInfo.SourceType, token)
 		return mvc.Success(context.H{
 			"git":      appInfo.Git,
 			"branches": names,

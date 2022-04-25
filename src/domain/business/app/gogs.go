@@ -121,11 +121,11 @@ func (vcs *GogsVcsService) CreateRepository(repoName string) (*VcsRepository, er
 	return nil, err
 }
 
-func (vcs *GogsVcsService) GetGitBranches(gitAddr string, sourceType string) ([]string, error) {
+func (vcs *GogsVcsService) GetGitBranches(gitAddr string, sourceType string, gitToken string) ([]string, error) {
 	//gitUrl := vcs.config.GetString(GIT_URL)
 	//gitToken := vcs.config.GetString(GIT_TOKEN)
 	//gogsClient := gogs.NewClient(gitUrl, gitToken)
-	gitToken := ""
+	//gitToken := ""
 
 	client, err := NewScmProvider(sourceType, gitAddr, gitToken)
 	branchList := []*scm.Reference{}
