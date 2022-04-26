@@ -37,7 +37,7 @@ type Pipeline interface {
 
 // HTTPClient defined http native client
 var (
-	timeout    = 1000 * time.Millisecond
+	timeout    = 15000 * time.Millisecond
 	HTTPClient = httpclient.NewHClient(httpclient.WithHTTPTimeout(timeout))
 )
 
