@@ -200,7 +200,7 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 					Command: `
 					container('docker') {
 						sh "[ -d $SGR_REGISTRY_CONFIG ] || mkdir -pv $SGR_REGISTRY_CONFIG"
-   						sh """
+   						sh """#!/busybox/sh -e
                     		echo '{"auths": {"'$SGR_REGISTRY_ADDR'": {"auth": "'$SGR_REGISTRY_AUTH'"}}}' > $SGR_REGISTRY_CONFIG/config.json
 						"""
 						sh '''#!/busybox/sh
