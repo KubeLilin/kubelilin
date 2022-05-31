@@ -1,6 +1,6 @@
 module kubelilin
 
-go 1.16
+go 1.18
 
 require (
 	github.com/ahmetb/go-linq/v3 v3.2.0
