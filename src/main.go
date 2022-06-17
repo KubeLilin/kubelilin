@@ -49,6 +49,7 @@ func Bootstrap(container *dependencyinjection.ServiceCollection) {
 
 func ShowLogo() {
 	logo := `
+	KubeLilin is starting......
                                        ##         .
                                  ## ## ##        ==
                               ## ## ## ## ##    ===
@@ -56,7 +57,7 @@ func ShowLogo() {
                       ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
                            \______ o          _,/
                             \      \       _,'
-                              '--.._\..--''
+                              '--.._\..--''         KubeLilin An Cloud-Native application platform for Kubernetes.
 	`
 	fmt.Println(logo)
 }
