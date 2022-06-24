@@ -12,7 +12,21 @@ yoyogo:
         allow_origins: ["*"]
         allow_methods: ["*"]
         allow_credentials: false
-
+      jwt:
+        header: "Authorization"
+        secret: "12391JdeOW^%$#@"
+        prefix: "Bearer"
+        expires: 360000
+        enable: true
+        skip_path: [
+          "/v1/user/login",
+          "/v1/pod/terminal",
+          "/v1/deployment/executedeployment",
+          "/v1/deployment/notify",
+          "/actuator/health/liveness",
+          "/actuator/health/readiness",
+          "/actuator/health/detail"
+        ]
   datasource:
     pool:
       init_cap: 2
