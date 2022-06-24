@@ -9,18 +9,25 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	applycorev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"kubelilin/api/req"
 	"kubelilin/domain/database/models"
+	"kubelilin/domain/dto"
+	"kubelilin/pkg/page"
 	"strconv"
 	"strings"
 )
 
 type ServiceSupervisor struct {
-	db *gorm.DB
+	db             *gorm.DB
+	clusterService *ClusterService
 }
 
-func NewServiceSupervisor(db *gorm.DB) *ServiceSupervisor {
+var temp string
+
+func NewServiceSupervisor(db *gorm.DB, clusterService *ClusterService) *ServiceSupervisor {
 	return &ServiceSupervisor{
-		db: db,
+		db:             db,
+		clusterService: clusterService,
 	}
 }
 
@@ -80,4 +87,38 @@ func (svc *ServiceSupervisor) ApplyService(client corev1.CoreV1Interface, dp *mo
 	spec.Ports = ports
 	serviceInfo.Spec = &spec
 	return k8sService.Apply(context.TODO(), serviceInfo, metav1.ApplyOptions{Force: true, FieldManager: "service-apply-fields"})
+}
+
+func (svc *ServiceSupervisor) QueryServiceList(req req.ServiceRequest) (*page.Page, error) {
+	var svcList []dto.ServiceList
+	client, err := svc.clusterService.GetClusterClientByTenantAndId(req.TenantId, req.ClusterId)
+	if err != nil {
+		return nil, err
+	}
+	services := client.CoreV1().Services(req.Namespace)
+	list, err := services.List(context.TODO(), metav1.ListOptions{Limit: int64(req.PageSize)})
+	if err != nil {
+		return nil, err
+	}
+	//data, err := json.Marshal(&list.Items[0])
+	for _, x := range list.Items {
+		svc := dto.ServiceList{
+			Namespace:  req.Namespace,
+			Name:       x.Name,
+			Labels:     x.Labels,
+			Selector:   x.Spec.Selector,
+			Type:       string(x.Spec.Type),
+			CreateTime: x.GetCreationTimestamp().Time,
+		}
+		svcList = append(svcList, svc)
+	}
+	var res = page.Page{}
+	count := list.RemainingItemCount
+	if count == nil {
+		res.Total = int64(len(svcList))
+	} else {
+		res.Total = int64(len(svcList)) + *count
+	}
+	res.Data = svcList
+	return &res, nil
 }

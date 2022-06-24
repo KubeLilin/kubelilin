@@ -32,4 +32,5 @@ func ConfigureMvc(builder *mvc.ControllerBuilder) {
 	builder.AddController(controllers.NewPodController)
 	builder.AddController(controllers.NewMetricsController)
 	builder.AddController(controllers.NewServiceConnectionController)
+	builder.AddController(controllers.NewServiceController)
 }
