@@ -102,7 +102,7 @@ func (svc *ServiceSupervisor) QueryServiceList(req req.ServiceRequest) (*page.Pa
 		return nil, err
 	}
 	services := client.CoreV1().Services(req.Namespace)
-	options := metav1.ListOptions{Limit: 3}
+	options := metav1.ListOptions{Limit: int64(req.PageSize)}
 	if req.ContinueStr != "" {
 		options.Continue = req.ContinueStr
 	}
