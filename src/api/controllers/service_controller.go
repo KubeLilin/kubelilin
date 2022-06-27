@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"kubelilin/api/req"
@@ -24,15 +23,18 @@ func NewServiceController(clusterService *kubernetes.ClusterService, svcSupervis
 func (c *ServiceController) GetServiceList(ctx *context.HttpContext) mvc.ApiResult {
 	reqParam := req.ServiceRequest{}
 	_ = ctx.BindWithUri(&reqParam)
-	reqParam.TenantId = 1
-	reqParam.ClusterId = 3
-	reqParam.Namespace = "yoyogo"
-	fmt.Println("666")
-	fmt.Println(reqParam)
+	userInfo := req.GetUserInfo(ctx)
+	reqParam.TenantId = userInfo.TenantID
 	//userInfo := req.GetUserInfo(ctx)
 	list, err := c.svcSupervisor.QueryServiceList(reqParam)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}
+	return mvc.Success(list)
+}
+
+func (c *ServiceController) GetNamespaceByTenant(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	list := c.svcSupervisor.QueryNameSpaceByTenant(userInfo.TenantID)
 	return mvc.Success(list)
 }

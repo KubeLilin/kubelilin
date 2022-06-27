@@ -10,6 +10,7 @@ import (
 	applycorev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"kubelilin/api/req"
+	"kubelilin/api/res"
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
 	"kubelilin/pkg/page"
@@ -91,24 +92,34 @@ func (svc *ServiceSupervisor) ApplyService(client corev1.CoreV1Interface, dp *mo
 
 func (svc *ServiceSupervisor) QueryServiceList(req req.ServiceRequest) (*page.Page, error) {
 	var svcList []dto.ServiceList
-	client, err := svc.clusterService.GetClusterClientByTenantAndId(req.TenantId, req.ClusterId)
+	if req.Namespace == "" {
+		return &page.Page{}, nil
+	}
+	namespaceInfo := &models.SgrTenantNamespace{}
+	svc.db.Model(models.SgrTenantNamespace{}).Where("namespace=?", req.Namespace).First(namespaceInfo)
+	client, err := svc.clusterService.GetClusterClientByTenantAndId(req.TenantId, namespaceInfo.ClusterID)
 	if err != nil {
 		return nil, err
 	}
 	services := client.CoreV1().Services(req.Namespace)
-	list, err := services.List(context.TODO(), metav1.ListOptions{Limit: int64(req.PageSize)})
+	options := metav1.ListOptions{Limit: 3}
+	if req.ContinueStr != "" {
+		options.Continue = req.ContinueStr
+	}
+	list, err := services.List(context.TODO(), options)
 	if err != nil {
 		return nil, err
 	}
 	//data, err := json.Marshal(&list.Items[0])
 	for _, x := range list.Items {
 		svc := dto.ServiceList{
-			Namespace:  req.Namespace,
-			Name:       x.Name,
-			Labels:     x.Labels,
-			Selector:   x.Spec.Selector,
-			Type:       string(x.Spec.Type),
-			CreateTime: x.GetCreationTimestamp().Time,
+			Namespace:   req.Namespace,
+			Name:        x.Name,
+			Labels:      x.Labels,
+			Selector:    x.Spec.Selector,
+			Type:        string(x.Spec.Type),
+			CreateTime:  x.GetCreationTimestamp().Time,
+			ContinueStr: list.Continue,
 		}
 		svcList = append(svcList, svc)
 	}
@@ -121,4 +132,10 @@ func (svc *ServiceSupervisor) QueryServiceList(req req.ServiceRequest) (*page.Pa
 	}
 	res.Data = svcList
 	return &res, nil
+}
+
+func (svc *ServiceSupervisor) QueryNameSpaceByTenant(tenantId uint64) []res.NamespaceList {
+	var data = make([]res.NamespaceList, 0)
+	svc.db.Model(&models.SgrTenantNamespace{}).Where("tenant_id=?", tenantId).Find(&data)
+	return data
 }
