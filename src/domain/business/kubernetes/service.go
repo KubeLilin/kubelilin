@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
 	v1 "k8s.io/api/core/v1"
@@ -134,8 +135,117 @@ func (svc *ServiceSupervisor) QueryServiceList(req req.ServiceRequest) (*page.Pa
 	return &res, nil
 }
 
+func (svc *ServiceSupervisor) QueryServiceInfo(req req.ServiceRequest) (*res.ServiceInfo, error) {
+	if req.Namespace == "" {
+		return nil, errors.New("请传入命名空间")
+	}
+	if req.Name == "" {
+		return nil, errors.New("请传入服务名称")
+	}
+	namespaceInfo := &models.SgrTenantNamespace{}
+	svc.db.Model(models.SgrTenantNamespace{}).Where("namespace=?", req.Namespace).First(namespaceInfo)
+	client, err := svc.clusterService.GetClusterClientByTenantAndId(req.TenantId, namespaceInfo.ClusterID)
+	if err != nil {
+		return nil, err
+	}
+	services := client.CoreV1().Services(req.Namespace)
+	svcInfo, err := services.Get(context.TODO(), req.Name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	selectorStr, err := json.Marshal(svcInfo.Spec.Selector)
+	labelsStr, err := json.Marshal(svcInfo.Labels)
+	service := res.ServiceInfo{
+		Name:       svcInfo.Name,
+		Namespace:  svcInfo.Namespace,
+		Selector:   string(selectorStr),
+		Labels:     string(labelsStr),
+		CreateTime: svcInfo.GetCreationTimestamp().Time,
+		Type:       string(svcInfo.Spec.Type),
+		Port:       svcInfo.Spec.Ports,
+	}
+	return &service, err
+}
+
 func (svc *ServiceSupervisor) QueryNameSpaceByTenant(tenantId uint64) []res.NamespaceList {
 	var data = make([]res.NamespaceList, 0)
 	svc.db.Model(&models.SgrTenantNamespace{}).Where("tenant_id=?", tenantId).Find(&data)
 	return data
+}
+
+func (svc *ServiceSupervisor) ChangeService(svcReq *req.ServiceInfoReq) error {
+	if svcReq.Namespace == "" {
+		return errors.New("请传入命名空间")
+	}
+	if svcReq.Name == "" {
+		return errors.New("请传入服务名称")
+	}
+	if len(svcReq.Port) == 0 {
+		return errors.New("请传入端口映射信息")
+	}
+	for i, x := range svcReq.Port {
+		for j, y := range svcReq.Port {
+			if x.Port == y.Port && i != j {
+				return errors.New("服务端口不可重复")
+			}
+		}
+	}
+	namespaceInfo := &models.SgrTenantNamespace{}
+	svc.db.Model(models.SgrTenantNamespace{}).Where("namespace=?", svcReq.Namespace).First(namespaceInfo)
+	client, err := svc.clusterService.GetClusterClientByTenantAndId(svcReq.TenantId, namespaceInfo.ClusterID)
+	if err != nil {
+		return err
+	}
+	configuration := applycorev1.ServiceApplyConfiguration{}
+	serviceInfo := configuration.WithName(svcReq.Name)
+	services := client.CoreV1().Services(svcReq.Namespace)
+	var apiVersion = "v1"
+	var kind = "Service"
+	var svcName = svcReq.Name
+	serviceInfo.Name = &svcName
+	serviceInfo.APIVersion = &apiVersion
+	serviceInfo.Kind = &kind
+	//匹配dp的label
+	//metaLabel := make(map[string]string)
+	//metaLabel["k8s-app"] = dp.Name
+	/*metaLabels := map[string]string{
+		"kubelilin-default": "true",
+		"appId":             strconv.FormatUint(dp.AppID, 10),
+		"tenantId":          strconv.FormatUint(dp.TenantID, 10),
+		"clusterId":         strconv.FormatUint(dp.ClusterID, 10),
+		"namespaceId":       strconv.FormatUint(dp.NamespaceID, 10),
+		"namespace":         namespace.Namespace,
+		"k8s-app":           dp.Name,
+		"profileLevel":      dp.Level,
+	}*/
+	spec := applycorev1.ServiceSpecApplyConfiguration{}
+	//spec.Selector = metaLabels
+	//构造端口数据
+	var ports []applycorev1.ServicePortApplyConfiguration
+	for _, x := range svcReq.Port {
+		portNumber := x.Port
+		protocol := v1.ProtocolTCP
+		targetPort := x.TargetPort
+		servicePortName := strings.ToLower((string)(protocol))
+		port := applycorev1.ServicePortApplyConfiguration{
+			Name:       &servicePortName,
+			Protocol:   &protocol,
+			Port:       &portNumber,
+			TargetPort: &targetPort,
+		}
+		var specType v1.ServiceType
+		if svcReq.Type == CLUSTER_IP {
+			specType = v1.ServiceTypeClusterIP
+			spec.Type = &specType
+		} else if svcReq.Type == NODE_PORT {
+			specType = v1.ServiceTypeNodePort
+			spec.Type = &specType
+			port.NodePort = &portNumber
+		}
+		ports = append(ports, port)
+	}
+	spec.Ports = ports
+	serviceInfo.Spec = &spec
+	_, err = services.Apply(context.TODO(), serviceInfo, metav1.ApplyOptions{Force: true, FieldManager: "service-apply-fields"})
+	return err
 }
