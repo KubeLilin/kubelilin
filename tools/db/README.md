@@ -1,6 +1,6 @@
 # gormt 全局安装
 ```go
-go get -u -v github.com/xxjwxc/gormt@master
+go install github.com/xxjwxc/gormt@v2.1.gorm 
 ```
 
 # 配置文件
