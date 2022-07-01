@@ -17,7 +17,7 @@ func NewDevopsService(db *gorm.DB) *DevopsService {
 
 func (service *DevopsService) CreateProject(project *req.CreateNewProject) error {
 	var exitCount int64
-	service.db.Model(&models.SgrTenantApplication{}).Where("tenant_id=? and name=?", project.TenantID, project.Name).Count(&exitCount)
+	service.db.Model(&models.DevopsProjects{}).Where("tenant_id=? and name=?", project.TenantID, project.Name).Count(&exitCount)
 	if exitCount > 0 {
 		return errors.New("already have the same name project")
 	}

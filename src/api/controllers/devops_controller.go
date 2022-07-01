@@ -20,7 +20,9 @@ func (controller *DevopsController) GetProjectList(ctx *context.HttpContext) mvc
 	return mvc.Success(nil)
 }
 
-func (controller *DevopsController) PostCreateProject(request *req.CreateNewProject) mvc.ApiResult {
+func (controller *DevopsController) PostCreateProject(ctx *context.HttpContext, request *req.CreateNewProject) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	request.TenantID = userInfo.TenantID
 	err := controller.devopsService.CreateProject(request)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
