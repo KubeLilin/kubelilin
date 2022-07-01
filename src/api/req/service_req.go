@@ -2,9 +2,8 @@ package req
 
 import (
 	"github.com/yoyofx/yoyogo/web/mvc"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"kubelilin/pkg/page"
-	"time"
 )
 
 type ServiceRequest struct {
@@ -18,12 +17,18 @@ type ServiceRequest struct {
 
 type ServiceInfoReq struct {
 	mvc.RequestBody
-	TenantId   uint64 `json:"tenantId" uri:"tenantId"`
-	Namespace  string `json:"namespace" uri:"namespace"`
-	Name       string `json:"name" uri:"name"`
-	Type       string `json:"type" uri:"type"`
-	Labels     string `json:"labels" uri:"labels"`
-	Selector   string `json:"selector" uri:"selector"`
-	CreateTime time.Time
-	Port       []v1.ServicePort `json:"port" uri:"port"`
+	TenantId  uint64            `json:"tenantId" uri:"tenantId"`
+	Namespace string            `json:"namespace" uri:"namespace"`
+	Name      string            `json:"name" uri:"name"`
+	Type      string            `json:"type" uri:"type"`
+	Labels    string            `json:"labels" uri:"labels"`
+	Selector  string            `json:"selector" uri:"selector"`
+	Port      []ServicePortInfo `json:"port" uri:"port"`
+}
+
+type ServicePortInfo struct {
+	Name       string             `json:"name"`
+	Port       intstr.IntOrString `json:"port"`
+	TargetPort intstr.IntOrString `json:"targetPort"`
+	Protocol   string             `json:"protocol"`
 }

@@ -16,7 +16,6 @@ import (
 	"kubelilin/domain/dto"
 	"kubelilin/pkg/page"
 	"strconv"
-	"strings"
 )
 
 type ServiceSupervisor struct {
@@ -68,8 +67,7 @@ func (svc *ServiceSupervisor) ApplyService(client corev1.CoreV1Interface, dp *mo
 	portNumber := int32(dp.ServicePort)
 	protocol := v1.ProtocolTCP
 	targetPort := intstr.FromInt(int(dp.ServicePort))
-
-	servicePortName := strings.ToLower((string)(protocol))
+	servicePortName := "默认端口映射"
 	port := applycorev1.ServicePortApplyConfiguration{
 		Name:       &servicePortName,
 		Protocol:   &protocol,
@@ -223,12 +221,21 @@ func (svc *ServiceSupervisor) ChangeService(svcReq *req.ServiceInfoReq) error {
 	//构造端口数据
 	var ports []applycorev1.ServicePortApplyConfiguration
 	for _, x := range svcReq.Port {
-		portNumber := x.Port
+		var portNumber int32
+		var targetPort intstr.IntOrString
+		if x.Port.Type == intstr.Int {
+			portNumber = x.Port.IntVal
+			targetPort = x.TargetPort
+		} else {
+			protStrForInt, _ := strconv.Atoi(x.Port.StrVal)
+			portNumber = int32(protStrForInt)
+			targetPort = intstr.Parse(x.TargetPort.StrVal)
+		}
 		protocol := v1.ProtocolTCP
-		targetPort := x.TargetPort
-		servicePortName := strings.ToLower((string)(protocol))
+
+		name := x.Name
 		port := applycorev1.ServicePortApplyConfiguration{
-			Name:       &servicePortName,
+			Name:       &name,
 			Protocol:   &protocol,
 			Port:       &portNumber,
 			TargetPort: &targetPort,

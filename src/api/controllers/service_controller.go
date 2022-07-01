@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
@@ -56,7 +57,8 @@ func (c *ServiceController) GetNamespaceByTenant(ctx *context.HttpContext) mvc.A
 func (c *ServiceController) PostChangeService(ctx *context.HttpContext, svcReq *req.ServiceInfoReq) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
 	svcReq.TenantId = userInfo.TenantID
-	fmt.Println(svcReq)
+	marshal, _ := json.Marshal(svcReq)
+	fmt.Println(string(marshal))
 	err := c.svcSupervisor.ChangeService(svcReq)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
