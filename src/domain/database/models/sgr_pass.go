@@ -29,7 +29,7 @@ var CodeServiceConnectionColumns = struct {
 type DevopsProjects struct {
 	ID           uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned zerofill;not null" json:"id"`
 	Name         string     `gorm:"column:name;type:varchar(50);not null" json:"name"`                                         // 项目名称
-	TenantID     int64      `gorm:"column:tenant_id;type:bigint;not null" json:"tenantId"`                                     // 租户ID
+	TenantID     uint64     `gorm:"column:tenant_id;type:bigint unsigned;not null" json:"tenantId"`                            // 租户ID
 	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"creationTime"` // 创建时间
 }
 
@@ -54,8 +54,8 @@ var DevopsProjectsColumns = struct {
 // DevopsProjectsApps devops 项目应用对应表
 type DevopsProjectsApps struct {
 	ID            uint64 `gorm:"primaryKey;column:id;type:bigint(20) unsigned zerofill;not null" json:"id"`
-	ProjectID     int64  `gorm:"column:project_id;type:bigint;not null" json:"projectId"`         // 项目ID
-	ApplicationID int64  `gorm:"column:application_id;type:bigint;not null" json:"applicationId"` // 应用 ID
+	ProjectID     uint64 `gorm:"column:project_id;type:bigint unsigned;not null" json:"projectId"`         // 项目ID
+	ApplicationID uint64 `gorm:"column:application_id;type:bigint unsigned;not null" json:"applicationId"` // 应用 ID
 }
 
 // TableName get sql table name.获取数据库表名
