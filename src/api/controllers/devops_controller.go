@@ -26,10 +26,10 @@ func (controller *DevopsController) PostCreateProject(ctx *context.HttpContext, 
 	return mvc.Success("ok")
 }
 
-func (controller *DevopsController) GetProjectList(ctx *context.HttpContext) mvc.ApiResult {
-	var request req.DevopsProjectReq
-	_ = ctx.BindWithUri(&request)
-	err, res := controller.devopsService.GetProjectList(&request)
+func (controller *DevopsController) GetProjectList(ctx *context.HttpContext, request *req.DevopsProjectReq) mvc.ApiResult {
+	//var request req.DevopsProjectReq
+	//_ = ctx.BindWithUri(&request)
+	err, res := controller.devopsService.GetProjectList(request)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}

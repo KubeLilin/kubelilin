@@ -52,7 +52,7 @@ func (service *DevopsService) GetProjectList(request *req.DevopsProjectReq) (err
 FROM devops_projects p`
 	var sqlParams []interface{}
 	if request.Name != "" {
-		sql += "WHERE p.name like ?"
+		sql += " WHERE p.name like ?"
 		sqlParams = append(sqlParams, "%"+request.Name+"%")
 	}
 	res := &[]dto.DevOpsProjectsDTO{}

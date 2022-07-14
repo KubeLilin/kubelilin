@@ -9,5 +9,5 @@ type DevopsProjectReq struct {
 	mvc.RequestBody
 	page.PageRequest
 
-	Name string `json:"name"`
+	Name string `json:"name" uri:"name"`
 }
