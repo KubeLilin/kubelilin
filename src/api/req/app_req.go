@@ -19,6 +19,7 @@ type AppReq struct {
 	Status     int8   `json:"status" uri:"status"`
 	SourceType string `json:"sourceType" uri:"sourceType"`
 	SCID       uint64 `json:"sources" uri:"sources"`
+	ProjectID  uint64 `json:"pid" uri:"pid"`
 }
 
 type AppNewPipelineReq struct {

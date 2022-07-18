@@ -9,5 +9,6 @@ type DevopsProjectReq struct {
 	mvc.RequestBody
 	page.PageRequest
 
-	Name string `json:"name" uri:"name"`
+	Name     string `json:"name" uri:"name"`
+	TenantID uint64
 }
