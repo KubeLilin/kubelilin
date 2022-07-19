@@ -17,10 +17,20 @@ func NewDevopsController(devops *app.DevopsService) *DevopsController {
 	return &DevopsController{devopsService: devops}
 }
 
-func (controller DevopsController) PostCreateProject(ctx *context.HttpContext, request *req.CreateNewProject) mvc.ApiResult {
+func (controller DevopsController) PostCreateProject(ctx *context.HttpContext, request *req.NewProject) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
 	err := controller.devopsService.CreateProject(request)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success("ok")
+}
+
+func (controller DevopsController) PostEditProject(ctx *context.HttpContext, request *req.NewProject) mvc.ApiResult {
+	userInfo := req.GetUserInfo(ctx)
+	request.TenantID = userInfo.TenantID
+	err := controller.devopsService.EditProject(request)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}

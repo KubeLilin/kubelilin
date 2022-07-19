@@ -19,7 +19,7 @@ func NewDevopsService(db *gorm.DB) *DevopsService {
 	return &DevopsService{db: db}
 }
 
-func (service *DevopsService) CreateProject(requestProject *req.CreateNewProject) error {
+func (service *DevopsService) CreateProject(requestProject *req.NewProject) error {
 	var exitCount int64
 	service.db.Model(&models.DevopsProjects{}).Where("tenant_id=? and name=?", requestProject.TenantID, requestProject.Name).Count(&exitCount)
 	if exitCount > 0 {
@@ -41,6 +41,21 @@ func (service *DevopsService) CreateProject(requestProject *req.CreateNewProject
 			ApplicationID: appId,
 		}
 		service.db.Model(&models.DevopsProjectsApps{}).Create(&devProjectApps)
+	}
+
+	return nil
+}
+
+func (service *DevopsService) EditProject(updateRequest *req.NewProject) error {
+	devProject := models.DevopsProjects{
+		ID:           updateRequest.ProjectId,
+		Name:         updateRequest.Name,
+		TenantID:     updateRequest.TenantID,
+		CreationTime: utils.TimeNowPtr(),
+	}
+	dpcRes := service.db.Model(&models.DevopsProjects{}).Where("id=?", updateRequest.ProjectId).Updates(&devProject)
+	if dpcRes.Error != nil {
+		return dpcRes.Error
 	}
 
 	return nil
