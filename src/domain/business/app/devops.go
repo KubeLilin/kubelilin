@@ -53,12 +53,24 @@ func (service *DevopsService) EditProject(updateRequest *req.NewProject) error {
 		TenantID:     updateRequest.TenantID,
 		CreationTime: utils.TimeNowPtr(),
 	}
-	dpcRes := service.db.Model(&models.DevopsProjects{}).Where("id=?", updateRequest.ProjectId).Updates(&devProject)
-	if dpcRes.Error != nil {
-		return dpcRes.Error
-	}
-
-	return nil
+	err := service.db.Transaction(func(tx *gorm.DB) error {
+		dpcRes := tx.Model(&models.DevopsProjects{}).Where("id=?", updateRequest.ProjectId).Updates(devProject)
+		if dpcRes.Error != nil {
+			return dpcRes.Error
+		}
+		dpcRes = tx.Model(&models.DevopsProjectsApps{}).Delete(&models.DevopsProjectsApps{}, "project_id=?", updateRequest.ProjectId)
+		if dpcRes.Error == nil {
+			for _, appId := range updateRequest.AppIdList {
+				devProjectApps := models.DevopsProjectsApps{
+					ProjectID:     devProject.ID,
+					ApplicationID: appId,
+				}
+				tx.Model(&models.DevopsProjectsApps{}).Create(&devProjectApps)
+			}
+		}
+		return nil
+	})
+	return err
 }
 
 func (service *DevopsService) GetProjectList(request *req.DevopsProjectReq) (error, *page.Page) {
