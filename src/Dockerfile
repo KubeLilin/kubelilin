@@ -1,5 +1,5 @@
 # 构建容器,使用版本: golang:1.16
-FROM golang:1.16-alpine AS builder
+FROM golang:1.18-alpine AS builder
 
 ENV GO111MODULE=on \
     CGO_ENABLED=0 \
