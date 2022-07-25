@@ -39,11 +39,6 @@ yoyogo:
       username: root
       password: P@ssW0rd
       debug: true
-    redis:
-      name: reids1
-      url: 47.100.213.49:6379
-      password: P@ssW0rd
-      db: 0
 vcs:
   git:
     url: https://gogs.xiaocui.site
