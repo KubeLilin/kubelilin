@@ -73,6 +73,11 @@ func (service *DevopsService) EditProject(updateRequest *req.NewProject) error {
 	return err
 }
 
+func (service *DevopsService) DeleteProject(projectId uint64) error {
+	//dpcRes := service.db.Model(&models.DevopsProjects{}).Where("id=?", projectId).Updates(devProject)
+	return nil
+}
+
 func (service *DevopsService) GetProjectList(request *req.DevopsProjectReq) (error, *page.Page) {
 	sql := `SELECT p.id,p.name 'project_name', p.creation_time, 
 (SELECT count(1) FROM  devops_projects_apps pas WHERE p.id = pas.project_id) 'app_count',
