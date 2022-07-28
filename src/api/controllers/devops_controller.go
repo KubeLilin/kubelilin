@@ -39,7 +39,7 @@ func (controller DevopsController) PostEditProject(ctx *context.HttpContext, req
 }
 
 func (controller DevopsController) DeleteProject(ctx *context.HttpContext) mvc.ApiResult {
-	projectId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("projectId", "0"))
+	projectId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
 	err := controller.devopsService.DeleteProject(projectId)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
