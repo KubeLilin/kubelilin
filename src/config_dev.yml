@@ -35,16 +35,10 @@ yoyogo:
     db:
       name: db1
       type: mysql
-      url: tcp(47.100.213.49:3306)/sgr_pass?charset=utf8mb4&loc=Local&parseTime=True
-      username: root
-      password: P@ssW0rd
+      url: ${PAAS_DB_CONN:tcp(127.0.0.1)/sgr_pass?charset=utf8mb4&loc=Local&parseTime=True}
+      username: ${PAAS_DB_USER:root}
+      password: ${PAAS_DB_PWD:root}
       debug: true
-vcs:
-  git:
-    url: https://gogs.xiaocui.site
-    token: d2911632a4ac8db4ce13a3135700b58a5c8d7772
-    username: sgr
-    password: admin123
 hub:
   harbor:
     url: harbor.xiaocui.site
