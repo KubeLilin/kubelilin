@@ -16,7 +16,7 @@ RUN go build -ldflags="-s -w" -o app .
 
 
 # 最终容器, 基础镜像alpine 中包含 tini
-FROM yoyofx/tini:1.0-alpine as production
+FROM kubelilin/tini:v0.1.0 as production
 
 COPY --from=builder /publish/app /
 
