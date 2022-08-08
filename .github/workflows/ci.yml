@@ -14,6 +14,11 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.18.0"
+        
       - name: Build kubelilin apiserver
         run: |
           go env -w GOPROXY=https://goproxy.cn,direct
