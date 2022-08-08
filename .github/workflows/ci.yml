@@ -44,5 +44,7 @@ jobs:
           context: src
           file: src/Dockerfile_Prod
           push: true
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/kubelilin-apiserver:latest
+          cache-to: type=inline
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/kubelilin-apiserver:latest
         if: github.event_name != 'pull_request'
