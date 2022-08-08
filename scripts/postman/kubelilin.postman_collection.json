@@ -1,0 +1,1263 @@
+{
+	"info": {
+		"_postman_id": "a96c5b1d-3535-4885-9f0c-705a517af1b3",
+		"name": "kubelilin",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "租户&用户管理",
+			"item": [
+				{
+					"name": "用户注册接口",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"tenantId\":1,\n\t\"userName\":\"xx1\",\n\t\"account\":\"xx1\",\n\t\"password\":\"123456\",\n\t\"mobile\":\"\",\n\t\"email\":\"xx1@hotmail.com\"\n}"
+						},
+						"url": "{{baseurl}}/v1/user/register"
+					},
+					"response": []
+				},
+				{
+					"name": "获取用户列表接口",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/v1/user/list?tenantId=1&pageIndex=1&pageSize=10",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"user",
+								"list"
+							],
+							"query": [
+								{
+									"key": "tenantId",
+									"value": "1"
+								},
+								{
+									"key": "pageIndex",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "删除用户接口",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"id\":0,\n\t\"name\":\"爱吃222\",\n\t\"code\":\"caichi222\",\n\t\"status\":1\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/v1/user/unregister?id=3",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"user",
+								"unregister"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取用户信息接口byID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/v1/user/info?id=1",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"user",
+								"info"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "设置用户状态",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/v1/user/status?id=2&status=0",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"user",
+								"status"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "2"
+								},
+								{
+									"key": "status",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "租户&用户角色管理",
+			"item": [
+				{
+					"name": "用户角色关联",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userRoleList\":[{\n        \"userId\":1,\n        \"roleId\":1\n    }]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseurl}}/v1/tenantuserrole/userrole"
+					},
+					"response": []
+				},
+				{
+					"name": "新建租户角色",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roleCode\":\"10010\",\n    \"roleName\":\"第二个角色\",\n    \"status\":1,\n    \"tenantId\":1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseurl}}/v1/tenantrole/tenantrole"
+					},
+					"response": []
+				},
+				{
+					"name": "删除用户角色",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/v1/tenantuserrole/userrole?id=1",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"tenantuserrole",
+								"userrole"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "删除租户角色",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/v1/tenantrole/tenantrole?id=2",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"tenantrole",
+								"tenantrole"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "更新租户角色",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 2,\n    \"roleCode\":\"10010\",\n    \"roleName\":\"第二个角色2\",\n    \"status\":1,\n    \"tenantId\":1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseurl}}/v1/tenantrole/tenantrole"
+					},
+					"response": []
+				},
+				{
+					"name": "获取租户角色列表",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzQwMjU0MzksImlzcyI6ImFkbWluIiwidWlkIjoxLCJhZG1pbiI6ZmFsc2V9.Yvoiwuo9Y2ORh7zgHQjFWOWdsdFt2o7FrZViAg5UriU",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/v1/tenantrole/tenantrolelist?pageIndex=0&pageSize=10",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"tenantrole",
+								"tenantrolelist"
+							],
+							"query": [
+								{
+									"key": "pageIndex",
+									"value": "0"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取用户角色列表",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDE5MDY3MTcsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.Z3bo07xjNq_C4_6_UNqaF4jJoAhmf4ii_y9CK0tHIe0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/v1/tenantuserrole/userrole?userId=1&pageIndex=1&pageSize=10",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"tenantuserrole",
+								"userrole"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "1"
+								},
+								{
+									"key": "pageIndex",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取全部角色列表",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDE5MDY3MTcsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.Z3bo07xjNq_C4_6_UNqaF4jJoAhmf4ii_y9CK0tHIe0",
+								"type": "text"
+							}
+						],
+						"url": "{{baseurl}}/v1/tenantuserrole/allrole"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "系统菜单管理",
+			"item": [
+				{
+					"name": "菜单查询",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/v1/sysmenu/menulist?pageIndex=1&pageSize=10",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"sysmenu",
+								"menulist"
+							],
+							"query": [
+								{
+									"key": "pageIndex",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "用户登录(权限)获取菜单",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/v1/sysmenu/querylist?userid=1",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"sysmenu",
+								"querylist"
+							],
+							"query": [
+								{
+									"key": "userid",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "删除菜单",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/v1/sysmenu/menu?id=1",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"sysmenu",
+								"menu"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "创建菜单",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"id\":1,\n\"tenantId\":1,\n\"menuCode\": \"001\",\n\"menuName\": \"hao1\",\n\"icon\": \"\",\n\"path\": \"\" ,\n\"component\": \"\",\n\"isRoot\": 1,\n\"parentId\": 0,\n\"sort\": 0,\n\"status\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseurl}}/v1/sysmenu/createmenu"
+					},
+					"response": []
+				},
+				{
+					"name": "更新菜单",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"id\":1,\n\"tenantId\":1,\n\"menuCode\": \"001\",\n\"menuName\": \"hao2\",\n\"icon\": \"\",\n\"path\": \"\" ,\n\"component\": \"\",\n\"isRoot\": 1,\n\"parentId\": 0,\n\"sort\": 0,\n\"status\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseurl}}/v1/sysmenu/updatemenu"
+					},
+					"response": []
+				},
+				{
+					"name": "获取用户菜单树",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzIzNjczMjEsImlzcyI6ImFkbWluIiwidWlkIjoxLCJhZG1pbiI6ZmFsc2V9.Tm3KLMLLTqloraYKsvW0BMTJ98T4qd7zXMVEgzbzGS8",
+								"type": "text"
+							}
+						],
+						"url": "{{baseurl}}/v1/sysmenu/usermenutree"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "集群管理",
+			"item": [
+				{
+					"name": "获取集群PODs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzgyNTMwMjYsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.mhT2sk--InCW7ainqAv_DJx6lIUJ5wsOZ2qLKT_TAiU",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/v1/cluster/pods?cid=2&app=yoyogo",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"cluster",
+								"pods"
+							],
+							"query": [
+								{
+									"key": "cid",
+									"value": "2"
+								},
+								{
+									"key": "node",
+									"value": "172.21.16.13",
+									"disabled": true
+								},
+								{
+									"key": "namespace",
+									"value": "yoyogo",
+									"disabled": true
+								},
+								{
+									"key": "app",
+									"value": "yoyogo"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取命名空间列表",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzQ1NDM3NjgsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.DCdqgtcWIH2ZV2Gqt2ZkHvJT2mgnyRwvZP18Rz00830",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/v1/cluster/namespaces?cid=2",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"cluster",
+								"namespaces"
+							],
+							"query": [
+								{
+									"key": "cid",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取部署",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzQ1NTYyNTgsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.br_J8qLfl4hMZXvU8pvhLXlIeM-2nqmi1A1edDEGIRI",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/v1/cluster/Deployments?cid=2&namespace=yoyogo",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"cluster",
+								"Deployments"
+							],
+							"query": [
+								{
+									"key": "cid",
+									"value": "2"
+								},
+								{
+									"key": "namespace",
+									"value": "yoyogo"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取节点信息",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzcxMzMwNjUsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.i2WuVn5t3eDitERQ2SU08w_weUQnKGwRddA_tYaPP3I",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/v1/cluster/nodes?cid=2",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"cluster",
+								"nodes"
+							],
+							"query": [
+								{
+									"key": "cid",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取租户集群列表",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzQ1NDM3NjgsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.DCdqgtcWIH2ZV2Gqt2ZkHvJT2mgnyRwvZP18Rz00830",
+								"type": "text"
+							}
+						],
+						"url": "{{baseurl}}/v1/cluster/list"
+					},
+					"response": []
+				},
+				{
+					"name": "集群导入",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "tenantId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "nickName",
+									"value": "ccccc",
+									"type": "text"
+								},
+								{
+									"key": "file1",
+									"type": "file",
+									"src": "/C:/Users/zlhxd/.kube/config"
+								}
+							]
+						},
+						"url": "{{baseurl}}/v1/cluster/clusterbyconfig"
+					},
+					"response": []
+				},
+				{
+					"name": "hub.docker.login",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\"username\": \"yoyofx\",\r\n\"password\": \"zl1253303\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "https://hub.docker.com/v2/users/login"
+					},
+					"response": []
+				},
+				{
+					"name": "获取集群命名空间资源配额",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDI3NjYwNjEsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.hzx0rwzazlLrQiVdoYJofmz_ssaJWLXi0t2YKaV5Fm8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/v1/cluster/resourcequota?cid=4&namespace=devops",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"cluster",
+								"resourcequota"
+							],
+							"query": [
+								{
+									"key": "cid",
+									"value": "4"
+								},
+								{
+									"key": "namespace",
+									"value": "devops"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "部署管理",
+			"item": [
+				{
+					"name": "部署环境修改",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mzc2NTQwNTIsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.Mg0EQcR8N89_sli0QZjoChsHBWhaN9QOSDLubc6t9MM",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/v1/deployment/modify?deployid=2",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"deployment",
+								"modify"
+							],
+							"query": [
+								{
+									"key": "deployid",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "部署环境新建",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mzc3NDQ3MjcsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.3MQxeGCdeXT0i7R7Y4tIu0e9mB1oI1FuTsWMGb-7hG8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"prod\",\n    \"nickname\":\"生产环境\",\n    \"tenantId\":1,\n    \"clusterId\":2,\n    \"namespaceId\":1,\n    \"appId\":1,\n    \"appName\":\"yoyogo-demo\",\n    \"imageHub\":\"hub.yoyogo.run/apps/yoyogo-demo-prod\",\n    \"workloadType\":\"Deployment\",\n    \"replicas\":1,\n    \"serviceEnable\": true,\n    \"serviceAway\":\"ClusterPort\",\n    \"servicePortType\":\"TCP\",\n    \"servicePort\":8080\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/v1/deployment/new",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"deployment",
+								"new"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "部署伸缩实例",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mzg5NjQ4OTksImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.9ANSXE9ipywzIdH08WRD6FrVSf0aCbnY9WVgYGHQPDA",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"namespace\":\"yoyogo\",\n    \"deploymentName\": \"wetoo\",\n    \"clusterId\":2,\n    \"number\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseurl}}/v1/deployment/replicas"
+					},
+					"response": []
+				},
+				{
+					"name": "按部署ID伸缩实例",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzkzNzg0NzMsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.il0s9KNajJV1YycGz1Y5P3vMaR36ej53dJFVBVR7c9M",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"deployId\":36,\n    \"number\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseurl}}/v1/deployment/replicasbyid"
+					},
+					"response": []
+				},
+				{
+					"name": "销毁Pod",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzkzOTMzNDMsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.LYj7hSalwJiX1iWN6CbWOEqzeu9siLyXTCHyfs36Aos",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"clusterId\":2,\n    \"namespace\": \"yoyogo\",\n    \"podName\": \"wetoo-5d88b5c7c4-g5brn\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseurl}}/v1/deployment/destroypod"
+					},
+					"response": []
+				},
+				{
+					"name": "获取Pod日志",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mzk0ODQ3NzcsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.4wPAwVGDpbrQMhhZGgqCr6nf16-QwwufvJXsSc30xcs",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"clusterId\":2,\n    \"namespace\": \"yoyogo\",\n    \"podName\": \"wetoo-5d88b5c7c4-g5brn\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/v1/deployment/podlogs?clusterId=2&namespace=yoyogo&podName=yoyogo-867678b49b-ldtr5&containerName=sm&lines=100",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"deployment",
+								"podlogs"
+							],
+							"query": [
+								{
+									"key": "clusterId",
+									"value": "2"
+								},
+								{
+									"key": "namespace",
+									"value": "yoyogo"
+								},
+								{
+									"key": "podName",
+									"value": "yoyogo-867678b49b-ldtr5"
+								},
+								{
+									"key": "containerName",
+									"value": "sm"
+								},
+								{
+									"key": "lines",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取部署EventList",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mzk1NzQ4NDcsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.H3xhMeaVreQF0u1X8cM_44a89yZrllWyvYr26gXFUBM",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"clusterId\":2,\n    \"namespace\": \"yoyogo\",\n    \"podName\": \"wetoo-5d88b5c7c4-g5brn\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/v1/deployment/events?clusterId=2&namespace=yoyogo&deployment=wetoo",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"deployment",
+								"events"
+							],
+							"query": [
+								{
+									"key": "clusterId",
+									"value": "2"
+								},
+								{
+									"key": "namespace",
+									"value": "yoyogo"
+								},
+								{
+									"key": "deployment",
+									"value": "wetoo"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "连接Pod终端(websocket)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDAwMDM2NzEsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.P0yYuv2vv3laizivFSKUThnPlRHHUJfU-_tR2JCHjI0",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/v1/pod/terminal?clusterId=2&namespace=yoyogo&podName=yoyogo-867678b49b-ldtr5&containerName=sm",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"pod",
+								"terminal"
+							],
+							"query": [
+								{
+									"key": "clusterId",
+									"value": "2"
+								},
+								{
+									"key": "namespace",
+									"value": "yoyogo"
+								},
+								{
+									"key": "podName",
+									"value": "yoyogo-867678b49b-ldtr5"
+								},
+								{
+									"key": "containerName",
+									"value": "sm"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "创建命名空间",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDA2NzgxMDAsImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.WVY54PK4oEXl9JSLN37RivtMsvxu7_fA1MsF-felpPM",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/v1/cluster/newnamespace?cid=3&namespace=sgr-test",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"cluster",
+								"newnamespace"
+							],
+							"query": [
+								{
+									"key": "cid",
+									"value": "3"
+								},
+								{
+									"key": "namespace",
+									"value": "sgr-test"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "发布部署",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"wholeImage\": \"harbor.xiaocui.site/apps/pipeline-4-app-2:v36\", \"IsDiv\":true , \"dpId\": 10, \"tenantId\": 1 }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseurl}}/v1/deployment/executedeployment"
+					},
+					"response": []
+				},
+				{
+					"name": "部署通知",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"version\": \"v48\",  \"dpId\": 10, \"branch\": \"master\" , \"notifyType\": \"wechat\" , \"notifyKey\": \"bed1347e-aeeb-43c8-9a91-d64d3fab144f\" }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseurl}}/v1/deployment/notify"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "流水线",
+			"item": [
+				{
+					"name": "修改流水线状态",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 2,\n    \"status\":2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseurl}}/v1/application/pipelinestatus"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "度量",
+			"item": [
+				{
+					"name": "获取所有节点的度量",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc1OTkyOTksImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.d_D8B9pr2AC8Qid6ORu4vK060hMuIoDjfvnUMvUG2zM",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/v1/metrics/nodes?cid=3",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"metrics",
+								"nodes"
+							],
+							"query": [
+								{
+									"key": "cid",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "集群度量",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc1OTkyOTksImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.d_D8B9pr2AC8Qid6ORu4vK060hMuIoDjfvnUMvUG2zM",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/v1/metrics/statistics?cid=3",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"metrics",
+								"statistics"
+							],
+							"query": [
+								{
+									"key": "cid",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "工作负载指标",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc1OTkyOTksImlzcyI6ImFkbWluIiwidWlkIjoxLCJ0ZW5hbnRJZCI6MSwiYWRtaW4iOmZhbHNlfQ.d_D8B9pr2AC8Qid6ORu4vK060hMuIoDjfvnUMvUG2zM",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/v1/metrics/workloads?cid=3",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"v1",
+								"metrics",
+								"workloads"
+							],
+							"query": [
+								{
+									"key": "cid",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "用户登录获取Token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\":\"admin\",\n    \"password\":\"1234abcd\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{baseurl}}/v1/user/login"
+			},
+			"response": []
+		}
+	]
+}

@@ -30,6 +30,8 @@ func (s *ApplicationService) CreateApp(req *req.AppReq) (error, *models.SgrTenan
 	}
 	appModel := &models.SgrTenantApplication{}
 	err := copier.Copy(appModel, req)
+	appModel.ScID = &req.SCID
+	appModel.GitType = req.SourceType
 	if err != nil {
 		return err, nil
 	}
@@ -38,10 +40,10 @@ func (s *ApplicationService) CreateApp(req *req.AppReq) (error, *models.SgrTenan
 		if dbRes.Error != nil {
 			return nil
 		}
-		_, repoErr := s.VCSService.CreateTenantRepository(req.TenantID, req.Name)
-		if repoErr != nil {
-			return repoErr
-		}
+		//_, repoErr := s.VCSService.CreateTenantRepository(req.TenantID, req.Name)
+		//if repoErr != nil {
+		//	return repoErr
+		//}
 		return nil
 	})
 	//创建git仓库
@@ -57,7 +59,9 @@ func (s *ApplicationService) UpdateApp(req *req.AppReq) (error, int64) {
 	appModel.Remarks = req.Remarks
 	appModel.Language = req.Language
 	appModel.Status = req.Status
-	//appModel.Git = req.Git
+	appModel.GitType = req.SourceType
+	appModel.ScID = &req.SCID
+	appModel.Git = req.Git
 	appModel.Labels = req.Labels
 	dbRes := s.db.Model(&models.SgrTenantApplication{}).Where("id=?", req.ID).Updates(appModel)
 	if dbRes.Error != nil {
@@ -70,7 +74,7 @@ func (s *ApplicationService) QueryAppList(req *req.AppReq) (error, *page.Page) {
 	res := &[]dto.ApplicationInfoDTO{}
 	var sqlParams []interface{}
 	sb := strings.Builder{}
-	sb.WriteString("SELECT t1.*,t2.name as language_name,t3.name as level_name FROM sgr_tenant_application AS t1 INNER JOIN sgr_code_application_language AS t2  ")
+	sb.WriteString("SELECT t1.*,t1.git_type as SourceType,t1.sc_id as SCID,t2.name as language_name,t3.name as level_name FROM sgr_tenant_application AS t1 INNER JOIN sgr_code_application_language AS t2  ")
 	sb.WriteString(" ON t1.language = t2.id INNER JOIN sgr_code_application_level AS t3 ON t1.LEVEL = t3.id WHERE t1.status = 1 ")
 	if req.Name != "" {
 		sb.WriteString(" AND t1.name like ?")
@@ -134,7 +138,7 @@ func (s *ApplicationService) InitGitRepository(tenantId uint64, appName string) 
 
 func (s *ApplicationService) GetAppInfo(appId uint64) (dto.ApplicationDisplayDTO, error) {
 	sql := `
-SELECT t.t_name tenantName,app.name appName,app.labels,app.git,app.imagehub hub,lev.name level , lang.name language ,app.status 
+SELECT t.t_name tenantName,app.name appName,app.labels,app.git,app.imagehub hub,lev.name level ,app.git_type ,app.sc_id, lang.name language ,app.status 
 from sgr_tenant_application app 
 INNER JOIN sgr_code_application_level lev on lev.id = app.level
 INNER JOIN sgr_code_application_language lang on lang.id = app.language
@@ -146,6 +150,12 @@ WHERE app.id = ?
 	return appInfo, err
 }
 
+func (s *ApplicationService) GetServiceConnectionById(Id uint64) (models.ServiceConnectionDetails, error) {
+	var model models.ServiceConnectionDetails
+	res := s.db.Model(&models.ServiceConnectionDetails{}).Where("main_id=?", Id).First(&model)
+	return model, res.Error
+}
+
 func (s *ApplicationService) GetAppCountByDeployLevel(appId uint64) ([]dto.DeployLeveLCountInfo, error) {
 	sql := `SELECT lev.name label,lev.code  value,IFNULL(dep.count,0) count FROM sgr_code_deployment_level lev
 LEFT JOIN (
@@ -154,5 +164,16 @@ LEFT JOIN (
 ) dep on dep.level = lev.code`
 	var list []dto.DeployLeveLCountInfo
 	err := s.db.Raw(sql, appId).Find(&list).Error
+	return list, err
+}
+
+func (s *ApplicationService) GetProjectCountByDeployLevel(projectId uint64) ([]dto.DeployLeveLCountInfo, error) {
+	sql := `SELECT lev.name label,lev.code  value,IFNULL(dep.count,0) count FROM sgr_code_deployment_level lev
+LEFT JOIN (
+   SELECT  level,COUNT(level) count FROM sgr_tenant_deployments WHERE app_id in (select application_id from devops_projects_apps WHERE project_id =?)
+	 GROUP BY level
+) dep on dep.level = lev.code`
+	var list []dto.DeployLeveLCountInfo
+	err := s.db.Raw(sql, projectId).Find(&list).Error
 	return list, err
 }

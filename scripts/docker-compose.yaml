@@ -13,8 +13,8 @@ services:
       - "3306:3306"
     restart: always
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-  sgr-api:
-    image: sgrapi:1
+  kubelilin-apiserver:
+    image: kubelilin-apiserver:debug
     build: ../src
     container_name: app
     ports:

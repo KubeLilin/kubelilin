@@ -200,7 +200,7 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 					Command: `
 					container('docker') {
 						sh "[ -d $SGR_REGISTRY_CONFIG ] || mkdir -pv $SGR_REGISTRY_CONFIG"
-   						sh """
+   						sh """#!/busybox/sh -e
                     		echo '{"auths": {"'$SGR_REGISTRY_ADDR'": {"auth": "'$SGR_REGISTRY_AUTH'"}}}' > $SGR_REGISTRY_CONFIG/config.json
 						"""
 						sh '''#!/busybox/sh
@@ -245,10 +245,10 @@ func getBuildImageByLanguage(languageName string) string {
 		buildImage = "maven:3.8.4-jdk-8"
 		break
 	case "golang":
-		buildImage = "golang:1.16.5"
+		buildImage = "golang:1.18.1"
 		break
 	case "nodejs":
-		buildImage = "node:16-alpine"
+		buildImage = "node:14-alpine"
 	case "dotnet":
 		buildImage = "mcr.microsoft.com/dotnet/sdk:5.0"
 	}

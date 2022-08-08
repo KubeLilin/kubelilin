@@ -42,8 +42,11 @@ func (controller ClusterController) GetPods(ctx *context.HttpContext) mvc.ApiRes
 		if k8sapp != "" {
 			emptyOptions.LabelSelector = "k8s-app=" + k8sapp
 		}
-		if k8snode != "" {
-			emptyOptions.FieldSelector = "spec.nodeName=" + k8snode
+		//if k8snode != "" {
+		//	emptyOptions.FieldSelector = "spec.nodeName=" + k8snode
+		//}
+		if namespace == "" {
+			emptyOptions.Limit = 500
 		}
 		podsMetricsList, err := metricsClient.MetricsV1beta1().PodMetricses(namespace).List(contextV1.TODO(), emptyOptions)
 		if err == nil {

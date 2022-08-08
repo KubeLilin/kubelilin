@@ -1,7 +1,7 @@
 yoyogo:
   application:
-    name: sgr_platform_api
-    metadata: "develop"
+    name: kubelilin-apiserver
+    metadata: "local.develop.debug"
     server:
       type: "fasthttp"
       address: ":8080"

@@ -47,7 +47,7 @@ func (cluster *ClusterService) GetClustersByTenant(tenantId uint64, clusterName 
 
 func (cluster *ClusterService) GetNameSpacesFromDB(tenantId uint64, clusterId int) []models.SgrTenantNamespace {
 	var res []models.SgrTenantNamespace
-	cluster.db.Model(&models.SgrTenantNamespace{}).Where(" cluster_id=?", clusterId).Find(&res)
+	cluster.db.Model(&models.SgrTenantNamespace{}).Where(" cluster_id=? and tenant_id=?", clusterId, tenantId).Find(&res)
 	return res
 }
 
