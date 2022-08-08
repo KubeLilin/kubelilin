@@ -41,7 +41,7 @@ jobs:
       - name: Build And Push kubelilin apiserver
         uses: docker/build-push-action@v3
         with:
-          context: src
+          context: .
           file: src/Dockerfile_Prod
           push: true
           cache-from: type=gha,scope=blockcluster
