@@ -5,6 +5,7 @@ import (
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"kubelilin/api/req"
 	"kubelilin/domain/business/app"
+	"kubelilin/utils"
 	"strconv"
 )
 
@@ -55,6 +56,15 @@ func (controller *ServiceConnectionController) GetServiceConnectionInfo(ctx *con
 	res, err := controller.svc.QueryServiceConnectionInfo(id)
 	if err == nil {
 		return mvc.Success(res)
+	}
+	return mvc.FailWithMsg(nil, err.Error())
+}
+
+func (controller *ServiceConnectionController) DeleteServiceConnectionInfo(ctx *context.HttpContext) mvc.ApiResult {
+	id, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
+	err := controller.svc.DeleteServiceConnectionInfo(id)
+	if err == nil {
+		return mvc.Success(true)
 	}
 	return mvc.FailWithMsg(nil, err.Error())
 }
