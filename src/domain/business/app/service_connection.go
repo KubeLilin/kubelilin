@@ -139,7 +139,8 @@ func (svc *ServiceConnectionService) QueryServiceConnectionInfo(id int64) (*res.
 }
 
 func (svc *ServiceConnectionService) DeleteServiceConnectionInfo(id uint64) error {
-	return svc.db.Model(&models.ServiceConnection{}).Delete(&models.ServiceConnectionDetails{}, "id=?", id).Error
+	svc.db.Model(&models.ServiceConnectionDetails{}).Delete(&models.ServiceConnectionDetails{}, "main_id=?", id)
+	return svc.db.Model(&models.ServiceConnection{}).Delete(&models.ServiceConnection{}, "id=?", id).Error
 }
 
 func (svc *ServiceConnectionService) QueryRepoListByType(tenantId uint64, repoType string) ([]res.ServiceConnectionRes, error) {
