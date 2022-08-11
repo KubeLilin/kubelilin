@@ -31,6 +31,14 @@ func NewServiceConnectionService(db *gorm.DB) *ServiceConnectionService {
 }
 
 func (svc *ServiceConnectionService) CreateServiceConnection(req *req.ServiceConnectionReq) (*req.ServiceConnectionReq, error) {
+	if req.Type > 1 {
+		var existsCount int64 = 0
+		svc.db.Model(&models.ServiceConnection{}).Where("service_type=?", req.ServiceType).Count(&existsCount)
+		if existsCount > 0 {
+			return nil, errors.New("current service type exists")
+		}
+	}
+
 	var mainDatum = models.ServiceConnection{}
 	var connectionDatum = models.ServiceConnectionDetails{}
 	mainDatum.ServiceType = req.ServiceType
@@ -147,9 +155,9 @@ func (svc *ServiceConnectionService) QueryRepoListByType(tenantId uint64, repoTy
 	var sb strings.Builder
 	data := make([]res.ServiceConnectionRes, 0)
 	sb.WriteString("select t1.id,t1.name,t2.detail from service_connection as t1 ")
-	sb.WriteString("inner join service_connection_details as t2 ON  t1.id=t2.main_id and t1.tenant_id=? and t2.type=?")
+	sb.WriteString("inner join service_connection_details as t2 ON  t1.id=t2.main_id and t2.type=?")
 	serviceType := svc.switchServiceType(repoType)
-	dbErr := svc.db.Raw(sb.String(), tenantId, serviceType).Scan(&data)
+	dbErr := svc.db.Raw(sb.String(), serviceType).Scan(&data)
 	if dbErr.Error != nil {
 		return nil, dbErr.Error
 	}
