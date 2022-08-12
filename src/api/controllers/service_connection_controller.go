@@ -21,7 +21,6 @@ func NewServiceConnectionController(svc *app.ServiceConnectionService) *ServiceC
 }
 
 func (controller *ServiceConnectionController) PostCreateServiceConnection(ctx *context.HttpContext, request *req.ServiceConnectionReq) mvc.ApiResult {
-
 	userInfo := req.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
 	res, err := controller.svc.CreateServiceConnection(request)

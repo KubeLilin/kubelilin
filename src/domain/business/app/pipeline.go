@@ -312,3 +312,7 @@ func (pipelineService *PipelineService) GetLogs(request *req.PipelineDetailsReq)
 	pipeline, _ := builder.Build()
 	return pipeline.GetJobLogs(pipelineName, request.TaskId)
 }
+
+func getAllSCList(db *gorm.DB) {
+
+}
