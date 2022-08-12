@@ -39,19 +39,5 @@ yoyogo:
       username: ${PAAS_DB_USER:root}
       password: ${PAAS_DB_PWD:root}
       debug: true
-hub:
-  harbor:
-    url: harbor.xiaocui.site
-    username: admin
-    password: Harbor12345
-    token: YWRtaW46SGFyYm9yMTIzNDU=
-pipeline:
-  jenkins:
-    k8s-namespace: sgr-ci  # kube-lilin
-    url: http://152.136.141.235:32001
-    username: jenkins
-    token: 11d32a54cd6150bd626d8ed73c3bfa02d6
 
-kubelilin:
-  deploy:
-    url: http://prod-kubelilin-apiserver-cls-hbktlqm5-svc-cluster-sgr.yoyogo:8080 #api.kubelilin.com
+

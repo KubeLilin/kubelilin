@@ -34,7 +34,7 @@ func init() {
 			serviceCollection.AddTransient(app.NewApplicationService)
 			serviceCollection.AddTransient(app.NewDeploymentService)
 			serviceCollection.AddTransient(app.NewVcsService)
-			serviceCollection.AddTransient(app.NewPipelineService)
+			serviceCollection.AddSingleton(app.NewPipelineService)
 			serviceCollection.AddTransient(app.NewServiceConnectionService)
 			serviceCollection.AddTransient(app.NewDevopsService)
 
