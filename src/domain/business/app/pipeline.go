@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/yoyofx/glinq"
 	"github.com/yoyofx/yoyogo/abstractions"
 	"gorm.io/gorm"
 	"kubelilin/api/req"
@@ -17,16 +16,23 @@ import (
 )
 
 type PipelineService struct {
-	db             *gorm.DB
-	jenkinsBuilder *pipelineV1.Builder
-	config         abstractions.IConfiguration
+	db                *gorm.DB
+	jenkinsBuilder    *pipelineV1.Builder
+	serviceConnection *ServiceConnectionService
+	config            abstractions.IConfiguration
+	onReady           bool
 }
 
-func NewPipelineService(db *gorm.DB, jenkins *pipelineV1.Builder, config abstractions.IConfiguration) *PipelineService {
+func NewPipelineService(db *gorm.DB, jenkins *pipelineV1.Builder, sc *ServiceConnectionService, config abstractions.IConfiguration) *PipelineService {
 	// set pipeline config
-	peSC, _ := getPipelineEngine(db)
-	jenkins.UseJenkins(peSC.Repo, peSC.UserName, peSC.Token).UseKubernetes(peSC.Password)
-	return &PipelineService{db: db, jenkinsBuilder: jenkins, config: config}
+	peSC, err := sc.GetPipelineEngine()
+	onReady := err == nil
+	if onReady {
+		jenkins.UseJenkins(peSC.Repo, peSC.UserName, peSC.Token).UseKubernetes(peSC.Password)
+	} else {
+		panic("not found pipeline settings. Pipeline be can't run.")
+	}
+	return &PipelineService{db: db, jenkinsBuilder: jenkins, serviceConnection: sc, onReady: onReady, config: config}
 }
 
 /*
@@ -137,7 +143,10 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 	context["deployUrl"] = "localhost"
 	context["pipelineName"] = pipelineName
 	// get config by db
-	systemCallbackSC, _ := getSystemCallback(pipelineService.db)
+	systemCallbackSC, err := pipelineService.serviceConnection.GetSystemCallback()
+	if err != nil {
+		return errors.New("not found system callback , pipeline will be not deploy application")
+	}
 	context["deployUrl"] = systemCallbackSC.Repo
 	context["deployToken"] = systemCallbackSC.Token
 	//deployUrl := pipelineService.config.GetString("kubelilin.deploy.url")
@@ -145,7 +154,10 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 	//	 harbor config
 	//harborAddress := pipelineService.config.GetString("hub.harbor.url")
 	//harborToken := pipelineService.config.GetString("hub.harbor.token")
-	imageHubSC, _ := getImageHub(pipelineService.db)
+	imageHubSC, err := pipelineService.serviceConnection.GetImageHub()
+	if err != nil {
+		return errors.New("not found image hub settings , pipeline will be not deploy application")
+	}
 	context["imageHubAddress"] = imageHubSC.Repo
 	context["imageHubToken"] = imageHubSC.Token
 
@@ -323,43 +335,4 @@ func (pipelineService *PipelineService) GetLogs(request *req.PipelineDetailsReq)
 	builder := pipelineService.jenkinsBuilder
 	pipeline, _ := builder.Build()
 	return pipeline.GetJobLogs(pipelineName, request.TaskId)
-}
-
-func getImageHub(db *gorm.DB) (dto.ServiceConnectionInfo, error) {
-	return queryServiceConnectionList(db).Where(func(e dto.ServiceConnectionInfo) bool {
-		return e.ServiceType == dto.SC_IMAGEHUB
-	}).First()
-
-}
-
-func getPipelineEngine(db *gorm.DB) (dto.ServiceConnectionInfo, error) {
-	return queryServiceConnectionList(db).Where(func(e dto.ServiceConnectionInfo) bool {
-		return e.ServiceType == dto.SC_PIPELINE
-	}).First()
-}
-
-func getSystemCallback(db *gorm.DB) (dto.ServiceConnectionInfo, error) {
-	return queryServiceConnectionList(db).Where(func(e dto.ServiceConnectionInfo) bool {
-		return e.ServiceType == dto.SC_CALLBACK
-	}).First()
-}
-
-func queryServiceConnectionList(db *gorm.DB) glinq.Queryable[dto.ServiceConnectionInfo] {
-	var serviceConnectionList []dto.ServiceConnectionInfo
-	sql := `SELECT scd.detail,sc.service_type,scd.type as value FROM service_connection sc
-INNER JOIN service_connection_details scd on scd.main_id = sc.id WHERE scd.enable = 1`
-	var list []dto.ServiceConnectionDTO
-	err := db.Raw(sql).Scan(&list).Error
-	if err == nil {
-		serviceConnectionList = make([]dto.ServiceConnectionInfo, 0)
-		for _, item := range list {
-			var serviceConnectionInfo dto.ServiceConnectionInfo
-			hasErr := json.Unmarshal([]byte(item.Detail), &serviceConnectionInfo)
-			if hasErr == nil {
-				serviceConnectionInfo.ServiceType = item.ServiceType
-				serviceConnectionList = append(serviceConnectionList, serviceConnectionInfo)
-			}
-		}
-	}
-	return glinq.From(serviceConnectionList)
 }

@@ -1,12 +1,15 @@
 package app
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/yoyofx/glinq"
 	"gorm.io/gorm"
 	"kubelilin/api/req"
 	"kubelilin/api/res"
 	"kubelilin/domain/database/models"
+	"kubelilin/domain/dto"
 	"kubelilin/pkg/page"
 	"strings"
 	"time"
@@ -181,4 +184,49 @@ func (svc *ServiceConnectionService) switchServiceType(name string) int {
 		break
 	}
 	return 0
+}
+
+func (svc *ServiceConnectionService) GetImageHub() (dto.ServiceConnectionInfo, error) {
+	return queryServiceConnectionList(svc.db).Where(func(e dto.ServiceConnectionInfo) bool {
+		return e.ServiceType == dto.SC_IMAGEHUB
+	}).First()
+
+}
+
+func (svc *ServiceConnectionService) GetPipelineEngine() (dto.ServiceConnectionInfo, error) {
+	return queryServiceConnectionList(svc.db).Where(func(e dto.ServiceConnectionInfo) bool {
+		return e.ServiceType == dto.SC_PIPELINE
+	}).First()
+}
+
+func (svc *ServiceConnectionService) GetSystemCallback() (dto.ServiceConnectionInfo, error) {
+	return queryServiceConnectionList(svc.db).Where(func(e dto.ServiceConnectionInfo) bool {
+		return e.ServiceType == dto.SC_CALLBACK
+	}).First()
+}
+
+func (svc *ServiceConnectionService) GetTest() (dto.ServiceConnectionInfo, error) {
+	return queryServiceConnectionList(svc.db).Where(func(e dto.ServiceConnectionInfo) bool {
+		return e.ServiceType == 99999
+	}).First()
+}
+
+func queryServiceConnectionList(db *gorm.DB) glinq.Queryable[dto.ServiceConnectionInfo] {
+	var serviceConnectionList []dto.ServiceConnectionInfo
+	sql := `SELECT scd.detail,sc.service_type,scd.type as value FROM service_connection sc
+INNER JOIN service_connection_details scd on scd.main_id = sc.id WHERE scd.enable = 1`
+	var list []dto.ServiceConnectionDTO
+	err := db.Raw(sql).Scan(&list).Error
+	if err == nil {
+		serviceConnectionList = make([]dto.ServiceConnectionInfo, 0)
+		for _, item := range list {
+			var serviceConnectionInfo dto.ServiceConnectionInfo
+			hasErr := json.Unmarshal([]byte(item.Detail), &serviceConnectionInfo)
+			if hasErr == nil {
+				serviceConnectionInfo.ServiceType = item.ServiceType
+				serviceConnectionList = append(serviceConnectionList, serviceConnectionInfo)
+			}
+		}
+	}
+	return glinq.From(serviceConnectionList)
 }

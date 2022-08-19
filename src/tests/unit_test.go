@@ -2,6 +2,10 @@ package tests
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"kubelilin/domain/business/app"
 	"testing"
 )
 
@@ -27,11 +31,21 @@ func TestPointer(t *testing.T) {
 }
 
 func TestQuerySC(t *testing.T) {
-	//dsn := "root:P@ssW0rd@tcp(47.100.213.41)/sgr_pass?charset=utf8&parseTime=True"
-	//db1, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	//query := app.queryServiceConnectionList(db1)
-	//query1 := query.Where(func(e dto.ServiceConnectionInfo) bool {
-	//	return e.ServiceType > 1
-	//})
-	//assert.Equal(t, query1.Count() > 0, true)
+	dsn := "root:P@ssW0rd@tcp(47.100.213.41)/sgr_pass?charset=utf8&parseTime=True"
+	db1, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	sc := app.NewServiceConnectionService(db1)
+	te, e0 := sc.GetTest()
+
+	pe, e := sc.GetPipelineEngine()
+	img, e1 := sc.GetImageHub()
+	sys, e2 := sc.GetSystemCallback()
+
+	fmt.Println(te)
+	fmt.Println(pe)
+	fmt.Println(img)
+	fmt.Println(sys)
+	assert.Equal(t, e0 != nil, true)
+	assert.Equal(t, e == nil, true)
+	assert.Equal(t, e1 == nil, true)
+	assert.Equal(t, e2 == nil, true)
 }

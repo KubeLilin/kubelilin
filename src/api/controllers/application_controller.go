@@ -165,7 +165,7 @@ func (c *ApplicationController) PostEditPipeline(request *req.EditPipelineReq) m
 		err = c.pipelineService.UpdateDSL(request)
 	}
 	if err != nil {
-		return mvc.Fail(false)
+		return mvc.FailWithMsg(false, err.Error())
 	}
 
 	return mvc.Success(true)

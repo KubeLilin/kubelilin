@@ -11,9 +11,10 @@ require (
 	github.com/jinzhu/copier v0.3.5
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.7.1
-	github.com/yoyofx/glinq v0.2.0
+	github.com/yoyofx/glinq v0.2.1
 	github.com/yoyofx/yoyogo v1.8.3
 	github.com/yoyofxteam/dependencyinjection v1.0.1
+	gorm.io/driver/mysql v1.1.3
 	gorm.io/gorm v1.21.12
 	k8s.io/api v0.22.0
 	k8s.io/apimachinery v0.22.0
@@ -99,7 +100,6 @@ require (
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/mysql v1.1.3 // indirect
 	k8s.io/klog/v2 v2.9.0 // indirect
 	k8s.io/utils v0.0.0-20210707171843-4b05e18ac7d9 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
