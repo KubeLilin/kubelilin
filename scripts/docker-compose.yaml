@@ -1,11 +1,11 @@
 version: '3'
 services:
   mysql:
-    image: mysql:1
+    image: mysql:57
     container_name: mysql
     build: ./mysql
     volumes:
-      - /Users/yoyofx/data/mysql:/var/lib/mysql
+      - ./mysql/data/:/var/lib/mysql
       - ./mysql/init:/docker-entrypoint-initdb.d/
     environment:
       - MYSQL_ROOT_PASSWORD=P@ssW0rd
@@ -13,11 +13,27 @@ services:
       - "3306:3306"
     restart: always
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - kubelilin-network
+
+  kubelilin-dashboard:
+    image: kubelilin/kubelilin-dashboard:node-dev
+    container_name: "frontend"
+    depends_on:
+      - kubelilin-apiserver
+    networks:
+      - kubelilin-network
+
   kubelilin-apiserver:
-    image: kubelilin-apiserver:debug
-    build: ../src
+    image: kubelilin/kubelilin-apiserver:latest
     container_name: app
     ports:
       - "8080:8080"
-    links:
-      - mysql:mysql
+    depends_on:
+      - mysql
+    networks:
+      - kubelilin-network
+
+networks:
+  kubelilin-network:
+    driver: bridge
