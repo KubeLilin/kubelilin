@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"kubelilin/pkg/pipeline/templates"
 	"log"
-	"strings"
 )
 
 type Options struct {
@@ -46,59 +45,59 @@ func (builder *Builder) Build() (Pipeline, error) {
 		"", nil)
 }
 
-// WorkFlowProcessor 生成流水线代码 /**
-func (builder *Builder) WorkFlowProcessor(inputParams []EnvItem, callback *DeployRequest,
-	checkoutSteps []StepItem, buildSteps []StepItem, imageSteps []StepItem) FlowProcessor {
-	envVars := []EnvItem{
-		{Key: "JENKINS_SLAVE_WORKSPACE", Value: "/home/jenkins/agent"},
-		{Key: "ACCESS_TOKEN", Value: builder.Options.jenkinsUserToken},
-	}
-	envVars = append(envVars, inputParams...)
-
-	containerTemplates := []ContainerEnv{
-		{
-			Name:       "jnlp",
-			Image:      "jenkins/inbound-agent:4.10-3",
-			WorkingDir: "/home/jenkins/agent",
-		},
-		{
-			Name:       "build",
-			Image:      builder.Options.dockerBuildImage,
-			CommandArr: []string{"sleep"},
-			ArgsArr:    []string{"99d"},
-		},
-		{
-			Name:       "docker",
-			Image:      "yoyofx/kaniko-executor:debug",
-			WorkingDir: "/home/jenkins/agent",
-			CommandArr: []string{"cat"},
-		},
-	}
-
-	checkoutItems := map[string]interface{}{"CheckoutItems": checkoutSteps}
-	buildItems := map[string]interface{}{"BuildItems": buildSteps}
-	imageItems := map[string]interface{}{"ImageItems": imageSteps}
-
-	var taskPipelineXMLStrArr []string
-	checkoutTasks, _ := GeneratePipelineXMLStr(templates.Checkout, checkoutItems)
-	compileTasks, _ := GeneratePipelineXMLStr(templates.Compile, buildItems)
-	buildTasks, _ := GeneratePipelineXMLStr(templates.BuildImage, imageItems)
-
-	taskPipelineXMLStrArr = append(taskPipelineXMLStrArr, checkoutTasks)
-	taskPipelineXMLStrArr = append(taskPipelineXMLStrArr, compileTasks)
-	taskPipelineXMLStrArr = append(taskPipelineXMLStrArr, buildTasks)
-	pipelineJson := strings.Join(taskPipelineXMLStrArr, " ")
-	flowProcessor := &CIContext{
-		EnvVars:            envVars,
-		ContainerTemplates: containerTemplates,
-		Stages:             pipelineJson,
-		CommonContext: CommonContext{
-			Namespace: builder.Options.k8sNamespace,
-		},
-		CallBack: callback,
-	}
-	return flowProcessor
-}
+//// WorkFlowProcessor 生成流水线代码 /**
+//func (builder *Builder) WorkFlowProcessor(inputParams []EnvItem, callback *DeployRequest,
+//	checkoutSteps []StepItem, buildSteps []StepItem, imageSteps []StepItem) FlowProcessor {
+//	envVars := []EnvItem{
+//		{Key: "JENKINS_SLAVE_WORKSPACE", Value: "/home/jenkins/agent"},
+//		{Key: "ACCESS_TOKEN", Value: builder.Options.jenkinsUserToken},
+//	}
+//	envVars = append(envVars, inputParams...)
+//
+//	containerTemplates := []ContainerEnv{
+//		{
+//			Name:       "jnlp",
+//			Image:      "jenkins/inbound-agent:4.10-3",
+//			WorkingDir: "/home/jenkins/agent",
+//		},
+//		{
+//			Name:       "build",
+//			Image:      builder.Options.dockerBuildImage,
+//			CommandArr: []string{"sleep"},
+//			ArgsArr:    []string{"99d"},
+//		},
+//		{
+//			Name:       "docker",
+//			Image:      "kubelilin/kaniko-executor:debug",
+//			WorkingDir: "/home/jenkins/agent",
+//			CommandArr: []string{"cat"},
+//		},
+//	}
+//
+//	checkoutItems := map[string]interface{}{"CheckoutItems": checkoutSteps}
+//	buildItems := map[string]interface{}{"BuildItems": buildSteps}
+//	imageItems := map[string]interface{}{"ImageItems": imageSteps}
+//
+//	var taskPipelineXMLStrArr []string
+//	checkoutTasks, _ := GeneratePipelineXMLStr(templates.Checkout, checkoutItems)
+//	compileTasks, _ := GeneratePipelineXMLStr(templates.Compile, buildItems)
+//	buildTasks, _ := GeneratePipelineXMLStr(templates.BuildImage, imageItems)
+//
+//	taskPipelineXMLStrArr = append(taskPipelineXMLStrArr, checkoutTasks)
+//	taskPipelineXMLStrArr = append(taskPipelineXMLStrArr, compileTasks)
+//	taskPipelineXMLStrArr = append(taskPipelineXMLStrArr, buildTasks)
+//	pipelineJson := strings.Join(taskPipelineXMLStrArr, " ")
+//	flowProcessor := &CIContext{
+//		EnvVars:            envVars,
+//		ContainerTemplates: containerTemplates,
+//		Stages:             pipelineJson,
+//		CommonContext: CommonContext{
+//			Namespace: builder.Options.k8sNamespace,
+//		},
+//		CallBack: callback,
+//	}
+//	return flowProcessor
+//}
 
 func (builder *Builder) CICDProcessor(inputParams []EnvItem, stages map[string]interface{}) FlowProcessor {
 	envVars := []EnvItem{
@@ -121,7 +120,7 @@ func (builder *Builder) CICDProcessor(inputParams []EnvItem, stages map[string]i
 		},
 		{
 			Name:       "docker",
-			Image:      "yoyofx/kaniko-executor:debug",
+			Image:      "kubelilin/kaniko-executor:debug",
 			WorkingDir: "/home/jenkins/agent",
 			CommandArr: []string{"cat"},
 		},

@@ -16,7 +16,8 @@ type ServiceConnectionReq struct {
 }
 
 type ServiceConnectionPageReq struct {
-	Name     string `json:"name" uri:"name"`
-	TenantID uint64 `json:"tenantId" uri:"tenantId"`
+	Name        string `json:"name" uri:"name"`
+	TenantID    uint64 `json:"tenantId" uri:"tenantId"`
+	ServiceType int    `json:"serviceType" uri:"serviceType"` // 连接类型
 	page.PageRequest
 }

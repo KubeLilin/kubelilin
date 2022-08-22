@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	gitClient  = gogs.NewClient("https://gogs.xiaocui.site/", "b472ae0baaeb86d5dddf5f4db6b4f06c13cd6949")
-	gitClient2 = gogs.NewClient("https://gogs.xiaocui.site/", "d2911632a4ac8db4ce13a3135700b58a5c8d7772")
+	gitClient  = gogs.NewClient("https://gogs/", "xxxxxxddf5f4db6b4f06c13cd6949")
+	gitClient2 = gogs.NewClient("https://gogs/", "xxxxxxdb4ce13a3135700b58a5c8d7772")
 )
 
 func TestGogsCreateRepo(t *testing.T) {
@@ -48,7 +48,7 @@ func TestCreateOrg(t *testing.T) {
 }
 
 func TestGetRegexpLibrary(t *testing.T) {
-	git := "https://gogs.xiaocui.site/administration/nginx.git"
+	git := "https://gihub.com/administration/nginx.git"
 
 	names, _ := GetRepoNames(git)
 	fmt.Println(names.OrganizationName, names.RepositoryName)
