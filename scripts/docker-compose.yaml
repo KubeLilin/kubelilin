@@ -1,7 +1,7 @@
 version: '3'
 services:
   mysql:
-    image: mysql:57
+    image: mysql:58
     container_name: mysql
     build: ./mysql
     volumes:
@@ -15,18 +15,22 @@ services:
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     networks:
       - kubelilin-network
-
   kubelilin-dashboard:
     image: kubelilin/kubelilin-dashboard:node-dev
     container_name: "frontend"
+    ports:
+      - "8000:8000"
     depends_on:
       - kubelilin-apiserver
     networks:
       - kubelilin-network
-
   kubelilin-apiserver:
     image: kubelilin/kubelilin-apiserver:latest
     container_name: app
+    environment:
+      - PAAS_DB_CONN=tcp(mysql:3306)/sgr_pass?charset=utf8mb4&loc=Local&parseTime=True
+      - PAAS_DB_USER=root
+      - PAAS_DB_PWD=P@ssW0rd
     ports:
       - "8080:8080"
     depends_on:
