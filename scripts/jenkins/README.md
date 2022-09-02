@@ -15,11 +15,13 @@
 
 #3. 配置Kubernetes cloud
 * 创建RABC账号ServiceAccount
+```bash
+kubectl apply -f .\rabc.yml
+```
 * 注意默认授权的命名空间 **kube-lilin** .
 ## 获取ServiceAccount Auth
 ```bash
-$ kubectl -n devops describe serviceaccount jenkins-admin
-$ kubectl -n devops describe secret [jenkins-admin-token-name]
+$ kubectl -n kube-lilin describe secret jekins-admin-token
 ```
 ## 创建 Secret text 类型的Credentials
 ![img_1.png](images/img_1.png)
