@@ -1,3 +1,4 @@
+# Jenkins for Kubernetes 部署
 # 镜像
 * Jenkins Server:  jenkins/jenkins:2.328
 * Jenkins Slave :  jenkins/inbound-agent:4.10-3
