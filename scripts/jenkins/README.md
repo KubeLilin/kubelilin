@@ -1,13 +1,28 @@
-# Jenkins for Kubernetes 部署
-# 镜像
-* Jenkins Server:  jenkins/jenkins:2.328
-* Jenkins Slave :  jenkins/inbound-agent:4.10-3
-
-# 1.依赖插件
+# Jenkins 流水线-依赖插件
 * Kubernetes
 * Pipeline
 * Blue Ocean
 * HTTP Request Plugin
+
+# Jenkins for Docker 部署
+```bash
+$ docker run \
+  --name jenkins-blueocean \
+  -d \
+  -p 8080:8080 \
+  -p 50000:50000 \
+  -v jenkins-data:/var/jenkins_home \
+  jenkinsci/blueocean
+  
+$ docker exec -it jenkins-blueocean /bin/bash
+jenkins@93f88d6ca212:/$ cat /var/jenkins_home/secrets/initialAdminPassword
+a6f6d08fcc474178833001d1fc79be62
+```
+
+# Jenkins for Kubernetes 部署
+# 镜像
+* Jenkins Server:  jenkins/jenkins:2.328
+* Jenkins Slave :  jenkins/inbound-agent:4.10-3
 
 #2. 开启匿名用户的可读权限
 ``为了保证 流水线的 日志详情可以正常打开
