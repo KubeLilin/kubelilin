@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/yoyofx/yoyogo/abstractions"
 	"github.com/yoyofx/yoyogo/abstractions/xlog"
+	"github.com/yoyofx/yoyogo/pkg/configuration"
 	_ "github.com/yoyofx/yoyogo/pkg/datasources/mysql"
 	_ "github.com/yoyofx/yoyogo/pkg/datasources/redis"
 	"github.com/yoyofx/yoyogo/web"
@@ -15,35 +15,24 @@ import (
 )
 
 func main() {
+	ShowLogo()
 	global.GlobalLogger = xlog.GetXLogger("global")
 
-	// 加载 nacos 远程配置
-	//config := nacosConfig.RemoteConfig("config")
-	config := abstractions.NewConfigurationBuilder().
-		AddEnvironment().
-		AddYamlFile("config").Build()
-	ShowLogo()
 	web.NewWebHostBuilder().
-		UseConfiguration(config).
+		UseConfiguration(configuration.LocalConfig("config")).
 		Configure(func(app *web.ApplicationBuilder) {
-			// add http middlewares
 			//app.UseMiddleware(middlewares.NewCORS())
 			app.SetJsonSerializer(extension.CamelJson())
-			app.UseEndpoints(api.ConfigureApi) // 在 api/init.go 中定义 api or mvc 路由
+			// 在 api/init.go 中定义 api or mvc 路由
+			app.UseEndpoints(api.ConfigureApi)
 			app.UseMvc(api.ConfigureMvc)
-			//app.UseMiddleware(middlewares.NewJwt())
 			// and more ...
 		}).
-		ConfigureServices(func(container *dependencyinjection.ServiceCollection) {
-			Bootstrap(container)
-		}).
-		Build().
+		ConfigureServices(Bootstrap).Build().
 		Run()
-
 }
 
 func Bootstrap(container *dependencyinjection.ServiceCollection) {
-	// 注册 Nacos 服务发现
 	//nacos.UseServiceDiscovery(container)
 }
 

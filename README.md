@@ -2,12 +2,16 @@
 Kubelilin cloud native backend .
 
 ## PaaS 平台运行
-### Backend & MySQL
+### Docker-Compose FrontEnd & Backend & MySQL
 ```bash
 git clone https://github.com/KubeLilin/kubelilin.git
 cd kubelilin/scripts
-docker-compose -f ./docker-compose.yaml up -d
+docker-compose  up -d
 ```
+#### 登录
+* 用户名: admin
+* 密  码: 1234abcd
+
 ### FrontEnd
 ```bash
 git clone https://github.com/KubeLilin/dashboard.git
