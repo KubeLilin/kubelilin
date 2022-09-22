@@ -133,7 +133,7 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.Depl
 }
 
 func (deployment *DeploymentService) GetDeployments(profile string, appId uint64, tenantId uint64,
-	deployName string, appName string, clusterId uint64, pageIndex int, pageSize int) (error, *page.Page) {
+	deployName string, appName string, clusterId uint64, projectId uint64, pageIndex int, pageSize int) (error, *page.Page) {
 
 	dataSql := strings.Builder{}
 	dataSql.WriteString(`SELECT d.id, d.nickname ,d.name,lev.name level, c.name  as 'clusterName' ,app.name as 'appName',
@@ -153,13 +153,8 @@ func (deployment *DeploymentService) GetDeployments(profile string, appId uint64
 	if appName != "" {
 		dataSql.WriteString("AND app.name like '%" + appName + "%'")
 	}
-
 	var params []interface{}
 	params = append(params, tenantId)
-	if appId > 0 {
-		dataSql.WriteString(" AND d.app_id = ? ")
-		params = append(params, appId)
-	}
 
 	if clusterId > 0 {
 		dataSql.WriteString(" AND c.id = ? ")
@@ -168,6 +163,16 @@ func (deployment *DeploymentService) GetDeployments(profile string, appId uint64
 	if profile != "" {
 		dataSql.WriteString("AND lev.code = ?")
 		params = append(params, profile)
+	}
+
+	if projectId > 0 {
+		dataSql.WriteString(" AND app.id in (select application_id from devops_projects_apps WHERE project_id =?)")
+		params = append(params, projectId)
+	} else {
+		if appId > 0 {
+			dataSql.WriteString(" AND d.app_id = ? ")
+			params = append(params, appId)
+		}
 	}
 
 	var deploymentList []dto.DeploymentItemDto

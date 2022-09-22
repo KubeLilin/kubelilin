@@ -1,7 +1,7 @@
 yoyogo:
   application:
     name: kubelilin-apiserver
-    metadata: "local.develop"
+    metadata: "local.develop.debug"
     server:
       type: "fasthttp"
       address: ":8080"

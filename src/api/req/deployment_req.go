@@ -14,6 +14,8 @@ type DeploymentGetListRequest struct {
 	DeployName string `json:"nickname" uri:"nickname"`
 	ClusterId  uint64 `json:"clusterId" uri:"clusterId"`
 	Profile    string `json:"profile" uri:"profile"`
+
+	ProjectId uint64 `json:"projectId" uri:"projectId"`
 }
 
 type DeploymentStepRequest struct {

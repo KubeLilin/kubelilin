@@ -1,12 +1,14 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
     creator: admin
-  creationTimestamp: "2019-11-21T07:55:50Z"
   name: jenkins
-  namespace: sgr-ci
+  namespace: kube-lilin
 spec:
+  selector:
+    matchLabels:
+      app: jenkins
   progressDeadlineSeconds: 600
   replicas: 1
   revisionHistoryLimit: 2
@@ -15,7 +17,7 @@ spec:
       labels:
         app: jenkins
       name: jenkins
-      namespace: sgr-ci
+      namespace: kube-lilin
     spec:
       containers:
         - image: jenkins/jenkins:2.328

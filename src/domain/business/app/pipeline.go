@@ -10,18 +10,29 @@ import (
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
 	pipelineV1 "kubelilin/pkg/pipeline"
+	"kubelilin/utils"
 	"strconv"
 	"time"
 )
 
 type PipelineService struct {
-	db             *gorm.DB
-	jenkinsBuilder *pipelineV1.Builder
-	config         abstractions.IConfiguration
+	db                *gorm.DB
+	jenkinsBuilder    *pipelineV1.Builder
+	serviceConnection *ServiceConnectionService
+	config            abstractions.IConfiguration
+	onReady           bool
 }
 
-func NewPipelineService(db *gorm.DB, jenkins *pipelineV1.Builder, config abstractions.IConfiguration) *PipelineService {
-	return &PipelineService{db: db, jenkinsBuilder: jenkins, config: config}
+func NewPipelineService(db *gorm.DB, jenkins *pipelineV1.Builder, sc *ServiceConnectionService, config abstractions.IConfiguration) *PipelineService {
+	// set pipeline config
+	peSC, err := sc.GetPipelineEngine()
+	onReady := err == nil
+	if onReady {
+		jenkins.UseJenkins(peSC.Repo, peSC.UserName, peSC.Token).UseKubernetes(peSC.Password)
+	} else {
+		panic("not found pipeline settings. Pipeline be can't run.")
+	}
+	return &PipelineService{db: db, jenkinsBuilder: jenkins, serviceConnection: sc, onReady: onReady, config: config}
 }
 
 /*
@@ -123,32 +134,45 @@ func (pipelineService *PipelineService) UpdatePipeline(request *req.EditPipeline
 func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) error {
 	// Generate pipeline name and docker image name.
 	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
-	imageName := pipelineName
 	// pipeline json from frontend
 	var pipelineStages []dto.StageInfo
 	_ = json.Unmarshal([]byte(request.DSL), &pipelineStages)
 
-	// get config by configuration
-	deployUrl := pipelineService.config.GetString("kubelilin.deploy.url")
-	if deployUrl == "" {
-		deployUrl = "localhost"
+	// global context
+	context := make(map[string]string)
+	context["deployUrl"] = "localhost"
+	context["pipelineName"] = pipelineName
+	// get config by db
+	systemCallbackSC, err := pipelineService.serviceConnection.GetSystemCallback()
+	if err != nil {
+		return errors.New("not found system callback , pipeline will be not deploy application")
 	}
+	context["deployUrl"] = systemCallbackSC.Repo
+	context["deployToken"] = systemCallbackSC.Token
+	//deployUrl := pipelineService.config.GetString("kubelilin.deploy.url")
+
 	//	 harbor config
-	harborAddress := pipelineService.config.GetString("hub.harbor.url")
-	harborToken := pipelineService.config.GetString("hub.harbor.token")
+	//harborAddress := pipelineService.config.GetString("hub.harbor.url")
+	//harborToken := pipelineService.config.GetString("hub.harbor.token")
+	imageHubSC, err := pipelineService.serviceConnection.GetImageHub()
+	if err != nil {
+		return errors.New("not found image hub settings , pipeline will be not deploy application")
+	}
+	context["imageHubAddress"] = imageHubSC.Repo
+	context["imageHubToken"] = imageHubSC.Token
 
 	// Conversion JSON to DSL
 	// Set SGR_DOCKER_FILE value, that apply to code_build step .
 	env := []pipelineV1.EnvItem{
 		// {Key: "SGR_DOCKER_FILE", Value: "./examples/simpleweb/Dockerfile"},
-		{Key: "SGR_REPOSITORY_NAME", Value: fmt.Sprintf("%s/apps/%s", harborAddress, imageName)},
-		{Key: "SGR_REGISTRY_ADDR", Value: fmt.Sprintf("https://%s/", harborAddress)},
-		{Key: "SGR_REGISTRY_AUTH", Value: harborToken},
+		{Key: "SGR_REPOSITORY_NAME", Value: fmt.Sprintf("%s/apps/%s", context["imageHubAddress"], context["pipelineName"])},
+		{Key: "SGR_REGISTRY_ADDR", Value: fmt.Sprintf("https://%s/", context["imageHubAddress"])},
+		{Key: "SGR_REGISTRY_AUTH", Value: context["imageHubToken"]},
 		{Key: "SGR_REGISTRY_CONFIG", Value: "/kaniko/.docker"},
 	}
-	var buildImage string
-	var branch string
-	var deployId uint64
+	//var buildImage string
+	//var branch string
+	//var deployId uint64
 	var dslStageList []pipelineV1.StageItem
 	for _, stage := range pipelineStages {
 		dslStageItem := pipelineV1.StageItem{Name: stage.Name}
@@ -162,7 +186,7 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
                     	doGenerateSubmoduleConfigurations: false,extensions: [[$class:'CheckoutOption',timeout:30],[$class:'CloneOption',depth:0,noTags:false,reference:'',shallow:false,timeout:30]], submoduleCfg: [],
                     	userRemoteConfigs: [[ url: "%s"]]
                 	])`, step.Content["branch"], step.Content["git"])})
-				branch = step.Content["branch"].(string)
+				context["branch"] = step.Content["branch"].(string)
 				break
 			case "cmd_shell":
 				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: step.Name,
@@ -178,15 +202,15 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 					   def rbody = "{\"wholeImage\": \"${env.SGR_REPOSITORY_NAME}:v${env.BUILD_NUMBER}\", \"IsDiv\":true , \"dpId\": %v, \"tenantId\": 0 }"
 					   httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody:rbody , responseHandle: 'NONE', timeout: 30, url: '%s/v1/deployment/executedeployment'
 				   }
-				`, step.Content["depolyment"], deployUrl)})
-				deployId = uint64(step.Content["depolyment"].(float64))
+				`, step.Content["depolyment"], context["deployUrl"])})
+				context["deployId"] = utils.ToString(uint64(step.Content["depolyment"].(float64)))
 				break
 			case "code_build":
 				// 添加编译环境,Dockerfile 文件位置
 				env = append(env, pipelineV1.EnvItem{Key: "SGR_DOCKER_FILE", Value: step.Content["buildFile"].(string)})
 				// 添加编译环境 编译镜像：版本
 				buildEnv := step.Content["buildEnv"].(string)
-				buildImage = getBuildImageByLanguage(buildEnv)
+				context["buildImage"] = getBuildImageByLanguage(buildEnv)
 
 				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: "code build",
 					Command: fmt.Sprintf(`
@@ -215,7 +239,7 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 					   def rbody = "{\"version\": \"v${env.BUILD_NUMBER}\",  \"dpId\": %v, \"branch\": \"%s\" , \"notifyType\": \"%s\" , \"notifyKey\": \"%s\" }"
 					   httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody:rbody , responseHandle: 'NONE', timeout: 30, url: '%s/v1/deployment/notify'
 				   }
-				`, deployId, branch, step.Content["notifyType"], step.Content["notifyKey"], deployUrl)})
+				`, context["deployId"], context["branch"], step.Content["notifyType"], step.Content["notifyKey"], context["deployUrl"])})
 				break
 			}
 		}
@@ -230,7 +254,7 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 	//builder.UseJenkins(jenkinsUrl, jenkinsUser, jenkinsToken).
 	//	UseKubernetes(jenkinsNamespace).UseBuildImage(buildImage)
 
-	builder := pipelineService.jenkinsBuilder.UseBuildImage(buildImage)
+	builder := pipelineService.jenkinsBuilder.UseBuildImage(context["buildImage"])
 
 	processor := builder.CICDProcessor(env, stageItems)
 	pipeline, _ := builder.Build()

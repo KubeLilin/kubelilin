@@ -81,6 +81,12 @@ func (c *ApplicationController) GetDeployLevelCounts(ctx *context.HttpContext) m
 	return mvc.Success(res)
 }
 
+func (c *ApplicationController) GetProjectDeployLevelCounts(ctx *context.HttpContext) mvc.ApiResult {
+	projectId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("projectId", "0"))
+	res, _ := c.service.GetProjectCountByDeployLevel(projectId)
+	return mvc.Success(res)
+}
+
 // GetGitRepo get git address for application
 func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := req.GetUserInfo(ctx)
@@ -159,7 +165,7 @@ func (c *ApplicationController) PostEditPipeline(request *req.EditPipelineReq) m
 		err = c.pipelineService.UpdateDSL(request)
 	}
 	if err != nil {
-		return mvc.Fail(false)
+		return mvc.FailWithMsg(false, err.Error())
 	}
 
 	return mvc.Success(true)

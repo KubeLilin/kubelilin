@@ -69,7 +69,7 @@ func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.Api
 		tenantID = userInfo.TenantID
 	}
 	err, deploymentList := controller.deploymentService.GetDeployments(request.Profile, request.AppID, tenantID,
-		request.DeployName, request.AppName, request.ClusterId, request.CurrentPage, request.PageSize)
+		request.DeployName, request.AppName, request.ClusterId, request.ProjectId, request.CurrentPage, request.PageSize)
 	if err != nil {
 		return mvc.Fail(err.Error())
 	}

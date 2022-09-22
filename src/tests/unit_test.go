@@ -5,19 +5,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"kubelilin/domain/business/tenant"
+	"kubelilin/domain/business/app"
 	"testing"
 )
-
-func TestRoleMenuList(t *testing.T) {
-	dsn := "root:1234abcd@tcp(cdb-amqub3mo.bj.tencentcdb.com:10042)/sgr_paas?charset=utf8&parseTime=True"
-	db1, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	service := tenant.NewSysMenuService(db1)
-
-	dd := service.GetRoleMenuIdList(1)
-
-	assert.Equal(t, len(dd) > 0, true)
-}
 
 func TestSlices(t *testing.T) {
 	slice := make([]int, 100)
@@ -37,7 +27,25 @@ func TestPointer(t *testing.T) {
 	name := "deployment"
 	var ss *string
 	ss = &name
-
 	println(*ss)
+}
 
+func TestQuerySC(t *testing.T) {
+	dsn := "root:P@ssW0rd@tcp(47.100.213.41)/sgr_pass?charset=utf8&parseTime=True"
+	db1, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	sc := app.NewServiceConnectionService(db1)
+	te, e0 := sc.GetTest()
+
+	pe, e := sc.GetPipelineEngine()
+	img, e1 := sc.GetImageHub()
+	sys, e2 := sc.GetSystemCallback()
+
+	fmt.Println(te)
+	fmt.Println(pe)
+	fmt.Println(img)
+	fmt.Println(sys)
+	assert.Equal(t, e0 != nil, true)
+	assert.Equal(t, e == nil, true)
+	assert.Equal(t, e1 == nil, true)
+	assert.Equal(t, e2 == nil, true)
 }

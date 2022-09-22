@@ -6,6 +6,7 @@ import (
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"kubelilin/api/req"
 	"kubelilin/domain/business/app"
+	"kubelilin/utils"
 )
 
 type DevopsController struct {
@@ -31,6 +32,15 @@ func (controller DevopsController) PostEditProject(ctx *context.HttpContext, req
 	userInfo := req.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
 	err := controller.devopsService.EditProject(request)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success("ok")
+}
+
+func (controller DevopsController) DeleteProject(ctx *context.HttpContext) mvc.ApiResult {
+	projectId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
+	err := controller.devopsService.DeleteProject(projectId)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}

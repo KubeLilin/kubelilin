@@ -16,6 +16,7 @@ import (
 	"kubelilin/domain/dto"
 	"kubelilin/pkg/page"
 	"strconv"
+	"strings"
 )
 
 type ServiceSupervisor struct {
@@ -67,7 +68,7 @@ func (svc *ServiceSupervisor) ApplyService(client corev1.CoreV1Interface, dp *mo
 	portNumber := int32(dp.ServicePort)
 	protocol := v1.ProtocolTCP
 	targetPort := intstr.FromInt(int(dp.ServicePort))
-	servicePortName := "默认端口映射"
+	servicePortName := "default-" + strings.ToLower((string)(protocol))
 	port := applycorev1.ServicePortApplyConfiguration{
 		Name:       &servicePortName,
 		Protocol:   &protocol,
