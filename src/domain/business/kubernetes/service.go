@@ -37,7 +37,7 @@ func (svc *ServiceSupervisor) ApplyService(client corev1.CoreV1Interface, dp *mo
 	namespace := &models.SgrTenantNamespace{}
 	dbErr := svc.db.Model(&models.SgrTenantNamespace{}).Where("id=?", dp.NamespaceID).First(namespace)
 	if dbErr.Error != nil {
-		return errors.New("未找到命名空间信息"), nil
+		return nil, errors.New("未找到命名空间信息")
 	}
 	k8sService := client.Services(namespace.Namespace)
 	configuration := applycorev1.ServiceApplyConfiguration{}
