@@ -37,7 +37,7 @@ func (svc *ServiceSupervisor) ApplyService(client corev1.CoreV1Interface, dp *mo
 	namespace := &models.SgrTenantNamespace{}
 	dbErr := svc.db.Model(&models.SgrTenantNamespace{}).Where("id=?", dp.NamespaceID).First(namespace)
 	if dbErr.Error != nil {
-		return errors.New("未找到命名空间信息"), nil
+		return nil, errors.New("未找到命名空间信息")
 	}
 	k8sService := client.Services(namespace.Namespace)
 	configuration := applycorev1.ServiceApplyConfiguration{}
@@ -204,8 +204,15 @@ func (svc *ServiceSupervisor) ChangeService(svcReq *req.ServiceInfoReq) error {
 	serviceInfo.Name = &svcName
 	serviceInfo.APIVersion = &apiVersion
 	serviceInfo.Kind = &kind
+	metaLabels := make(map[string]string)
+	if svcReq.Labels != "" {
+		err := json.Unmarshal([]byte(svcReq.Labels), &metaLabels)
+		if err != nil {
+			return nil
+		}
+	}
 	//匹配dp的label
-	//metaLabel := make(map[string]string)
+
 	//metaLabel["k8s-app"] = dp.Name
 	/*metaLabels := map[string]string{
 		"kubelilin-default": "true",
@@ -218,7 +225,7 @@ func (svc *ServiceSupervisor) ChangeService(svcReq *req.ServiceInfoReq) error {
 		"profileLevel":      dp.Level,
 	}*/
 	spec := applycorev1.ServiceSpecApplyConfiguration{}
-	//spec.Selector = metaLabels
+	spec.Selector = metaLabels
 	//构造端口数据
 	var ports []applycorev1.ServicePortApplyConfiguration
 	for _, x := range svcReq.Port {
