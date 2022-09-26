@@ -1,6 +1,30 @@
 package models
 
-import "time"
+// ApplicationLanguageCompile [...]
+type ApplicationLanguageCompile struct {
+	ID           uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`        // 编译环境ID
+	LanguageID   uint64 `gorm:"column:language_id;type:bigint unsigned;not null" json:"languageId"`  // 语言ID
+	CompileImage string `gorm:"column:compile_image;type:varchar(255);not null" json:"compileImage"` // 编译镜像
+	Sort         string `gorm:"column:sort;type:varchar(255);not null" json:"sort"`                  // 排序
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *ApplicationLanguageCompile) TableName() string {
+	return "application_language_compile"
+}
+
+// ApplicationLanguageCompileColumns get sql column name.获取数据库列名
+var ApplicationLanguageCompileColumns = struct {
+	ID           string
+	LanguageID   string
+	CompileImage string
+	Sort         string
+}{
+	ID:           "id",
+	LanguageID:   "language_id",
+	CompileImage: "compile_image",
+	Sort:         "sort",
+}
 
 // DevopsProjects devops 项目管理
 type DevopsProjects struct {
@@ -219,10 +243,13 @@ var ServiceConnectionTypeListColumns = struct {
 
 // SgrCodeApplicationLanguage 字典-应用开发语言
 type SgrCodeApplicationLanguage struct {
-	ID   uint16 `gorm:"primaryKey;column:id;type:smallint unsigned;not null" json:"id"`
-	Code string `gorm:"column:code;type:varchar(8)" json:"code"`
-	Name string `gorm:"column:name;type:varchar(50);not null" json:"name"`
-	Sort uint16 `gorm:"column:sort;type:smallint unsigned;not null;default:0" json:"sort"`
+	ID      uint16 `gorm:"primaryKey;column:id;type:smallint unsigned;not null" json:"id"`
+	Code    string `gorm:"column:code;type:varchar(8)" json:"code"`
+	Name    string `gorm:"column:name;type:varchar(50);not null" json:"name"`
+	Alias   string `gorm:"column:alias;type:varchar(50);not null" json:"alias"`
+	Icon    string `gorm:"column:icon;type:varchar(255);not null" json:"icon"`
+	Content string `gorm:"column:content;type:varchar(255);not null" json:"content"`
+	Sort    uint16 `gorm:"column:sort;type:smallint unsigned;not null;default:0" json:"sort"`
 }
 
 // TableName get sql table name.获取数据库表名
@@ -232,15 +259,21 @@ func (m *SgrCodeApplicationLanguage) TableName() string {
 
 // SgrCodeApplicationLanguageColumns get sql column name.获取数据库列名
 var SgrCodeApplicationLanguageColumns = struct {
-	ID   string
-	Code string
-	Name string
-	Sort string
+	ID      string
+	Code    string
+	Name    string
+	Alias   string
+	Icon    string
+	Content string
+	Sort    string
 }{
-	ID:   "id",
-	Code: "code",
-	Name: "name",
-	Sort: "sort",
+	ID:      "id",
+	Code:    "code",
+	Name:    "name",
+	Alias:   "alias",
+	Icon:    "icon",
+	Content: "content",
+	Sort:    "sort",
 }
 
 // SgrCodeApplicationLevel 字典-应用级别
@@ -373,38 +406,6 @@ var SgrSysMenuColumns = struct {
 	ParentID:     "parent_id",
 	Sort:         "sort",
 	Status:       "status",
-	CreationTime: "creation_time",
-	UpdateTime:   "update_time",
-}
-
-// SgrTeantConfigMap k8sconfig_map
-type SgrTeantConfigMap struct {
-	ID           int64      `gorm:"primaryKey;column:id;type:bigint;not null" json:"id"`
-	TeantID      uint64     `gorm:"column:teant_id;type:bigint unsigned;not null" json:"teantId"`
-	Name         string     `gorm:"column:name;type:varchar(50);not null" json:"name"`
-	AppID        uint64     `gorm:"column:app_id;type:bigint unsigned;not null" json:"appId"` // 属于哪个应用
-	CreationTime *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
-	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
-}
-
-// TableName get sql table name.获取数据库表名
-func (m *SgrTeantConfigMap) TableName() string {
-	return "sgr_teant_config_map"
-}
-
-// SgrTeantConfigMapColumns get sql column name.获取数据库列名
-var SgrTeantConfigMapColumns = struct {
-	ID           string
-	TeantID      string
-	Name         string
-	AppID        string
-	CreationTime string
-	UpdateTime   string
-}{
-	ID:           "id",
-	TeantID:      "teant_id",
-	Name:         "name",
-	AppID:        "app_id",
 	CreationTime: "creation_time",
 	UpdateTime:   "update_time",
 }
@@ -586,6 +587,47 @@ var SgrTenantClusterColumns = struct {
 	Status:       "status",
 	CreateTime:   "create_time",
 	UpdateTime:   "update_time",
+}
+
+// SgrTenantConfigMap k8sconfig_map
+type SgrTenantConfigMap struct {
+	ID           int64      `gorm:"primaryKey;column:id;type:bigint;not null" json:"id"`
+	Name         string     `gorm:"column:name;type:varchar(50);not null" json:"name"`
+	TenantID     uint64     `gorm:"column:tenant_id;type:bigint unsigned;not null" json:"tenantId"`
+	ClusterID    uint64     `gorm:"column:cluster_id;type:bigint unsigned;not null" json:"clusterId"`     // 集群id
+	NamespaceID  uint64     `gorm:"column:namespace_id;type:bigint unsigned;not null" json:"namespaceId"` // 命名空间
+	CreationTime *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
+	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
+	Type         string     `gorm:"column:type;type:char(10);not null" json:"type"` // 文件类型，yaml、properties
+	Data         []byte     `gorm:"column:data;type:varbinary(1000)" json:"data"`   // 配置内容
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *SgrTenantConfigMap) TableName() string {
+	return "sgr_tenant_config_map"
+}
+
+// SgrTenantConfigMapColumns get sql column name.获取数据库列名
+var SgrTenantConfigMapColumns = struct {
+	ID           string
+	Name         string
+	TenantID     string
+	ClusterID    string
+	NamespaceID  string
+	CreationTime string
+	UpdateTime   string
+	Type         string
+	Data         string
+}{
+	ID:           "id",
+	Name:         "name",
+	TenantID:     "tenant_id",
+	ClusterID:    "cluster_id",
+	NamespaceID:  "namespace_id",
+	CreationTime: "creation_time",
+	UpdateTime:   "update_time",
+	Type:         "type",
+	Data:         "data",
 }
 
 // SgrTenantDeploymentRecord 部署发布记录
