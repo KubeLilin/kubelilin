@@ -131,9 +131,13 @@ func (c *ApplicationController) GetGitBranches(ctx *context.HttpContext) mvc.Api
 	return mvc.Fail("no data")
 }
 
-// GetBuildScripts get pipeline build scripts for code_build step.
-func (c *ApplicationController) GetBuildScripts() mvc.ApiResult {
-	return mvc.Success(c.pipelineService.GetBuildScripts())
+func (c *ApplicationController) GetBuildImageByLanguageId(ctx *context.HttpContext) mvc.ApiResult {
+	languageId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("languageId", "0"))
+	list, err := c.pipelineService.GetBuildImageByLanguageId(languageId)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(list)
 }
 
 // PostNewPipeline new pipeline only by name & id

@@ -35,29 +35,10 @@ func NewPipelineService(db *gorm.DB, jenkins *pipelineV1.Builder, sc *ServiceCon
 	return &PipelineService{db: db, jenkinsBuilder: jenkins, serviceConnection: sc, onReady: onReady, config: config}
 }
 
-/*
-GetBuildScripts 获取各语言流水线构建编译命令
-*/
-func (pipelineService *PipelineService) GetBuildScripts() map[string]string {
-	return map[string]string{
-		"golang": `# 编译命令，注：当前已在代码根路径下
-go env -w GOPROXY=https://goproxy.cn,direct
-go build -ldflags="-s -w" -o app .
-`,
-		"java": `# 编译命令，注：当前已在代码根路径下
-mvn clean package                         
-`,
-		"nodejs": `# 编译命令，注：当前已在代码根路径下
-npm config set registry https://registry.npm.taobao.org --global
-npm install
-npm run build
-`,
-		"dotnet": `# 编译命令，注：当前已在代码根路径下
-dotnet restore
-dotnet publish -p:PublishSingleFile=true -r linux-musl-x64 --self-contained true -p:PublishTrimmed=True -p:TrimMode=Link -c Release -o /app/publish                       
-`,
-	}
-
+func (pipelineService *PipelineService) GetBuildImageByLanguageId(languageId uint64) ([]models.ApplicationLanguageCompile, error) {
+	var languageCompileList []models.ApplicationLanguageCompile
+	dbRes := pipelineService.db.Model(&models.ApplicationLanguageCompile{}).Where("language_id=?", languageId).Find(&languageCompileList)
+	return languageCompileList, dbRes.Error
 }
 
 /*
@@ -210,7 +191,13 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 				env = append(env, pipelineV1.EnvItem{Key: "SGR_DOCKER_FILE", Value: step.Content["buildFile"].(string)})
 				// 添加编译环境 编译镜像：版本
 				buildEnv := step.Content["buildEnv"].(string)
-				context["buildImage"] = getBuildImageByLanguage(buildEnv)
+				buildImage, hasBuildImage := step.Content["buildImage"].(string)
+				if hasBuildImage {
+					context["buildImage"] = buildImage
+				} else { // 没有镜像设置,则使用默认语言镜像
+					context["buildImage"] = getDefaultBuildImageByLanguage(buildEnv)
+
+				}
 
 				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: "code build",
 					Command: fmt.Sprintf(`
@@ -262,7 +249,7 @@ func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) 
 	return pipeline.SaveJob(pipelineName, processor)
 }
 
-func getBuildImageByLanguage(languageName string) string {
+func getDefaultBuildImageByLanguage(languageName string) string {
 	buildImage := ""
 	switch languageName {
 	case "java":
