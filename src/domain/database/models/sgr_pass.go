@@ -1,11 +1,15 @@
 package models
 
+import "time"
+
 // ApplicationLanguageCompile [...]
 type ApplicationLanguageCompile struct {
-	ID           uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`        // 编译环境ID
-	LanguageID   uint64 `gorm:"column:language_id;type:bigint unsigned;not null" json:"languageId"`  // 语言ID
-	CompileImage string `gorm:"column:compile_image;type:varchar(255);not null" json:"compileImage"` // 编译镜像
-	Sort         string `gorm:"column:sort;type:varchar(255);not null" json:"sort"`                  // 排序
+	ID           uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`         // 编译环境ID
+	LanguageID   uint64 `gorm:"column:language_id;type:bigint unsigned;not null" json:"languageId"`   // 语言ID
+	CompileImage string `gorm:"column:compile_image;type:varchar(120);not null" json:"compileImage"`  // 编译镜像
+	AliasName    string `gorm:"column:alias_name;type:varchar(100);not null" json:"aliasName"`        // 别名
+	Sort         string `gorm:"column:sort;type:varchar(255);not null" json:"sort"`                   // 排序
+	Status       uint8  `gorm:"column:status;type:tinyint unsigned;not null;default:1" json:"status"` // 状态
 }
 
 // TableName get sql table name.获取数据库表名
@@ -18,12 +22,16 @@ var ApplicationLanguageCompileColumns = struct {
 	ID           string
 	LanguageID   string
 	CompileImage string
+	AliasName    string
 	Sort         string
+	Status       string
 }{
 	ID:           "id",
 	LanguageID:   "language_id",
 	CompileImage: "compile_image",
+	AliasName:    "alias_name",
 	Sort:         "sort",
+	Status:       "status",
 }
 
 // DevopsProjects devops 项目管理
@@ -243,13 +251,14 @@ var ServiceConnectionTypeListColumns = struct {
 
 // SgrCodeApplicationLanguage 字典-应用开发语言
 type SgrCodeApplicationLanguage struct {
-	ID      uint16 `gorm:"primaryKey;column:id;type:smallint unsigned;not null" json:"id"`
-	Code    string `gorm:"column:code;type:varchar(8)" json:"code"`
-	Name    string `gorm:"column:name;type:varchar(50);not null" json:"name"`
-	Alias   string `gorm:"column:alias;type:varchar(50);not null" json:"alias"`
-	Icon    string `gorm:"column:icon;type:varchar(255);not null" json:"icon"`
-	Content string `gorm:"column:content;type:varchar(255);not null" json:"content"`
-	Sort    uint16 `gorm:"column:sort;type:smallint unsigned;not null;default:0" json:"sort"`
+	ID             uint16 `gorm:"primaryKey;column:id;type:smallint unsigned;not null" json:"id"`
+	Code           string `gorm:"column:code;type:varchar(8)" json:"code"`                                 // 编号
+	Name           string `gorm:"column:name;type:varchar(50);not null" json:"name"`                       // 语言名称
+	Alias          string `gorm:"column:alias;type:varchar(50);not null" json:"alias"`                     // 别名
+	Icon           string `gorm:"column:icon;type:varchar(255);not null" json:"icon"`                      // 图标
+	Content        string `gorm:"column:content;type:varchar(255);not null" json:"content"`                // 描述
+	Sort           uint16 `gorm:"column:sort;type:smallint unsigned;not null;default:0" json:"sort"`       // 排序
+	CompileScripts string `gorm:"column:compile_scripts;type:varchar(255);not null" json:"compileScripts"` // 默认编译脚本
 }
 
 // TableName get sql table name.获取数据库表名
@@ -259,21 +268,23 @@ func (m *SgrCodeApplicationLanguage) TableName() string {
 
 // SgrCodeApplicationLanguageColumns get sql column name.获取数据库列名
 var SgrCodeApplicationLanguageColumns = struct {
-	ID      string
-	Code    string
-	Name    string
-	Alias   string
-	Icon    string
-	Content string
-	Sort    string
+	ID             string
+	Code           string
+	Name           string
+	Alias          string
+	Icon           string
+	Content        string
+	Sort           string
+	CompileScripts string
 }{
-	ID:      "id",
-	Code:    "code",
-	Name:    "name",
-	Alias:   "alias",
-	Icon:    "icon",
-	Content: "content",
-	Sort:    "sort",
+	ID:             "id",
+	Code:           "code",
+	Name:           "name",
+	Alias:          "alias",
+	Icon:           "icon",
+	Content:        "content",
+	Sort:           "sort",
+	CompileScripts: "compile_scripts",
 }
 
 // SgrCodeApplicationLevel 字典-应用级别
