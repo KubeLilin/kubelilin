@@ -3,10 +3,12 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/yoyofx/yoyogo/web/binding"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	"kubelilin/api/req"
 	"kubelilin/domain/business/app"
+	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
 	"kubelilin/utils"
 )
@@ -138,6 +140,36 @@ func (c *ApplicationController) GetBuildImageByLanguageId(ctx *context.HttpConte
 		return mvc.Fail(err.Error())
 	}
 	return mvc.Success(list)
+}
+
+func (c *ApplicationController) GetBuildImageByLanguages(ctx *context.HttpContext) mvc.ApiResult {
+	languageId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("languageId", "0"))
+	aliasName := ctx.Input.QueryDefault("aliasName", "")
+	list, err := c.pipelineService.GetBuildImageBy(aliasName, languageId)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(list)
+}
+
+func (c *ApplicationController) PostBuildImage(ctx *context.HttpContext) mvc.ApiResult {
+	var request models.ApplicationLanguageCompile
+	_ = ctx.BindWith(&request, binding.JSON)
+	request.Status = 1
+	err := c.pipelineService.AddOrEditBuildImage(request)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(true)
+}
+
+func (c *ApplicationController) DeleteBuildImage(ctx *context.HttpContext) mvc.ApiResult {
+	id, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
+	err := c.pipelineService.DeleteBuildImage(id)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(true)
 }
 
 // PostNewPipeline new pipeline only by name & id

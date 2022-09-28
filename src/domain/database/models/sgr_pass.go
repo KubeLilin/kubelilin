@@ -8,7 +8,7 @@ type ApplicationLanguageCompile struct {
 	LanguageID   uint64 `gorm:"column:language_id;type:bigint unsigned;not null" json:"languageId"`   // 语言ID
 	CompileImage string `gorm:"column:compile_image;type:varchar(120);not null" json:"compileImage"`  // 编译镜像
 	AliasName    string `gorm:"column:alias_name;type:varchar(100);not null" json:"aliasName"`        // 别名
-	Sort         string `gorm:"column:sort;type:varchar(255);not null" json:"sort"`                   // 排序
+	Sort         uint   `gorm:"column:sort;type:int unsigned;not null" json:"sort"`                   // 排序
 	Status       uint8  `gorm:"column:status;type:tinyint unsigned;not null;default:1" json:"status"` // 状态
 }
 

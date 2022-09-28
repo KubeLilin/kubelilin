@@ -37,8 +37,34 @@ func NewPipelineService(db *gorm.DB, jenkins *pipelineV1.Builder, sc *ServiceCon
 
 func (pipelineService *PipelineService) GetBuildImageByLanguageId(languageId uint64) ([]models.ApplicationLanguageCompile, error) {
 	var languageCompileList []models.ApplicationLanguageCompile
-	dbRes := pipelineService.db.Model(&models.ApplicationLanguageCompile{}).Where("language_id=?", languageId).Find(&languageCompileList)
+	dbRes := pipelineService.db.Model(&models.ApplicationLanguageCompile{}).Where("language_id=? AND status = 1", languageId).Order("compile_image, sort DESC").Find(&languageCompileList)
 	return languageCompileList, dbRes.Error
+}
+
+func (pipelineService *PipelineService) GetBuildImageBy(alias string, languageId uint64) ([]models.ApplicationLanguageCompile, error) {
+	var languageCompileList []models.ApplicationLanguageCompile
+	dbRes := pipelineService.db.Model(&models.ApplicationLanguageCompile{}).Where("status = 1")
+	if languageId > 0 {
+		dbRes.Where("language_id=?", languageId)
+	}
+	if alias != "" {
+		dbRes.Where("compile_image like ?", "%"+alias+"%")
+	}
+	dbRes.Order("compile_image, sort DESC").Find(&languageCompileList)
+	return languageCompileList, dbRes.Error
+}
+
+func (pipelineService *PipelineService) AddOrEditBuildImage(request models.ApplicationLanguageCompile) error {
+	if request.ID > 0 {
+		return pipelineService.db.Model(&models.ApplicationLanguageCompile{}).Where("id=?", request.ID).Updates(&request).Error
+	} else {
+		return pipelineService.db.Model(&models.ApplicationLanguageCompile{}).Create(&request).Error
+	}
+}
+
+func (pipelineService *PipelineService) DeleteBuildImage(id uint64) error {
+	dbRes := pipelineService.db.Model(&models.ApplicationLanguageCompile{}).Where("id=?", id).Update("status", 0)
+	return dbRes.Error
 }
 
 /*
