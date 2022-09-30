@@ -1,8 +1,6 @@
 package models
 
-import "time"
-
-// ApplicationAPIGateway [...]
+// ApplicationAPIGateway 集群网关(APISIX)
 type ApplicationAPIGateway struct {
 	ID          uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`         // 网关ID
 	Name        string `gorm:"column:name;type:varchar(100);not null" json:"name"`                   // 网关名称
@@ -37,7 +35,7 @@ var ApplicationAPIGatewayColumns = struct {
 	Status:      "status",
 }
 
-// ApplicationAPIGatewayRouters [...]
+// ApplicationAPIGatewayRouters 集群网关团队路由
 type ApplicationAPIGatewayRouters struct {
 	ID           uint64  `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`               // 路由ID
 	Name         string  `gorm:"column:name;type:varchar(50);not null" json:"name"`                          // 路由名称
@@ -90,7 +88,7 @@ var ApplicationAPIGatewayRoutersColumns = struct {
 	Status:       "status",
 }
 
-// ApplicationAPIGatewayTeams [...]
+// ApplicationAPIGatewayTeams 集群网关团队目录
 type ApplicationAPIGatewayTeams struct {
 	ID        uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`     // 网关团队目录ID
 	Name      string `gorm:"column:name;type:varchar(100);not null" json:"name"`               // 网关团队目录名称
@@ -122,7 +120,7 @@ var ApplicationAPIGatewayTeamsColumns = struct {
 	Status:    "status",
 }
 
-// ApplicationLanguageCompile [...]
+// ApplicationLanguageCompile CI流水线编译环境容器镜像
 type ApplicationLanguageCompile struct {
 	ID           uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`         // 编译环境ID
 	LanguageID   uint64 `gorm:"column:language_id;type:bigint unsigned;not null" json:"languageId"`   // 语言ID
@@ -152,6 +150,62 @@ var ApplicationLanguageCompileColumns = struct {
 	AliasName:    "alias_name",
 	Sort:         "sort",
 	Status:       "status",
+}
+
+// DeploymentContainerLifecycleCheck 容器生命周期健康检查
+type DeploymentContainerLifecycleCheck struct {
+	ID                  uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`                                 // 生命周期
+	DeploymentID        uint64     `gorm:"column:deployment_id;type:bigint unsigned;not null" json:"deploymentId"`                       // 部署id
+	ContainerID         uint64     `gorm:"column:container_id;type:bigint unsigned;not null" json:"containerId"`                         // 容器id
+	Type                string     `gorm:"column:type;type:varchar(50);not null" json:"type"`                                            // 检查类型readinessProbe/livenessProbe
+	Scheme              string     `gorm:"column:scheme;type:varchar(20);not null" json:"scheme"`                                        // HTTP/TCP
+	Path                string     `gorm:"column:path;type:varchar(500);not null" json:"path"`                                           // 请求路径
+	Port                uint       `gorm:"column:port;type:int unsigned;not null" json:"port"`                                           // 检查端口
+	SuccessThreshold    uint       `gorm:"column:success_threshold;type:int unsigned;not null;default:1" json:"successThreshold"`        // 成功阈值(次数)
+	FailureThreshold    uint       `gorm:"column:failure_threshold;type:int unsigned;not null;default:3" json:"failureThreshold"`        // 错误阀值(次数)
+	InitialDelaySeconds uint       `gorm:"column:initial_delay_seconds;type:int unsigned;not null;default:4" json:"initialDelaySeconds"` // 启动延时(秒)
+	PeriodSeconds       uint       `gorm:"column:period_seconds;type:int unsigned;not null;default:10" json:"periodSeconds"`             // 间隔时间(秒)
+	TimeoutSeconds      uint       `gorm:"column:timeout_seconds;type:int unsigned;not null;default:3" json:"timeoutSeconds"`            // 响应超时(秒)
+	CreationTime        *time.Time `gorm:"column:creation_time;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"creationTime"`
+	UpdateTime          *time.Time `gorm:"column:update_time;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"updateTime"`
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *DeploymentContainerLifecycleCheck) TableName() string {
+	return "deployment_container_lifecycle_check"
+}
+
+// DeploymentContainerLifecycleCheckColumns get sql column name.获取数据库列名
+var DeploymentContainerLifecycleCheckColumns = struct {
+	ID                  string
+	DeploymentID        string
+	ContainerID         string
+	Type                string
+	Scheme              string
+	Path                string
+	Port                string
+	SuccessThreshold    string
+	FailureThreshold    string
+	InitialDelaySeconds string
+	PeriodSeconds       string
+	TimeoutSeconds      string
+	CreationTime        string
+	UpdateTime          string
+}{
+	ID:                  "id",
+	DeploymentID:        "deployment_id",
+	ContainerID:         "container_id",
+	Type:                "type",
+	Scheme:              "scheme",
+	Path:                "path",
+	Port:                "port",
+	SuccessThreshold:    "success_threshold",
+	FailureThreshold:    "failure_threshold",
+	InitialDelaySeconds: "initial_delay_seconds",
+	PeriodSeconds:       "period_seconds",
+	TimeoutSeconds:      "timeout_seconds",
+	CreationTime:        "creation_time",
+	UpdateTime:          "update_time",
 }
 
 // DevopsProjects devops 项目管理
@@ -340,7 +394,7 @@ var ServiceConnectionTypeCodeColumns = struct {
 	TypeName:    "type_name",
 }
 
-// ServiceConnectionTypeList [...]
+// ServiceConnectionTypeList 服务连接类别(git , docker, jenkins , system)
 type ServiceConnectionTypeList struct {
 	ID          uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
 	ServiceType uint   `gorm:"column:service_type;type:int unsigned;not null" json:"serviceType"`
@@ -761,44 +815,6 @@ var SgrTenantConfigMapColumns = struct {
 	Data:         "data",
 }
 
-// SgrTenantDeploymentPreCheck 容器启动检查
-type SgrTenantDeploymentPreCheck struct {
-	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
-	Type         string     `gorm:"column:type;type:varchar(50);not null" json:"type"`        // 检查类型READINESS/LIVENESS
-	Port         uint       `gorm:"column:port;type:int unsigned;not null" json:"port"`       // 检查端口
-	URL          string     `gorm:"column:url;type:varchar(500);not null" json:"url"`         // 请求路径
-	DpID         uint64     `gorm:"column:dp_id;type:bigint unsigned;not null" json:"dpId"`   // 部署id
-	ReqType      string     `gorm:"column:req_type;type:varchar(20);not null" json:"reqType"` // HTTP/TCP
-	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;default:CURRENT_TIMESTAMP" json:"creationTime"`
-	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime;default:CURRENT_TIMESTAMP" json:"updateTime"`
-}
-
-// TableName get sql table name.获取数据库表名
-func (m *SgrTenantDeploymentPreCheck) TableName() string {
-	return "sgr_tenant_deployment_pre_check"
-}
-
-// SgrTenantDeploymentPreCheckColumns get sql column name.获取数据库列名
-var SgrTenantDeploymentPreCheckColumns = struct {
-	ID           string
-	Type         string
-	Port         string
-	URL          string
-	DpID         string
-	ReqType      string
-	CreationTime string
-	UpdateTime   string
-}{
-	ID:           "id",
-	Type:         "type",
-	Port:         "port",
-	URL:          "url",
-	DpID:         "dp_id",
-	ReqType:      "req_type",
-	CreationTime: "creation_time",
-	UpdateTime:   "update_time",
-}
-
 // SgrTenantDeploymentRecord 部署发布记录
 type SgrTenantDeploymentRecord struct {
 	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
@@ -845,27 +861,28 @@ var SgrTenantDeploymentRecordColumns = struct {
 
 // SgrTenantDeployments 集群部署
 type SgrTenantDeployments struct {
-	ID              uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
-	TenantID        uint64     `gorm:"column:tenant_id;type:bigint unsigned;not null" json:"tenantId"`
-	Name            string     `gorm:"column:name;type:varchar(50);not null" json:"name"`                    // 部署名称(英文唯一)
-	Nickname        string     `gorm:"column:nickname;type:varchar(50);not null" json:"nickname"`            // 部署中文名称
-	ClusterID       uint64     `gorm:"column:cluster_id;type:bigint unsigned;not null" json:"clusterId"`     // 集群ID
-	NamespaceID     uint64     `gorm:"column:namespace_id;type:bigint unsigned;not null" json:"namespaceId"` // 命名空间ID
-	AppID           uint64     `gorm:"column:app_id;type:bigint unsigned;not null" json:"appId"`             // 应用ID
-	Status          uint8      `gorm:"column:status;type:tinyint unsigned;not null;default:1" json:"status"` // 状态
-	CreateTime      *time.Time `gorm:"column:create_time;type:datetime" json:"createTime"`                   // 创建时间
-	UpdateTime      *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`                   // 更新时间
-	ImageHub        string     `gorm:"column:image_hub;type:varchar(200);not null;default:''" json:"imageHub"`
-	AppName         string     `gorm:"column:app_name;type:varchar(50)" json:"appName"`
-	WorkloadType    string     `gorm:"column:workload_type;type:varchar(25);not null;default:''" json:"workloadType"`
-	Replicas        uint       `gorm:"column:replicas;type:int unsigned;not null;default:1" json:"replicas"`
-	ServiceEnable   *uint8     `gorm:"column:service_enable;type:tinyint unsigned" json:"serviceEnable"`
-	ServiceName     string     `gorm:"column:service_name;type:varchar(150);not null;default:''" json:"serviceName"`
-	ServiceAway     string     `gorm:"column:service_away;type:varchar(30)" json:"serviceAway"`
-	ServicePort     uint       `gorm:"column:service_port;type:int unsigned;not null;default:0" json:"servicePort"`
-	ServicePortType string     `gorm:"column:service_port_type;type:varchar(8);not null;default:''" json:"servicePortType"`
-	LastImage       string     `gorm:"column:last_image;type:varchar(350)" json:"lastImage"`
-	Level           string     `gorm:"index:levev_idx;column:level;type:varchar(8)" json:"level"`
+	ID                            uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	TenantID                      uint64     `gorm:"column:tenant_id;type:bigint unsigned;not null" json:"tenantId"`
+	Name                          string     `gorm:"column:name;type:varchar(50);not null" json:"name"`                                                                  // 部署名称(英文唯一)
+	Nickname                      string     `gorm:"column:nickname;type:varchar(50);not null" json:"nickname"`                                                          // 部署中文名称
+	ClusterID                     uint64     `gorm:"column:cluster_id;type:bigint unsigned;not null" json:"clusterId"`                                                   // 集群ID
+	NamespaceID                   uint64     `gorm:"column:namespace_id;type:bigint unsigned;not null" json:"namespaceId"`                                               // 命名空间ID
+	AppID                         uint64     `gorm:"column:app_id;type:bigint unsigned;not null" json:"appId"`                                                           // 应用ID
+	Status                        uint8      `gorm:"column:status;type:tinyint unsigned;not null;default:1" json:"status"`                                               // 状态
+	CreateTime                    *time.Time `gorm:"column:create_time;type:datetime" json:"createTime"`                                                                 // 创建时间
+	UpdateTime                    *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`                                                                 // 更新时间
+	ImageHub                      string     `gorm:"column:image_hub;type:varchar(200);not null;default:''" json:"imageHub"`                                             // 镜像仓库地址
+	AppName                       string     `gorm:"column:app_name;type:varchar(50)" json:"appName"`                                                                    // 应用名称
+	WorkloadType                  string     `gorm:"column:workload_type;type:varchar(25);not null;default:''" json:"workloadType"`                                      // 工作负载类型
+	Replicas                      uint       `gorm:"column:replicas;type:int unsigned;not null;default:1" json:"replicas"`                                               // 副本数
+	ServiceEnable                 *uint8     `gorm:"column:service_enable;type:tinyint unsigned" json:"serviceEnable"`                                                   // 是否开启网络服务
+	ServiceName                   string     `gorm:"column:service_name;type:varchar(150);not null;default:''" json:"serviceName"`                                       // 服务名称
+	ServiceAway                   string     `gorm:"column:service_away;type:varchar(30)" json:"serviceAway"`                                                            // 服务类型(clusterIP nodeIP ...)
+	ServicePort                   uint       `gorm:"column:service_port;type:int unsigned;not null;default:0" json:"servicePort"`                                        // 服务端口
+	ServicePortType               string     `gorm:"column:service_port_type;type:varchar(8);not null;default:''" json:"servicePortType"`                                // 服务端口类型 http tcp
+	LastImage                     string     `gorm:"column:last_image;type:varchar(350)" json:"lastImage"`                                                               // 最终部署镜像
+	Level                         string     `gorm:"index:levev_idx;column:level;type:varchar(8)" json:"level"`                                                          // 应用部署级别
+	TerminationGracePeriodSeconds uint       `gorm:"column:termination_grace_period_seconds;type:int unsigned;not null;default:30" json:"terminationGracePeriodSeconds"` //  最大容忍pod销毁时间(默认30s)
 }
 
 // TableName get sql table name.获取数据库表名
@@ -875,49 +892,51 @@ func (m *SgrTenantDeployments) TableName() string {
 
 // SgrTenantDeploymentsColumns get sql column name.获取数据库列名
 var SgrTenantDeploymentsColumns = struct {
-	ID              string
-	TenantID        string
-	Name            string
-	Nickname        string
-	ClusterID       string
-	NamespaceID     string
-	AppID           string
-	Status          string
-	CreateTime      string
-	UpdateTime      string
-	ImageHub        string
-	AppName         string
-	WorkloadType    string
-	Replicas        string
-	ServiceEnable   string
-	ServiceName     string
-	ServiceAway     string
-	ServicePort     string
-	ServicePortType string
-	LastImage       string
-	Level           string
+	ID                            string
+	TenantID                      string
+	Name                          string
+	Nickname                      string
+	ClusterID                     string
+	NamespaceID                   string
+	AppID                         string
+	Status                        string
+	CreateTime                    string
+	UpdateTime                    string
+	ImageHub                      string
+	AppName                       string
+	WorkloadType                  string
+	Replicas                      string
+	ServiceEnable                 string
+	ServiceName                   string
+	ServiceAway                   string
+	ServicePort                   string
+	ServicePortType               string
+	LastImage                     string
+	Level                         string
+	TerminationGracePeriodSeconds string
 }{
-	ID:              "id",
-	TenantID:        "tenant_id",
-	Name:            "name",
-	Nickname:        "nickname",
-	ClusterID:       "cluster_id",
-	NamespaceID:     "namespace_id",
-	AppID:           "app_id",
-	Status:          "status",
-	CreateTime:      "create_time",
-	UpdateTime:      "update_time",
-	ImageHub:        "image_hub",
-	AppName:         "app_name",
-	WorkloadType:    "workload_type",
-	Replicas:        "replicas",
-	ServiceEnable:   "service_enable",
-	ServiceName:     "service_name",
-	ServiceAway:     "service_away",
-	ServicePort:     "service_port",
-	ServicePortType: "service_port_type",
-	LastImage:       "last_image",
-	Level:           "level",
+	ID:                            "id",
+	TenantID:                      "tenant_id",
+	Name:                          "name",
+	Nickname:                      "nickname",
+	ClusterID:                     "cluster_id",
+	NamespaceID:                   "namespace_id",
+	AppID:                         "app_id",
+	Status:                        "status",
+	CreateTime:                    "create_time",
+	UpdateTime:                    "update_time",
+	ImageHub:                      "image_hub",
+	AppName:                       "app_name",
+	WorkloadType:                  "workload_type",
+	Replicas:                      "replicas",
+	ServiceEnable:                 "service_enable",
+	ServiceName:                   "service_name",
+	ServiceAway:                   "service_away",
+	ServicePort:                   "service_port",
+	ServicePortType:               "service_port_type",
+	LastImage:                     "last_image",
+	Level:                         "level",
+	TerminationGracePeriodSeconds: "termination_grace_period_seconds",
 }
 
 // SgrTenantDeploymentsContainers 应用部署容器配置
@@ -937,7 +956,8 @@ type SgrTenantDeploymentsContainers struct {
 	Workdir           string  `gorm:"column:workdir;type:varchar(200)" json:"workdir"`
 	RunCmd            string  `gorm:"column:run_cmd;type:varchar(200)" json:"runCmd"`
 	RunParams         string  `gorm:"column:run_params;type:varchar(100)" json:"runParams"`
-	Podstop           string  `gorm:"column:podstop;type:varchar(100)" json:"podstop"`
+	Podstop           string  `gorm:"column:podstop;type:varchar(255)" json:"podstop"`
+	Poststart         string  `gorm:"column:poststart;type:varchar(255)" json:"poststart"`
 	Liveness          string  `gorm:"column:liveness;type:varchar(300)" json:"liveness"`
 	Readness          string  `gorm:"column:readness;type:varchar(300)" json:"readness"`
 }
@@ -965,6 +985,7 @@ var SgrTenantDeploymentsContainersColumns = struct {
 	RunCmd            string
 	RunParams         string
 	Podstop           string
+	Poststart         string
 	Liveness          string
 	Readness          string
 }{
@@ -984,6 +1005,7 @@ var SgrTenantDeploymentsContainersColumns = struct {
 	RunCmd:            "run_cmd",
 	RunParams:         "run_params",
 	Podstop:           "podstop",
+	Poststart:         "poststart",
 	Liveness:          "liveness",
 	Readness:          "readness",
 }
