@@ -2,8 +2,8 @@ package models
 
 import "time"
 
-// ApplicationAPIgateway [...]
-type ApplicationAPIgateway struct {
+// ApplicationAPIGateway [...]
+type ApplicationAPIGateway struct {
 	ID          uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`         // 网关ID
 	Name        string `gorm:"column:name;type:varchar(100);not null" json:"name"`                   // 网关名称
 	Desc        string `gorm:"column:desc;type:varchar(255);not null" json:"desc"`                   // 网关描述
@@ -14,12 +14,12 @@ type ApplicationAPIgateway struct {
 }
 
 // TableName get sql table name.获取数据库表名
-func (m *ApplicationAPIgateway) TableName() string {
-	return "application_apigateway"
+func (m *ApplicationAPIGateway) TableName() string {
+	return "application_api_gateway"
 }
 
-// ApplicationAPIgatewayColumns get sql column name.获取数据库列名
-var ApplicationAPIgatewayColumns = struct {
+// ApplicationAPIGatewayColumns get sql column name.获取数据库列名
+var ApplicationAPIGatewayColumns = struct {
 	ID          string
 	Name        string
 	Desc        string
@@ -37,28 +37,30 @@ var ApplicationAPIgatewayColumns = struct {
 	Status:      "status",
 }
 
-// ApplicationAPIgatewayRouters [...]
-type ApplicationAPIgatewayRouters struct {
-	ID           uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`               // 路由ID
-	Name         string `gorm:"column:name;type:varchar(50);not null" json:"name"`                          // 路由名称
-	Desc         string `gorm:"column:desc;type:varchar(255);not null" json:"desc"`                         // 路由描述
-	TeamID       uint64 `gorm:"column:team_id;type:bigint unsigned;not null" json:"teamId"`                 // 团队目录ID
-	Host         string `gorm:"column:host;type:varchar(150);not null" json:"host"`                         // 路由域名
-	URI          string `gorm:"column:uri;type:varchar(255);not null" json:"uri"`                           // 路由路径
-	Websocket    uint8  `gorm:"column:websocket;type:tinyint unsigned;not null;default:0" json:"websocket"` // 是否开启websocket
-	UpstreamType string `gorm:"column:upstream_type;type:varchar(20);not null" json:"upstreamType"`         // service | node
-	Loadbalance  string `gorm:"column:loadbalance;type:varchar(255);not null" json:"loadbalance"`           // roundrobin | chash | ewma | least_conn
-	Nodes        string `gorm:"column:nodes;type:varchar(255);not null" json:"nodes"`                       // {,   "127.0.0.1:1980": 1,,   "127.0.0.1:1981": 1,}
-	Timeout      uint   `gorm:"column:timeout;type:int unsigned;not null" json:"timeout"`                   // 超时时间
+// ApplicationAPIGatewayRouters [...]
+type ApplicationAPIGatewayRouters struct {
+	ID           uint64  `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`               // 路由ID
+	Name         string  `gorm:"column:name;type:varchar(50);not null" json:"name"`                          // 路由名称
+	Desc         string  `gorm:"column:desc;type:varchar(255);not null" json:"desc"`                         // 路由描述
+	TeamID       uint64  `gorm:"column:team_id;type:bigint unsigned;not null" json:"teamId"`                 // 团队目录ID
+	Host         string  `gorm:"column:host;type:varchar(150);not null" json:"host"`                         // 路由域名
+	URI          string  `gorm:"column:uri;type:varchar(255);not null" json:"uri"`                           // 路由路径
+	Websocket    uint8   `gorm:"column:websocket;type:tinyint unsigned;not null;default:0" json:"websocket"` // 是否开启websocket
+	UpstreamType string  `gorm:"column:upstream_type;type:varchar(20);not null" json:"upstreamType"`         // service | node
+	Loadbalance  string  `gorm:"column:loadbalance;type:varchar(255);not null" json:"loadbalance"`           // roundrobin | chash | ewma | least_conn
+	Nodes        string  `gorm:"column:nodes;type:varchar(255);not null" json:"nodes"`                       // {,   "127.0.0.1:1980": 1,,   "127.0.0.1:1981": 1,}
+	Timeout      uint    `gorm:"column:timeout;type:int unsigned;not null" json:"timeout"`                   // 超时时间
+	DeploymentID *uint64 `gorm:"column:deployment_id;type:bigint unsigned" json:"deploymentId"`              // 应用部署ID
+	Status       uint8   `gorm:"column:status;type:tinyint unsigned;not null" json:"status"`                 // 状态
 }
 
 // TableName get sql table name.获取数据库表名
-func (m *ApplicationAPIgatewayRouters) TableName() string {
-	return "application_apigateway_routers"
+func (m *ApplicationAPIGatewayRouters) TableName() string {
+	return "application_api_gateway_routers"
 }
 
-// ApplicationAPIgatewayRoutersColumns get sql column name.获取数据库列名
-var ApplicationAPIgatewayRoutersColumns = struct {
+// ApplicationAPIGatewayRoutersColumns get sql column name.获取数据库列名
+var ApplicationAPIGatewayRoutersColumns = struct {
 	ID           string
 	Name         string
 	Desc         string
@@ -70,6 +72,8 @@ var ApplicationAPIgatewayRoutersColumns = struct {
 	Loadbalance  string
 	Nodes        string
 	Timeout      string
+	DeploymentID string
+	Status       string
 }{
 	ID:           "id",
 	Name:         "name",
@@ -82,10 +86,12 @@ var ApplicationAPIgatewayRoutersColumns = struct {
 	Loadbalance:  "loadbalance",
 	Nodes:        "nodes",
 	Timeout:      "timeout",
+	DeploymentID: "deployment_id",
+	Status:       "status",
 }
 
-// ApplicationAPIgatewayTeams [...]
-type ApplicationAPIgatewayTeams struct {
+// ApplicationAPIGatewayTeams [...]
+type ApplicationAPIGatewayTeams struct {
 	ID        uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`     // 网关团队目录ID
 	Name      string `gorm:"column:name;type:varchar(100);not null" json:"name"`               // 网关团队目录名称
 	GatewayID uint64 `gorm:"column:gateway_id;type:bigint unsigned;not null" json:"gatewayId"` // 网关ID
@@ -95,12 +101,12 @@ type ApplicationAPIgatewayTeams struct {
 }
 
 // TableName get sql table name.获取数据库表名
-func (m *ApplicationAPIgatewayTeams) TableName() string {
-	return "application_apigateway_teams"
+func (m *ApplicationAPIGatewayTeams) TableName() string {
+	return "application_api_gateway_teams"
 }
 
-// ApplicationAPIgatewayTeamsColumns get sql column name.获取数据库列名
-var ApplicationAPIgatewayTeamsColumns = struct {
+// ApplicationAPIGatewayTeamsColumns get sql column name.获取数据库列名
+var ApplicationAPIGatewayTeamsColumns = struct {
 	ID        string
 	Name      string
 	GatewayID string
@@ -753,6 +759,44 @@ var SgrTenantConfigMapColumns = struct {
 	UpdateTime:   "update_time",
 	Type:         "type",
 	Data:         "data",
+}
+
+// SgrTenantDeploymentPreCheck 容器启动检查
+type SgrTenantDeploymentPreCheck struct {
+	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	Type         string     `gorm:"column:type;type:varchar(50);not null" json:"type"`        // 检查类型READINESS/LIVENESS
+	Port         uint       `gorm:"column:port;type:int unsigned;not null" json:"port"`       // 检查端口
+	URL          string     `gorm:"column:url;type:varchar(500);not null" json:"url"`         // 请求路径
+	DpID         uint64     `gorm:"column:dp_id;type:bigint unsigned;not null" json:"dpId"`   // 部署id
+	ReqType      string     `gorm:"column:req_type;type:varchar(20);not null" json:"reqType"` // HTTP/TCP
+	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;default:CURRENT_TIMESTAMP" json:"creationTime"`
+	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime;default:CURRENT_TIMESTAMP" json:"updateTime"`
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *SgrTenantDeploymentPreCheck) TableName() string {
+	return "sgr_tenant_deployment_pre_check"
+}
+
+// SgrTenantDeploymentPreCheckColumns get sql column name.获取数据库列名
+var SgrTenantDeploymentPreCheckColumns = struct {
+	ID           string
+	Type         string
+	Port         string
+	URL          string
+	DpID         string
+	ReqType      string
+	CreationTime string
+	UpdateTime   string
+}{
+	ID:           "id",
+	Type:         "type",
+	Port:         "port",
+	URL:          "url",
+	DpID:         "dp_id",
+	ReqType:      "req_type",
+	CreationTime: "creation_time",
+	UpdateTime:   "update_time",
 }
 
 // SgrTenantDeploymentRecord 部署发布记录
