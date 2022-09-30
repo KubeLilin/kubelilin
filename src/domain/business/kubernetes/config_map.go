@@ -37,6 +37,10 @@ func (cs *ConfigMapSupervisor) QueryConfigList(req req.ConfigMapPageReq) []model
 	return configMapList
 }
 
+func (cs *ConfigMapSupervisor) CreateConfig() {
+
+}
+
 func (cs *ConfigMapSupervisor) ApplyConfigMap(client corev1.CoreV1Interface, cp *models.SgrTenantConfigMap) (interface{}, error) {
 	namespace := &models.SgrTenantNamespace{}
 	dbErr := cs.db.Model(models.SgrTenantNamespace{}).Where("id=?", cp.NamespaceID).First(namespace)
