@@ -37,7 +37,7 @@ func (cs *ConfigMapSupervisor) QueryConfigList(req req.ConfigMapPageReq) []model
 	return configMapList
 }
 
-func (cs *ConfigMapSupervisor) CreateConfig() {
+func (cs *ConfigMapSupervisor) CreateConfig(req req.CreateConfigMapReq) {
 
 }
 

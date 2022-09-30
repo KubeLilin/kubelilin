@@ -9,7 +9,7 @@ type ApplicationAPIgateway struct {
 	Desc        string `gorm:"column:desc;type:varchar(255);not null" json:"desc"`                   // 网关描述
 	ClusterID   uint64 `gorm:"column:cluster_id;type:bigint unsigned;not null" json:"clusterId"`     // 集群ID
 	AdminURI    string `gorm:"column:admin_uri;type:varchar(255);not null" json:"adminUri"`          // 网关admin api
-	AccessToken string `gorm:"column:access _token;type:varchar(255);not null" json:"AccessToken "`  // 网关 admin api访问token
+	AccessToken string `gorm:"column:access_token;type:varchar(255);not null" json:"accessToken"`    // 网关 admin api访问token
 	Status      uint8  `gorm:"column:status;type:tinyint unsigned;not null;default:1" json:"status"` // 网关状态
 }
 
@@ -33,7 +33,7 @@ var ApplicationAPIgatewayColumns = struct {
 	Desc:        "desc",
 	ClusterID:   "cluster_id",
 	AdminURI:    "admin_uri",
-	AccessToken: "access _token",
+	AccessToken: "access_token",
 	Status:      "status",
 }
 
