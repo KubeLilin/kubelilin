@@ -33,7 +33,6 @@ func init() {
 			serviceCollection.AddTransient(kubernetes.NewClusterService)
 			serviceCollection.AddTransient(app.NewApplicationService)
 			serviceCollection.AddTransient(app.NewDeploymentService)
-			serviceCollection.AddTransient(app.NewVcsService)
 			serviceCollection.AddSingleton(app.NewPipelineService)
 			serviceCollection.AddTransient(app.NewServiceConnectionService)
 			serviceCollection.AddTransient(app.NewDevopsService)

@@ -187,6 +187,7 @@ func (ds *DeploymentSupervisor) ApplyDeployment(clientSet *kubernetes.Clientset,
 	spec.Selector = &appsapplymetav1.LabelSelectorApplyConfiguration{
 		MatchLabels: metaLabels,
 	}
+
 	//region  template
 	specTemplate := corev1.PodTemplateSpecApplyConfiguration{}
 	specTemplate.WithNamespace(namespace.Namespace)
