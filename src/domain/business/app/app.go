@@ -14,12 +14,12 @@ import (
 
 type ApplicationService struct {
 	db         *gorm.DB
-	VCSService VcsService
+	vcsService VcsService
 	config     abstractions.IConfiguration
 }
 
-func NewApplicationService(db *gorm.DB, gogsVcsService *GogsVcsService, config abstractions.IConfiguration) *ApplicationService {
-	return &ApplicationService{db: db, VCSService: gogsVcsService, config: config}
+func NewApplicationService(db *gorm.DB, config abstractions.IConfiguration) *ApplicationService {
+	return &ApplicationService{db: db, config: config}
 }
 
 func (s *ApplicationService) CreateApp(req *req.AppReq) (error, *models.SgrTenantApplication) {
@@ -40,10 +40,6 @@ func (s *ApplicationService) CreateApp(req *req.AppReq) (error, *models.SgrTenan
 		if dbRes.Error != nil {
 			return nil
 		}
-		//_, repoErr := s.VCSService.CreateTenantRepository(req.TenantID, req.Name)
-		//if repoErr != nil {
-		//	return repoErr
-		//}
 		return nil
 	})
 	//创建git仓库
@@ -126,7 +122,7 @@ func (s *ApplicationService) InitGitRepository(tenantId uint64, appName string) 
 		return "", dberr.Error
 	}
 	sb := strings.Builder{}
-	sb.WriteString(s.config.GetString(GIT_URL))
+	sb.WriteString(s.config.GetString("GIT_URL"))
 	sb.WriteString("/")
 	sb.WriteString(tenant.TCode)
 	sb.WriteString("/")

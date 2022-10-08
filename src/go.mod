@@ -3,7 +3,6 @@ module kubelilin
 go 1.18
 
 require (
-	github.com/ahmetb/go-linq/v3 v3.2.0
 	github.com/drone/go-scm v1.20.0
 	github.com/fasthttp/websocket v1.5.0
 	github.com/gogs/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
