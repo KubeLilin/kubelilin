@@ -3,7 +3,7 @@ package controllers
 import (
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	"kubelilin/domain/business/tenant"
 	"strconv"
 )
@@ -17,7 +17,7 @@ func NewTenantRoleController(service *tenant.TenantRoleService) *TenantRoleContr
 	return &TenantRoleController{service: service}
 }
 
-func (c *TenantRoleController) PostTenantRole(req *req.TenantRoleReq) mvc.ApiResult {
+func (c *TenantRoleController) PostTenantRole(req *requests.TenantRoleReq) mvc.ApiResult {
 	req.Status = 1
 	success, res := c.service.CreateTenantRole(req)
 	return mvc.ApiResult{
@@ -27,7 +27,7 @@ func (c *TenantRoleController) PostTenantRole(req *req.TenantRoleReq) mvc.ApiRes
 	}
 }
 
-func (c *TenantRoleController) PostUpdateTenantRole(req *req.TenantRoleReq) mvc.ApiResult {
+func (c *TenantRoleController) PostUpdateTenantRole(req *requests.TenantRoleReq) mvc.ApiResult {
 	req.Status = 1
 	success, res := c.service.UpdateTenantRole(req)
 	return mvc.ApiResult{

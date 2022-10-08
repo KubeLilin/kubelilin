@@ -3,7 +3,7 @@ package tenant
 import (
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
 	"kubelilin/pkg/page"
@@ -51,7 +51,7 @@ func (sms *SysMenuService) DelMenu(id int64) bool {
 	return res.RowsAffected > 0
 }
 
-func (sms *SysMenuService) QueryMenuList(menuReq *req.SysMenuReq) *page.Page {
+func (sms *SysMenuService) QueryMenuList(menuReq *requests.SysMenuReq) *page.Page {
 	data := &[]models.SgrSysMenu{}
 	params := &models.SgrSysMenu{}
 	err := copier.Copy(menuReq, params)

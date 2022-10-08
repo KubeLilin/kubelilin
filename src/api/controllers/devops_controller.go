@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"kubelilin/api/req"
+	requests2 "kubelilin/api/dto/requests"
 	"kubelilin/domain/business/app"
 	"kubelilin/utils"
 )
@@ -18,8 +18,8 @@ func NewDevopsController(devops *app.DevopsService) *DevopsController {
 	return &DevopsController{devopsService: devops}
 }
 
-func (controller DevopsController) PostCreateProject(ctx *context.HttpContext, request *req.NewProject) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+func (controller DevopsController) PostCreateProject(ctx *context.HttpContext, request *requests2.NewProject) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
 	err := controller.devopsService.CreateProject(request)
 	if err != nil {
@@ -28,8 +28,8 @@ func (controller DevopsController) PostCreateProject(ctx *context.HttpContext, r
 	return mvc.Success("ok")
 }
 
-func (controller DevopsController) PostEditProject(ctx *context.HttpContext, request *req.NewProject) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+func (controller DevopsController) PostEditProject(ctx *context.HttpContext, request *requests2.NewProject) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
 	err := controller.devopsService.EditProject(request)
 	if err != nil {
@@ -47,8 +47,8 @@ func (controller DevopsController) DeleteProject(ctx *context.HttpContext) mvc.A
 	return mvc.Success("ok")
 }
 
-func (controller DevopsController) GetProjectList(ctx *context.HttpContext, request *req.DevopsProjectReq) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+func (controller DevopsController) GetProjectList(ctx *context.HttpContext, request *requests2.DevopsProjectReq) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
 	err, res := controller.devopsService.GetProjectList(request)
 	if err != nil {
@@ -57,8 +57,8 @@ func (controller DevopsController) GetProjectList(ctx *context.HttpContext, requ
 	return mvc.Success(res)
 }
 
-func (controller DevopsController) GetAppList(ctx *context.HttpContext, request *req.AppReq) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+func (controller DevopsController) GetAppList(ctx *context.HttpContext, request *requests2.AppReq) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
 	err, res := controller.devopsService.GetAppList(request)
 	fmt.Println(res.Data)

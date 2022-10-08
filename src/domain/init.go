@@ -44,13 +44,7 @@ func init() {
 }
 
 func injectionJenkinsBuilder(config abstractions.IConfiguration, serviceCollection *dependencyinjection.ServiceCollection) {
-	jenkinsUrl := config.GetString("pipeline.jenkins.url")
-	jenkinsToken := config.GetString("pipeline.jenkins.token")
-	jenkinsUser := config.GetString("pipeline.jenkins.username")
-	jenkinsNamespace := config.GetString("pipeline.jenkins.k8s-namespace")
-
 	serviceCollection.AddSingleton(func() *pipelineV1.Builder {
-		return pipelineV1.NewBuilder().UseJenkins(jenkinsUrl, jenkinsUser, jenkinsToken).
-			UseKubernetes(jenkinsNamespace)
+		return pipelineV1.NewBuilder()
 	})
 }

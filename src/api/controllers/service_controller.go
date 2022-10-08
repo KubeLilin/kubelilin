@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"kubelilin/api/req"
+	requests2 "kubelilin/api/dto/requests"
 	"kubelilin/domain/business/kubernetes"
 )
 
@@ -23,11 +23,11 @@ func NewServiceController(clusterService *kubernetes.ClusterService, svcSupervis
 }
 
 func (c *ServiceController) GetServiceList(ctx *context.HttpContext) mvc.ApiResult {
-	reqParam := req.ServiceRequest{}
+	reqParam := requests2.ServiceRequest{}
 	_ = ctx.BindWithUri(&reqParam)
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	reqParam.TenantId = userInfo.TenantID
-	//userInfo := req.GetUserInfo(ctx)
+	//userInfo := requests.GetUserInfo(ctx)
 	list, err := c.svcSupervisor.QueryServiceList(reqParam)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
@@ -36,11 +36,11 @@ func (c *ServiceController) GetServiceList(ctx *context.HttpContext) mvc.ApiResu
 }
 
 func (c *ServiceController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
-	reqParam := req.ServiceRequest{}
+	reqParam := requests2.ServiceRequest{}
 	_ = ctx.BindWithUri(&reqParam)
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	reqParam.TenantId = userInfo.TenantID
-	//userInfo := req.GetUserInfo(ctx)
+	//userInfo := requests.GetUserInfo(ctx)
 	list, err := c.svcSupervisor.QueryServiceInfo(reqParam)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
@@ -49,13 +49,13 @@ func (c *ServiceController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
 }
 
 func (c *ServiceController) GetNamespaceByTenant(ctx *context.HttpContext) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	list := c.svcSupervisor.QueryNameSpaceByTenant(userInfo.TenantID)
 	return mvc.Success(list)
 }
 
-func (c *ServiceController) PostChangeService(ctx *context.HttpContext, svcReq *req.ServiceInfoReq) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+func (c *ServiceController) PostChangeService(ctx *context.HttpContext, svcReq *requests2.ServiceInfoReq) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	svcReq.TenantId = userInfo.TenantID
 	marshal, _ := json.Marshal(svcReq)
 	fmt.Println(string(marshal))

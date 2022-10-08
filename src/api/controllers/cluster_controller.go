@@ -6,7 +6,7 @@ import (
 	"github.com/yoyofx/yoyogo/web/mvc"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	metricsv "k8s.io/metrics/pkg/client/clientset/versioned"
-	"kubelilin/api/req"
+	requests2 "kubelilin/api/dto/requests"
 	"kubelilin/domain/business/kubernetes"
 	"kubelilin/domain/dto"
 	"kubelilin/utils"
@@ -27,7 +27,7 @@ func (controller ClusterController) GetPods(ctx *context.HttpContext) mvc.ApiRes
 	k8sapp := ctx.Input.QueryDefault("app", "")
 	k8snode := ctx.Input.QueryDefault("node", "")
 
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	cid, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
 	client, clientErr := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
 	if clientErr != nil {
@@ -70,7 +70,7 @@ func (controller ClusterController) GetPods(ctx *context.HttpContext) mvc.ApiRes
 func (controller ClusterController) GetNamespaces(ctx *context.HttpContext) mvc.ApiResult {
 	//tenantId := ctx.Input.QueryDefault("tid","")
 	// get k8s cluster client by tenant id
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	strCid := ctx.Input.QueryDefault("cid", "0")
 	cid, _ := strconv.ParseUint(strCid, 10, 64)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
@@ -82,7 +82,7 @@ func (controller ClusterController) GetNamespaces(ctx *context.HttpContext) mvc.
 func (controller ClusterController) GetNamespacesFromDB(ctx *context.HttpContext) mvc.ApiResult {
 	//tenantId := ctx.Input.QueryDefault("tid","")
 	// get k8s cluster client by tenant id
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	strCid := ctx.Input.QueryDefault("cid", "0")
 	cid, _ := strconv.Atoi(strCid)
 	res := controller.clusterService.GetNameSpacesFromDB(userInfo.TenantID, cid)
@@ -90,7 +90,7 @@ func (controller ClusterController) GetNamespacesFromDB(ctx *context.HttpContext
 }
 
 func (controller ClusterController) GetNamespaceList(ctx *context.HttpContext) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	cid, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
 	tenantName := ctx.Input.QueryDefault("tenant", "")
 	pageIndex, _ := utils.StringToInt(ctx.Input.QueryDefault("current", "0"))
@@ -112,7 +112,7 @@ func (controller ClusterController) GetNamespaceList(ctx *context.HttpContext) m
 
 func (controller ClusterController) GetDeployments(ctx *context.HttpContext) mvc.ApiResult {
 	namespace := ctx.Input.QueryDefault("namespace", "")
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	strCid := ctx.Input.QueryDefault("cid", "0")
 	cid, _ := strconv.ParseUint(strCid, 10, 64)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
@@ -122,7 +122,7 @@ func (controller ClusterController) GetDeployments(ctx *context.HttpContext) mvc
 }
 
 func (controller ClusterController) GetNodes(ctx *context.HttpContext) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	strCid := ctx.Input.QueryDefault("cid", "0")
 	cid, _ := strconv.ParseUint(strCid, 10, 64)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
@@ -132,19 +132,19 @@ func (controller ClusterController) GetNodes(ctx *context.HttpContext) mvc.ApiRe
 }
 
 func (controller ClusterController) GetList(ctx *context.HttpContext) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	clusterName := ctx.Input.Query("name")
 	tenantClusterList, _ := controller.clusterService.GetClustersByTenant(userInfo.TenantID, clusterName)
 	return controller.OK(tenantClusterList)
 }
 
-func (controller ClusterController) PostClusterByConfig(ctx *context.HttpContext, request *req.ImportClusterReq) mvc.ApiResult {
+func (controller ClusterController) PostClusterByConfig(ctx *context.HttpContext, request *requests2.ImportClusterReq) mvc.ApiResult {
 	_, k8sFile, err := ctx.Input.FormFile("file1")
 	if err != nil {
 		return controller.Fail(err.Error())
 	}
 	configFile, _ := k8sFile.Open()
-	//userInfo := req.GetUserInfo(ctx)
+	//userInfo := requests.GetUserInfo(ctx)
 	// 只能导入到 平台租户中，再进行分配
 	config, err := controller.clusterService.ImportK8sConfig(configFile, request.NickName, uint64(1))
 	if err == nil {
@@ -166,7 +166,7 @@ func (controller ClusterController) DeleteDelClusterInfo(ctx *context.HttpContex
 }
 
 func (controller ClusterController) PutNewNamespace(ctx *context.HttpContext) mvc.ApiResult {
-	//userInfo := req.GetUserInfo(ctx)
+	//userInfo := requests.GetUserInfo(ctx)
 	cid := ctx.Input.QueryDefault("cid", "0")
 	clusterId, _ := strconv.ParseUint(cid, 10, 64)
 	namespace := ctx.Input.QueryDefault("namespace", "default")
@@ -191,7 +191,7 @@ func (controller ClusterController) PutNewNamespace(ctx *context.HttpContext) mv
 }
 
 func (controller ClusterController) PutNewK8sNamespace(ctx *context.HttpContext) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
 	namespace := ctx.Input.QueryDefault("namespace", "")
 

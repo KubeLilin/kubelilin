@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/yoyofx/yoyogo/abstractions"
 	"gorm.io/gorm"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
 	pipelineV1 "kubelilin/pkg/pipeline"
@@ -70,7 +70,7 @@ func (pipelineService *PipelineService) DeleteBuildImage(id uint64) error {
 /*
 NewPipeline 新建流水线(仅名称)
 */
-func (pipelineService *PipelineService) NewPipeline(req *req.AppNewPipelineReq) (error, *models.SgrTenantApplicationPipelines) {
+func (pipelineService *PipelineService) NewPipeline(req *requests.AppNewPipelineReq) (error, *models.SgrTenantApplicationPipelines) {
 	var exitCount int64
 	pipelineService.db.Model(&models.SgrTenantApplicationPipelines{}).Where("appid=? and name=?", req.AppId, req.Name).Count(&exitCount)
 	if exitCount > 0 {
@@ -118,7 +118,7 @@ func (pipelineService *PipelineService) GetPipelineById(id uint64) (dto.Pipeline
 /*
 UpdatePipeline 更新流水线基本信息
 */
-func (pipelineService *PipelineService) UpdatePipeline(request *req.EditPipelineReq) error {
+func (pipelineService *PipelineService) UpdatePipeline(request *requests.EditPipelineReq) error {
 	var pipelineInfo models.SgrTenantApplicationPipelines
 	dbRes := pipelineService.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).First(&pipelineInfo)
 	if dbRes.Error != nil {
@@ -138,7 +138,7 @@ func (pipelineService *PipelineService) UpdatePipeline(request *req.EditPipeline
 	return nil
 }
 
-func (pipelineService *PipelineService) UpdateDSL(request *req.EditPipelineReq) error {
+func (pipelineService *PipelineService) UpdateDSL(request *requests.EditPipelineReq) error {
 	// Generate pipeline name and docker image name.
 	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
 	// pipeline json from frontend
@@ -292,14 +292,14 @@ func getDefaultBuildImageByLanguage(languageName string) string {
 	return buildImage
 }
 
-func (pipelineService *PipelineService) AbortPipeline(request *req.AbortPipelineReq) error {
+func (pipelineService *PipelineService) AbortPipeline(request *requests.AbortPipelineReq) error {
 	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
 	builder := pipelineService.jenkinsBuilder
 	pipeline, _ := builder.Build()
 	return pipeline.Abort(pipelineName, request.TaskId)
 }
 
-func (pipelineService *PipelineService) RunPipeline(request *req.RunPipelineReq) (int64, error) {
+func (pipelineService *PipelineService) RunPipeline(request *requests.RunPipelineReq) (int64, error) {
 	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
 	builder := pipelineService.jenkinsBuilder
 	pipeline, _ := builder.Build()
@@ -318,7 +318,7 @@ func (pipelineService *PipelineService) RunPipeline(request *req.RunPipelineReq)
 	return taskId, err
 }
 
-func (pipelineService *PipelineService) UpdatePipelineStatus(request *req.PipelineStatusReq) error {
+func (pipelineService *PipelineService) UpdatePipelineStatus(request *requests.PipelineStatusReq) error {
 	// update databse
 	var pipelineInfo models.SgrTenantApplicationPipelines
 	_ = pipelineService.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).First(&pipelineInfo)
@@ -335,7 +335,7 @@ func (pipelineService *PipelineService) DeletePipeline(pipelineId uint64) error 
 	return pipelineService.db.Exec(sql, pipelineId).Error
 }
 
-func (pipelineService *PipelineService) GetDetails(request *req.PipelineDetailsReq) (*pipelineV1.JobInfo, error) {
+func (pipelineService *PipelineService) GetDetails(request *requests.PipelineDetailsReq) (*pipelineV1.JobInfo, error) {
 	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
 	builder := pipelineService.jenkinsBuilder
 	pipeline, _ := builder.Build()
@@ -343,7 +343,7 @@ func (pipelineService *PipelineService) GetDetails(request *req.PipelineDetailsR
 
 	//job1.Result (IN_PROGRESS, SUCCESS , FAILED , ABORTED)
 }
-func (pipelineService *PipelineService) GetLogs(request *req.PipelineDetailsReq) (string, error) {
+func (pipelineService *PipelineService) GetLogs(request *requests.PipelineDetailsReq) (string, error) {
 	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
 	builder := pipelineService.jenkinsBuilder
 	pipeline, _ := builder.Build()

@@ -6,7 +6,7 @@ import (
 	"github.com/yoyofx/yoyogo/utils/jwt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	"kubelilin/domain/business/tenant"
 	dbmodels "kubelilin/domain/database/models"
 	"strconv"
@@ -33,7 +33,7 @@ func NewUserController(configuration abstractions.IConfiguration, service *tenan
 		}{secretKey: secretKey, expires: expires}}
 }
 
-func (user *UserController) PostLogin(ctx *context.HttpContext, loginRequest *req.LoginRequest) mvc.ApiResult {
+func (user *UserController) PostLogin(ctx *context.HttpContext, loginRequest *requests.LoginRequest) mvc.ApiResult {
 	if loginRequest.UserName == "" || loginRequest.Password == "" {
 		ctx.Output.SetStatus(401)
 		return user.Fail("no username or password")
@@ -42,12 +42,12 @@ func (user *UserController) PostLogin(ctx *context.HttpContext, loginRequest *re
 	queryUser := user.Service.GetUserByNameAndPassword(loginRequest.UserName, pwd)
 
 	if queryUser == nil {
-		return mvc.ApiResult{Success: true, Message: "can not find user be", Data: req.LoginResult{Status: "false"}}
+		return mvc.ApiResult{Success: true, Message: "can not find user be", Data: requests.LoginResult{Status: "false"}}
 	}
 
 	exp := time.Now().Add(time.Duration(user.config.expires) * time.Second)
 
-	claims := &req.JwtCustomClaims{
+	claims := &requests.JwtCustomClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: exp.Unix(),
 			Issuer:    queryUser.UserName,
@@ -58,7 +58,7 @@ func (user *UserController) PostLogin(ctx *context.HttpContext, loginRequest *re
 
 	token, _ := jwt.CreateCustomToken([]byte(user.config.secretKey), claims)
 
-	return user.OK(req.LoginResult{Status: "ok", UserId: queryUser.ID, LoginType: loginRequest.LoginType, Authority: "admin", Token: token, Expires: exp.Unix()})
+	return user.OK(requests.LoginResult{Status: "ok", UserId: queryUser.ID, LoginType: loginRequest.LoginType, Authority: "admin", Token: token, Expires: exp.Unix()})
 }
 
 func (user *UserController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
@@ -75,7 +75,7 @@ func (user *UserController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
 	return mvc.ApiResult{
 		Success: userInfo != nil,
 		Message: "获取用户信息",
-		Data: req.UserInfoResponse{
+		Data: requests.UserInfoResponse{
 			Name:        userInfo.UserName,
 			Avatar:      "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png",
 			Userid:      strconv.FormatUint(userInfo.ID, 10),
@@ -164,7 +164,7 @@ func (user *UserController) PutStatus(ctx *context.HttpContext) mvc.ApiResult {
 }
 
 func (user *UserController) GetList(ctx *context.HttpContext) mvc.ApiResult {
-	request := &req.QueryUserRequest{}
+	request := &requests.QueryUserRequest{}
 	err := ctx.BindWithUri(request)
 	if err != nil {
 		panic(err)

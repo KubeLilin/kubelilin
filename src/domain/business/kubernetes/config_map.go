@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 	configCorev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	"kubelilin/domain/database/models"
 	"kubelilin/pkg/page"
 	"strconv"
@@ -24,7 +24,7 @@ func NewConfigMapSupervisor(db *gorm.DB, clusterService *ClusterService) *Config
 	}
 }
 
-func (cs *ConfigMapSupervisor) QueryConfigList(req req.ConfigMapPageReq) []models.SgrTenantConfigMap {
+func (cs *ConfigMapSupervisor) QueryConfigList(req requests.ConfigMapPageReq) []models.SgrTenantConfigMap {
 	var configMapList []models.SgrTenantConfigMap
 	sb := strings.Builder{}
 	sb.WriteString("select * from sgr_tenant_config_map ")
@@ -37,7 +37,7 @@ func (cs *ConfigMapSupervisor) QueryConfigList(req req.ConfigMapPageReq) []model
 	return configMapList
 }
 
-func (cs *ConfigMapSupervisor) CreateConfig(req req.CreateConfigMapReq) {
+func (cs *ConfigMapSupervisor) CreateConfig(req requests.CreateConfigMapReq) {
 
 }
 

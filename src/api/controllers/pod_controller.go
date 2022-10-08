@@ -6,7 +6,7 @@ import (
 	"github.com/yoyofx/yoyogo/web"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	"kubelilin/domain/business/kubernetes"
 )
 
@@ -20,7 +20,7 @@ func NewPodController(clusterService *kubernetes.ClusterService) *PodController 
 }
 
 func (controller PodController) GetTerminal(ctx *context.HttpContext) {
-	var request req.PodTerminalExecRequest
+	var request requests.PodTerminalExecRequest
 	_ = ctx.BindWithUri(&request)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(request.TenantId, request.ClusterId)
 	config, _ := controller.clusterService.GetClusterConfig(request.TenantId, request.ClusterId)

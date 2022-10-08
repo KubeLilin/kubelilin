@@ -3,7 +3,7 @@ package controllers
 import (
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"kubelilin/api/req"
+	requests2 "kubelilin/api/dto/requests"
 	"kubelilin/domain/business/app"
 	"kubelilin/utils"
 	"strconv"
@@ -20,8 +20,8 @@ func NewServiceConnectionController(svc *app.ServiceConnectionService) *ServiceC
 	}
 }
 
-func (controller *ServiceConnectionController) PostCreateServiceConnection(ctx *context.HttpContext, request *req.ServiceConnectionReq) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+func (controller *ServiceConnectionController) PostCreateServiceConnection(ctx *context.HttpContext, request *requests2.ServiceConnectionReq) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
 	res, err := controller.svc.CreateServiceConnection(request)
 	if err != nil {
@@ -30,7 +30,7 @@ func (controller *ServiceConnectionController) PostCreateServiceConnection(ctx *
 	return mvc.Success(res)
 }
 
-func (controller *ServiceConnectionController) PostUpdateServiceConnection(req *req.ServiceConnectionReq) mvc.ApiResult {
+func (controller *ServiceConnectionController) PostUpdateServiceConnection(req *requests2.ServiceConnectionReq) mvc.ApiResult {
 	res, err := controller.svc.UpdateServiceConnection(req)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
@@ -39,8 +39,8 @@ func (controller *ServiceConnectionController) PostUpdateServiceConnection(req *
 }
 
 func (controller *ServiceConnectionController) GetQueryServiceConnections(ctx *context.HttpContext) mvc.ApiResult {
-	var pageReq req.ServiceConnectionPageReq
-	userInfo := req.GetUserInfo(ctx)
+	var pageReq requests2.ServiceConnectionPageReq
+	userInfo := requests2.GetUserInfo(ctx)
 	ctx.BindWithUri(&pageReq)
 	pageReq.TenantID = userInfo.TenantID
 	res, err := controller.svc.QueryServiceConnections(&pageReq)
@@ -70,7 +70,7 @@ func (controller *ServiceConnectionController) DeleteServiceConnectionInfo(ctx *
 
 func (controller *ServiceConnectionController) GetRepoListByType(ctx *context.HttpContext) mvc.ApiResult {
 	repoType := ctx.Input.Query("repoType")
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	res, err := controller.svc.QueryRepoListByType(userInfo.TenantID, repoType)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())

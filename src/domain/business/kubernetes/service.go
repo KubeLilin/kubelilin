@@ -10,8 +10,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	applycorev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"kubelilin/api/req"
-	"kubelilin/api/res"
+	"kubelilin/api/dto/requests"
+	"kubelilin/api/dto/responses"
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
 	"kubelilin/pkg/page"
@@ -90,7 +90,7 @@ func (svc *ServiceSupervisor) ApplyService(client corev1.CoreV1Interface, dp *mo
 	return k8sService.Apply(context.TODO(), serviceInfo, metav1.ApplyOptions{Force: true, FieldManager: "service-apply-fields"})
 }
 
-func (svc *ServiceSupervisor) QueryServiceList(req req.ServiceRequest) (*page.Page, error) {
+func (svc *ServiceSupervisor) QueryServiceList(req requests.ServiceRequest) (*page.Page, error) {
 	var svcList []dto.ServiceList
 	if req.Namespace == "" {
 		return &page.Page{}, nil
@@ -134,7 +134,7 @@ func (svc *ServiceSupervisor) QueryServiceList(req req.ServiceRequest) (*page.Pa
 	return &res, nil
 }
 
-func (svc *ServiceSupervisor) QueryServiceInfo(req req.ServiceRequest) (*res.ServiceInfo, error) {
+func (svc *ServiceSupervisor) QueryServiceInfo(req requests.ServiceRequest) (*responses.ServiceInfo, error) {
 	if req.Namespace == "" {
 		return nil, errors.New("请传入命名空间")
 	}
@@ -154,7 +154,7 @@ func (svc *ServiceSupervisor) QueryServiceInfo(req req.ServiceRequest) (*res.Ser
 	}
 	selectorStr, err := json.Marshal(svcInfo.Spec.Selector)
 	labelsStr, err := json.Marshal(svcInfo.Labels)
-	service := res.ServiceInfo{
+	service := responses.ServiceInfo{
 		Name:       svcInfo.Name,
 		Namespace:  svcInfo.Namespace,
 		Selector:   string(selectorStr),
@@ -166,13 +166,13 @@ func (svc *ServiceSupervisor) QueryServiceInfo(req req.ServiceRequest) (*res.Ser
 	return &service, err
 }
 
-func (svc *ServiceSupervisor) QueryNameSpaceByTenant(tenantId uint64) []res.NamespaceList {
-	var data = make([]res.NamespaceList, 0)
+func (svc *ServiceSupervisor) QueryNameSpaceByTenant(tenantId uint64) []responses.NamespaceList {
+	var data = make([]responses.NamespaceList, 0)
 	svc.db.Model(&models.SgrTenantNamespace{}).Where("tenant_id=?", tenantId).Find(&data)
 	return data
 }
 
-func (svc *ServiceSupervisor) ChangeService(svcReq *req.ServiceInfoReq) error {
+func (svc *ServiceSupervisor) ChangeService(svcReq *requests.ServiceInfoReq) error {
 	if svcReq.Namespace == "" {
 		return errors.New("请传入命名空间")
 	}

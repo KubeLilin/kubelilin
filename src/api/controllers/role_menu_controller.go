@@ -3,7 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	"kubelilin/domain/business/tenant"
 )
 
@@ -18,7 +18,7 @@ func NewRoleMenuController(service *tenant.RoleMenuService) *RoleMenuController 
 	}
 }
 
-func (c *RoleMenuController) PostRoleMenuMap(req *req.RoleMenuListReq) mvc.ApiResult {
+func (c *RoleMenuController) PostRoleMenuMap(req *requests.RoleMenuListReq) mvc.ApiResult {
 	fmt.Println(req)
 	res := c.service.CreateRoleMenuMap(req)
 	msg := "操作成功"

@@ -15,8 +15,8 @@ import (
 	corev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	appsapplymetav1 "k8s.io/client-go/applyconfigurations/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"kubelilin/api/req"
-	"kubelilin/api/res"
+	"kubelilin/api/dto/requests"
+	"kubelilin/api/dto/responses"
 	"kubelilin/domain/database/models"
 	"kubelilin/pkg/page"
 	"strconv"
@@ -54,7 +54,7 @@ func NewDeploymentSupervisor(db *gorm.DB, clusterService *ClusterService, k8sSer
 	}
 }
 
-func (ds *DeploymentSupervisor) ExecuteDeployment(execReq *req.ExecDeploymentRequest) (interface{}, error) {
+func (ds *DeploymentSupervisor) ExecuteDeployment(execReq *requests.ExecDeploymentRequest) (interface{}, error) {
 	//region 参数校验
 	if execReq.DpId == 0 {
 		return nil, errors.New("未接收到部署ID")
@@ -293,7 +293,7 @@ func injectionContainerEnv(envJson string) []corev1.EnvVarApplyConfiguration {
 
 	//region 添加录入对系统环境变量
 	if envJson != "" {
-		var envArr []req.DeploymentEnv
+		var envArr []requests.DeploymentEnv
 		envJsonErr := json.Unmarshal([]byte(envJson), &envArr)
 		if envJsonErr == nil {
 			for _, x := range envArr {
@@ -382,7 +382,7 @@ func (ds *DeploymentSupervisor) ReleaseRecord(record models.SgrTenantDeploymentR
 }
 
 func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, level string, req *page.PageRequest) (error, *page.Page) {
-	var res []res.DeploymentReleaseRecordRes
+	var res []responses.DeploymentReleaseRecordRes
 	condition := ds.db.Model(models.SgrTenantDeploymentRecord{})
 	var params []interface{}
 	params = append(params, appId)
@@ -448,8 +448,8 @@ func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, level str
 //	podSpec.Containers = containers
 //	deploymentDatum.Spec = spec
 //	//endregion
-//	res, err := k8sDeployment.Create(context.TODO(), &deploymentDatum, metav1.CreateOptions{})
-//	return res, err
+//	responses, err := k8sDeployment.Create(context.TODO(), &deploymentDatum, metav1.CreateOptions{})
+//	return responses, err
 //}
 //
 //func (ds *DeploymentSupervisor) InitAppsV1Beta1Deployment(client appsv1beta1client.AppsV1beta1Interface, dp models.SgrTenantDeployments, dpc models.SgrTenantDeploymentsContainers) (interface{}, error) {
@@ -492,8 +492,8 @@ func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, level str
 //	podSpec.Containers = containers
 //	deploymentDatum.Spec = spec
 //	//endregion
-//	res, err := k8sDeployment.Create(context.TODO(), &deploymentDatum, metav1.CreateOptions{})
-//	return res, err
+//	responses, err := k8sDeployment.Create(context.TODO(), &deploymentDatum, metav1.CreateOptions{})
+//	return responses, err
 //}
 //
 //func (ds *DeploymentSupervisor) InitAppsV1Beta2Deployment(client appsv1beta2client.AppsV1beta2Interface, dp models.SgrTenantDeployments, dpc models.SgrTenantDeploymentsContainers) (interface{}, error) {
@@ -540,8 +540,8 @@ func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, level str
 //	//endregion
 //	deploymentDatum.Spec = spec
 //
-//	res, err := k8sDeployment.Create(context.TODO(), &deploymentDatum, metav1.CreateOptions{})
-//	return res, err
+//	responses, err := k8sDeployment.Create(context.TODO(), &deploymentDatum, metav1.CreateOptions{})
+//	return responses, err
 //}
 //
 //func (ds *DeploymentSupervisor) InitAppsV1Deployment(client appsv1client.AppsV1Interface, dp models.SgrTenantDeployments, dpc models.SgrTenantDeploymentsContainers) (interface{}, error) {
@@ -588,8 +588,8 @@ func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, level str
 //	deploymentDatum.Spec = spec
 //	jsonStr, _ := json.Marshal(deploymentDatum)
 //	fmt.Println(string(jsonStr))
-//	res, err := k8sDeployment.Create(context.TODO(), &deploymentDatum, metav1.CreateOptions{})
-//	return res, err
+//	responses, err := k8sDeployment.Create(context.TODO(), &deploymentDatum, metav1.CreateOptions{})
+//	return responses, err
 //}
 //
 //// SwitchApiVersion 根据k8sVersion选择对应的API版本，1.6之前EXTENSION_V1_BETA1  1.6-1.7 APPS_V1_BETA1 1.8 APPS_V1_BETA2 1.9以后 APPS_V1/**
