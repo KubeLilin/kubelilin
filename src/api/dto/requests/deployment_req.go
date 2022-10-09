@@ -43,11 +43,11 @@ type DeploymentStepRequest struct {
 	LimitMemory     float64         `json:"limitMemory" gorm:"column:limit_memory;type:decimal(5,0) unsigned;not null"` // 内存限制MiB
 	Environments    []DeploymentEnv `json:"environments" gorm:"column:environments;type:varchar(255)"`
 	EnvJson         string          `gorm:"column:env_json;type:varchar(255)"`
-	Readiness       PreCheckRequest `json:"readiness"` //就绪检查
-	Liveness        PreCheckRequest `json:"liveness"`  //存活检查
+	Readiness       ProBeRequest    `json:"readiness" gorm:"-:all"` //就绪检查
+	Liveness        ProBeRequest    `json:"liveness" gorm:"-:all"`  //存活检查
 }
 
-type PreCheckRequest struct {
+type ProBeRequest struct {
 	Type    string `gorm:"column:type;type:varchar(50);not null" json:"type"`        // 检查类型READINESS/LIVENESS
 	Port    uint   `gorm:"column:port;type:int unsigned;not null" json:"port"`       // 检查端口
 	URL     string `gorm:"column:url;type:varchar(500);not null" json:"url"`         // 请求路径
