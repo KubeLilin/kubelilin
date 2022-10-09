@@ -43,8 +43,8 @@ type DeploymentStepRequest struct {
 	LimitMemory     float64         `json:"limitMemory" gorm:"column:limit_memory;type:decimal(5,0) unsigned;not null"` // 内存限制MiB
 	Environments    []DeploymentEnv `json:"environments" gorm:"column:environments;type:varchar(255)"`
 	EnvJson         string          `gorm:"column:env_json;type:varchar(255)"`
-	Readiness       PreCheckRequest `json:"readiness"` //就绪检查
-	Liveness        PreCheckRequest `json:"liveness"`  //存活检查
+	Readiness       PreCheckRequest `json:"readiness" gorm:"-:all"` //就绪检查
+	Liveness        PreCheckRequest `json:"liveness" gorm:"-:all"`  //存活检查
 }
 
 type PreCheckRequest struct {

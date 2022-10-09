@@ -266,9 +266,12 @@ func (ds *DeploymentSupervisor) AssemblingContainerForApply(dp *models.SgrTenant
 	container.Ports = ports
 
 	container.Env = injectionContainerEnv(dpc.Environments)
-
 	containerArr = append(containerArr, container)
 	return containerArr, nil
+}
+
+func GenReadinessProbe() {
+
 }
 
 func injectionContainerEnv(envJson string) []corev1.EnvVarApplyConfiguration {
