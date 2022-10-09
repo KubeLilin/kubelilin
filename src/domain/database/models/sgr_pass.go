@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 // ApplicationAPIGateway 集群网关(APISIX)
 type ApplicationAPIGateway struct {
 	ID          uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`         // 网关ID
@@ -513,6 +511,41 @@ var SgrCodeDeploymentLevelColumns = struct {
 	Code: "code",
 	Name: "name",
 	Sort: "sort",
+}
+
+// SgrDeploymentProbe 部署状态检查
+type SgrDeploymentProbe struct {
+	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	Type         string     `gorm:"column:type;type:varchar(20);not null" json:"type"`            // 类型READINESS/LIVENESS
+	Port         int        `gorm:"column:port;type:int;not null" json:"port"`                    // 请求端口
+	URL          string     `gorm:"column:url;type:varchar(505);not null" json:"url"`             // 请求地址
+	ReqScheme    string     `gorm:"column:req_scheme;type:varchar(10);not null" json:"reqScheme"` // 请求协议 HTTP
+	CreationTime *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
+	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *SgrDeploymentProbe) TableName() string {
+	return "sgr_deployment_probe"
+}
+
+// SgrDeploymentProbeColumns get sql column name.获取数据库列名
+var SgrDeploymentProbeColumns = struct {
+	ID           string
+	Type         string
+	Port         string
+	URL          string
+	ReqScheme    string
+	CreationTime string
+	UpdateTime   string
+}{
+	ID:           "id",
+	Type:         "type",
+	Port:         "port",
+	URL:          "url",
+	ReqScheme:    "req_scheme",
+	CreationTime: "creation_time",
+	UpdateTime:   "update_time",
 }
 
 // SgrRoleMenuMap 角色菜单权限影射
