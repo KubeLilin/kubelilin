@@ -13,7 +13,7 @@ type DbConfig struct {
 }
 
 func InitDb() *gorm.DB {
-	dsnPath := fmt.Sprintf("%s:%s@%s", "root", "P@ssW0rd", "tcp(47.100.213.41)/sgr_pass?charset=utf8mb4&loc=Local&parseTime=True")
+	dsnPath := fmt.Sprintf("%s:%s@%s", "root", "P@ssW0rd", "tcp(47.100.213.40)/sgr_pass?charset=utf8mb4&loc=Local&parseTime=True")
 	db1, _ := gorm.Open(mysql.Open(dsnPath), &gorm.Config{})
 	return db1
 }
