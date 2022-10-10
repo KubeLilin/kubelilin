@@ -39,19 +39,23 @@ var ApplicationAPIGatewayColumns = struct {
 
 // ApplicationAPIGatewayRouters 集群网关团队路由
 type ApplicationAPIGatewayRouters struct {
-	ID           uint64  `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`               // 路由ID
-	Name         string  `gorm:"column:name;type:varchar(50);not null" json:"name"`                          // 路由名称
-	Desc         string  `gorm:"column:desc;type:varchar(255);not null" json:"desc"`                         // 路由描述
-	TeamID       uint64  `gorm:"column:team_id;type:bigint unsigned;not null" json:"teamId"`                 // 团队目录ID
-	Host         string  `gorm:"column:host;type:varchar(150);not null" json:"host"`                         // 路由域名
-	URI          string  `gorm:"column:uri;type:varchar(255);not null" json:"uri"`                           // 路由路径
-	Websocket    uint8   `gorm:"column:websocket;type:tinyint unsigned;not null;default:0" json:"websocket"` // 是否开启websocket
-	UpstreamType string  `gorm:"column:upstream_type;type:varchar(20);not null" json:"upstreamType"`         // service | node
-	Loadbalance  string  `gorm:"column:loadbalance;type:varchar(255);not null" json:"loadbalance"`           // roundrobin | chash | ewma | least_conn
-	Nodes        string  `gorm:"column:nodes;type:varchar(255);not null" json:"nodes"`                       // {,   "127.0.0.1:1980": 1,,   "127.0.0.1:1981": 1,}
-	Timeout      uint    `gorm:"column:timeout;type:int unsigned;not null" json:"timeout"`                   // 超时时间
-	DeploymentID *uint64 `gorm:"column:deployment_id;type:bigint unsigned" json:"deploymentId"`              // 应用部署ID
-	Status       uint8   `gorm:"column:status;type:tinyint unsigned;not null" json:"status"`                 // 状态
+	ID           uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`                     // 路由ID
+	Name         string `gorm:"column:name;type:varchar(50);not null" json:"name"`                                // 路由名称
+	Desc         string `gorm:"column:desc;type:varchar(255);not null" json:"desc"`                               // 路由描述
+	TeamID       uint64 `gorm:"column:team_id;type:bigint unsigned;not null" json:"teamId"`                       // 团队目录ID
+	Host         string `gorm:"column:host;type:varchar(150);not null" json:"host"`                               // 路由域名
+	URI          string `gorm:"column:uri;type:varchar(255);not null" json:"uri"`                                 // 路由路径
+	Websocket    uint8  `gorm:"column:websocket;type:tinyint unsigned;not null;default:0" json:"websocket"`       // 是否开启websocket
+	UpstreamType string `gorm:"column:upstream_type;type:varchar(20);not null" json:"upstreamType"`               // service | node
+	Loadbalance  string `gorm:"column:loadbalance;type:varchar(255);not null" json:"loadbalance"`                 // roundrobin | chash | ewma | least_conn
+	Nodes        string `gorm:"column:nodes;type:varchar(255);not null" json:"nodes"`                             // {,   "127.0.0.1:1980": 1,,   "127.0.0.1:1981": 1,}
+	Timeout      uint   `gorm:"column:timeout;type:int unsigned;not null" json:"timeout"`                         // 超时时间
+	DeploymentID uint64 `gorm:"column:deployment_id;type:bigint unsigned;not null;default:0" json:"deploymentId"` // 应用部署ID
+	Rewirte      uint8  `gorm:"column:rewirte;type:tinyint unsigned;not null;default:0" json:"rewirte"`           // 是否重写
+	RegexURI     string `gorm:"column:regex_uri;type:varchar(150);not null;default:''" json:"regexUri"`           // 匹配正则表达式,
+	RegexTmp     string `gorm:"column:regex_tmp;type:varchar(100);not null;default:''" json:"regexTmp"`           // 转发路径模版,
+	Label        string `gorm:"column:label;type:varchar(50);not null;default:''" json:"label"`                   // 标签
+	Status       uint8  `gorm:"column:status;type:tinyint unsigned;not null" json:"status"`                       // 状态
 }
 
 // TableName get sql table name.获取数据库表名
@@ -73,6 +77,10 @@ var ApplicationAPIGatewayRoutersColumns = struct {
 	Nodes        string
 	Timeout      string
 	DeploymentID string
+	Rewirte      string
+	RegexURI     string
+	RegexTmp     string
+	Label        string
 	Status       string
 }{
 	ID:           "id",
@@ -87,6 +95,10 @@ var ApplicationAPIGatewayRoutersColumns = struct {
 	Nodes:        "nodes",
 	Timeout:      "timeout",
 	DeploymentID: "deployment_id",
+	Rewirte:      "rewirte",
+	RegexURI:     "regex_uri",
+	RegexTmp:     "regex_tmp",
+	Label:        "label",
 	Status:       "status",
 }
 

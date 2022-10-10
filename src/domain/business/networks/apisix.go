@@ -61,6 +61,16 @@ func (proxy APISIXProxy) CreateOrUpdateRoute(id string, router models.Applicatio
 	if router.Host != "" {
 		m["host"] = router.Host
 	}
+	if router.Rewirte > 0 {
+		m["plugins"] = gout.H{
+			"proxy-rewrite": gout.H{
+				"regex_uri": gout.A{
+					router.RegexURI, router.RegexTmp}},
+		}
+	}
+	if router.Label != "" {
+		m["labels"] = gout.H{"API_ENV": router.Label}
+	}
 	return gout.
 		PUT(url).
 		SetHeader(gout.H{"X-API-KEY": proxy.token}).

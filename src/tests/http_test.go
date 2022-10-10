@@ -31,18 +31,22 @@ func TestGatewayGetRouteById(t *testing.T) {
 
 func TestGatewayCreateRoute(t *testing.T) {
 	apigateway := getApiGateway()
-	err := apigateway.CreateOrUpdateRoute("ccc121", models.ApplicationAPIGatewayRouters{
-		Name:         "test1",
-		Desc:         "test1234efwefwf",
+	err := apigateway.CreateOrUpdateRoute("r10000001", models.ApplicationAPIGatewayRouters{
+		Name:         "dev-nginx-cls-hbktlqm5_r10000001",
+		Desc:         "dev-nginx-cls-hbktlqm5",
 		TeamID:       10000000,
-		Host:         "wiofjiowefuhu22.kubelilin.com",
-		URI:          "/*",
+		Host:         "proxy.kubelilin.com",
+		URI:          "/dev-nginx-cls-hbktlqm5/*",
 		Websocket:    1,
 		UpstreamType: "service",
 		Loadbalance:  "roundrobin",
-		Nodes:        "127.0.0.1:9080",
+		Nodes:        "dev-nginx-cls-hbktlqm5-svc-cluster-sgr.yoyogo:80",
 		Timeout:      3,
-		DeploymentID: nil,
+		DeploymentID: 0,
+		Rewirte:      1,
+		RegexURI:     "^/dev-nginx-cls-hbktlqm5/(.*)",
+		RegexTmp:     "/$1",
+		Label:        "deployment",
 		Status:       1,
 	})
 
