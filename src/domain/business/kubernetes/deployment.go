@@ -409,6 +409,28 @@ func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, level str
 	return err, page
 }
 
+func (ds *DeploymentSupervisor) CreateProBe(proReq requests.ProbeRequest) {
+	ds.db.Transaction(func(tx *gorm.DB) error {
+		if proReq.EnableReadiness {
+			probe := models.SgrDeploymentProbe{}
+			probe.Type = proReq.Readiness.Type
+			probe.Port = proReq.Readiness.Port
+			probe.URL = proReq.Readiness.URL
+			probe.ReqScheme = proReq.Readiness.ReqScheme
+			tx.Model(models.SgrDeploymentProbe{}).Save(probe)
+		}
+		if proReq.EnableLiveness {
+			probe := models.SgrDeploymentProbe{}
+			probe.Type = proReq.Liveness.Type
+			probe.Port = proReq.Liveness.Port
+			probe.URL = proReq.Liveness.URL
+			probe.ReqScheme = proReq.Liveness.ReqScheme
+			tx.Model(models.SgrDeploymentProbe{}).Save(probe)
+		}
+		return nil
+	})
+}
+
 //region 暂时弃用的代码，最开始的时候考虑为每个不通版本的k8s指定不通的api-version,最后发现可以统一用apps/v1
 
 //func (ds *DeploymentSupervisor) InitExtensionV1Beta1deployment(client extensionsclient.ExtensionsV1beta1Interface, dp models.SgrTenantDeployments, dpc models.SgrTenantDeploymentsContainers) (interface{}, error) {
