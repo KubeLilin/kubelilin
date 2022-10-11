@@ -108,7 +108,7 @@ type ApplicationAPIGatewayTeams struct {
 	Name      string `gorm:"column:name;type:varchar(100);not null" json:"name"`               // 网关团队目录名称
 	GatewayID uint64 `gorm:"column:gateway_id;type:bigint unsigned;not null" json:"gatewayId"` // 网关ID
 	TenantID  uint64 `gorm:"column:tenant_id;type:bigint unsigned;not null" json:"tenantId"`   // 租户ID
-	Level     string `gorm:"column:level;type:varchar(50);not null" json:"level"`              // 服务级别 P0 - P4
+	Level     string `gorm:"column:level;type:varchar(50);not null;default:P1" json:"level"`   // 服务级别 P0 - P4
 	Status    uint8  `gorm:"column:status;type:tinyint unsigned;not null" json:"status"`       // 状态
 }
 
@@ -530,8 +530,9 @@ var SgrCodeDeploymentLevelColumns = struct {
 // SgrDeploymentProbe 部署状态检查
 type SgrDeploymentProbe struct {
 	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	DpID         int64      `gorm:"column:dp_id;type:bigint;not null" json:"dpId"`                // 部署ID
 	Type         string     `gorm:"column:type;type:varchar(20);not null" json:"type"`            // 类型READINESS/LIVENESS
-	Port         int        `gorm:"column:port;type:int;not null" json:"port"`                    // 请求端口
+	Port         uint       `gorm:"column:port;type:int unsigned;not null" json:"port"`           // 请求端口
 	URL          string     `gorm:"column:url;type:varchar(505);not null" json:"url"`             // 请求地址
 	ReqScheme    string     `gorm:"column:req_scheme;type:varchar(10);not null" json:"reqScheme"` // 请求协议 HTTP
 	CreationTime *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
@@ -546,6 +547,7 @@ func (m *SgrDeploymentProbe) TableName() string {
 // SgrDeploymentProbeColumns get sql column name.获取数据库列名
 var SgrDeploymentProbeColumns = struct {
 	ID           string
+	DpID         string
 	Type         string
 	Port         string
 	URL          string
@@ -554,6 +556,7 @@ var SgrDeploymentProbeColumns = struct {
 	UpdateTime   string
 }{
 	ID:           "id",
+	DpID:         "dp_id",
 	Type:         "type",
 	Port:         "port",
 	URL:          "url",
