@@ -68,7 +68,7 @@ INNER JOIN sgr_tenant tt on tt.id = ns.tenant_id WHERE 1=1 `)
 		params = append(params, "%"+tenantName+"%")
 	}
 
-	//err := cluster.db.Raw(sqlBuilder.String(), params...).Scan(&res).Error
+	//err := cluster.db.Raw(sqlBuilder.String(), params...).Scan(&responses).Error
 
 	return page.StartPage(cluster.db, PageIndex, PageSize).DoScan(&res, sqlBuilder.String(), params...)
 }

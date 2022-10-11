@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/drone/go-scm v1.20.0
 	github.com/fasthttp/websocket v1.5.0
-	github.com/gogs/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
+	github.com/guonaihong/gout v0.3.1
 	github.com/isbrick/http-client v0.0.0-20210321135403-0a5df00fdb84
 	github.com/jinzhu/copier v0.3.5
 	github.com/spf13/viper v1.12.0

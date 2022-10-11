@@ -6,6 +6,7 @@ import (
 	"github.com/yoyofxteam/dependencyinjection"
 	"kubelilin/domain/business/app"
 	"kubelilin/domain/business/kubernetes"
+	"kubelilin/domain/business/networks"
 	"kubelilin/domain/business/tenant"
 	"kubelilin/domain/conf"
 	pipelineV1 "kubelilin/pkg/pipeline"
@@ -36,6 +37,7 @@ func init() {
 			serviceCollection.AddSingleton(app.NewPipelineService)
 			serviceCollection.AddTransient(app.NewServiceConnectionService)
 			serviceCollection.AddTransient(app.NewDevopsService)
+			serviceCollection.AddTransient(networks.NewApiGatewayService)
 
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
 			injectionJenkinsBuilder(config, serviceCollection)
@@ -44,13 +46,7 @@ func init() {
 }
 
 func injectionJenkinsBuilder(config abstractions.IConfiguration, serviceCollection *dependencyinjection.ServiceCollection) {
-	jenkinsUrl := config.GetString("pipeline.jenkins.url")
-	jenkinsToken := config.GetString("pipeline.jenkins.token")
-	jenkinsUser := config.GetString("pipeline.jenkins.username")
-	jenkinsNamespace := config.GetString("pipeline.jenkins.k8s-namespace")
-
 	serviceCollection.AddSingleton(func() *pipelineV1.Builder {
-		return pipelineV1.NewBuilder().UseJenkins(jenkinsUrl, jenkinsUser, jenkinsToken).
-			UseKubernetes(jenkinsNamespace)
+		return pipelineV1.NewBuilder()
 	})
 }

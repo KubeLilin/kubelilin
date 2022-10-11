@@ -41,6 +41,22 @@ func StringToBool(s string) (bool, error) {
 	return false, errors.New("params error: should be true or false")
 }
 
+func StringToNull(s string) interface{} {
+	if s == "" {
+		return nil
+	} else {
+		return s
+	}
+}
+
+func Uint8ToBool(num uint8) bool {
+	if num > 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
 func ToString(value interface{}) string {
 	switch v := value.(type) {
 	case string:

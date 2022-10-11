@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/yoyofx/glinq"
 	"gorm.io/gorm"
-	"kubelilin/api/req"
-	"kubelilin/api/res"
+	"kubelilin/api/dto/requests"
+	"kubelilin/api/dto/responses"
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
 	"kubelilin/pkg/page"
@@ -33,7 +33,7 @@ func NewServiceConnectionService(db *gorm.DB) *ServiceConnectionService {
 	}
 }
 
-func (svc *ServiceConnectionService) CreateServiceConnection(req *req.ServiceConnectionReq) (*req.ServiceConnectionReq, error) {
+func (svc *ServiceConnectionService) CreateServiceConnection(req *requests.ServiceConnectionReq) (*requests.ServiceConnectionReq, error) {
 	if req.Type > 1 {
 		var existsCount int64 = 0
 		svc.db.Model(&models.ServiceConnection{}).Where("service_type=?", req.ServiceType).Count(&existsCount)
@@ -68,7 +68,7 @@ func (svc *ServiceConnectionService) CreateServiceConnection(req *req.ServiceCon
 	return req, nil
 }
 
-func (svc *ServiceConnectionService) UpdateServiceConnection(req *req.ServiceConnectionReq) (*req.ServiceConnectionReq, error) {
+func (svc *ServiceConnectionService) UpdateServiceConnection(req *requests.ServiceConnectionReq) (*requests.ServiceConnectionReq, error) {
 	if req.ID == 0 {
 		return nil, errors.New("非法标识")
 	}
@@ -107,8 +107,8 @@ func (svc *ServiceConnectionService) UpdateServiceConnection(req *req.ServiceCon
 	return req, nil
 }
 
-func (svc *ServiceConnectionService) QueryServiceConnections(req *req.ServiceConnectionPageReq) (*page.Page, error) {
-	data := &[]res.ServiceConnectionRes{}
+func (svc *ServiceConnectionService) QueryServiceConnections(req *requests.ServiceConnectionPageReq) (*page.Page, error) {
+	data := &[]responses.ServiceConnectionRes{}
 	var params []interface{}
 	sql := strings.Builder{}
 	sql.WriteString("select * from service_connection")
@@ -128,8 +128,8 @@ func (svc *ServiceConnectionService) QueryServiceConnections(req *req.ServiceCon
 	return pageRes, err
 }
 
-func (svc *ServiceConnectionService) QueryServiceConnectionInfo(id int64) (*res.ServiceConnectionRes, error) {
-	var datum res.ServiceConnectionRes
+func (svc *ServiceConnectionService) QueryServiceConnectionInfo(id int64) (*responses.ServiceConnectionRes, error) {
+	var datum responses.ServiceConnectionRes
 	var mainDatum models.ServiceConnection
 	mainErr := svc.db.Model(&models.ServiceConnection{}).Where("id=?", id).First(&mainDatum)
 	if mainErr.Error != nil {
@@ -154,9 +154,9 @@ func (svc *ServiceConnectionService) DeleteServiceConnectionInfo(id uint64) erro
 	return svc.db.Model(&models.ServiceConnection{}).Delete(&models.ServiceConnection{}, "id=?", id).Error
 }
 
-func (svc *ServiceConnectionService) QueryRepoListByType(tenantId uint64, repoType string) ([]res.ServiceConnectionRes, error) {
+func (svc *ServiceConnectionService) QueryRepoListByType(tenantId uint64, repoType string) ([]responses.ServiceConnectionRes, error) {
 	var sb strings.Builder
-	data := make([]res.ServiceConnectionRes, 0)
+	data := make([]responses.ServiceConnectionRes, 0)
 	sb.WriteString("select t1.id,t1.name,t2.detail from service_connection as t1 ")
 	sb.WriteString("inner join service_connection_details as t2 ON  t1.id=t2.main_id and t2.type=?")
 	serviceType := svc.switchServiceType(repoType)

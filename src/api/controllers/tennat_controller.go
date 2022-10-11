@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	"kubelilin/domain/business/tenant"
 	"kubelilin/domain/database/models"
 )
@@ -29,7 +29,7 @@ func NewTenantController(service *tenant.TenantService) *TenantController {
 		"status":0
 	}
 */
-func (controller TenantController) PostCreate(tenant *req.TenantRequest) mvc.ApiResult {
+func (controller TenantController) PostCreate(tenant *requests.TenantRequest) mvc.ApiResult {
 	if tenant.TCode == "admin" {
 		return mvc.FailWithMsg(nil, "admin为系统预留字段，请使用其他命名")
 	}
@@ -47,7 +47,7 @@ func (controller TenantController) PostCreate(tenant *req.TenantRequest) mvc.Api
 	return mvc.ApiResult{Data: res, Success: res, Message: errorMessage}
 }
 
-func (controller TenantController) PostUpdate(tenant *req.TenantRequest) mvc.ApiResult {
+func (controller TenantController) PostUpdate(tenant *requests.TenantRequest) mvc.ApiResult {
 	res := controller.Service.UpdateTenant(&models.SgrTenant{
 		TName:  tenant.TName,
 		TCode:  tenant.TCode,
@@ -56,13 +56,13 @@ func (controller TenantController) PostUpdate(tenant *req.TenantRequest) mvc.Api
 	return mvc.ApiResult{Data: res}
 }
 
-func (controller TenantController) PostStatus(tenant *req.TenantRequest) mvc.ApiResult {
+func (controller TenantController) PostStatus(tenant *requests.TenantRequest) mvc.ApiResult {
 	res := controller.Service.ChangeStatus(tenant.ID, *tenant.Status)
 	return mvc.ApiResult{Success: res}
 }
 
 func (controller TenantController) GetTenantList(ctx *context.HttpContext) mvc.ApiResult {
-	var tenantRequest = &req.TenantRequest{}
+	var tenantRequest = &requests.TenantRequest{}
 	err := ctx.BindWithUri(tenantRequest)
 	if err != nil {
 		panic(err)

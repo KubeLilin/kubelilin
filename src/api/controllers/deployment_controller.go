@@ -5,7 +5,7 @@ import (
 	"github.com/yoyofx/glinq"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"kubelilin/api/req"
+	requests2 "kubelilin/api/dto/requests"
 	"kubelilin/domain/business/app"
 	"kubelilin/domain/business/kubernetes"
 	"kubelilin/domain/business/notice"
@@ -26,8 +26,8 @@ func NewDeploymentController(deploymentService *app.DeploymentService, clusterSe
 	return &DeploymentController{deploymentService: deploymentService, clusterService: clusterService, deploymentSupervisor: deploymentSupervisor}
 }
 
-func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpContext, execReq *req.ExecDeploymentRequest) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpContext, execReq *requests2.ExecDeploymentRequest) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	execReq.TenantId = userInfo.TenantID
 	execReq.Operator = uint64(userInfo.UserId)
 	res, err := controller.deploymentSupervisor.ExecuteDeployment(execReq)
@@ -37,8 +37,8 @@ func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpCo
 	return controller.ApiResult().StatusCode(500).Build()
 }
 
-func (controller *DeploymentController) PostCreateDeploymentStep1(ctx *context.HttpContext, deployModel *req.DeploymentStepRequest) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+func (controller *DeploymentController) PostCreateDeploymentStep1(ctx *context.HttpContext, deployModel *requests2.DeploymentStepRequest) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	var tenantID uint64 = 0
 	if userInfo != nil {
 		tenantID = userInfo.TenantID
@@ -51,7 +51,7 @@ func (controller *DeploymentController) PostCreateDeploymentStep1(ctx *context.H
 	return mvc.Success(res)
 }
 
-func (controller *DeploymentController) PostCreateDeploymentStep2(deployModel *req.DeploymentStepRequest) mvc.ApiResult {
+func (controller *DeploymentController) PostCreateDeploymentStep2(deployModel *requests2.DeploymentStepRequest) mvc.ApiResult {
 	fmt.Println(deployModel)
 	err, res := controller.deploymentService.CreateDeploymentStep2(deployModel)
 	if err != nil {
@@ -61,9 +61,9 @@ func (controller *DeploymentController) PostCreateDeploymentStep2(deployModel *r
 }
 
 func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.ApiResult {
-	var request req.DeploymentGetListRequest
+	var request requests2.DeploymentGetListRequest
 	_ = ctx.BindWithUri(&request)
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	var tenantID uint64 = 0
 	if userInfo != nil {
 		tenantID = userInfo.TenantID
@@ -91,7 +91,7 @@ func (controller DeploymentController) GetDeploymentFormInfo(ctx *context.HttpCo
 }
 
 func (controller DeploymentController) DeleteDeployment(ctx *context.HttpContext) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	deploymentId, err := utils.StringToUInt64(ctx.Input.QueryDefault("dpId", "0"))
 	if err != nil {
 		return mvc.FailWithMsg(nil, "部署id无效或者未接收到部署id")
@@ -104,8 +104,8 @@ func (controller DeploymentController) DeleteDeployment(ctx *context.HttpContext
 
 }
 
-func (controller DeploymentController) PostReplicas(request *req.ScaleRequest, ctx *context.HttpContext) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+func (controller DeploymentController) PostReplicas(request *requests2.ScaleRequest, ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, request.ClusterId)
 	ret, err := kubernetes.SetReplicasNumber(client, request.Namespace, request.DeploymentName, request.Number)
 	if err != nil {
@@ -114,8 +114,8 @@ func (controller DeploymentController) PostReplicas(request *req.ScaleRequest, c
 	return mvc.Success(ret)
 }
 
-func (controller DeploymentController) PostReplicasById(request *req.ScaleV1Request, ctx *context.HttpContext) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+func (controller DeploymentController) PostReplicasById(request *requests2.ScaleV1Request, ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	deployment, _ := controller.deploymentService.GetDeploymentByID(request.DeploymentId)
 	if deployment.ID == 0 {
 		return mvc.Fail("未找到部署信息")
@@ -131,8 +131,8 @@ func (controller DeploymentController) PostReplicasById(request *req.ScaleV1Requ
 	return mvc.Success(ret)
 }
 
-func (controller DeploymentController) PostDestroyPod(request *req.DestroyPodRequest, ctx *context.HttpContext) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+func (controller DeploymentController) PostDestroyPod(request *requests2.DestroyPodRequest, ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, request.ClusterId)
 	err := kubernetes.DestroyPod(client, request.Namespace, request.PodName)
 	if err != nil {
@@ -142,8 +142,8 @@ func (controller DeploymentController) PostDestroyPod(request *req.DestroyPodReq
 }
 
 func (controller DeploymentController) GetPodLogs(ctx *context.HttpContext) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
-	var request *req.PodLogsRequest
+	userInfo := requests2.GetUserInfo(ctx)
+	var request *requests2.PodLogsRequest
 	_ = ctx.BindWithUri(&request)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, request.ClusterId)
 	logs, err := kubernetes.GetLogs(client, request.Namespace, request.PodName, request.ContainerName, request.Lines)
@@ -154,8 +154,8 @@ func (controller DeploymentController) GetPodLogs(ctx *context.HttpContext) mvc.
 }
 
 func (controller DeploymentController) GetEvents(ctx *context.HttpContext) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
-	var request *req.EventsRequest
+	userInfo := requests2.GetUserInfo(ctx)
+	var request *requests2.EventsRequest
 	_ = ctx.BindWithUri(&request)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, request.ClusterId)
 	events := kubernetes.GetEvents(client, request.Namespace, request.Deployment)
@@ -163,7 +163,7 @@ func (controller DeploymentController) GetEvents(ctx *context.HttpContext) mvc.A
 }
 
 func (controller DeploymentController) GetYaml(ctx *context.HttpContext) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	dpIdStr := ctx.Input.Query("dpId")
 	dpId, _ := strconv.ParseUint(dpIdStr, 10, 64)
 	yamlStr, err := controller.deploymentSupervisor.GetDeploymentYaml(userInfo.TenantID, dpId)
@@ -185,7 +185,7 @@ func (controller DeploymentController) GetReleaseRecord(ctx *context.HttpContext
 	return mvc.Success(res)
 }
 
-func (controller DeploymentController) PostNotify(notifyReq *req.DeployNotifyRequest) mvc.ApiResult {
+func (controller DeploymentController) PostNotify(notifyReq *requests2.DeployNotifyRequest) mvc.ApiResult {
 	notifyPlugin, _ := glinq.From(notice.Plugins).Where(func(item notice.Plugin) bool {
 		return item.Value == notifyReq.NotifyType
 	}).First()
@@ -211,8 +211,8 @@ func (controller DeploymentController) PostNotify(notifyReq *req.DeployNotifyReq
 
 }
 
-func (c DeploymentController) PostRollBackByReleaseRecord(ctx *context.HttpContext, execReq *req.ExecDeploymentRequest) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+func (c DeploymentController) PostRollBackByReleaseRecord(ctx *context.HttpContext, execReq *requests2.ExecDeploymentRequest) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	execReq.TenantId = userInfo.TenantID
 	execReq.Operator = uint64(userInfo.UserId)
 	res, err := c.deploymentSupervisor.ExecuteDeployment(execReq)
@@ -223,5 +223,11 @@ func (c DeploymentController) PostRollBackByReleaseRecord(ctx *context.HttpConte
 }
 
 func (controller DeploymentController) GetNotifications() mvc.ApiResult {
+	return mvc.Success(notice.Plugins)
+}
+
+// PostProbe 创建POD探针/**
+func (controller DeploymentController) PostProbe(request requests2.ProbeRequest) mvc.ApiResult {
+	controller.deploymentSupervisor.CreateProBe(request)
 	return mvc.Success(notice.Plugins)
 }

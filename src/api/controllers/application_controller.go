@@ -6,7 +6,7 @@ import (
 	"github.com/yoyofx/yoyogo/web/binding"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"kubelilin/api/req"
+	requests2 "kubelilin/api/dto/requests"
 	"kubelilin/domain/business/app"
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
@@ -24,8 +24,8 @@ func NewApplicationController(service *app.ApplicationService, pipelineService *
 }
 
 // PostCreateApp new application.
-func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request *req.AppReq) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request *requests2.AppReq) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
 	err, res := c.service.CreateApp(request)
 	if err != nil {
@@ -35,8 +35,8 @@ func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request 
 }
 
 // PutEditApp edit application information.
-func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *req.AppReq) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *requests2.AppReq) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
 	err, res := c.service.UpdateApp(request)
 	if err != nil {
@@ -47,10 +47,10 @@ func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *re
 
 // GetAppList get application list by tenant id.
 func (c *ApplicationController) GetAppList(ctx *context.HttpContext) mvc.ApiResult {
-	request := req.AppReq{}
+	request := requests2.AppReq{}
 	_ = ctx.BindWithUri(&request)
 
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
 	err, res := c.service.QueryAppList(&request)
 	fmt.Println(res.Data)
@@ -91,7 +91,7 @@ func (c *ApplicationController) GetProjectDeployLevelCounts(ctx *context.HttpCon
 
 // GetGitRepo get git address for application
 func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResult {
-	userInfo := req.GetUserInfo(ctx)
+	userInfo := requests2.GetUserInfo(ctx)
 	appName := ctx.Input.Query("appName")
 	cvsRes, err := c.service.InitGitRepository(userInfo.TenantID, appName)
 	if err != nil {
@@ -173,7 +173,7 @@ func (c *ApplicationController) DeleteBuildImage(ctx *context.HttpContext) mvc.A
 }
 
 // PostNewPipeline new pipeline only by name & id
-func (c *ApplicationController) PostNewPipeline(req *req.AppNewPipelineReq) mvc.ApiResult {
+func (c *ApplicationController) PostNewPipeline(req *requests2.AppNewPipelineReq) mvc.ApiResult {
 	err, pipeline := c.pipelineService.NewPipeline(req)
 	if err != nil {
 		return mvc.Fail(err.Error())
@@ -195,7 +195,7 @@ func (c *ApplicationController) GetPipelines(ctx *context.HttpContext) mvc.ApiRe
 }
 
 // PostEditPipeline Save pipeline information and DSL.
-func (c *ApplicationController) PostEditPipeline(request *req.EditPipelineReq) mvc.ApiResult {
+func (c *ApplicationController) PostEditPipeline(request *requests2.EditPipelineReq) mvc.ApiResult {
 	err := c.pipelineService.UpdatePipeline(request)
 	if err == nil {
 		err = c.pipelineService.UpdateDSL(request)
@@ -217,7 +217,7 @@ func (c *ApplicationController) GetPipeline(ctx *context.HttpContext) mvc.ApiRes
 	return mvc.Success(pipeline)
 }
 
-func (c *ApplicationController) PostAbortPipeline(request *req.AbortPipelineReq) mvc.ApiResult {
+func (c *ApplicationController) PostAbortPipeline(request *requests2.AbortPipelineReq) mvc.ApiResult {
 	err := c.pipelineService.AbortPipeline(request)
 	if err != nil {
 		return mvc.Fail(err.Error())
@@ -225,7 +225,7 @@ func (c *ApplicationController) PostAbortPipeline(request *req.AbortPipelineReq)
 	return mvc.Success(true)
 }
 
-func (c *ApplicationController) PostRunPipeline(request *req.RunPipelineReq) mvc.ApiResult {
+func (c *ApplicationController) PostRunPipeline(request *requests2.RunPipelineReq) mvc.ApiResult {
 	taskId, err := c.pipelineService.RunPipeline(request)
 	if err != nil {
 		return mvc.Fail(err.Error())
@@ -233,7 +233,7 @@ func (c *ApplicationController) PostRunPipeline(request *req.RunPipelineReq) mvc
 	return mvc.Success(taskId)
 }
 
-func (c *ApplicationController) PostPipelineStatus(request *req.PipelineStatusReq) mvc.ApiResult {
+func (c *ApplicationController) PostPipelineStatus(request *requests2.PipelineStatusReq) mvc.ApiResult {
 	err := c.pipelineService.UpdatePipelineStatus(request)
 	if err != nil {
 		return mvc.Fail(err.Error())
@@ -251,7 +251,7 @@ func (c *ApplicationController) DeletePipeline(ctx *context.HttpContext) mvc.Api
 }
 
 func (c *ApplicationController) GetPipelineDetails(httpContext *context.HttpContext) mvc.ApiResult {
-	var request req.PipelineDetailsReq
+	var request requests2.PipelineDetailsReq
 	_ = httpContext.BindWithUri(&request)
 	job, err := c.pipelineService.GetDetails(&request)
 	if err != nil {
@@ -261,7 +261,7 @@ func (c *ApplicationController) GetPipelineDetails(httpContext *context.HttpCont
 }
 
 func (c *ApplicationController) GetPipelineLogs(httpContext *context.HttpContext) mvc.ApiResult {
-	var request req.PipelineDetailsReq
+	var request requests2.PipelineDetailsReq
 	_ = httpContext.BindWithUri(&request)
 	logs, err := c.pipelineService.GetLogs(&request)
 	if err != nil {

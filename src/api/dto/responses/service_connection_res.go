@@ -1,4 +1,4 @@
-package res
+package responses
 
 type ServiceConnectionRes struct {
 	ID          uint64 `json:"id"`

@@ -3,7 +3,7 @@ package app
 import (
 	"errors"
 	"gorm.io/gorm"
-	"kubelilin/api/req"
+	requests2 "kubelilin/api/dto/requests"
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
 	"kubelilin/pkg/page"
@@ -19,7 +19,7 @@ func NewDevopsService(db *gorm.DB) *DevopsService {
 	return &DevopsService{db: db}
 }
 
-func (service *DevopsService) CreateProject(requestProject *req.NewProject) error {
+func (service *DevopsService) CreateProject(requestProject *requests2.NewProject) error {
 	var exitCount int64
 	service.db.Model(&models.DevopsProjects{}).Where("tenant_id=? and name=?", requestProject.TenantID, requestProject.Name).Count(&exitCount)
 	if exitCount > 0 {
@@ -46,7 +46,7 @@ func (service *DevopsService) CreateProject(requestProject *req.NewProject) erro
 	return nil
 }
 
-func (service *DevopsService) EditProject(updateRequest *req.NewProject) error {
+func (service *DevopsService) EditProject(updateRequest *requests2.NewProject) error {
 	devProject := models.DevopsProjects{
 		ID:           updateRequest.ProjectId,
 		Name:         updateRequest.Name,
@@ -78,7 +78,7 @@ func (service *DevopsService) DeleteProject(projectId uint64) error {
 	return service.db.Exec("UPDATE devops_projects SET soft_del = 1 WHERE id=?", projectId).Error
 }
 
-func (service *DevopsService) GetProjectList(request *req.DevopsProjectReq) (error, *page.Page) {
+func (service *DevopsService) GetProjectList(request *requests2.DevopsProjectReq) (error, *page.Page) {
 	sql := `SELECT p.id,p.name 'project_name', p.creation_time, 
 (SELECT count(1) FROM  devops_projects_apps pas WHERE p.id = pas.project_id) 'app_count',
 (SELECT GROUP_CONCAT(pas.application_id) FROM  devops_projects_apps pas WHERE p.id = pas.project_id) 'app_ids'
@@ -93,7 +93,7 @@ FROM devops_projects p WHERE p.tenant_id= ? AND p.soft_del=0`
 	return page.StartPage(service.db, request.CurrentPage, request.PageSize).DoScan(res, sql, sqlParams...)
 }
 
-func (service *DevopsService) GetAppList(req *req.AppReq) (error, *page.Page) {
+func (service *DevopsService) GetAppList(req *requests2.AppReq) (error, *page.Page) {
 	res := &[]dto.ApplicationInfoDTO{}
 	var sqlParams []interface{}
 	sb := strings.Builder{}

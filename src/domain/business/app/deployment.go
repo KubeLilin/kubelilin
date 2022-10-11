@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
 	"kubelilin/pkg/page"
@@ -28,7 +28,7 @@ func NewDeploymentService(db *gorm.DB) *DeploymentService {
 	return &DeploymentService{db: db}
 }
 
-func (deployment *DeploymentService) NewOrUpdateDeployment(deployModel *req.DeploymentStepRequest) (error, *req.DeploymentStepRequest) {
+func (deployment *DeploymentService) NewOrUpdateDeployment(deployModel *requests.DeploymentStepRequest) (error, *requests.DeploymentStepRequest) {
 	var deploy *models.SgrTenantDeployments
 
 	deployment.db.Model(deployModel).Where("app_id = ? and name = ?", deployModel.AppID, deployModel.Name).First(&deploy)
@@ -41,7 +41,7 @@ func (deployment *DeploymentService) NewOrUpdateDeployment(deployModel *req.Depl
 	}
 }
 
-func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *req.DeploymentStepRequest) (error, *models.SgrTenantDeployments) {
+func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *requests.DeploymentStepRequest) (error, *models.SgrTenantDeployments) {
 	dpModel := &models.SgrTenantDeployments{}
 	dpModel.ServiceName = deployModel.Name + "-svc-cluster-sgr"
 	dpModel.WorkloadType = "Deployment"
@@ -78,7 +78,7 @@ func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *req.Depl
 	}
 }
 
-func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *req.DeploymentStepRequest) (error, *models.SgrTenantDeployments) {
+func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *requests.DeploymentStepRequest) (error, *models.SgrTenantDeployments) {
 	dpModel := models.SgrTenantDeployments{}
 	/*requestCPU, _ := strconv.ParseFloat(deployModel.RequestCPU, 64)
 	requestMemory, _ := strconv.ParseFloat(deployModel.RequestMemory, 64)
@@ -181,9 +181,9 @@ func (deployment *DeploymentService) GetDeployments(profile string, appId uint64
 	//return deploymentList, dataRes.Error
 }
 
-func (deployment *DeploymentService) GetDeploymentForm(id uint64) (error, *req.DeploymentStepRequest) {
+func (deployment *DeploymentService) GetDeploymentForm(id uint64) (error, *requests.DeploymentStepRequest) {
 
-	res := &req.DeploymentStepRequest{}
+	res := &requests.DeploymentStepRequest{}
 	sql := strings.Builder{}
 	sql.WriteString(`select dp.id,dpc.id as dpc_id , dp.name,dp.nickname,dp.tenant_id,dp.cluster_id,dp.namespace_id,dp.app_id,dp.app_name,
        dp.level,dp.replicas,dp.service_away,dp.service_enable,dp.service_port,dp.service_port_type,
@@ -193,7 +193,7 @@ inner join sgr_tenant_deployments_containers as dpc on dp.id=dpc.deploy_id
 where dp.id=?`)
 	resErr := deployment.db.Raw(sql.String(), id).Scan(res)
 	if resErr != nil && res.EnvJson != "" {
-		var env []req.DeploymentEnv
+		var env []requests.DeploymentEnv
 		jsonErr := json.Unmarshal([]byte(res.EnvJson), &env)
 		if jsonErr != nil {
 			return jsonErr, nil

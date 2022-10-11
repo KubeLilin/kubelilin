@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	"kubelilin/domain/database/models"
 )
 
@@ -16,7 +16,7 @@ func NewRoleMenuService(db *gorm.DB) *RoleMenuService {
 	return &RoleMenuService{db: db}
 }
 
-func (rms *RoleMenuService) CreateRoleMenuMap(req *req.RoleMenuListReq) error {
+func (rms *RoleMenuService) CreateRoleMenuMap(req *requests.RoleMenuListReq) error {
 	var menuRoleData = make([]models.SgrRoleMenuMap, 0)
 	for _, x := range req.RoleMenuList {
 		var menuRoleEle = models.SgrRoleMenuMap{}

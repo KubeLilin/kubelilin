@@ -5,7 +5,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/yoyofx/yoyogo/abstractions"
 	"gorm.io/gorm"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
 	"kubelilin/pkg/page"
@@ -22,7 +22,7 @@ func NewApplicationService(db *gorm.DB, config abstractions.IConfiguration) *App
 	return &ApplicationService{db: db, config: config}
 }
 
-func (s *ApplicationService) CreateApp(req *req.AppReq) (error, *models.SgrTenantApplication) {
+func (s *ApplicationService) CreateApp(req *requests.AppReq) (error, *models.SgrTenantApplication) {
 	var exitCount int64
 	s.db.Model(&models.SgrTenantApplication{}).Where("tenant_id=? and name=?", req.TenantID, req.Name).Count(&exitCount)
 	if exitCount > 0 {
@@ -49,7 +49,7 @@ func (s *ApplicationService) CreateApp(req *req.AppReq) (error, *models.SgrTenan
 	return nil, appModel
 }
 
-func (s *ApplicationService) UpdateApp(req *req.AppReq) (error, int64) {
+func (s *ApplicationService) UpdateApp(req *requests.AppReq) (error, int64) {
 	appModel := models.SgrTenantApplication{}
 	appModel.Level = req.Level
 	appModel.Remarks = req.Remarks
@@ -66,7 +66,7 @@ func (s *ApplicationService) UpdateApp(req *req.AppReq) (error, int64) {
 	return nil, dbRes.RowsAffected
 }
 
-func (s *ApplicationService) QueryAppList(req *req.AppReq) (error, *page.Page) {
+func (s *ApplicationService) QueryAppList(req *requests.AppReq) (error, *page.Page) {
 	res := &[]dto.ApplicationInfoDTO{}
 	var sqlParams []interface{}
 	sb := strings.Builder{}

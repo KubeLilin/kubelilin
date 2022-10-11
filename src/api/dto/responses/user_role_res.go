@@ -1,4 +1,4 @@
-package res
+package responses
 
 type UserRoleRes struct {
 	UserId   int64

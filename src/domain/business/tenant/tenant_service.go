@@ -4,7 +4,7 @@ import (
 	"github.com/jinzhu/copier"
 	fxutils "github.com/yoyofx/yoyogo/utils"
 	"gorm.io/gorm"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	"kubelilin/domain/database/models"
 	"kubelilin/pkg/page"
 )
@@ -69,7 +69,7 @@ func (ts *TenantService) ChangeStatus(id uint64, status int8) bool {
 	return res.Error == nil
 }
 
-func (ts *TenantService) QueryTenantList(request *req.TenantRequest) *page.Page {
+func (ts *TenantService) QueryTenantList(request *requests.TenantRequest) *page.Page {
 	params := &models.SgrTenant{}
 	err := copier.Copy(params, request)
 	params.TName = ""

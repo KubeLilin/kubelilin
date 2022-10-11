@@ -3,7 +3,7 @@ package tenant
 import (
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	"kubelilin/domain/database/models"
 	"kubelilin/pkg/page"
 	"time"
@@ -19,7 +19,7 @@ func NewTenantRoleService(db *gorm.DB) *TenantRoleService {
 	}
 }
 
-func (trs *TenantRoleService) CreateTenantRole(req *req.TenantRoleReq) (bool, *models.SgrTenantRole) {
+func (trs *TenantRoleService) CreateTenantRole(req *requests.TenantRoleReq) (bool, *models.SgrTenantRole) {
 	var tenantRoelModel = &models.SgrTenantRole{}
 	copier.Copy(tenantRoelModel, req)
 	t := time.Now()
@@ -29,7 +29,7 @@ func (trs *TenantRoleService) CreateTenantRole(req *req.TenantRoleReq) (bool, *m
 	return tenantRoelModel.ID != 0, tenantRoelModel
 }
 
-func (trs *TenantRoleService) UpdateTenantRole(req *req.TenantRoleReq) (bool, *models.SgrTenantRole) {
+func (trs *TenantRoleService) UpdateTenantRole(req *requests.TenantRoleReq) (bool, *models.SgrTenantRole) {
 	var tenantRoelModel = &models.SgrTenantRole{}
 	copier.Copy(tenantRoelModel, req)
 	t := time.Now()

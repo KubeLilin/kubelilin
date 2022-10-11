@@ -2,7 +2,7 @@ package tenant
 
 import (
 	"gorm.io/gorm"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	dbmodels "kubelilin/domain/database/models"
 	"kubelilin/pkg/page"
 )
@@ -62,7 +62,7 @@ func (user *UserService) Delete(id int64) bool {
 	return res.RowsAffected > 0
 }
 
-func (user *UserService) QueryUserList(request *req.QueryUserRequest) *page.Page {
+func (user *UserService) QueryUserList(request *requests.QueryUserRequest) *page.Page {
 	condition := user.db.Model(&dbmodels.SgrTenantUser{})
 
 	if request.TenantID > 0 {

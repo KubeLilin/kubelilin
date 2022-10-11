@@ -3,7 +3,7 @@ package controllers
 import (
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	"kubelilin/domain/business/tenant"
 )
 
@@ -18,7 +18,7 @@ func NewTenantUserRoleController(sc *tenant.TenantUserRoleService) *TenantUserRo
 	}
 }
 
-func (c *TenantUserRoleController) PostUserRole(req *req.UserRoleListReq) mvc.ApiResult {
+func (c *TenantUserRoleController) PostUserRole(req *requests.UserRoleListReq) mvc.ApiResult {
 	success, res := c.Service.CreateUserRole(req)
 	return mvc.ApiResult{
 		Success: success,
@@ -37,7 +37,7 @@ func (c *TenantUserRoleController) DeleteUserRole(ctx *context.HttpContext) mvc.
 }
 
 func (c *TenantUserRoleController) GetUserRole(ctx *context.HttpContext) mvc.ApiResult {
-	req := &req.UserRoleReq{}
+	req := &requests.UserRoleReq{}
 	err := ctx.BindWithUri(req)
 	if err != nil {
 		panic(err)

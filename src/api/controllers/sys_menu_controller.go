@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"kubelilin/api/req"
+	"kubelilin/api/dto/requests"
 	"kubelilin/domain/business/tenant"
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
@@ -82,7 +82,7 @@ func (c *SysMenuController) DeleteMenu(ctx *context.HttpContext) mvc.ApiResult {
 }
 
 func (c *SysMenuController) GetMenuList(ctx *context.HttpContext) mvc.ApiResult {
-	var sysReq = &req.SysMenuReq{}
+	var sysReq = &requests.SysMenuReq{}
 	err := ctx.BindWithUri(sysReq)
 	if err != nil {
 		panic(err)
