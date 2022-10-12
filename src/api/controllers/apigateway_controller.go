@@ -5,6 +5,7 @@ import (
 	"github.com/yoyofx/yoyogo/web/mvc"
 	requests "kubelilin/api/dto/requests"
 	"kubelilin/domain/business/networks"
+	"kubelilin/domain/database/models"
 	"kubelilin/utils"
 )
 
@@ -35,4 +36,21 @@ func (controller *ApiGatewayController) GetTeamList(ctx *context.HttpContext) mv
 		return mvc.FailWithMsg(false, err.Error())
 	}
 	return mvc.Success(list)
+}
+
+func (controller *ApiGatewayController) PostCreateOrEditTeam(ctx *context.HttpContext, request *requests.GatewayTeamRequest) mvc.ApiResult {
+	userInfo := requests.GetUserInfo(ctx)
+	tenantID := userInfo.TenantID
+	err := controller.service.CreateOrUpdateTeam(models.ApplicationAPIGatewayTeams{
+		ID:        request.Id,
+		Name:      request.TeamName,
+		GatewayID: request.GatewayId,
+		TenantID:  tenantID,
+		Level:     request.Level,
+		Status:    1,
+	})
+	if err != nil {
+		return mvc.FailWithMsg(false, err.Error())
+	}
+	return mvc.Success(true)
 }
