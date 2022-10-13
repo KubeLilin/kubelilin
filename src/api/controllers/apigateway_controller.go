@@ -54,3 +54,34 @@ func (controller *ApiGatewayController) PostCreateOrEditTeam(ctx *context.HttpCo
 	}
 	return mvc.Success(true)
 }
+
+func (controller *ApiGatewayController) GetRouterList(request *requests.GatewayRouterRequest) mvc.ApiResult {
+	list, err := controller.service.GetRouterList(request)
+	if err != nil {
+		return mvc.FailWithMsg(false, err.Error())
+	}
+	return mvc.Success(list)
+}
+
+func (controller *ApiGatewayController) GetAppList(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := requests.GetUserInfo(ctx)
+	tenantID := userInfo.TenantID
+	list, err := controller.service.GetAppList(tenantID)
+	if err != nil {
+		return mvc.FailWithMsg(false, err.Error())
+	}
+	return mvc.Success(list)
+}
+
+func (controller *ApiGatewayController) GetDeploymentList(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := requests.GetUserInfo(ctx)
+	tenantID := userInfo.TenantID
+	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
+	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appId", "0"))
+
+	list, err := controller.service.GetDeploymentList(tenantID, clusterId, appId)
+	if err != nil {
+		return mvc.FailWithMsg(false, err.Error())
+	}
+	return mvc.Success(list)
+}

@@ -2,7 +2,10 @@ package networks
 
 import (
 	"errors"
+	"github.com/yoyofx/glinq"
 	"gorm.io/gorm"
+	"kubelilin/api/dto/requests"
+	"kubelilin/api/dto/responses"
 	"kubelilin/domain/database/models"
 )
 
@@ -58,4 +61,52 @@ func (service *ApiGatewayService) GetAllGatewayTeamList(gatewayId uint64, tenant
 	err := service.db.Model(&models.ApplicationAPIGatewayTeams{}).
 		Where("gateway_id=? AND tenant_id=?", gatewayId, tenantId).Find(&gatewayList).Error
 	return gatewayList, err
+}
+
+func (service *ApiGatewayService) GetRouterList(requestRouter *requests.GatewayRouterRequest) ([]models.ApplicationAPIGatewayRouters, error) {
+	var gatewayList []models.ApplicationAPIGatewayRouters
+	query := service.db.Model(&models.ApplicationAPIGatewayRouters{}).
+		Where("team_id=?", requestRouter.TeamId)
+
+	if requestRouter.Name != "" {
+		query = query.Where("name like ?", "%"+requestRouter.Name+"%")
+	}
+
+	if requestRouter.Host != "" {
+		query = query.Where("host like ?", "%"+requestRouter.Host+"%")
+	}
+	if requestRouter.Desc != "" {
+		query = query.Where("desc like ?", "%"+requestRouter.Desc+"%")
+	}
+
+	err := query.Find(&gatewayList).Error
+	return gatewayList, err
+}
+
+func (service *ApiGatewayService) GetAppList(tenantId uint64) ([]responses.LabelValues, error) {
+	var applist []models.SgrTenantApplication
+	query := service.db.Raw("SELECT id,name FROM sgr_tenant_application WHERE tenant_id = ?", tenantId)
+	err := query.Find(&applist).Error
+	res := glinq.Map(glinq.From(applist), func(app models.SgrTenantApplication) responses.LabelValues {
+		return responses.LabelValues{
+			Label: app.Name,
+			Value: app.ID,
+		}
+	})
+
+	return res.ToSlice(), err
+}
+
+func (service *ApiGatewayService) GetDeploymentList(tenantId uint64, clusterId uint64, appId uint64) ([]responses.LabelValues, error) {
+	var deploymentList []models.SgrTenantDeployments
+	query := service.db.Raw(`SELECT id,name FROM sgr_tenant_deployments 
+WHERE tenant_id = ? AND cluster_id = ? AND app_id = ?`, tenantId, clusterId, appId)
+	err := query.Find(&deploymentList).Error
+	res := glinq.Map(glinq.From(deploymentList), func(deploy models.SgrTenantDeployments) responses.LabelValues {
+		return responses.LabelValues{
+			Label: deploy.Name,
+			Value: deploy.ID,
+		}
+	})
+	return res.ToSlice(), err
 }
