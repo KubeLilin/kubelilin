@@ -7,6 +7,8 @@ type ApplicationAPIGateway struct {
 	ID          uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`         // 网关ID
 	Name        string `gorm:"column:name;type:varchar(100);not null" json:"name"`                   // 网关名称
 	Desc        string `gorm:"column:desc;type:varchar(255);not null" json:"desc"`                   // 网关描述
+	Vip         string `gorm:"column:vip;type:varchar(50);not null;default:''" json:"vip"`           // 内网vip
+	ExportIP    string `gorm:"column:export_ip;type:varchar(50);default:''" json:"exportIp"`         // 出口IP
 	ClusterID   uint64 `gorm:"column:cluster_id;type:bigint unsigned;not null" json:"clusterId"`     // 集群ID
 	AdminURI    string `gorm:"column:admin_uri;type:varchar(255);not null" json:"adminUri"`          // 网关admin api
 	AccessToken string `gorm:"column:access_token;type:varchar(255);not null" json:"accessToken"`    // 网关 admin api访问token
@@ -23,6 +25,8 @@ var ApplicationAPIGatewayColumns = struct {
 	ID          string
 	Name        string
 	Desc        string
+	Vip         string
+	ExportIP    string
 	ClusterID   string
 	AdminURI    string
 	AccessToken string
@@ -31,6 +35,8 @@ var ApplicationAPIGatewayColumns = struct {
 	ID:          "id",
 	Name:        "name",
 	Desc:        "desc",
+	Vip:         "vip",
+	ExportIP:    "export_ip",
 	ClusterID:   "cluster_id",
 	AdminURI:    "admin_uri",
 	AccessToken: "access_token",

@@ -19,7 +19,7 @@ func NewApiGatewayService(db *gorm.DB) *ApiGatewayService {
 
 func (service *ApiGatewayService) GetAllGatewayList(clusterId uint64) ([]models.ApplicationAPIGateway, error) {
 	var gatewayList []models.ApplicationAPIGateway
-	sql := `SELECT gw.id,gw.name,gw.desc,gw.cluster_id,tc.name admin_uri FROM application_api_gateway gw
+	sql := `SELECT gw.id,gw.name,gw.desc,gw.cluster_id,tc.name admin_uri,gw.export_ip,gw.vip FROM application_api_gateway gw
 	INNER JOIN sgr_tenant_cluster tc on tc.id = gw.cluster_id `
 	var sqlParams []interface{}
 	if clusterId > 0 {
