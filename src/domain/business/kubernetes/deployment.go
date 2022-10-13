@@ -415,7 +415,7 @@ func (ds *DeploymentSupervisor) CreateProBe(proReq requests.ProbeRequest) {
 			probe := models.SgrDeploymentProbe{}
 			probe.Type = proReq.Readiness.Type
 			probe.Port = proReq.Readiness.Port
-			probe.URL = proReq.Readiness.URL
+			probe.Path = proReq.Readiness.Path
 			probe.ReqScheme = proReq.Readiness.ReqScheme
 			tx.Model(models.SgrDeploymentProbe{}).Save(probe)
 		}
@@ -423,7 +423,7 @@ func (ds *DeploymentSupervisor) CreateProBe(proReq requests.ProbeRequest) {
 			probe := models.SgrDeploymentProbe{}
 			probe.Type = proReq.Liveness.Type
 			probe.Port = proReq.Liveness.Port
-			probe.URL = proReq.Liveness.URL
+			probe.Path = proReq.Liveness.Path
 			probe.ReqScheme = proReq.Liveness.ReqScheme
 			tx.Model(models.SgrDeploymentProbe{}).Save(probe)
 		}
