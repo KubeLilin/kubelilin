@@ -7,6 +7,8 @@ type ApplicationAPIGateway struct {
 	ID          uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`         // 网关ID
 	Name        string `gorm:"column:name;type:varchar(100);not null" json:"name"`                   // 网关名称
 	Desc        string `gorm:"column:desc;type:varchar(255);not null" json:"desc"`                   // 网关描述
+	Vip         string `gorm:"column:vip;type:varchar(50);not null;default:''" json:"vip"`           // 内网vip
+	ExportIP    string `gorm:"column:export_ip;type:varchar(50);default:''" json:"exportIp"`         // 出口IP
 	ClusterID   uint64 `gorm:"column:cluster_id;type:bigint unsigned;not null" json:"clusterId"`     // 集群ID
 	AdminURI    string `gorm:"column:admin_uri;type:varchar(255);not null" json:"adminUri"`          // 网关admin api
 	AccessToken string `gorm:"column:access_token;type:varchar(255);not null" json:"accessToken"`    // 网关 admin api访问token
@@ -23,6 +25,8 @@ var ApplicationAPIGatewayColumns = struct {
 	ID          string
 	Name        string
 	Desc        string
+	Vip         string
+	ExportIP    string
 	ClusterID   string
 	AdminURI    string
 	AccessToken string
@@ -31,6 +35,8 @@ var ApplicationAPIGatewayColumns = struct {
 	ID:          "id",
 	Name:        "name",
 	Desc:        "desc",
+	Vip:         "vip",
+	ExportIP:    "export_ip",
 	ClusterID:   "cluster_id",
 	AdminURI:    "admin_uri",
 	AccessToken: "access_token",
@@ -39,23 +45,25 @@ var ApplicationAPIGatewayColumns = struct {
 
 // ApplicationAPIGatewayRouters 集群网关团队路由
 type ApplicationAPIGatewayRouters struct {
-	ID           uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`                     // 路由ID
-	Name         string `gorm:"column:name;type:varchar(50);not null" json:"name"`                                // 路由名称
-	Desc         string `gorm:"column:desc;type:varchar(255);not null" json:"desc"`                               // 路由描述
-	TeamID       uint64 `gorm:"column:team_id;type:bigint unsigned;not null" json:"teamId"`                       // 团队目录ID
-	Host         string `gorm:"column:host;type:varchar(150);not null" json:"host"`                               // 路由域名
-	URI          string `gorm:"column:uri;type:varchar(255);not null" json:"uri"`                                 // 路由路径
-	Websocket    uint8  `gorm:"column:websocket;type:tinyint unsigned;not null;default:0" json:"websocket"`       // 是否开启websocket
-	UpstreamType string `gorm:"column:upstream_type;type:varchar(20);not null" json:"upstreamType"`               // service | node
-	Loadbalance  string `gorm:"column:loadbalance;type:varchar(255);not null" json:"loadbalance"`                 // roundrobin | chash | ewma | least_conn
-	Nodes        string `gorm:"column:nodes;type:varchar(255);not null" json:"nodes"`                             // {,   "127.0.0.1:1980": 1,,   "127.0.0.1:1981": 1,}
-	Timeout      uint   `gorm:"column:timeout;type:int unsigned;not null" json:"timeout"`                         // 超时时间
-	DeploymentID uint64 `gorm:"column:deployment_id;type:bigint unsigned;not null;default:0" json:"deploymentId"` // 应用部署ID
-	Rewirte      uint8  `gorm:"column:rewirte;type:tinyint unsigned;not null;default:0" json:"rewirte"`           // 是否重写
-	RegexURI     string `gorm:"column:regex_uri;type:varchar(150);not null;default:''" json:"regexUri"`           // 匹配正则表达式,
-	RegexTmp     string `gorm:"column:regex_tmp;type:varchar(100);not null;default:''" json:"regexTmp"`           // 转发路径模版,
-	Label        string `gorm:"column:label;type:varchar(50);not null;default:''" json:"label"`                   // 标签
-	Status       uint8  `gorm:"column:status;type:tinyint unsigned;not null" json:"status"`                       // 状态
+	ID            uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`                        // 路由ID
+	Name          string `gorm:"column:name;type:varchar(50);not null;default:''" json:"name"`                        // 路由名称
+	Desc          string `gorm:"column:desc;type:varchar(255);not null;default:''" json:"desc"`                       // 路由描述
+	TeamID        uint64 `gorm:"column:team_id;type:bigint unsigned;not null;default:0" json:"teamId"`                // 团队目录ID
+	Host          string `gorm:"column:host;type:varchar(150);not null;default:''" json:"host"`                       // 路由域名
+	URI           string `gorm:"column:uri;type:varchar(255);not null;default:/*" json:"uri"`                         // 路由路径
+	Websocket     uint8  `gorm:"column:websocket;type:tinyint unsigned;not null;default:1" json:"websocket"`          // 是否开启websocket
+	UpstreamType  string `gorm:"column:upstream_type;type:varchar(20);not null;default:service" json:"upstreamType"`  // service | node
+	Loadbalance   string `gorm:"column:loadbalance;type:varchar(255);not null;default:roundrobin" json:"loadbalance"` // roundrobin | chash | ewma | least_conn
+	Nodes         string `gorm:"column:nodes;type:varchar(255);not null;default:''" json:"nodes"`                     // {,   "127.0.0.1:1980": 1,,   "127.0.0.1:1981": 1,}
+	Timeout       uint   `gorm:"column:timeout;type:int unsigned;not null;default:60" json:"timeout"`                 // 超时时间
+	ApplicationID uint64 `gorm:"column:application_id;type:bigint unsigned;not null;default:0" json:"applicationId"`  // 应用ID
+	DeploymentID  uint64 `gorm:"column:deployment_id;type:bigint unsigned;not null;default:0" json:"deploymentId"`    // 应用部署ID
+	Rewrite       uint8  `gorm:"column:rewrite;type:tinyint unsigned;not null;default:0" json:"rewrite"`              // 是否重写
+	RegexURI      string `gorm:"column:regex_uri;type:varchar(150);not null;default:''" json:"regexUri"`              // 匹配正则表达式,
+	RegexTmp      string `gorm:"column:regex_tmp;type:varchar(100);not null;default:''" json:"regexTmp"`              // 转发路径模版,
+	Liveness      string `gorm:"column:liveness;type:varchar(255);not null;default:''" json:"liveness"`               // 存活探针
+	Label         string `gorm:"column:label;type:varchar(50);not null;default:''" json:"label"`                      // 标签
+	Status        uint8  `gorm:"column:status;type:tinyint unsigned;not null;default:1" json:"status"`                // 状态
 }
 
 // TableName get sql table name.获取数据库表名
@@ -65,41 +73,45 @@ func (m *ApplicationAPIGatewayRouters) TableName() string {
 
 // ApplicationAPIGatewayRoutersColumns get sql column name.获取数据库列名
 var ApplicationAPIGatewayRoutersColumns = struct {
-	ID           string
-	Name         string
-	Desc         string
-	TeamID       string
-	Host         string
-	URI          string
-	Websocket    string
-	UpstreamType string
-	Loadbalance  string
-	Nodes        string
-	Timeout      string
-	DeploymentID string
-	Rewirte      string
-	RegexURI     string
-	RegexTmp     string
-	Label        string
-	Status       string
+	ID            string
+	Name          string
+	Desc          string
+	TeamID        string
+	Host          string
+	URI           string
+	Websocket     string
+	UpstreamType  string
+	Loadbalance   string
+	Nodes         string
+	Timeout       string
+	ApplicationID string
+	DeploymentID  string
+	Rewrite       string
+	RegexURI      string
+	RegexTmp      string
+	Liveness      string
+	Label         string
+	Status        string
 }{
-	ID:           "id",
-	Name:         "name",
-	Desc:         "desc",
-	TeamID:       "team_id",
-	Host:         "host",
-	URI:          "uri",
-	Websocket:    "websocket",
-	UpstreamType: "upstream_type",
-	Loadbalance:  "loadbalance",
-	Nodes:        "nodes",
-	Timeout:      "timeout",
-	DeploymentID: "deployment_id",
-	Rewirte:      "rewirte",
-	RegexURI:     "regex_uri",
-	RegexTmp:     "regex_tmp",
-	Label:        "label",
-	Status:       "status",
+	ID:            "id",
+	Name:          "name",
+	Desc:          "desc",
+	TeamID:        "team_id",
+	Host:          "host",
+	URI:           "uri",
+	Websocket:     "websocket",
+	UpstreamType:  "upstream_type",
+	Loadbalance:   "loadbalance",
+	Nodes:         "nodes",
+	Timeout:       "timeout",
+	ApplicationID: "application_id",
+	DeploymentID:  "deployment_id",
+	Rewrite:       "rewrite",
+	RegexURI:      "regex_uri",
+	RegexTmp:      "regex_tmp",
+	Liveness:      "liveness",
+	Label:         "label",
+	Status:        "status",
 }
 
 // ApplicationAPIGatewayTeams 集群网关团队目录
@@ -529,14 +541,16 @@ var SgrCodeDeploymentLevelColumns = struct {
 
 // SgrDeploymentProbe 部署状态检查
 type SgrDeploymentProbe struct {
-	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
-	DpID         int64      `gorm:"column:dp_id;type:bigint;not null" json:"dpId"`                // 部署ID
-	Type         string     `gorm:"column:type;type:varchar(20);not null" json:"type"`            // 类型READINESS/LIVENESS
-	Port         uint       `gorm:"column:port;type:int unsigned;not null" json:"port"`           // 请求端口
-	URL          string     `gorm:"column:url;type:varchar(505);not null" json:"url"`             // 请求地址
-	ReqScheme    string     `gorm:"column:req_scheme;type:varchar(10);not null" json:"reqScheme"` // 请求协议 HTTP
-	CreationTime *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
-	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
+	ID                  uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	DpID                int64      `gorm:"column:dp_id;type:bigint;not null" json:"dpId"`                // 部署ID
+	Type                string     `gorm:"column:type;type:varchar(20);not null" json:"type"`            // 类型READINESS/LIVENESS
+	Port                uint       `gorm:"column:port;type:int unsigned;not null" json:"port"`           // 请求端口
+	Path                string     `gorm:"column:path;type:varchar(500);not null" json:"path"`           // 请求地址
+	ReqScheme           string     `gorm:"column:req_scheme;type:varchar(10);not null" json:"reqScheme"` // 请求协议 HTTP
+	CreationTime        *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
+	UpdateTime          *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
+	InitialDelaySeconds uint       `gorm:"column:initial_delay_seconds;type:int unsigned;not null" json:"initialDelaySeconds"` // 执行第一次探测前应该等待
+	PeriodSeconds       uint       `gorm:"column:period_seconds;type:int unsigned;not null" json:"periodSeconds"`              // 每隔 n秒执行一次探测
 }
 
 // TableName get sql table name.获取数据库表名
@@ -546,23 +560,27 @@ func (m *SgrDeploymentProbe) TableName() string {
 
 // SgrDeploymentProbeColumns get sql column name.获取数据库列名
 var SgrDeploymentProbeColumns = struct {
-	ID           string
-	DpID         string
-	Type         string
-	Port         string
-	URL          string
-	ReqScheme    string
-	CreationTime string
-	UpdateTime   string
+	ID                  string
+	DpID                string
+	Type                string
+	Port                string
+	Path                string
+	ReqScheme           string
+	CreationTime        string
+	UpdateTime          string
+	InitialDelaySeconds string
+	PeriodSeconds       string
 }{
-	ID:           "id",
-	DpID:         "dp_id",
-	Type:         "type",
-	Port:         "port",
-	URL:          "url",
-	ReqScheme:    "req_scheme",
-	CreationTime: "creation_time",
-	UpdateTime:   "update_time",
+	ID:                  "id",
+	DpID:                "dp_id",
+	Type:                "type",
+	Port:                "port",
+	Path:                "path",
+	ReqScheme:           "req_scheme",
+	CreationTime:        "creation_time",
+	UpdateTime:          "update_time",
+	InitialDelaySeconds: "initial_delay_seconds",
+	PeriodSeconds:       "period_seconds",
 }
 
 // SgrRoleMenuMap 角色菜单权限影射

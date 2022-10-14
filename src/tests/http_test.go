@@ -43,7 +43,7 @@ func TestGatewayCreateRoute(t *testing.T) {
 		Nodes:        "dev-nginx-cls-hbktlqm5-svc-cluster-sgr.yoyogo:80",
 		Timeout:      3,
 		DeploymentID: 0,
-		Rewirte:      1,
+		Rewrite:      1,
 		RegexURI:     "^/dev-nginx-cls-hbktlqm5/(.*)",
 		RegexTmp:     "/$1",
 		Label:        "deployment",

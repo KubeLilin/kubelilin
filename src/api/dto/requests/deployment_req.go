@@ -55,11 +55,13 @@ type ProbeRequest struct {
 }
 
 type ProBeItem struct {
-	Type      string `gorm:"column:type;type:varchar(50);not null" json:"type"`            // 检查类型READINESS/LIVENESS
-	Port      uint   `gorm:"column:port;type:int unsigned;not null" json:"port"`           // 检查端口
-	URL       string `gorm:"column:url;type:varchar(500);not null" json:"url"`             // 请求路径
-	DpID      uint64 `gorm:"column:dp_id;type:bigint unsigned;not null" json:"dpId"`       // 部署id
-	ReqScheme string `gorm:"column:req_scheme;type:varchar(20);not null" json:"reqScheme"` // HTTP/TCP
+	Type                string `gorm:"column:type;type:varchar(50);not null" json:"type"`                                  // 检查类型READINESS/LIVENESS
+	Port                uint   `gorm:"column:port;type:int unsigned;not null" json:"port"`                                 // 检查端口
+	Path                string `gorm:"column:path;type:varchar(500);not null" json:"path"`                                 // 请求地址
+	DpID                uint64 `gorm:"column:dp_id;type:bigint unsigned;not null" json:"dpId"`                             // 部署id
+	ReqScheme           string `gorm:"column:req_scheme;type:varchar(20);not null" json:"reqScheme"`                       // HTTP/TCP
+	InitialDelaySeconds uint   `gorm:"column:initial_delay_seconds;type:int unsigned;not null" json:"initialDelaySeconds"` // 执行第一次探测前应该等待
+	PeriodSeconds       uint   `gorm:"column:period_seconds;type:int unsigned;not null" json:"periodSeconds"`              // 每隔 n秒执行一次探测
 }
 
 type ScaleRequest struct {
