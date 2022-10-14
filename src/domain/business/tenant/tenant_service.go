@@ -36,6 +36,7 @@ func (ts *TenantService) CreateTenant(tenant *models.SgrTenant) bool {
 			Account:  tenant.TName + "admin",
 			UserName: tenant.TCode + "-admin",
 			Password: fxutils.Md5String("123456"),
+			Status:   1,
 		}
 		if err := ts.db.Create(tenantAdmin).Error; err != nil {
 			return err
