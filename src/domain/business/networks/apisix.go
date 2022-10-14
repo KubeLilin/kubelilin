@@ -61,7 +61,7 @@ func (proxy APISIXProxy) CreateOrUpdateRoute(id string, router models.Applicatio
 	if router.Host != "" {
 		m["host"] = router.Host
 	}
-	if router.Rewirte > 0 {
+	if router.Rewrite > 0 {
 		m["plugins"] = gout.H{
 			"proxy-rewrite": gout.H{
 				"regex_uri": gout.A{

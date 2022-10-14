@@ -58,9 +58,10 @@ type ApplicationAPIGatewayRouters struct {
 	Timeout       uint   `gorm:"column:timeout;type:int unsigned;not null;default:60" json:"timeout"`                 // 超时时间
 	ApplicationID uint64 `gorm:"column:application_id;type:bigint unsigned;not null;default:0" json:"applicationId"`  // 应用ID
 	DeploymentID  uint64 `gorm:"column:deployment_id;type:bigint unsigned;not null;default:0" json:"deploymentId"`    // 应用部署ID
-	Rewirte       uint8  `gorm:"column:rewirte;type:tinyint unsigned;not null;default:0" json:"rewirte"`              // 是否重写
+	Rewrite       uint8  `gorm:"column:rewrite;type:tinyint unsigned;not null;default:0" json:"rewrite"`              // 是否重写
 	RegexURI      string `gorm:"column:regex_uri;type:varchar(150);not null;default:''" json:"regexUri"`              // 匹配正则表达式,
 	RegexTmp      string `gorm:"column:regex_tmp;type:varchar(100);not null;default:''" json:"regexTmp"`              // 转发路径模版,
+	Liveness      string `gorm:"column:liveness;type:varchar(255);not null;default:''" json:"liveness"`               // 存活探针
 	Label         string `gorm:"column:label;type:varchar(50);not null;default:''" json:"label"`                      // 标签
 	Status        uint8  `gorm:"column:status;type:tinyint unsigned;not null;default:1" json:"status"`                // 状态
 }
@@ -85,9 +86,10 @@ var ApplicationAPIGatewayRoutersColumns = struct {
 	Timeout       string
 	ApplicationID string
 	DeploymentID  string
-	Rewirte       string
+	Rewrite       string
 	RegexURI      string
 	RegexTmp      string
+	Liveness      string
 	Label         string
 	Status        string
 }{
@@ -104,9 +106,10 @@ var ApplicationAPIGatewayRoutersColumns = struct {
 	Timeout:       "timeout",
 	ApplicationID: "application_id",
 	DeploymentID:  "deployment_id",
-	Rewirte:       "rewirte",
+	Rewrite:       "rewrite",
 	RegexURI:      "regex_uri",
 	RegexTmp:      "regex_tmp",
+	Liveness:      "liveness",
 	Label:         "label",
 	Status:        "status",
 }

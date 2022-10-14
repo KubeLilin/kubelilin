@@ -4,6 +4,7 @@ import (
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	requests "kubelilin/api/dto/requests"
+	"kubelilin/domain/business/app"
 	"kubelilin/domain/business/networks"
 	"kubelilin/domain/database/models"
 	"kubelilin/utils"
@@ -11,11 +12,12 @@ import (
 
 type ApiGatewayController struct {
 	mvc.ApiController
-	service *networks.ApiGatewayService
+	service           *networks.ApiGatewayService
+	deploymentService *app.DeploymentService
 }
 
-func NewApiGatewayController(service *networks.ApiGatewayService) *ApiGatewayController {
-	return &ApiGatewayController{service: service}
+func NewApiGatewayController(service *networks.ApiGatewayService, deploymentService *app.DeploymentService) *ApiGatewayController {
+	return &ApiGatewayController{service: service, deploymentService: deploymentService}
 }
 
 func (controller *ApiGatewayController) GetList(ctx *context.HttpContext) mvc.ApiResult {
@@ -55,7 +57,7 @@ func (controller *ApiGatewayController) PostCreateOrEditTeam(ctx *context.HttpCo
 	return mvc.Success(true)
 }
 
-func (controller *ApiGatewayController) GetRouterList(request *requests.GatewayRouterRequest) mvc.ApiResult {
+func (controller *ApiGatewayController) GetRouterList(request *requests.GatewayRouterListRequest) mvc.ApiResult {
 	list, err := controller.service.GetRouterList(request)
 	if err != nil {
 		return mvc.FailWithMsg(false, err.Error())
@@ -84,4 +86,23 @@ func (controller *ApiGatewayController) GetDeploymentList(ctx *context.HttpConte
 		return mvc.FailWithMsg(false, err.Error())
 	}
 	return mvc.Success(list)
+}
+
+func (controller *ApiGatewayController) PostCreateOrEditRouter(request *requests.GatewayRouterRequest) mvc.ApiResult {
+	deployment, err := controller.deploymentService.GetDeploymentByID(uint64(request.DeploymentID))
+	if err != nil {
+		return mvc.FailWithMsg(false, "没有找到对应的部署")
+	}
+	model, rerr := controller.service.CreateOrEditRouter(request, deployment)
+	if rerr != nil {
+		return mvc.FailWithMsg(false, err.Error())
+	}
+	// add router for apisix api
+	gatewayEntity, _ := controller.service.GetById(request.GatewayID)
+	apisixProxy := networks.NewAPISIXProxy(gatewayEntity.AdminURI, gatewayEntity.AccessToken)
+	err = apisixProxy.CreateOrUpdateRoute(utils.ToString(model.ID), *model)
+	if err != nil {
+		return mvc.FailWithMsg(false, err.Error())
+	}
+	return mvc.Success(true)
 }

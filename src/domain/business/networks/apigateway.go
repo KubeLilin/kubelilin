@@ -2,11 +2,14 @@ package networks
 
 import (
 	"errors"
+	"fmt"
+	"github.com/jinzhu/copier"
 	"github.com/yoyofx/glinq"
 	"gorm.io/gorm"
 	"kubelilin/api/dto/requests"
 	"kubelilin/api/dto/responses"
 	"kubelilin/domain/database/models"
+	"kubelilin/domain/dto"
 )
 
 type ApiGatewayService struct {
@@ -63,7 +66,7 @@ func (service *ApiGatewayService) GetAllGatewayTeamList(gatewayId uint64, tenant
 	return gatewayList, err
 }
 
-func (service *ApiGatewayService) GetRouterList(requestRouter *requests.GatewayRouterRequest) ([]models.ApplicationAPIGatewayRouters, error) {
+func (service *ApiGatewayService) GetRouterList(requestRouter *requests.GatewayRouterListRequest) ([]models.ApplicationAPIGatewayRouters, error) {
 	var gatewayList []models.ApplicationAPIGatewayRouters
 	query := service.db.Model(&models.ApplicationAPIGatewayRouters{}).
 		Where("team_id=?", requestRouter.TeamId)
@@ -109,4 +112,26 @@ WHERE tenant_id = ? AND cluster_id = ? AND app_id = ?`, tenantId, clusterId, app
 		}
 	})
 	return res.ToSlice(), err
+}
+
+func (service *ApiGatewayService) CreateOrEditRouter(request *requests.GatewayRouterRequest, deployment dto.DeploymentItemDto) (*models.ApplicationAPIGatewayRouters, error) {
+	var router models.ApplicationAPIGatewayRouters
+	_ = copier.Copy(&router, request)
+
+	router.Label = "deployment"
+	router.Websocket = 1
+	router.Nodes = fmt.Sprintf("%s.%s:%d", deployment.ServiceName, deployment.NameSpace, deployment.ServicePort)
+	router.Status = 1
+
+	var err error
+	if router.ID > 0 {
+		// update the router
+		err = service.db.Model(&models.ApplicationAPIGatewayRouters{}).
+			Where("id=?", router.ID).
+			Updates(&router).Error
+	} else {
+		// create a new router
+		err = service.db.Create(&router).Error
+	}
+	return &router, err
 }
