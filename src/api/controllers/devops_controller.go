@@ -67,3 +67,13 @@ func (controller DevopsController) GetAppList(ctx *context.HttpContext, request 
 	}
 	return mvc.Success(res)
 }
+
+func (controller DevopsController) GetPipelineList(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
+	projectId := utils.GetNumberOfParam[uint64](ctx, "projectId")
+	res, err := controller.devopsService.GetPipelineListByProjectId(projectId, userInfo.TenantID)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(res)
+}
