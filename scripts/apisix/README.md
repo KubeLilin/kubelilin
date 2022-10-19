@@ -1,6 +1,6 @@
 # 集群内部署APISIX
 ## 修改配置
-在apisix.yaml中找到service配置成NodePort,端口只要与主机端口不冲突即可。
+在apisix.yaml中找到service配置成NodePort(默认30000),端口只要与主机端口不冲突即可。
 
 记录下文件中 admin_key的值，用于记录网关认证。
 ## 安装 
