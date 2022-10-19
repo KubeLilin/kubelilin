@@ -131,7 +131,7 @@ WHERE t1.status = 1 AND papp.project_id = ? `)
 func (service *DevopsService) GetPipelineListByProjectId(projectId uint64, tenantId uint64) ([]models.SgrTenantApplicationPipelines, error) {
 	sql := `SELECT ppl.* FROM devops_projects devp
 INNER JOIN devops_projects_apps depa on depa.project_id = devp.id
-INNER JOIN sgr_tenant_application_pipelines ppl on ppl.appid = depa.application_id WHERE devp.id = ? AND devp.tenant_id = ? `
+INNER JOIN sgr_tenant_application_pipelines ppl on ppl.appid = depa.application_id WHERE devp.id = ? AND devp.tenant_id = ? AND status=1 `
 	var res []models.SgrTenantApplicationPipelines
 	err := service.db.Raw(sql, projectId, tenantId).Find(&res).Error
 	if err != nil {
