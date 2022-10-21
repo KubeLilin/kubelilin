@@ -112,14 +112,17 @@ func (svc *ServiceSupervisor) QueryServiceList(req requests.ServiceRequest) (*pa
 	}
 	//data, err := json.Marshal(&list.Items[0])
 	for _, x := range list.Items {
+
 		svc := dto.ServiceList{
-			Namespace:   req.Namespace,
-			Name:        x.Name,
-			Labels:      x.Labels,
-			Selector:    x.Spec.Selector,
-			Type:        string(x.Spec.Type),
-			CreateTime:  x.GetCreationTimestamp().Time,
-			ContinueStr: list.Continue,
+			Namespace:       req.Namespace,
+			Name:            x.Name,
+			Labels:          x.Labels,
+			Selector:        x.Spec.Selector,
+			Type:            string(x.Spec.Type),
+			ClusterIP:       x.Spec.ClusterIP,
+			SessionAffinity: string(x.Spec.SessionAffinity),
+			CreateTime:      x.GetCreationTimestamp().Time,
+			ContinueStr:     list.Continue,
 		}
 		svcList = append(svcList, svc)
 	}
@@ -166,9 +169,14 @@ func (svc *ServiceSupervisor) QueryServiceInfo(req requests.ServiceRequest) (*re
 	return &service, err
 }
 
-func (svc *ServiceSupervisor) QueryNameSpaceByTenant(tenantId uint64) []responses.NamespaceList {
+func (svc *ServiceSupervisor) QueryNameSpaceByTenant(tenantId uint64, clusterId uint64) []responses.NamespaceList {
 	var data = make([]responses.NamespaceList, 0)
-	svc.db.Model(&models.SgrTenantNamespace{}).Where("tenant_id=?", tenantId).Find(&data)
+	query := svc.db.Model(&models.SgrTenantNamespace{}).Where("tenant_id=?", tenantId)
+	if clusterId > 0 {
+		query = query.Where("cluster_id=?", clusterId)
+	}
+	query.Find(&data)
+
 	return data
 }
 
