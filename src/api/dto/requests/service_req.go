@@ -30,5 +30,6 @@ type ServicePortInfo struct {
 	Name       string             `json:"name"`
 	Port       intstr.IntOrString `json:"port"`
 	TargetPort intstr.IntOrString `json:"targetPort"`
+	NodePort   intstr.IntOrString `json:"nodePort"`
 	Protocol   string             `json:"protocol"`
 }

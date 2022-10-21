@@ -238,13 +238,17 @@ func (svc *ServiceSupervisor) ChangeService(svcReq *requests.ServiceInfoReq) err
 	var ports []applycorev1.ServicePortApplyConfiguration
 	for _, x := range svcReq.Port {
 		var portNumber int32
+		var nodePort int32
 		var targetPort intstr.IntOrString
 		if x.Port.Type == intstr.Int {
 			portNumber = x.Port.IntVal
+			nodePort = x.NodePort.IntVal
 			targetPort = x.TargetPort
 		} else {
 			protStrForInt, _ := strconv.Atoi(x.Port.StrVal)
 			portNumber = int32(protStrForInt)
+			nodePortStrForInt, _ := strconv.Atoi(x.NodePort.StrVal)
+			nodePort = int32(nodePortStrForInt)
 			targetPort = intstr.Parse(x.TargetPort.StrVal)
 		}
 		protocol := v1.ProtocolTCP
@@ -263,7 +267,7 @@ func (svc *ServiceSupervisor) ChangeService(svcReq *requests.ServiceInfoReq) err
 		} else if svcReq.Type == NODE_PORT {
 			specType = v1.ServiceTypeNodePort
 			spec.Type = &specType
-			port.NodePort = &portNumber
+			port.NodePort = &nodePort
 		}
 		ports = append(ports, port)
 	}
