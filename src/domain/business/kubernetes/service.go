@@ -92,12 +92,20 @@ func (svc *ServiceSupervisor) ApplyService(client corev1.CoreV1Interface, dp *mo
 
 func (svc *ServiceSupervisor) QueryServiceList(req requests.ServiceRequest) (*page.Page, error) {
 	var svcList []dto.ServiceList
-	if req.Namespace == "" {
-		return &page.Page{}, nil
+
+	var clusterID uint64 = 0
+	if req.OnlyPAAS {
+		if req.Namespace == "" {
+			return &page.Page{}, nil
+		}
+		namespaceInfo := &models.SgrTenantNamespace{}
+		svc.db.Model(models.SgrTenantNamespace{}).Where("namespace=?", req.Namespace).First(namespaceInfo)
+		clusterID = namespaceInfo.ClusterID
+	} else {
+		clusterID = req.ClusterId
 	}
-	namespaceInfo := &models.SgrTenantNamespace{}
-	svc.db.Model(models.SgrTenantNamespace{}).Where("namespace=?", req.Namespace).First(namespaceInfo)
-	client, err := svc.clusterService.GetClusterClientByTenantAndId(req.TenantId, namespaceInfo.ClusterID)
+
+	client, err := svc.clusterService.GetClusterClientByTenantAndId(req.TenantId, clusterID)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +134,7 @@ func (svc *ServiceSupervisor) QueryServiceList(req requests.ServiceRequest) (*pa
 		}
 		svcList = append(svcList, svc)
 	}
-	var res = page.Page{}
+	var res = page.Page{PageIndex: req.CurrentPage}
 	count := list.RemainingItemCount
 	if count == nil {
 		res.Total = int64(len(svcList))
@@ -144,9 +152,16 @@ func (svc *ServiceSupervisor) QueryServiceInfo(req requests.ServiceRequest) (*re
 	if req.Name == "" {
 		return nil, errors.New("请传入服务名称")
 	}
-	namespaceInfo := &models.SgrTenantNamespace{}
-	svc.db.Model(models.SgrTenantNamespace{}).Where("namespace=?", req.Namespace).First(namespaceInfo)
-	client, err := svc.clusterService.GetClusterClientByTenantAndId(req.TenantId, namespaceInfo.ClusterID)
+	var clusterID uint64 = 0
+	if req.OnlyPAAS {
+		namespaceInfo := &models.SgrTenantNamespace{}
+		svc.db.Model(models.SgrTenantNamespace{}).Where("namespace=?", req.Namespace).First(namespaceInfo)
+		clusterID = namespaceInfo.ClusterID
+	} else {
+		clusterID = req.ClusterId
+	}
+
+	client, err := svc.clusterService.GetClusterClientByTenantAndId(req.TenantId, clusterID)
 	if err != nil {
 		return nil, err
 	}
@@ -178,6 +193,11 @@ func (svc *ServiceSupervisor) QueryNameSpaceByTenant(tenantId uint64, clusterId 
 	query.Find(&data)
 
 	return data
+}
+
+func (svc *ServiceSupervisor) QueryNamespaceList(tenantId uint64, clusterId uint64) ([]dto.Namespace, error) {
+	client, err := svc.clusterService.GetClusterClientByTenantAndId(tenantId, clusterId)
+	return GetAllNamespaces(client), err
 }
 
 func (svc *ServiceSupervisor) ChangeService(svcReq *requests.ServiceInfoReq) error {
