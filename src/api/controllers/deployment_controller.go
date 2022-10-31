@@ -211,11 +211,11 @@ func (controller DeploymentController) PostNotify(notifyReq *requests2.DeployNot
 
 }
 
-func (c DeploymentController) PostRollBackByReleaseRecord(ctx *context.HttpContext, execReq *requests2.ExecDeploymentRequest) mvc.ApiResult {
+func (controller DeploymentController) PostRollBackByReleaseRecord(ctx *context.HttpContext, execReq *requests2.ExecDeploymentRequest) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	execReq.TenantId = userInfo.TenantID
 	execReq.Operator = uint64(userInfo.UserId)
-	res, err := c.deploymentSupervisor.ExecuteDeployment(execReq)
+	res, err := controller.deploymentSupervisor.ExecuteDeployment(execReq)
 	if err == nil {
 		return mvc.Success(res)
 	}
