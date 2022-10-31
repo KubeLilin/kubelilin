@@ -43,7 +43,7 @@ func (deployment *DeploymentService) NewOrUpdateDeployment(deployModel *requests
 
 func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *requests.DeploymentStepRequest) (error, *models.SgrTenantDeployments) {
 	dpModel := &models.SgrTenantDeployments{}
-	dpModel.ServiceName = deployModel.Name + "-svc-cluster-sgr"
+	dpModel.ServiceName = deployModel.Name + "-svc"
 	dpModel.WorkloadType = "Deployment"
 	dpModel.ServicePortType = "TCP"
 	err := copier.Copy(dpModel, deployModel)
