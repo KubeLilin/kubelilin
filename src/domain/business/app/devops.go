@@ -127,3 +127,17 @@ WHERE t1.status = 1 AND papp.project_id = ? `)
 
 	return page.StartPage(service.db, req.PageIndex, req.PageSize).DoScan(res, sb.String(), sqlParams...)
 }
+
+func (service *DevopsService) GetPipelineListByProjectId(projectId uint64, tenantId uint64) ([]dto.ProjectPipelines, error) {
+	sql := `SELECT ppl.*,app.name appName FROM devops_projects devp
+INNER JOIN devops_projects_apps depa on depa.project_id = devp.id
+INNER JOIN sgr_tenant_application_pipelines ppl on ppl.appid = depa.application_id 
+INNER JOIN sgr_tenant_application app on app.id = depa.application_id
+WHERE devp.id = ? AND devp.tenant_id = ? AND ppl.status=1 `
+	var res []dto.ProjectPipelines
+	err := service.db.Raw(sql, projectId, tenantId).Find(&res).Error
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}

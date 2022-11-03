@@ -13,10 +13,12 @@ type ServiceRequest struct {
 	ClusterId   uint64 `json:"clusterId" uri:"clusterId"`
 	Namespace   string `json:"namespace" uri:"namespace"`
 	ContinueStr string `json:"continueStr" uri:"continueStr"`
+	OnlyPAAS    bool   `json:"onlyPAAS" uri:"onlyPAAS"`
 }
 
 type ServiceInfoReq struct {
 	mvc.RequestBody
+	ClusterId uint64            `json:"clusterId" uri:"clusterId"`
 	TenantId  uint64            `json:"tenantId" uri:"tenantId"`
 	Namespace string            `json:"namespace" uri:"namespace"`
 	Name      string            `json:"name" uri:"name"`
@@ -30,5 +32,6 @@ type ServicePortInfo struct {
 	Name       string             `json:"name"`
 	Port       intstr.IntOrString `json:"port"`
 	TargetPort intstr.IntOrString `json:"targetPort"`
+	NodePort   intstr.IntOrString `json:"nodePort"`
 	Protocol   string             `json:"protocol"`
 }

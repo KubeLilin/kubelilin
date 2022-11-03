@@ -43,7 +43,7 @@ func (deployment *DeploymentService) NewOrUpdateDeployment(deployModel *requests
 
 func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *requests.DeploymentStepRequest) (error, *models.SgrTenantDeployments) {
 	dpModel := &models.SgrTenantDeployments{}
-	dpModel.ServiceName = deployModel.Name + "-svc-cluster-sgr"
+	dpModel.ServiceName = deployModel.Name + "-svc"
 	dpModel.WorkloadType = "Deployment"
 	dpModel.ServicePortType = "TCP"
 	err := copier.Copy(dpModel, deployModel)
@@ -138,7 +138,7 @@ func (deployment *DeploymentService) GetDeployments(profile string, appId uint64
 	dataSql := strings.Builder{}
 	dataSql.WriteString(`SELECT d.id, d.nickname ,d.name,lev.name level, c.name  as 'clusterName' ,app.name as 'appName',
   d.cluster_id as 'clusterId' , n.namespace ,d.last_image as 'lastImage', 0 'running' , 
-  d.replicas 'expected', '0.0.0.0' as 'serviceIP', d.service_name as 'serviceName'
+  d.replicas 'expected', '0.0.0.0' as 'serviceIP', d.service_name as 'serviceName',d.service_Port as 'servicePort'
   FROM sgr_tenant_deployments d
   INNER JOIN sgr_tenant_cluster c on c.id = d.cluster_id
   INNER JOIN sgr_tenant_namespace n on n.id = d.namespace_id

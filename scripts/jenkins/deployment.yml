@@ -20,7 +20,7 @@ spec:
       namespace: kube-lilin
     spec:
       containers:
-        - image: jenkins/jenkins:2.328
+        - image: kubelilin/jenkins:v2.361.3-lts-alpine
           #imagePullPolicy: Always
           imagePullPolicy: IfNotPresent
           name: jenkins

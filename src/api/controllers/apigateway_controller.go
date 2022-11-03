@@ -106,3 +106,20 @@ func (controller *ApiGatewayController) PostCreateOrEditRouter(request *requests
 	}
 	return mvc.Success(true)
 }
+
+func (controller *ApiGatewayController) DeleteRoute(ctx *context.HttpContext) mvc.ApiResult {
+	id, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
+	gatewayId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("gatewayId", "0"))
+	err := controller.service.DeleteRouter(id)
+	if err != nil {
+		return mvc.FailWithMsg(false, err.Error())
+	}
+
+	gatewayEntity, _ := controller.service.GetById(gatewayId)
+	apisixProxy := networks.NewAPISIXProxy(gatewayEntity.AdminURI, gatewayEntity.AccessToken)
+	err = apisixProxy.DeleteRoute(utils.ToString(id))
+	if err != nil {
+		return mvc.FailWithMsg(false, err.Error())
+	}
+	return mvc.Success(true)
+}

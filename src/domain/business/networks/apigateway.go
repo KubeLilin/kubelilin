@@ -135,3 +135,7 @@ func (service *ApiGatewayService) CreateOrEditRouter(request *requests.GatewayRo
 	}
 	return &router, err
 }
+
+func (service *ApiGatewayService) DeleteRouter(id uint64) error {
+	return service.db.Delete(&models.ApplicationAPIGatewayRouters{}, "id=?", id).Error
+}

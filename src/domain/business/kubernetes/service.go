@@ -92,12 +92,8 @@ func (svc *ServiceSupervisor) ApplyService(client corev1.CoreV1Interface, dp *mo
 
 func (svc *ServiceSupervisor) QueryServiceList(req requests.ServiceRequest) (*page.Page, error) {
 	var svcList []dto.ServiceList
-	if req.Namespace == "" {
-		return &page.Page{}, nil
-	}
-	namespaceInfo := &models.SgrTenantNamespace{}
-	svc.db.Model(models.SgrTenantNamespace{}).Where("namespace=?", req.Namespace).First(namespaceInfo)
-	client, err := svc.clusterService.GetClusterClientByTenantAndId(req.TenantId, namespaceInfo.ClusterID)
+	var clusterID uint64 = req.ClusterId
+	client, err := svc.clusterService.GetClusterClientByTenantAndId(req.TenantId, clusterID)
 	if err != nil {
 		return nil, err
 	}
@@ -112,18 +108,21 @@ func (svc *ServiceSupervisor) QueryServiceList(req requests.ServiceRequest) (*pa
 	}
 	//data, err := json.Marshal(&list.Items[0])
 	for _, x := range list.Items {
+
 		svc := dto.ServiceList{
-			Namespace:   req.Namespace,
-			Name:        x.Name,
-			Labels:      x.Labels,
-			Selector:    x.Spec.Selector,
-			Type:        string(x.Spec.Type),
-			CreateTime:  x.GetCreationTimestamp().Time,
-			ContinueStr: list.Continue,
+			Namespace:       x.Namespace,
+			Name:            x.Name,
+			Labels:          x.Labels,
+			Selector:        x.Spec.Selector,
+			Type:            string(x.Spec.Type),
+			ClusterIP:       x.Spec.ClusterIP,
+			SessionAffinity: string(x.Spec.SessionAffinity),
+			CreateTime:      x.GetCreationTimestamp().Time,
+			ContinueStr:     list.Continue,
 		}
 		svcList = append(svcList, svc)
 	}
-	var res = page.Page{}
+	var res = page.Page{PageIndex: req.CurrentPage}
 	count := list.RemainingItemCount
 	if count == nil {
 		res.Total = int64(len(svcList))
@@ -141,9 +140,8 @@ func (svc *ServiceSupervisor) QueryServiceInfo(req requests.ServiceRequest) (*re
 	if req.Name == "" {
 		return nil, errors.New("请传入服务名称")
 	}
-	namespaceInfo := &models.SgrTenantNamespace{}
-	svc.db.Model(models.SgrTenantNamespace{}).Where("namespace=?", req.Namespace).First(namespaceInfo)
-	client, err := svc.clusterService.GetClusterClientByTenantAndId(req.TenantId, namespaceInfo.ClusterID)
+	var clusterID uint64 = req.ClusterId
+	client, err := svc.clusterService.GetClusterClientByTenantAndId(req.TenantId, clusterID)
 	if err != nil {
 		return nil, err
 	}
@@ -166,10 +164,20 @@ func (svc *ServiceSupervisor) QueryServiceInfo(req requests.ServiceRequest) (*re
 	return &service, err
 }
 
-func (svc *ServiceSupervisor) QueryNameSpaceByTenant(tenantId uint64) []responses.NamespaceList {
+func (svc *ServiceSupervisor) QueryNameSpaceByTenant(tenantId uint64, clusterId uint64) []responses.NamespaceList {
 	var data = make([]responses.NamespaceList, 0)
-	svc.db.Model(&models.SgrTenantNamespace{}).Where("tenant_id=?", tenantId).Find(&data)
+	query := svc.db.Model(&models.SgrTenantNamespace{}).Where("tenant_id=?", tenantId)
+	if clusterId > 0 {
+		query = query.Where("cluster_id=?", clusterId)
+	}
+	query.Find(&data)
+
 	return data
+}
+
+func (svc *ServiceSupervisor) QueryNamespaceList(tenantId uint64, clusterId uint64) ([]dto.Namespace, error) {
+	client, err := svc.clusterService.GetClusterClientByTenantAndId(tenantId, clusterId)
+	return GetAllNamespaces(client), err
 }
 
 func (svc *ServiceSupervisor) ChangeService(svcReq *requests.ServiceInfoReq) error {
@@ -189,9 +197,8 @@ func (svc *ServiceSupervisor) ChangeService(svcReq *requests.ServiceInfoReq) err
 			}
 		}
 	}
-	namespaceInfo := &models.SgrTenantNamespace{}
-	svc.db.Model(models.SgrTenantNamespace{}).Where("namespace=?", svcReq.Namespace).First(namespaceInfo)
-	client, err := svc.clusterService.GetClusterClientByTenantAndId(svcReq.TenantId, namespaceInfo.ClusterID)
+
+	client, err := svc.clusterService.GetClusterClientByTenantAndId(svcReq.TenantId, svcReq.ClusterId)
 	if err != nil {
 		return err
 	}
@@ -204,39 +211,27 @@ func (svc *ServiceSupervisor) ChangeService(svcReq *requests.ServiceInfoReq) err
 	serviceInfo.Name = &svcName
 	serviceInfo.APIVersion = &apiVersion
 	serviceInfo.Kind = &kind
-	metaLabels := make(map[string]string)
-	if svcReq.Labels != "" {
-		err := json.Unmarshal([]byte(svcReq.Labels), &metaLabels)
-		if err != nil {
-			return nil
-		}
-	}
-	//匹配dp的label
 
-	//metaLabel["k8s-app"] = dp.Name
-	/*metaLabels := map[string]string{
-		"kubelilin-default": "true",
-		"appId":             strconv.FormatUint(dp.AppID, 10),
-		"tenantId":          strconv.FormatUint(dp.TenantID, 10),
-		"clusterId":         strconv.FormatUint(dp.ClusterID, 10),
-		"namespaceId":       strconv.FormatUint(dp.NamespaceID, 10),
-		"namespace":         namespace.Namespace,
-		"k8s-app":           dp.Name,
-		"profileLevel":      dp.Level,
-	}*/
+	metaLabels := make(map[string]string)
 	spec := applycorev1.ServiceSpecApplyConfiguration{}
+	_ = json.Unmarshal([]byte(svcReq.Selector), &metaLabels)
+
 	spec.Selector = metaLabels
 	//构造端口数据
 	var ports []applycorev1.ServicePortApplyConfiguration
 	for _, x := range svcReq.Port {
 		var portNumber int32
+		var nodePort int32
 		var targetPort intstr.IntOrString
 		if x.Port.Type == intstr.Int {
 			portNumber = x.Port.IntVal
+			nodePort = x.NodePort.IntVal
 			targetPort = x.TargetPort
 		} else {
 			protStrForInt, _ := strconv.Atoi(x.Port.StrVal)
 			portNumber = int32(protStrForInt)
+			nodePortStrForInt, _ := strconv.Atoi(x.NodePort.StrVal)
+			nodePort = int32(nodePortStrForInt)
 			targetPort = intstr.Parse(x.TargetPort.StrVal)
 		}
 		protocol := v1.ProtocolTCP
@@ -255,7 +250,7 @@ func (svc *ServiceSupervisor) ChangeService(svcReq *requests.ServiceInfoReq) err
 		} else if svcReq.Type == NODE_PORT {
 			specType = v1.ServiceTypeNodePort
 			spec.Type = &specType
-			port.NodePort = &portNumber
+			port.NodePort = &nodePort
 		}
 		ports = append(ports, port)
 	}

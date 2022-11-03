@@ -1,12 +1,11 @@
 package controllers
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	requests2 "kubelilin/api/dto/requests"
 	"kubelilin/domain/business/kubernetes"
+	"kubelilin/utils"
 )
 
 type ServiceController struct {
@@ -27,7 +26,6 @@ func (c *ServiceController) GetServiceList(ctx *context.HttpContext) mvc.ApiResu
 	_ = ctx.BindWithUri(&reqParam)
 	userInfo := requests2.GetUserInfo(ctx)
 	reqParam.TenantId = userInfo.TenantID
-	//userInfo := requests.GetUserInfo(ctx)
 	list, err := c.svcSupervisor.QueryServiceList(reqParam)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
@@ -50,15 +48,20 @@ func (c *ServiceController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
 
 func (c *ServiceController) GetNamespaceByTenant(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
-	list := c.svcSupervisor.QueryNameSpaceByTenant(userInfo.TenantID)
+	clusterId := utils.GetNumberOfParam[uint64](ctx, "clusterId")
+	list := c.svcSupervisor.QueryNameSpaceByTenant(userInfo.TenantID, clusterId)
 	return mvc.Success(list)
 }
 
+func (c *ServiceController) GetNamespaceList(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
+	clusterId := utils.GetNumberOfParam[uint64](ctx, "clusterId")
+	list, _ := c.svcSupervisor.QueryNamespaceList(userInfo.TenantID, clusterId)
+	return mvc.Success(list)
+}
 func (c *ServiceController) PostChangeService(ctx *context.HttpContext, svcReq *requests2.ServiceInfoReq) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	svcReq.TenantId = userInfo.TenantID
-	marshal, _ := json.Marshal(svcReq)
-	fmt.Println(string(marshal))
 	err := c.svcSupervisor.ChangeService(svcReq)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())

@@ -5,6 +5,7 @@ import (
 	"github.com/yoyofx/yoyogo/pkg/configuration"
 	"github.com/yoyofxteam/dependencyinjection"
 	"kubelilin/domain/business/app"
+	"kubelilin/domain/business/devops"
 	"kubelilin/domain/business/kubernetes"
 	"kubelilin/domain/business/networks"
 	"kubelilin/domain/business/tenant"
@@ -38,6 +39,7 @@ func init() {
 			serviceCollection.AddTransient(app.NewServiceConnectionService)
 			serviceCollection.AddTransient(app.NewDevopsService)
 			serviceCollection.AddTransient(networks.NewApiGatewayService)
+			serviceCollection.AddTransient(devops.NewProjectService)
 
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
 			injectionJenkinsBuilder(config, serviceCollection)
