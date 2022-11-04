@@ -1,6 +1,6 @@
 package templates
 
-// CIPipeline defined default jenkins pipeline
+// CIPipeline defined default jenkins pipeline (default)
 const CIPipeline = `
 pipeline {
     agent {

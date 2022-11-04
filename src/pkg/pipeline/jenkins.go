@@ -355,6 +355,7 @@ func buildNow(addr, user, token, crumbKey, crumbValue, jobName string, nextBuild
 }
 
 // GetCIPipelineXML ..
+// 默认
 func (buildflow *CIContext) GetCIPipelineXML(context CIContext) (string, error) {
 	pipelineTemplate := template.Must(template.New("pipline").Parse(templates.CIPipeline))
 	var pipelineBuf bytes.Buffer
@@ -373,6 +374,7 @@ func (buildflow *CIContext) GetCIPipelineXML(context CIContext) (string, error) 
 }
 
 // GetDeployPipelineXML ..
+// 未使用
 func (deployflow *DeployContext) GetDeployPipelineXML(context DeployContext) (string, error) {
 	pipelineTemplate := template.Must(template.New("pipline").Parse(templates.DeployPipeline))
 	var pipelineBuf bytes.Buffer
