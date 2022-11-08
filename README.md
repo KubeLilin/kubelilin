@@ -1,4 +1,4 @@
-# kubelilin
+# Kubelilin
 An Cloud-Native application platform for Kubernetes.
 ![](https://mnur-prod-public.oss-cn-beijing.aliyuncs.com/0/tech/physical_architecture.png)
 ![](https://mnur-prod-public.oss-cn-beijing.aliyuncs.com/0/tech/functional_architecture.png)
