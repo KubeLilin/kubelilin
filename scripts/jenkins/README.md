@@ -21,8 +21,8 @@ a6f6d08fcc474178833001d1fc79be62
 
 # Jenkins for Kubernetes 部署
 # 镜像
-* Jenkins Server:  jenkins/jenkins:2.328
-* Jenkins Slave :  jenkins/inbound-agent:4.10-3
+* Jenkins Server:  kubelilin/jenkins:v2.361.3-lts-alpine
+* Jenkins Slave :  kubelilin/inbound-agent:v4.11-1-alpine-jdk11
 
 #2. 开启匿名用户的可读权限
 ``为了保证 流水线的 日志详情可以正常打开

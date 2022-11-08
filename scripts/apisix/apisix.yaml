@@ -40,7 +40,7 @@ spec:
           imagePullPolicy: IfNotPresent
       containers:
         - name: apisix
-          image: apache/apisix:2.10.0-alpine
+          image: apache/apisix:2.13.3-alpine
           ports:
             - name: http
               containerPort: 9080

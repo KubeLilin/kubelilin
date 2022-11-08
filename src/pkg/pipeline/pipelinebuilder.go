@@ -109,7 +109,7 @@ func (builder *Builder) CICDProcessor(inputParams []EnvItem, stages map[string]i
 	containerTemplates := []ContainerEnv{
 		{
 			Name:       "jnlp",
-			Image:      "jenkins/inbound-agent:4.10-3",
+			Image:      "kubelilin/inbound-agent:v4.11-1-alpine-jdk11",
 			WorkingDir: "/home/jenkins/agent",
 		},
 		{
