@@ -413,18 +413,18 @@ func (ds *DeploymentSupervisor) CreateProBe(proReq requests.ProbeRequest) {
 	ds.db.Transaction(func(tx *gorm.DB) error {
 		if proReq.EnableReadiness {
 			probe := models.SgrDeploymentProbe{}
-			probe.Type = proReq.Readiness.Type
-			probe.Port = proReq.Readiness.Port
-			probe.Path = proReq.Readiness.Path
-			probe.ReqScheme = proReq.Readiness.ReqScheme
+			probe.Type = proReq.ReadinessType
+			probe.Port = proReq.ReadinessPort
+			probe.Path = proReq.ReadinessUrl
+			probe.ReqScheme = proReq.ReadinessReqScheme
 			tx.Model(models.SgrDeploymentProbe{}).Save(probe)
 		}
 		if proReq.EnableLiveness {
 			probe := models.SgrDeploymentProbe{}
-			probe.Type = proReq.Liveness.Type
-			probe.Port = proReq.Liveness.Port
-			probe.Path = proReq.Liveness.Path
-			probe.ReqScheme = proReq.Liveness.ReqScheme
+			probe.Type = proReq.LivenessType
+			probe.Port = proReq.LivenessPort
+			probe.Path = proReq.LivenessUrl
+			probe.ReqScheme = proReq.LivenessReqScheme
 			tx.Model(models.SgrDeploymentProbe{}).Save(probe)
 		}
 		return nil

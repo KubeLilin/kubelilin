@@ -47,11 +47,27 @@ type DeploymentStepRequest struct {
 
 type ProbeRequest struct {
 	mvc.RequestBody
-	DpId            uint64    `json:"dpId"`
-	EnableReadiness bool      `json:"enableReadiness"`
-	EnableLiveness  bool      `json:"enableLiveness"`
-	Readiness       ProBeItem `json:"readiness" ` //就绪检查
-	Liveness        ProBeItem `json:"liveness" `  //存活检查
+	DpId                          uint64 `json:"dpId"`
+	EnableLifecycle               bool   `json:"enableLifecycle"`
+	EnableReadiness               bool   `json:"enableReadiness"`
+	EnableLiveness                bool   `json:"enableLiveness"`
+	TerminationGracePeriodSeconds uint64 `json:"terminationGracePeriodSeconds"`
+	LifecyclePreStop              string `json:"lifecyclePreStop"`
+	LifecyclePreStart             string `json:"lifecyclePreStart"`
+	ReadinessType                 string `json:"readinessType"`
+	ReadinessPort                 uint   `json:"readinessPort"`
+	ReadinessUrl                  string `json:"readinessUrl"`
+	ReadinessReqScheme            string `json:"readinessReqScheme"`
+	ReadinessInitialDelaySeconds  uint64 `json:"readinessInitialDelaySeconds"`
+	ReadinessTimeoutSeconds       uint64 `json:"readinessTimeoutSeconds"`
+	ReadinessPeriodSeconds        uint64 `json:"readinessPeriodSeconds"`
+	LivenessType                  string `json:"livenessType"`
+	LivenessPort                  uint   `json:"livenessPort"`
+	LivenessUrl                   string `json:"livenessUrl"`
+	LivenessReqScheme             string `json:"livenessReqScheme"`
+	LivenessInitialDelaySeconds   uint64 `json:"livenessInitialDelaySeconds"`
+	LivenessTimeoutSeconds        uint64 `json:"livenessTimeoutSeconds"`
+	LivenessPeriodSeconds         uint64 `json:"livenessPeriodSeconds"`
 }
 
 type ProBeItem struct {
