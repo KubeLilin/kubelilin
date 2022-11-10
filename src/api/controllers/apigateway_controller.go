@@ -65,6 +65,17 @@ func (controller *ApiGatewayController) GetRouterList(request *requests.GatewayR
 	return mvc.Success(list)
 }
 
+func (controller *ApiGatewayController) GetRouterListBy(ctx *context.HttpContext) mvc.ApiResult {
+	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appId", "0"))
+	deployId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("deployId", "0"))
+
+	list, err := controller.service.GetRouterListBy(appId, deployId)
+	if err != nil {
+		return mvc.FailWithMsg(false, err.Error())
+	}
+	return mvc.Success(list)
+}
+
 func (controller *ApiGatewayController) GetAppList(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests.GetUserInfo(ctx)
 	tenantID := userInfo.TenantID
