@@ -427,6 +427,9 @@ func (ds *DeploymentSupervisor) CreateProBe(proReq requests.ProbeRequest) {
 			probe.ReqScheme = proReq.LivenessReqScheme
 			tx.Model(models.SgrDeploymentProbe{}).Save(probe)
 		}
+		tx.Model(models.SgrTenantDeployments{}).Update("termination_grace_period_seconds=?", proReq.TerminationGracePeriodSeconds).Where("id=?", proReq.DpId)
+		tx.Model(models.SgrTenantDeploymentsContainers{}).Update("poststart=? ", proReq.LifecyclePreStart).Where("deploy_id=? and is_main=1", proReq.DpId)
+		tx.Model(models.SgrTenantDeploymentsContainers{}).Update(" podstop=?", proReq.LifecyclePreStop).Where("deploy_id=? and is_main=1", proReq.DpId)
 		return nil
 	})
 }
