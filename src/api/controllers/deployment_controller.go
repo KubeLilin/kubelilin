@@ -20,6 +20,7 @@ type DeploymentController struct {
 	deploymentService    *app.DeploymentService
 	deploymentSupervisor *kubernetes.DeploymentSupervisor
 	clusterService       *kubernetes.ClusterService
+	proBeService         *kubernetes.ProBeService
 }
 
 func NewDeploymentController(deploymentService *app.DeploymentService, clusterService *kubernetes.ClusterService, deploymentSupervisor *kubernetes.DeploymentSupervisor) *DeploymentController {
@@ -228,6 +229,6 @@ func (controller DeploymentController) GetNotifications() mvc.ApiResult {
 
 // PostProbe 创建POD探针/**
 func (controller DeploymentController) PostProbe(request *requests2.ProbeRequest) mvc.ApiResult {
-	controller.deploymentSupervisor.CreateProBe(request)
+	controller.proBeService.CreateProBe(request)
 	return mvc.Success(notice.Plugins)
 }

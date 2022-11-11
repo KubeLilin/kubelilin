@@ -411,40 +411,6 @@ func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, level str
 	return err, page
 }
 
-func (ds *DeploymentSupervisor) CreateProBe(proReq *requests.ProbeRequest) {
-	ds.db.Transaction(func(tx *gorm.DB) error {
-		if proReq.EnableReadiness {
-			probe := models.SgrDeploymentProbe{}
-			probe.DpID = proReq.DpId
-			probe.Type = proReq.ReadinessType
-			probe.Port = proReq.ReadinessPort
-			probe.Type = READINESS
-			probe.Path = proReq.ReadinessUrl
-			probe.ReqScheme = proReq.ReadinessReqScheme
-			probe.PeriodSeconds = proReq.ReadinessPeriodSeconds
-			probe.InitialDelaySeconds = proReq.ReadinessInitialDelaySeconds
-			tx.Model(models.SgrDeploymentProbe{}).Save(probe)
-		}
-		if proReq.EnableLiveness {
-			probe := models.SgrDeploymentProbe{}
-			probe.DpID = proReq.DpId
-			probe.Type = proReq.LivenessType
-			probe.Port = proReq.LivenessPort
-			probe.Path = proReq.LivenessUrl
-			probe.Type = LIVENESS
-			probe.ReqScheme = proReq.LivenessReqScheme
-			probe.PeriodSeconds = proReq.LivenessPeriodSeconds
-			probe.InitialDelaySeconds = proReq.LivenessInitialDelaySeconds
-			err := tx.Save(&probe).Error
-			_ = err
-		}
-		tx.Model(models.SgrTenantDeployments{}).Update("termination_grace_period_seconds=?", proReq.TerminationGracePeriodSeconds).Where("id=?", proReq.DpId)
-		tx.Model(models.SgrTenantDeploymentsContainers{}).Update("poststart=? ", proReq.LifecyclePreStart).Where("deploy_id=? and is_main=1", proReq.DpId)
-		tx.Model(models.SgrTenantDeploymentsContainers{}).Update(" podstop=?", proReq.LifecyclePreStop).Where("deploy_id=? and is_main=1", proReq.DpId)
-		return nil
-	})
-}
-
 //region 暂时弃用的代码，最开始的时候考虑为每个不通版本的k8s指定不通的api-version,最后发现可以统一用apps/v1
 
 //func (ds *DeploymentSupervisor) InitExtensionV1Beta1deployment(client extensionsclient.ExtensionsV1beta1Interface, dp models.SgrTenantDeployments, dpc models.SgrTenantDeploymentsContainers) (interface{}, error) {

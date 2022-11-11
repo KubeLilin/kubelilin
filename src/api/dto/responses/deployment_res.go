@@ -14,3 +14,27 @@ type DeploymentReleaseRecordRes struct {
 	OperatorName   string     `gorm:"column:operator_name;" json:"operatorName"`
 	CreationTime   *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
 }
+
+type DeploymentProbeInfo struct {
+	DpId                          uint64 `json:"dpId"`
+	EnableLifecycle               bool   `json:"enableLifecycle"`
+	EnableReadiness               bool   `json:"enableReadiness"`
+	EnableLiveness                bool   `json:"enableLiveness"`
+	TerminationGracePeriodSeconds uint64 `json:"terminationGracePeriodSeconds"`
+	LifecyclePreStop              string `json:"lifecyclePreStop"`
+	LifecyclePreStart             string `json:"lifecyclePreStart"`
+	ReadinessType                 string `json:"readinessType"`
+	ReadinessPort                 uint   `json:"readinessPort"`
+	ReadinessUrl                  string `json:"readinessUrl"`
+	ReadinessReqScheme            string `json:"readinessReqScheme"`
+	ReadinessInitialDelaySeconds  uint   `json:"readinessInitialDelaySeconds"`
+	ReadinessTimeoutSeconds       uint64 `json:"readinessTimeoutSeconds"`
+	ReadinessPeriodSeconds        uint   `json:"readinessPeriodSeconds"`
+	LivenessType                  string `json:"livenessType"`
+	LivenessPort                  uint   `json:"livenessPort"`
+	LivenessUrl                   string `json:"livenessUrl"`
+	LivenessReqScheme             string `json:"livenessReqScheme"`
+	LivenessInitialDelaySeconds   uint   `json:"livenessInitialDelaySeconds"`
+	LivenessTimeoutSeconds        uint64 `json:"livenessTimeoutSeconds"`
+	LivenessPeriodSeconds         uint   `json:"livenessPeriodSeconds"`
+}
