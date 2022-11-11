@@ -58,16 +58,16 @@ type ProbeRequest struct {
 	ReadinessPort                 uint   `json:"readinessPort"`
 	ReadinessUrl                  string `json:"readinessUrl"`
 	ReadinessReqScheme            string `json:"readinessReqScheme"`
-	ReadinessInitialDelaySeconds  uint64 `json:"readinessInitialDelaySeconds"`
+	ReadinessInitialDelaySeconds  uint   `json:"readinessInitialDelaySeconds"`
 	ReadinessTimeoutSeconds       uint64 `json:"readinessTimeoutSeconds"`
-	ReadinessPeriodSeconds        uint64 `json:"readinessPeriodSeconds"`
+	ReadinessPeriodSeconds        uint   `json:"readinessPeriodSeconds"`
 	LivenessType                  string `json:"livenessType"`
 	LivenessPort                  uint   `json:"livenessPort"`
 	LivenessUrl                   string `json:"livenessUrl"`
 	LivenessReqScheme             string `json:"livenessReqScheme"`
-	LivenessInitialDelaySeconds   uint64 `json:"livenessInitialDelaySeconds"`
+	LivenessInitialDelaySeconds   uint   `json:"livenessInitialDelaySeconds"`
 	LivenessTimeoutSeconds        uint64 `json:"livenessTimeoutSeconds"`
-	LivenessPeriodSeconds         uint64 `json:"livenessPeriodSeconds"`
+	LivenessPeriodSeconds         uint   `json:"livenessPeriodSeconds"`
 }
 
 type ProBeItem struct {

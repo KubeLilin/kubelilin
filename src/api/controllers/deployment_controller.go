@@ -227,7 +227,7 @@ func (controller DeploymentController) GetNotifications() mvc.ApiResult {
 }
 
 // PostProbe 创建POD探针/**
-func (controller DeploymentController) PostProbe(request requests2.ProbeRequest) mvc.ApiResult {
+func (controller DeploymentController) PostProbe(request *requests2.ProbeRequest) mvc.ApiResult {
 	controller.deploymentSupervisor.CreateProBe(request)
 	return mvc.Success(notice.Plugins)
 }

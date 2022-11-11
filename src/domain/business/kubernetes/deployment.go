@@ -38,6 +38,8 @@ const (
 	CLUSTER_IP   string = "ClusterIP"
 	NODE_PORT    string = "NodePort"
 	LOAD_BALANCE string = "LoadBalancer"
+	READINESS    string = "READINESS"
+	LIVENESS     string = "LIVENESS"
 )
 
 type DeploymentSupervisor struct {
@@ -409,22 +411,30 @@ func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, level str
 	return err, page
 }
 
-func (ds *DeploymentSupervisor) CreateProBe(proReq requests.ProbeRequest) {
+func (ds *DeploymentSupervisor) CreateProBe(proReq *requests.ProbeRequest) {
 	ds.db.Transaction(func(tx *gorm.DB) error {
 		if proReq.EnableReadiness {
 			probe := models.SgrDeploymentProbe{}
+			probe.DpID = proReq.DpId
 			probe.Type = proReq.ReadinessType
 			probe.Port = proReq.ReadinessPort
+			probe.Type = READINESS
 			probe.Path = proReq.ReadinessUrl
 			probe.ReqScheme = proReq.ReadinessReqScheme
+			probe.PeriodSeconds = proReq.ReadinessPeriodSeconds
+			probe.InitialDelaySeconds = proReq.ReadinessInitialDelaySeconds
 			tx.Model(models.SgrDeploymentProbe{}).Save(probe)
 		}
 		if proReq.EnableLiveness {
 			probe := models.SgrDeploymentProbe{}
+			probe.DpID = proReq.DpId
 			probe.Type = proReq.LivenessType
 			probe.Port = proReq.LivenessPort
 			probe.Path = proReq.LivenessUrl
+			probe.Type = LIVENESS
 			probe.ReqScheme = proReq.LivenessReqScheme
+			probe.PeriodSeconds = proReq.LivenessPeriodSeconds
+			probe.InitialDelaySeconds = proReq.LivenessInitialDelaySeconds
 			tx.Model(models.SgrDeploymentProbe{}).Save(probe)
 		}
 		tx.Model(models.SgrTenantDeployments{}).Update("termination_grace_period_seconds=?", proReq.TerminationGracePeriodSeconds).Where("id=?", proReq.DpId)

@@ -542,7 +542,7 @@ var SgrCodeDeploymentLevelColumns = struct {
 // SgrDeploymentProbe 部署状态检查
 type SgrDeploymentProbe struct {
 	ID                  uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
-	DpID                int64      `gorm:"column:dp_id;type:bigint;not null" json:"dpId"`                // 部署ID
+	DpID                uint64     `gorm:"column:dp_id;type:bigint;not null" json:"dpId"`                // 部署ID
 	Type                string     `gorm:"column:type;type:varchar(20);not null" json:"type"`            // 类型READINESS/LIVENESS
 	Port                uint       `gorm:"column:port;type:int unsigned;not null" json:"port"`           // 请求端口
 	Path                string     `gorm:"column:path;type:varchar(500);not null" json:"path"`           // 请求地址
