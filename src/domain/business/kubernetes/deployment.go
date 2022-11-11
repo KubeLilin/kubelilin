@@ -435,7 +435,8 @@ func (ds *DeploymentSupervisor) CreateProBe(proReq *requests.ProbeRequest) {
 			probe.ReqScheme = proReq.LivenessReqScheme
 			probe.PeriodSeconds = proReq.LivenessPeriodSeconds
 			probe.InitialDelaySeconds = proReq.LivenessInitialDelaySeconds
-			tx.Model(models.SgrDeploymentProbe{}).Save(probe)
+			err := tx.Save(&probe).Error
+			_ = err
 		}
 		tx.Model(models.SgrTenantDeployments{}).Update("termination_grace_period_seconds=?", proReq.TerminationGracePeriodSeconds).Where("id=?", proReq.DpId)
 		tx.Model(models.SgrTenantDeploymentsContainers{}).Update("poststart=? ", proReq.LifecyclePreStart).Where("deploy_id=? and is_main=1", proReq.DpId)
