@@ -327,7 +327,15 @@ func (ds *DeploymentSupervisor) DeleteDeployment(tenantId, dpId uint64) error {
 	if clientSetErr != nil {
 		return clientSetErr
 	}
-	return clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), dpDatum.Name, metav1.DeleteOptions{})
+
+	foundDep, _ := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), dpDatum.Name, metav1.GetOptions{})
+	if foundDep.Name != "" {
+		err = clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), foundDep.Name, metav1.DeleteOptions{})
+	}
+	if err == nil {
+		err = ds.db.Delete(&models.SgrTenantDeployments{}, "id=?", dpId).Error
+	}
+	return err
 }
 
 func (ds *DeploymentSupervisor) GetDeploymentYaml(tenantId, dpId uint64) (string, error) {
