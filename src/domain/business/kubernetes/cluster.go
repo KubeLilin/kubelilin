@@ -153,7 +153,7 @@ func (cluster *ClusterService) ImportK8sConfig(configFile multipart.File, cluste
 	if len(clusters) == 0 {
 		return nil, errors.New("config file must contain more than one cluster configuration points")
 	}
-	clusterConfig := clusters[0].(map[interface{}]interface{})
+	//clusterConfig := clusters[0].(map[string]interface{})
 	if len(configStr) == 0 {
 		return nil, errors.New("config can not be empty")
 	}
@@ -168,7 +168,7 @@ func (cluster *ClusterService) ImportK8sConfig(configFile multipart.File, cluste
 	}
 	clusterData := &models.SgrTenantCluster{
 		TenantID: tenantId,
-		Name:     clusterConfig["name"].(string),
+		Name:     clusterName, //clusterConfig["name"].(string),
 		Nickname: clusterName,
 		Version:  versionInfo.GitVersion,
 		Config:   configStr,
