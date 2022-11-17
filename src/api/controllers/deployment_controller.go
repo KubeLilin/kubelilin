@@ -20,6 +20,7 @@ type DeploymentController struct {
 	deploymentService    *app.DeploymentService
 	deploymentSupervisor *kubernetes.DeploymentSupervisor
 	clusterService       *kubernetes.ClusterService
+	proBeService         *kubernetes.ProBeService
 }
 
 func NewDeploymentController(deploymentService *app.DeploymentService, clusterService *kubernetes.ClusterService, deploymentSupervisor *kubernetes.DeploymentSupervisor) *DeploymentController {
@@ -101,7 +102,19 @@ func (controller DeploymentController) DeleteDeployment(ctx *context.HttpContext
 		return mvc.FailWithMsg(nil, err.Error())
 	}
 	return mvc.Success(true)
+}
 
+func (controller DeploymentController) DeleteDeploymentWithOutDB(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
+	deploymentId, err := utils.StringToUInt64(ctx.Input.QueryDefault("dpId", "0"))
+	if err != nil {
+		return mvc.FailWithMsg(nil, "部署id无效或者未接收到部署id")
+	}
+	err = controller.deploymentSupervisor.DeleteDeploymentWithOutDb(userInfo.TenantID, deploymentId)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(true)
 }
 
 func (controller DeploymentController) PostReplicas(request *requests2.ScaleRequest, ctx *context.HttpContext) mvc.ApiResult {
@@ -227,7 +240,7 @@ func (controller DeploymentController) GetNotifications() mvc.ApiResult {
 }
 
 // PostProbe 创建POD探针/**
-func (controller DeploymentController) PostProbe(request requests2.ProbeRequest) mvc.ApiResult {
-	controller.deploymentSupervisor.CreateProBe(request)
+func (controller DeploymentController) PostProbe(request *requests2.ProbeRequest) mvc.ApiResult {
+	controller.proBeService.CreateProBe(request)
 	return mvc.Success(notice.Plugins)
 }

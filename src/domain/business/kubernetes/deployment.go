@@ -38,6 +38,8 @@ const (
 	CLUSTER_IP   string = "ClusterIP"
 	NODE_PORT    string = "NodePort"
 	LOAD_BALANCE string = "LoadBalancer"
+	READINESS    string = "READINESS"
+	LIVENESS     string = "LIVENESS"
 )
 
 type DeploymentSupervisor struct {
@@ -325,6 +327,31 @@ func (ds *DeploymentSupervisor) DeleteDeployment(tenantId, dpId uint64) error {
 	if clientSetErr != nil {
 		return clientSetErr
 	}
+
+	foundDep, _ := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), dpDatum.Name, metav1.GetOptions{})
+	if foundDep.Name != "" {
+		err = clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), foundDep.Name, metav1.DeleteOptions{})
+	}
+	if err == nil {
+		err = ds.db.Delete(&models.SgrTenantDeployments{}, "id=?", dpId).Error
+	}
+	return err
+}
+
+func (ds *DeploymentSupervisor) DeleteDeploymentWithOutDb(tenantId, dpId uint64) error {
+	dpDatum := models.SgrTenantDeployments{}
+	dbErr := ds.db.Model(&models.SgrTenantDeployments{}).Where("id=?", dpId).First(&dpDatum)
+	if dbErr.Error != nil {
+		return errors.New("未找到相应的部署")
+	}
+	namespace, err := ds.GetNameSpaceByDpId(dpId)
+	if err != nil {
+		return err
+	}
+	clientSet, clientSetErr := ds.clusterService.GetClusterClientByTenantAndId(tenantId, dpDatum.ClusterID)
+	if clientSetErr != nil {
+		return clientSetErr
+	}
 	return clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), dpDatum.Name, metav1.DeleteOptions{})
 }
 
@@ -407,28 +434,6 @@ func (ds *DeploymentSupervisor) QueryReleaseRecord(appId, dpId uint64, level str
 	sql.WriteString("order by stdr.creation_time desc ")
 	err, page := page.StartPage(condition, req.PageIndex, req.PageSize).DoScan(&res, sql.String(), params...)
 	return err, page
-}
-
-func (ds *DeploymentSupervisor) CreateProBe(proReq requests.ProbeRequest) {
-	ds.db.Transaction(func(tx *gorm.DB) error {
-		if proReq.EnableReadiness {
-			probe := models.SgrDeploymentProbe{}
-			probe.Type = proReq.Readiness.Type
-			probe.Port = proReq.Readiness.Port
-			probe.Path = proReq.Readiness.Path
-			probe.ReqScheme = proReq.Readiness.ReqScheme
-			tx.Model(models.SgrDeploymentProbe{}).Save(probe)
-		}
-		if proReq.EnableLiveness {
-			probe := models.SgrDeploymentProbe{}
-			probe.Type = proReq.Liveness.Type
-			probe.Port = proReq.Liveness.Port
-			probe.Path = proReq.Liveness.Path
-			probe.ReqScheme = proReq.Liveness.ReqScheme
-			tx.Model(models.SgrDeploymentProbe{}).Save(probe)
-		}
-		return nil
-	})
 }
 
 //region 暂时弃用的代码，最开始的时候考虑为每个不通版本的k8s指定不通的api-version,最后发现可以统一用apps/v1
