@@ -49,6 +49,22 @@ func (s *ApplicationService) CreateApp(req *requests.AppReq) (error, *models.Sgr
 	return nil, appModel
 }
 
+func (s *ApplicationService) DeleteApp(appId uint64) error {
+	dbErr := s.db.Transaction(func(tx *gorm.DB) error {
+		var count int64
+		tx.Model(&models.SgrTenantDeployments{}).Where("app_id=?", appId).Count(&count)
+		if count > 0 {
+			return errors.New("application of deployments are not empty")
+		}
+		dbRes := tx.Delete(&models.SgrTenantApplication{}, "id=?", appId)
+		if dbRes.Error != nil {
+			return nil
+		}
+		return nil
+	})
+	return dbErr
+}
+
 func (s *ApplicationService) UpdateApp(req *requests.AppReq) (error, int64) {
 	appModel := models.SgrTenantApplication{}
 	appModel.Level = req.Level
@@ -70,8 +86,11 @@ func (s *ApplicationService) QueryAppList(req *requests.AppReq) (error, *page.Pa
 	res := &[]dto.ApplicationInfoDTO{}
 	var sqlParams []interface{}
 	sb := strings.Builder{}
-	sb.WriteString("SELECT t1.*,t1.git_type as SourceType,t1.sc_id as SCID,t2.name as language_name,t3.name as level_name FROM sgr_tenant_application AS t1 INNER JOIN sgr_code_application_language AS t2  ")
-	sb.WriteString(" ON t1.language = t2.id INNER JOIN sgr_code_application_level AS t3 ON t1.LEVEL = t3.id WHERE t1.status = 1 ")
+	sb.WriteString(`SELECT t1.*,t1.git_type as SourceType,t1.sc_id as SCID,t2.name as language_name,t3.name as level_name ,
+(SELECT count(1) FROM sgr_tenant_deployments where app_id = t1.id) as depCount
+FROM sgr_tenant_application AS t1 
+INNER JOIN sgr_code_application_language AS t2
+ON t1.language = t2.id INNER JOIN sgr_code_application_level AS t3 ON t1.LEVEL = t3.id WHERE t1.status = 1`)
 	if req.Name != "" {
 		sb.WriteString(" AND t1.name like ?")
 		sqlParams = append(sqlParams, "%"+req.Name+"%")

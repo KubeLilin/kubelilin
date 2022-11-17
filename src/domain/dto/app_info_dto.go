@@ -18,6 +18,7 @@ type ApplicationInfoDTO struct {
 	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" `                 // 更新时间
 	SourceType   string     `gorm:"column:git_type" `
 	SCID         uint64     `gorm:"column:sc_id"`
+	DeployCount  uint64     `gorm:"column:depCount"`
 }
 
 type ApplicationDisplayDTO struct {

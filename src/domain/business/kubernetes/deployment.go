@@ -338,6 +338,23 @@ func (ds *DeploymentSupervisor) DeleteDeployment(tenantId, dpId uint64) error {
 	return err
 }
 
+func (ds *DeploymentSupervisor) DeleteDeploymentWithOutDb(tenantId, dpId uint64) error {
+	dpDatum := models.SgrTenantDeployments{}
+	dbErr := ds.db.Model(&models.SgrTenantDeployments{}).Where("id=?", dpId).First(&dpDatum)
+	if dbErr.Error != nil {
+		return errors.New("未找到相应的部署")
+	}
+	namespace, err := ds.GetNameSpaceByDpId(dpId)
+	if err != nil {
+		return err
+	}
+	clientSet, clientSetErr := ds.clusterService.GetClusterClientByTenantAndId(tenantId, dpDatum.ClusterID)
+	if clientSetErr != nil {
+		return clientSetErr
+	}
+	return clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), dpDatum.Name, metav1.DeleteOptions{})
+}
+
 func (ds *DeploymentSupervisor) GetDeploymentYaml(tenantId, dpId uint64) (string, error) {
 	dpDatum := models.SgrTenantDeployments{}
 	dbErr := ds.db.Model(&models.SgrTenantDeployments{}).Where("id=?", dpId).First(&dpDatum)

@@ -102,7 +102,19 @@ func (controller DeploymentController) DeleteDeployment(ctx *context.HttpContext
 		return mvc.FailWithMsg(nil, err.Error())
 	}
 	return mvc.Success(true)
+}
 
+func (controller DeploymentController) DeleteDeploymentWithOutDB(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
+	deploymentId, err := utils.StringToUInt64(ctx.Input.QueryDefault("dpId", "0"))
+	if err != nil {
+		return mvc.FailWithMsg(nil, "部署id无效或者未接收到部署id")
+	}
+	err = controller.deploymentSupervisor.DeleteDeploymentWithOutDb(userInfo.TenantID, deploymentId)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(true)
 }
 
 func (controller DeploymentController) PostReplicas(request *requests2.ScaleRequest, ctx *context.HttpContext) mvc.ApiResult {

@@ -45,6 +45,15 @@ func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *re
 	return mvc.Success(res)
 }
 
+func (c *ApplicationController) DeleteApp(ctx *context.HttpContext) mvc.ApiResult {
+	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appId", "0"))
+	err := c.service.DeleteApp(appId)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(true)
+}
+
 // GetAppList get application list by tenant id.
 func (c *ApplicationController) GetAppList(ctx *context.HttpContext) mvc.ApiResult {
 	request := requests2.AppReq{}
