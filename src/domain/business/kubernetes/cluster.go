@@ -35,7 +35,7 @@ func (cluster *ClusterService) GetClustersByTenant(tenantId uint64, clusterName 
 	var data []models.SgrTenantCluster
 	var clusterList []dto.ClusterInfo
 
-	query := cluster.db.Model(&models.SgrTenantCluster{}).Where(" tenant_id=? ", tenantId)
+	query := cluster.db.Model(&models.SgrTenantCluster{})
 	if len(clusterName) > 0 {
 		query.Where(" name like ? ", "%"+clusterName+"%")
 	}
