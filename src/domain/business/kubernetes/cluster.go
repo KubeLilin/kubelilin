@@ -31,12 +31,16 @@ func NewClusterService(db *gorm.DB) *ClusterService {
 	return &ClusterService{db: db}
 }
 
-func (cluster *ClusterService) GetClustersByTenant(tenantId uint64, clusterName string) ([]dto.ClusterInfo, error) {
+func (cluster *ClusterService) GetClustersByTenant(clusterName string) ([]dto.ClusterInfo, error) {
 	var data []models.SgrTenantCluster
 	var clusterList []dto.ClusterInfo
 
-	cluster.db.Model(&models.SgrTenantCluster{}).Find(&data)
-	//cluster.db.Model(&models.SgrTenantCluster{}).Where(sb.String(), tenantId, clusterName).Find(&data)
+	query := cluster.db.Model(&models.SgrTenantCluster{})
+	if len(clusterName) > 0 {
+		query.Where(" name like ? ", "%"+clusterName+"%")
+	}
+	query.Find(&data)
+
 	for _, item := range data {
 		t := dto.ClusterInfo{}
 		copier.Copy(&t, item)
@@ -44,7 +48,6 @@ func (cluster *ClusterService) GetClustersByTenant(tenantId uint64, clusterName 
 	}
 	return clusterList, nil
 }
-
 func (cluster *ClusterService) GetNameSpacesFromDB(tenantId uint64, clusterId int) []models.SgrTenantNamespace {
 	var res []models.SgrTenantNamespace
 	cluster.db.Model(&models.SgrTenantNamespace{}).Where(" cluster_id=? and tenant_id=?", clusterId, tenantId).Find(&res)
