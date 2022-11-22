@@ -132,9 +132,9 @@ func (controller ClusterController) GetNodes(ctx *context.HttpContext) mvc.ApiRe
 }
 
 func (controller ClusterController) GetList(ctx *context.HttpContext) mvc.ApiResult {
-	userInfo := requests2.GetUserInfo(ctx)
+	//userInfo := requests2.GetUserInfo(ctx)
 	clusterName := ctx.Input.Query("name")
-	tenantClusterList, _ := controller.clusterService.GetClustersByTenant(userInfo.TenantID, clusterName)
+	tenantClusterList, _ := controller.clusterService.GetClustersByTenant(clusterName)
 	return controller.OK(tenantClusterList)
 }
 

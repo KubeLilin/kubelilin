@@ -31,7 +31,7 @@ func NewClusterService(db *gorm.DB) *ClusterService {
 	return &ClusterService{db: db}
 }
 
-func (cluster *ClusterService) GetClustersByTenant(tenantId uint64, clusterName string) ([]dto.ClusterInfo, error) {
+func (cluster *ClusterService) GetClustersByTenant(clusterName string) ([]dto.ClusterInfo, error) {
 	var data []models.SgrTenantCluster
 	var clusterList []dto.ClusterInfo
 
