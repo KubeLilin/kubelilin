@@ -97,7 +97,9 @@ func (service *DevopsService) GetAppList(req *requests2.AppReq) (error, *page.Pa
 	res := &[]dto.ApplicationInfoDTO{}
 	var sqlParams []interface{}
 	sb := strings.Builder{}
-	sb.WriteString(`SELECT t1.*,t1.git_type as SourceType,t1.sc_id as SCID,t2.name as language_name,t3.name as level_name FROM sgr_tenant_application AS t1 
+	sb.WriteString(`SELECT t1.*,t1.git_type as SourceType,t1.sc_id as SCID,t2.name as language_name,t3.name as level_name,
+(SELECT count(1) FROM sgr_tenant_deployments where app_id = t1.id) as depCount
+FROM sgr_tenant_application AS t1 
 INNER JOIN sgr_code_application_language AS t2 ON t1.language = t2.id 
 INNER JOIN sgr_code_application_level AS t3 ON t1.LEVEL = t3.id 
 INNER JOIN devops_projects_apps AS papp ON papp.application_id = t1.id
