@@ -109,7 +109,13 @@ func (controller *ApiGatewayController) PostCreateOrEditRouter(request *requests
 		return mvc.FailWithMsg(false, err.Error())
 	}
 	// add router for apisix api
-	gatewayEntity, _ := controller.service.GetById(request.GatewayID)
+	var gatewayEntity models.ApplicationAPIGateway
+	if request.GatewayID > 0 {
+		gatewayEntity, _ = controller.service.GetById(request.GatewayID)
+	} else {
+		gatewayEntity, _ = controller.service.GetByClusterId(deployment.ClusterId)
+	}
+
 	apisixProxy := networks.NewAPISIXProxy(gatewayEntity.AdminURI, gatewayEntity.AccessToken)
 	err = apisixProxy.CreateOrUpdateRoute(utils.ToString(model.ID), *model)
 	if err != nil {
