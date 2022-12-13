@@ -23,8 +23,8 @@ type DeploymentController struct {
 	proBeService         *kubernetes.ProBeService
 }
 
-func NewDeploymentController(deploymentService *app.DeploymentService, clusterService *kubernetes.ClusterService, deploymentSupervisor *kubernetes.DeploymentSupervisor) *DeploymentController {
-	return &DeploymentController{deploymentService: deploymentService, clusterService: clusterService, deploymentSupervisor: deploymentSupervisor}
+func NewDeploymentController(deploymentService *app.DeploymentService, clusterService *kubernetes.ClusterService, deploymentSupervisor *kubernetes.DeploymentSupervisor, probeService *kubernetes.ProBeService) *DeploymentController {
+	return &DeploymentController{deploymentService: deploymentService, clusterService: clusterService, deploymentSupervisor: deploymentSupervisor, proBeService: probeService}
 }
 
 func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpContext, execReq *requests2.ExecDeploymentRequest) mvc.ApiResult {
