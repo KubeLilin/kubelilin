@@ -35,7 +35,7 @@ func (ds *ProBeService) CreateProBe(proReq *requests.ProbeRequest) {
 			probe.Scheme = proReq.ReadinessReqScheme
 			probe.PeriodSeconds = proReq.ReadinessPeriodSeconds
 			probe.InitialDelaySeconds = proReq.ReadinessInitialDelaySeconds
-			err := tx.Model(models.SgrDeploymentProbe{}).Save(&probe).Error
+			err := tx.Model(models.DeploymentContainerLifecycleCheck{}).Save(&probe).Error
 			return err
 		}
 		if proReq.EnableLiveness {
@@ -48,7 +48,7 @@ func (ds *ProBeService) CreateProBe(proReq *requests.ProbeRequest) {
 			probe.Scheme = proReq.LivenessReqScheme
 			probe.PeriodSeconds = proReq.LivenessPeriodSeconds
 			probe.InitialDelaySeconds = proReq.LivenessInitialDelaySeconds
-			err := tx.Save(&probe).Error
+			err := tx.Model(models.DeploymentContainerLifecycleCheck{}).Save(&probe).Error
 			return err
 		}
 		tx.Model(models.SgrTenantDeployments{}).Update("termination_grace_period_seconds=?", proReq.TerminationGracePeriodSeconds).Where("id=?", proReq.DpId)
