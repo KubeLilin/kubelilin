@@ -35,7 +35,7 @@ func (ds *ProBeService) CreateProBe(proReq *requests.ProbeRequest) {
 			probe.Scheme = proReq.ReadinessReqScheme
 			probe.PeriodSeconds = proReq.ReadinessPeriodSeconds
 			probe.InitialDelaySeconds = proReq.ReadinessInitialDelaySeconds
-			err := tx.Model(models.SgrDeploymentProbe{}).Save(&probe).Error
+			err := tx.Model(models.DeploymentContainerLifecycleCheck{}).Save(&probe).Error
 			return err
 		}
 		if proReq.EnableLiveness {
