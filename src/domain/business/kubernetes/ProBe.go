@@ -28,19 +28,22 @@ func (pbs *ProBeService) CreateProBe(proReq *requests.ProbeRequest) error {
 			readiness := &models.DeploymentContainerLifecycleCheck{}
 			pbs.db.Model(models.DeploymentContainerLifecycleCheck{}).Where("deployment_id=? and type=? ", proReq.DpId, READINESS).First(readiness)
 			// 如果开启了readiness并且存在，则更新
-			if proReq.EnableReadiness && readiness != nil {
+			if readiness != nil {
 				readiness.Port = proReq.ReadinessPort
 				readiness.Path = proReq.ReadinessUrl
 				readiness.Scheme = proReq.ReadinessReqScheme
 				readiness.PeriodSeconds = proReq.ReadinessPeriodSeconds
 				readiness.InitialDelaySeconds = proReq.ReadinessInitialDelaySeconds
+				if proReq.EnableReadiness {
+					readiness.Enable = 1
+				} else {
+					readiness.Enable = 0
+				}
 				err := tx.Model(models.DeploymentContainerLifecycleCheck{}).Updates(&readiness).Error
 				return err
 			}
 			// 不开启则删除readniess配置
-			if !proReq.EnableReadiness {
 
-			}
 			liveness := &models.DeploymentContainerLifecycleCheck{}
 			pbs.db.Model(models.DeploymentContainerLifecycleCheck{}).Where("deployment_id=? and type=? ", proReq.DpId, LIVENESS).First(liveness)
 			if proReq.EnableLiveness && liveness != nil {
@@ -49,11 +52,13 @@ func (pbs *ProBeService) CreateProBe(proReq *requests.ProbeRequest) error {
 				liveness.Scheme = proReq.LivenessReqScheme
 				liveness.PeriodSeconds = proReq.LivenessPeriodSeconds
 				liveness.InitialDelaySeconds = proReq.LivenessInitialDelaySeconds
+				if proReq.EnableLiveness {
+					readiness.Enable = 1
+				} else {
+					readiness.Enable = 0
+				}
 				err := tx.Model(models.DeploymentContainerLifecycleCheck{}).Updates(&liveness).Error
 				return err
-			}
-			if !proReq.EnableLiveness {
-
 			}
 			return nil
 		})
@@ -76,6 +81,7 @@ func (pbs *ProBeService) CreateProBe(proReq *requests.ProbeRequest) error {
 				probe.Scheme = proReq.ReadinessReqScheme
 				probe.PeriodSeconds = proReq.ReadinessPeriodSeconds
 				probe.InitialDelaySeconds = proReq.ReadinessInitialDelaySeconds
+				probe.Enable = 1
 				err := tx.Model(models.DeploymentContainerLifecycleCheck{}).Save(&probe).Error
 				return err
 			}
@@ -89,6 +95,7 @@ func (pbs *ProBeService) CreateProBe(proReq *requests.ProbeRequest) error {
 				probe.Scheme = proReq.LivenessReqScheme
 				probe.PeriodSeconds = proReq.LivenessPeriodSeconds
 				probe.InitialDelaySeconds = proReq.LivenessInitialDelaySeconds
+				probe.Enable = 1
 				err := tx.Model(models.DeploymentContainerLifecycleCheck{}).Save(&probe).Error
 				return err
 			}
