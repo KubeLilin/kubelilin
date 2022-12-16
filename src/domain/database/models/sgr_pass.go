@@ -192,6 +192,7 @@ type DeploymentContainerLifecycleCheck struct {
 	InitialDelaySeconds uint       `gorm:"column:initial_delay_seconds;type:int unsigned;not null;default:4" json:"initialDelaySeconds"` // 启动延时(秒)
 	PeriodSeconds       uint       `gorm:"column:period_seconds;type:int unsigned;not null;default:10" json:"periodSeconds"`             // 间隔时间(秒)
 	TimeoutSeconds      uint       `gorm:"column:timeout_seconds;type:int unsigned;not null;default:3" json:"timeoutSeconds"`            // 响应超时(秒)
+	Enable              uint8      `gorm:"column:enable;type:tinyint unsigned;not null;default:0" json:"enable"`                         // 是否启用 1是0否
 	CreationTime        *time.Time `gorm:"column:creation_time;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"creationTime"`
 	UpdateTime          *time.Time `gorm:"column:update_time;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"updateTime"`
 }
@@ -215,6 +216,7 @@ var DeploymentContainerLifecycleCheckColumns = struct {
 	InitialDelaySeconds string
 	PeriodSeconds       string
 	TimeoutSeconds      string
+	Enable              string
 	CreationTime        string
 	UpdateTime          string
 }{
@@ -230,6 +232,7 @@ var DeploymentContainerLifecycleCheckColumns = struct {
 	InitialDelaySeconds: "initial_delay_seconds",
 	PeriodSeconds:       "period_seconds",
 	TimeoutSeconds:      "timeout_seconds",
+	Enable:              "enable",
 	CreationTime:        "creation_time",
 	UpdateTime:          "update_time",
 }
