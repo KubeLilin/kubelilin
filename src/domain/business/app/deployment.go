@@ -189,7 +189,7 @@ func (deployment *DeploymentService) GetDeploymentForm(id uint64) (error, *reque
        dp.level,dp.replicas,dp.service_away,dp.service_enable,dp.service_port,dp.service_port_type,
        dpc.request_cpu,dpc.limit_cpu,dpc.request_memory,dpc.limit_memory,dpc.environments as env_json
        from sgr_tenant_deployments as dp
-inner join sgr_tenant_deployments_containers as dpc on dp.id=dpc.deploy_id
+left join sgr_tenant_deployments_containers as dpc on dp.id=dpc.deploy_id
 where dp.id=?`)
 	resErr := deployment.db.Raw(sql.String(), id).Scan(res)
 	if resErr != nil && res.EnvJson != "" {

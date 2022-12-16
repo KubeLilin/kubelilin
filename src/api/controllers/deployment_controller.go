@@ -23,8 +23,8 @@ type DeploymentController struct {
 	proBeService         *kubernetes.ProBeService
 }
 
-func NewDeploymentController(deploymentService *app.DeploymentService, clusterService *kubernetes.ClusterService, deploymentSupervisor *kubernetes.DeploymentSupervisor) *DeploymentController {
-	return &DeploymentController{deploymentService: deploymentService, clusterService: clusterService, deploymentSupervisor: deploymentSupervisor}
+func NewDeploymentController(deploymentService *app.DeploymentService, clusterService *kubernetes.ClusterService, deploymentSupervisor *kubernetes.DeploymentSupervisor, probeService *kubernetes.ProBeService) *DeploymentController {
+	return &DeploymentController{deploymentService: deploymentService, clusterService: clusterService, deploymentSupervisor: deploymentSupervisor, proBeService: probeService}
 }
 
 func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpContext, execReq *requests2.ExecDeploymentRequest) mvc.ApiResult {
@@ -241,6 +241,9 @@ func (controller DeploymentController) GetNotifications() mvc.ApiResult {
 
 // PostProbe 创建POD探针/**
 func (controller DeploymentController) PostProbe(request *requests2.ProbeRequest) mvc.ApiResult {
-	controller.proBeService.CreateProBe(request)
-	return mvc.Success(notice.Plugins)
+	err := controller.proBeService.CreateProBe(request)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.SuccessVoid()
 }

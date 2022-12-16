@@ -36,9 +36,12 @@ func (s *ApplicationService) CreateApp(req *requests.AppReq) (error, *models.Sgr
 		return err, nil
 	}
 	dbErr := s.db.Transaction(func(tx *gorm.DB) error {
-		dbRes := s.db.Model(models.SgrTenantApplication{}).Create(appModel)
+		dbRes := tx.Model(models.SgrTenantApplication{}).Create(appModel)
 		if dbRes.Error != nil {
 			return nil
+		}
+		if req.ProjectID > 0 {
+			return tx.Create(&models.DevopsProjectsApps{ProjectID: req.ProjectID, ApplicationID: appModel.ID}).Error
 		}
 		return nil
 	})

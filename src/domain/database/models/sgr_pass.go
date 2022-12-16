@@ -192,6 +192,7 @@ type DeploymentContainerLifecycleCheck struct {
 	InitialDelaySeconds uint       `gorm:"column:initial_delay_seconds;type:int unsigned;not null;default:4" json:"initialDelaySeconds"` // 启动延时(秒)
 	PeriodSeconds       uint       `gorm:"column:period_seconds;type:int unsigned;not null;default:10" json:"periodSeconds"`             // 间隔时间(秒)
 	TimeoutSeconds      uint       `gorm:"column:timeout_seconds;type:int unsigned;not null;default:3" json:"timeoutSeconds"`            // 响应超时(秒)
+	Enable              uint8      `gorm:"column:enable;type:tinyint unsigned;not null;default:0" json:"enable"`                         // 是否启用 1是0否
 	CreationTime        *time.Time `gorm:"column:creation_time;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"creationTime"`
 	UpdateTime          *time.Time `gorm:"column:update_time;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"updateTime"`
 }
@@ -215,6 +216,7 @@ var DeploymentContainerLifecycleCheckColumns = struct {
 	InitialDelaySeconds string
 	PeriodSeconds       string
 	TimeoutSeconds      string
+	Enable              string
 	CreationTime        string
 	UpdateTime          string
 }{
@@ -230,6 +232,7 @@ var DeploymentContainerLifecycleCheckColumns = struct {
 	InitialDelaySeconds: "initial_delay_seconds",
 	PeriodSeconds:       "period_seconds",
 	TimeoutSeconds:      "timeout_seconds",
+	Enable:              "enable",
 	CreationTime:        "creation_time",
 	UpdateTime:          "update_time",
 }
@@ -537,50 +540,6 @@ var SgrCodeDeploymentLevelColumns = struct {
 	Code: "code",
 	Name: "name",
 	Sort: "sort",
-}
-
-// SgrDeploymentProbe 部署状态检查
-type SgrDeploymentProbe struct {
-	ID                  uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
-	DpID                uint64     `gorm:"column:dp_id;type:bigint;not null" json:"dpId"`                // 部署ID
-	Type                string     `gorm:"column:type;type:varchar(20);not null" json:"type"`            // 类型READINESS/LIVENESS
-	Port                uint       `gorm:"column:port;type:int unsigned;not null" json:"port"`           // 请求端口
-	Path                string     `gorm:"column:path;type:varchar(500);not null" json:"path"`           // 请求地址
-	ReqScheme           string     `gorm:"column:req_scheme;type:varchar(10);not null" json:"reqScheme"` // 请求协议 HTTP
-	CreationTime        *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
-	UpdateTime          *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
-	InitialDelaySeconds uint       `gorm:"column:initial_delay_seconds;type:int unsigned;not null" json:"initialDelaySeconds"` // 执行第一次探测前应该等待
-	PeriodSeconds       uint       `gorm:"column:period_seconds;type:int unsigned;not null" json:"periodSeconds"`              // 每隔 n秒执行一次探测
-}
-
-// TableName get sql table name.获取数据库表名
-func (m *SgrDeploymentProbe) TableName() string {
-	return "sgr_deployment_probe"
-}
-
-// SgrDeploymentProbeColumns get sql column name.获取数据库列名
-var SgrDeploymentProbeColumns = struct {
-	ID                  string
-	DpID                string
-	Type                string
-	Port                string
-	Path                string
-	ReqScheme           string
-	CreationTime        string
-	UpdateTime          string
-	InitialDelaySeconds string
-	PeriodSeconds       string
-}{
-	ID:                  "id",
-	DpID:                "dp_id",
-	Type:                "type",
-	Port:                "port",
-	Path:                "path",
-	ReqScheme:           "req_scheme",
-	CreationTime:        "creation_time",
-	UpdateTime:          "update_time",
-	InitialDelaySeconds: "initial_delay_seconds",
-	PeriodSeconds:       "period_seconds",
 }
 
 // SgrRoleMenuMap 角色菜单权限影射
@@ -950,6 +909,8 @@ type SgrTenantDeployments struct {
 	ServicePortType               string     `gorm:"column:service_port_type;type:varchar(8);not null;default:''" json:"servicePortType"`                                // 服务端口类型 http tcp
 	LastImage                     string     `gorm:"column:last_image;type:varchar(350)" json:"lastImage"`                                                               // 最终部署镜像
 	Level                         string     `gorm:"index:levev_idx;column:level;type:varchar(8)" json:"level"`                                                          // 应用部署级别
+	MaxUnavailable                *int       `gorm:"column:max_unavailable;type:int" json:"maxUnavailable"`                                                              // 最大不可用
+	MaxSurge                      *int       `gorm:"column:max_surge;type:int" json:"maxSurge"`                                                                          // 额外Pod
 	TerminationGracePeriodSeconds uint       `gorm:"column:termination_grace_period_seconds;type:int unsigned;not null;default:30" json:"terminationGracePeriodSeconds"` //  最大容忍pod销毁时间(默认30s)
 	CreateTime                    *time.Time `gorm:"column:create_time;type:datetime" json:"createTime"`                                                                 // 创建时间
 	UpdateTime                    *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`                                                                 // 更新时间
@@ -981,6 +942,8 @@ var SgrTenantDeploymentsColumns = struct {
 	ServicePortType               string
 	LastImage                     string
 	Level                         string
+	MaxUnavailable                string
+	MaxSurge                      string
 	TerminationGracePeriodSeconds string
 	CreateTime                    string
 	UpdateTime                    string
@@ -1004,6 +967,8 @@ var SgrTenantDeploymentsColumns = struct {
 	ServicePortType:               "service_port_type",
 	LastImage:                     "last_image",
 	Level:                         "level",
+	MaxUnavailable:                "max_unavailable",
+	MaxSurge:                      "max_surge",
 	TerminationGracePeriodSeconds: "termination_grace_period_seconds",
 	CreateTime:                    "create_time",
 	UpdateTime:                    "update_time",

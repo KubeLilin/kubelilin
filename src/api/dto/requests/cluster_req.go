@@ -7,7 +7,7 @@ import (
 
 type ImportClusterReq struct {
 	mvc.RequestBody
-	NickName string `form:"nickName"`
+	NickName string `form:"name"`
 	TenantId uint64 `form:"tenantId"`
 }
 

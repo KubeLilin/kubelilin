@@ -39,6 +39,12 @@ func (service *ApiGatewayService) GetById(id uint64) (models.ApplicationAPIGatew
 	return gateway, err
 }
 
+func (service *ApiGatewayService) GetByClusterId(clusterId uint64) (models.ApplicationAPIGateway, error) {
+	var gateway models.ApplicationAPIGateway
+	err := service.db.Model(&models.ApplicationAPIGateway{}).First(&gateway, "cluster_id=?", clusterId).Error
+	return gateway, err
+}
+
 func (service *ApiGatewayService) CreateTeam(team models.ApplicationAPIGatewayTeams) error {
 	var exitCount int64
 	service.db.Model(&models.DevopsProjects{}).Where("tenant_id=? and gateway_id=? and name=?", team.TenantID, team.GatewayID, team.Name).Count(&exitCount)
