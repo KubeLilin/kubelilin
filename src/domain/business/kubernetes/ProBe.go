@@ -32,6 +32,7 @@ func (pbs *ProBeService) CreateProBe(proReq *requests.ProbeRequest) error {
 			readiness.Scheme = proReq.ReadinessReqScheme
 			readiness.PeriodSeconds = proReq.ReadinessPeriodSeconds
 			readiness.InitialDelaySeconds = proReq.ReadinessInitialDelaySeconds
+			readiness.TimeoutSeconds = proReq.ReadinessTimeoutSeconds
 			if proReq.EnableReadiness {
 				readiness.Enable = 1
 			} else {
@@ -65,6 +66,7 @@ func (pbs *ProBeService) CreateProBe(proReq *requests.ProbeRequest) error {
 			liveness.Scheme = proReq.LivenessReqScheme
 			liveness.PeriodSeconds = proReq.LivenessPeriodSeconds
 			liveness.InitialDelaySeconds = proReq.LivenessInitialDelaySeconds
+			liveness.TimeoutSeconds = proReq.LivenessTimeoutSeconds
 			if proReq.EnableLiveness {
 				liveness.Enable = 1
 			} else {
@@ -91,11 +93,59 @@ func (pbs *ProBeService) CreateProBe(proReq *requests.ProbeRequest) error {
 		if mainContainer == nil {
 			return errors.New("can't find the sole container of development ")
 		}
-		tx.Model(models.SgrTenantDeployments{}).Update("termination_grace_period_seconds=?", proReq.TerminationGracePeriodSeconds).Where("id=?", proReq.DpId)
+		tx.Model(models.SgrTenantDeployments{}).Updates(models.SgrTenantDeployments{TerminationGracePeriodSeconds: proReq.TerminationGracePeriodSeconds, MaxUnavailable: &proReq.MaxUnavailable, MaxSurge: &proReq.MaxSurge}).Where("id=?", proReq.DpId)
 		tx.Model(models.SgrTenantDeploymentsContainers{}).Update("poststart=? ", proReq.LifecyclePreStart).Where("deploy_id=? and is_main=1", proReq.DpId)
 		tx.Model(models.SgrTenantDeploymentsContainers{}).Update(" podstop=?", proReq.LifecyclePreStop).Where("deploy_id=? and is_main=1", proReq.DpId)
 		return nil
 	})
 	return res
 
+}
+
+// GetProBe 获取探针信息 /**
+func (pbs *ProBeService) GetProBe(dpId uint64) (*requests.ProbeRequest, error) {
+	res := &requests.ProbeRequest{}
+	dp := models.SgrTenantDeployments{}
+	pbs.db.Model(models.SgrTenantDeployments{}).Where("id=?", dpId).First(&dp)
+	if dp.ID <= 0 {
+		return nil, errors.New("没有招到对应的deployment")
+	}
+	if dp.MaxUnavailable != nil {
+		res.MaxUnavailable = *dp.MaxUnavailable
+	}
+	if dp.MaxSurge != nil {
+		res.MaxSurge = *dp.MaxSurge
+	}
+	res.TerminationGracePeriodSeconds = dp.TerminationGracePeriodSeconds
+	mainContainer := &models.SgrTenantDeploymentsContainers{}
+	pbs.db.Model(models.SgrTenantDeploymentsContainers{}).Where("deploy_id=? and is_main=1", dpId).First(mainContainer)
+	if mainContainer != nil {
+		res.LifecyclePreStart = mainContainer.Poststart
+		res.LifecyclePreStop = mainContainer.Podstop
+	}
+	readiness := models.DeploymentContainerLifecycleCheck{}
+	pbs.db.Model(models.DeploymentContainerLifecycleCheck{}).Where("deployment_id=? and  type=?", dpId, READINESS).First(&readiness)
+	if readiness.ID > 0 {
+		res.DpId = readiness.DeploymentID
+		res.ReadinessPort = readiness.Port
+		res.ReadinessUrl = readiness.Path
+		res.ReadinessReqScheme = readiness.Scheme
+		res.ReadinessPeriodSeconds = readiness.PeriodSeconds
+		res.ReadinessInitialDelaySeconds = readiness.InitialDelaySeconds
+		res.EnableReadiness = readiness.Enable == 1
+		res.ReadinessTimeoutSeconds = readiness.TimeoutSeconds
+	}
+	liveness := models.DeploymentContainerLifecycleCheck{}
+	pbs.db.Model(models.DeploymentContainerLifecycleCheck{}).Where("deployment_id=? and  type=?", dpId, LIVENESS).First(&liveness)
+	if liveness.ID > 0 {
+		res.DpId = liveness.DeploymentID
+		res.LivenessPort = liveness.Port
+		res.LivenessUrl = liveness.Path
+		res.LivenessReqScheme = liveness.Scheme
+		res.LivenessPeriodSeconds = liveness.PeriodSeconds
+		res.LivenessInitialDelaySeconds = liveness.InitialDelaySeconds
+		res.EnableLiveness = liveness.Enable == 1
+		res.LivenessTimeoutSeconds = liveness.TimeoutSeconds
+	}
+	return res, nil
 }

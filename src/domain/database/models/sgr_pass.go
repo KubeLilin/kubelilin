@@ -909,8 +909,8 @@ type SgrTenantDeployments struct {
 	ServicePortType               string     `gorm:"column:service_port_type;type:varchar(8);not null;default:''" json:"servicePortType"`                                // 服务端口类型 http tcp
 	LastImage                     string     `gorm:"column:last_image;type:varchar(350)" json:"lastImage"`                                                               // 最终部署镜像
 	Level                         string     `gorm:"index:levev_idx;column:level;type:varchar(8)" json:"level"`                                                          // 应用部署级别
-	MaxUnavailable                *int       `gorm:"column:max_unavailable;type:int" json:"maxUnavailable"`                                                              // 最大不可用
-	MaxSurge                      *int       `gorm:"column:max_surge;type:int" json:"maxSurge"`                                                                          // 额外Pod
+	MaxUnavailable                *uint      `gorm:"column:max_unavailable;type:int" json:"maxUnavailable"`                                                              // 最大不可用
+	MaxSurge                      *uint      `gorm:"column:max_surge;type:int" json:"maxSurge"`                                                                          // 额外Pod
 	TerminationGracePeriodSeconds uint       `gorm:"column:termination_grace_period_seconds;type:int unsigned;not null;default:30" json:"terminationGracePeriodSeconds"` //  最大容忍pod销毁时间(默认30s)
 	CreateTime                    *time.Time `gorm:"column:create_time;type:datetime" json:"createTime"`                                                                 // 创建时间
 	UpdateTime                    *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`                                                                 // 更新时间

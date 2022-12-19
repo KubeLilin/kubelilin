@@ -247,3 +247,14 @@ func (controller DeploymentController) PostProbe(request *requests2.ProbeRequest
 	}
 	return mvc.SuccessVoid()
 }
+
+// PostProbe 获取POD探针/**
+func (controller DeploymentController) GetProbe(ctx *context.HttpContext) mvc.ApiResult {
+	dpIdStr := ctx.Input.Query("dpId")
+	dpId, err := strconv.ParseUint(dpIdStr, 10, 64)
+	res, err := controller.proBeService.GetProBe(dpId)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(res)
+}

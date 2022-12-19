@@ -51,7 +51,7 @@ type ProbeRequest struct {
 	EnableLifecycle               bool   `json:"enableLifecycle"`
 	EnableReadiness               bool   `json:"enableReadiness"`
 	EnableLiveness                bool   `json:"enableLiveness"`
-	TerminationGracePeriodSeconds uint64 `json:"terminationGracePeriodSeconds"`
+	TerminationGracePeriodSeconds uint   `json:"terminationGracePeriodSeconds"`
 	LifecyclePreStop              string `json:"lifecyclePreStop"`
 	LifecyclePreStart             string `json:"lifecyclePreStart"`
 	ReadinessType                 string `json:"readinessType"`
@@ -59,15 +59,17 @@ type ProbeRequest struct {
 	ReadinessUrl                  string `json:"readinessUrl"`
 	ReadinessReqScheme            string `json:"readinessReqScheme"`
 	ReadinessInitialDelaySeconds  uint   `json:"readinessInitialDelaySeconds"`
-	ReadinessTimeoutSeconds       uint64 `json:"readinessTimeoutSeconds"`
+	ReadinessTimeoutSeconds       uint   `json:"readinessTimeoutSeconds"`
 	ReadinessPeriodSeconds        uint   `json:"readinessPeriodSeconds"`
 	LivenessType                  string `json:"livenessType"`
 	LivenessPort                  uint   `json:"livenessPort"`
 	LivenessUrl                   string `json:"livenessUrl"`
 	LivenessReqScheme             string `json:"livenessReqScheme"`
 	LivenessInitialDelaySeconds   uint   `json:"livenessInitialDelaySeconds"`
-	LivenessTimeoutSeconds        uint64 `json:"livenessTimeoutSeconds"`
+	LivenessTimeoutSeconds        uint   `json:"livenessTimeoutSeconds"`
 	LivenessPeriodSeconds         uint   `json:"livenessPeriodSeconds"`
+	MaxUnavailable                uint   `json:"maxUnavailable"`
+	MaxSurge                      uint   `json:"maxSurge"`
 }
 
 type ProBeItem struct {
