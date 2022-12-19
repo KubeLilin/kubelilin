@@ -996,6 +996,7 @@ type SgrTenantDeploymentsContainers struct {
 	RunParams         string  `gorm:"column:run_params;type:varchar(100)" json:"runParams"`                          // 启动命令行参数
 	Podstop           string  `gorm:"column:podstop;type:varchar(255)" json:"podstop"`                               // Pod生命周期-销毁前执行命令
 	Poststart         string  `gorm:"column:poststart;type:varchar(255)" json:"poststart"`                           // Pod生命周期-创建前执行命令
+	EnableLife        *uint8  `gorm:"column:enable_life;type:tinyint unsigned;default:0" json:"enableLife"`          // 是否开启生命周期
 }
 
 // TableName get sql table name.获取数据库表名
@@ -1022,6 +1023,7 @@ var SgrTenantDeploymentsContainersColumns = struct {
 	RunParams         string
 	Podstop           string
 	Poststart         string
+	EnableLife        string
 }{
 	ID:                "id",
 	Name:              "name",
@@ -1040,6 +1042,7 @@ var SgrTenantDeploymentsContainersColumns = struct {
 	RunParams:         "run_params",
 	Podstop:           "podstop",
 	Poststart:         "poststart",
+	EnableLife:        "enable_life",
 }
 
 // SgrTenantNamespace 集群_命名空间
