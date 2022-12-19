@@ -10,6 +10,7 @@ type ApplicationAPIGateway struct {
 	Vip         string `gorm:"column:vip;type:varchar(50);not null;default:''" json:"vip"`           // 内网vip
 	ExportIP    string `gorm:"column:export_ip;type:varchar(50);default:''" json:"exportIp"`         // 出口IP
 	ClusterID   uint64 `gorm:"column:cluster_id;type:bigint unsigned;not null" json:"clusterId"`     // 集群ID
+	DefaultHost string `gorm:"column:default_host;type:varchar(255);not null" json:"defaultHost"`    // 默认域名
 	AdminURI    string `gorm:"column:admin_uri;type:varchar(255);not null" json:"adminUri"`          // 网关admin api
 	AccessToken string `gorm:"column:access_token;type:varchar(255);not null" json:"accessToken"`    // 网关 admin api访问token
 	Status      uint8  `gorm:"column:status;type:tinyint unsigned;not null;default:1" json:"status"` // 网关状态
@@ -28,6 +29,7 @@ var ApplicationAPIGatewayColumns = struct {
 	Vip         string
 	ExportIP    string
 	ClusterID   string
+	DefaultHost string
 	AdminURI    string
 	AccessToken string
 	Status      string
@@ -38,6 +40,7 @@ var ApplicationAPIGatewayColumns = struct {
 	Vip:         "vip",
 	ExportIP:    "export_ip",
 	ClusterID:   "cluster_id",
+	DefaultHost: "default_host",
 	AdminURI:    "admin_uri",
 	AccessToken: "access_token",
 	Status:      "status",
@@ -909,8 +912,8 @@ type SgrTenantDeployments struct {
 	ServicePortType               string     `gorm:"column:service_port_type;type:varchar(8);not null;default:''" json:"servicePortType"`                                // 服务端口类型 http tcp
 	LastImage                     string     `gorm:"column:last_image;type:varchar(350)" json:"lastImage"`                                                               // 最终部署镜像
 	Level                         string     `gorm:"index:levev_idx;column:level;type:varchar(8)" json:"level"`                                                          // 应用部署级别
-	MaxUnavailable                *uint      `gorm:"column:max_unavailable;type:int" json:"maxUnavailable"`                                                              // 最大不可用
-	MaxSurge                      *uint      `gorm:"column:max_surge;type:int" json:"maxSurge"`                                                                          // 额外Pod
+	MaxUnavailable                *uint      `gorm:"column:max_unavailable;type:int unsigned;default:0" json:"maxUnavailable"`                                           // 最大不可用
+	MaxSurge                      *uint      `gorm:"column:max_surge;type:int unsigned;default:0" json:"maxSurge"`                                                       // 额外Pod
 	TerminationGracePeriodSeconds uint       `gorm:"column:termination_grace_period_seconds;type:int unsigned;not null;default:30" json:"terminationGracePeriodSeconds"` //  最大容忍pod销毁时间(默认30s)
 	CreateTime                    *time.Time `gorm:"column:create_time;type:datetime" json:"createTime"`                                                                 // 创建时间
 	UpdateTime                    *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`                                                                 // 更新时间
