@@ -331,6 +331,7 @@ func (ds *DeploymentSupervisor) DeleteDeployment(tenantId, dpId uint64) error {
 	foundDep, _ := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), dpDatum.Name, metav1.GetOptions{})
 	if foundDep.Name != "" {
 		err = clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), foundDep.Name, metav1.DeleteOptions{})
+		_ = clientSet.CoreV1().Services(namespace).Delete(context.TODO(), dpDatum.ServiceName, metav1.DeleteOptions{})
 	}
 	if err == nil {
 		err = ds.db.Delete(&models.SgrTenantDeployments{}, "id=?", dpId).Error
