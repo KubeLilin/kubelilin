@@ -206,7 +206,7 @@ where dp.id=?`)
 func (deployment *DeploymentService) GetDeploymentByID(id uint64) (dto.DeploymentItemDto, error) {
 	var dpModel dto.DeploymentItemDto
 	sql := strings.Builder{}
-	sql.WriteString(`SELECT d.id, d.nickname ,d.name,
+	sql.WriteString(`SELECT d.id, d.nickname ,d.name, d.app_id,
   d.cluster_id as 'clusterId' , n.namespace ,d.replicas 'expected',  d.service_name as 'serviceName', d.service_port as 'servicePort'
   FROM sgr_tenant_deployments d
   INNER JOIN sgr_tenant_namespace n on n.id = d.namespace_id

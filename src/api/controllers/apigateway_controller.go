@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
 	requests "kubelilin/api/dto/requests"
@@ -74,6 +75,32 @@ func (controller *ApiGatewayController) GetRouterListBy(ctx *context.HttpContext
 		return mvc.FailWithMsg(false, err.Error())
 	}
 	return mvc.Success(list)
+}
+
+func (controller *ApiGatewayController) GetRouterByName(ctx *context.HttpContext) mvc.ApiResult {
+	deployId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("deployId", "0"))
+	routeName := ctx.Input.QueryDefault("routeName", "")
+
+	gatewayRouter, err := controller.service.GetRouterByDeployIdAndName(deployId, routeName)
+	if err != nil {
+		deploy, _ := controller.deploymentService.GetDeploymentByID(deployId)
+		gatewayRouter.Name = routeName
+		gatewayRouter.ApplicationID = deploy.AppId
+		gatewayRouter.DeploymentID = deploy.ID
+		gatewayRouter.Websocket = 1
+		gatewayRouter.Rewrite = 1
+		gatewayRouter.RegexTmp = "/$1"
+		gatewayRouter.RegexURI = fmt.Sprintf("^/%s/(.*)", deploy.Name)
+		gatewayRouter.URI = fmt.Sprintf("/%s/*", deploy.Name)
+		gatewayRouter.Loadbalance = "roundrobin"
+		gatewayRouter.TeamID = 0
+		gateway, _ := controller.service.GetByClusterId(deploy.ClusterId)
+		if gateway.ID > 0 {
+			gatewayRouter.Host = gateway.DefaultHost
+			gatewayRouter.Liveness = gatewayRouter.Host + fmt.Sprintf("/%s/", deploy.Name)
+		}
+	}
+	return mvc.Success(gatewayRouter)
 }
 
 func (controller *ApiGatewayController) GetAppList(ctx *context.HttpContext) mvc.ApiResult {
