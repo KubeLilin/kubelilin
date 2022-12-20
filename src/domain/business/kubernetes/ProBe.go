@@ -94,8 +94,15 @@ func (pbs *ProBeService) CreateProBe(proReq *requests.ProbeRequest) error {
 			return errors.New("can't find the sole container of development ")
 		}
 		tx.Model(models.SgrTenantDeployments{}).Updates(models.SgrTenantDeployments{TerminationGracePeriodSeconds: proReq.TerminationGracePeriodSeconds, MaxUnavailable: &proReq.MaxUnavailable, MaxSurge: &proReq.MaxSurge}).Where("id=?", proReq.DpId)
-		tx.Model(models.SgrTenantDeploymentsContainers{}).Update("poststart=? ", proReq.LifecyclePreStart).Where("deploy_id=? and is_main=1", proReq.DpId)
-		tx.Model(models.SgrTenantDeploymentsContainers{}).Update(" podstop=?", proReq.LifecyclePreStop).Where("deploy_id=? and is_main=1", proReq.DpId)
+		updateDatum := models.SgrTenantDeploymentsContainers{Poststart: proReq.LifecyclePreStart, Podstop: proReq.LifecyclePreStop}
+		y := uint8(1)
+		n := uint8(0)
+		if proReq.EnableLifecycle {
+			updateDatum.EnableLife = &y
+		} else {
+			updateDatum.EnableLife = &n
+		}
+		tx.Model(models.SgrTenantDeploymentsContainers{}).Updates(updateDatum).Where("deploy_id=? and is_main=1", proReq.DpId)
 		return nil
 	})
 	return res
@@ -122,6 +129,13 @@ func (pbs *ProBeService) GetProBe(dpId uint64) (*requests.ProbeRequest, error) {
 	if mainContainer != nil {
 		res.LifecyclePreStart = mainContainer.Poststart
 		res.LifecyclePreStop = mainContainer.Podstop
+		if mainContainer.EnableLife != nil {
+			if *mainContainer.EnableLife == 1 {
+				res.EnableLifecycle = true
+			} else {
+				res.EnableLifecycle = false
+			}
+		}
 	}
 	readiness := models.DeploymentContainerLifecycleCheck{}
 	pbs.db.Model(models.DeploymentContainerLifecycleCheck{}).Where("deployment_id=? and  type=?", dpId, READINESS).First(&readiness)

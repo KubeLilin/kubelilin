@@ -203,7 +203,6 @@ func (controller DeploymentController) PostNotify(notifyReq *requests2.DeployNot
 		return item.Value == notifyReq.NotifyType
 	}).First()
 	notifier := notifyPlugin.New(notifyReq.NotifyKey)
-
 	_, deployment := controller.deploymentService.GetDeploymentForm(notifyReq.DeployId)
 	message := notice.Message{
 		App:         deployment.Nickname,
@@ -214,12 +213,10 @@ func (controller DeploymentController) PostNotify(notifyReq *requests2.DeployNot
 		Timestamp:   time.Now().Format("2006-01-02 15:04:05"),
 		Success:     "发布成功",
 	}
-
 	err := notifier.PostMessage(message)
 	if err != nil {
 		return mvc.ApiResult{Message: err.Error(), Status: 500}
 	}
-
 	return mvc.Success(true)
 
 }
