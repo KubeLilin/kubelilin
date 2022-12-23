@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"errors"
 	"strconv"
 )
@@ -83,4 +84,13 @@ func ToString(value interface{}) string {
 		return strconv.FormatUint(v, 10)
 	}
 	return ""
+}
+
+func ObjectToString(obj interface{}) string {
+	jsonByte, _ := json.Marshal(obj)
+	return string(jsonByte)
+}
+
+func StringToJson(jsonStr string, obj any) {
+	_ = json.Unmarshal([]byte(jsonStr), obj)
 }

@@ -49,7 +49,7 @@ var ApplicationAPIGatewayColumns = struct {
 // ApplicationAPIGatewayRouters 集群网关团队路由
 type ApplicationAPIGatewayRouters struct {
 	ID            uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`                        // 路由ID
-	Name          string `gorm:"column:name;type:varchar(50);not null;default:''" json:"name"`                        // 路由名称
+	Name          string `gorm:"index:name;column:name;type:varchar(50);not null;default:''" json:"name"`             // 路由名称
 	Desc          string `gorm:"column:desc;type:varchar(255);not null;default:''" json:"desc"`                       // 路由描述
 	TeamID        uint64 `gorm:"column:team_id;type:bigint unsigned;not null;default:0" json:"teamId"`                // 团队目录ID
 	Host          string `gorm:"column:host;type:varchar(150);not null;default:''" json:"host"`                       // 路由域名
@@ -808,15 +808,15 @@ var SgrTenantClusterColumns = struct {
 
 // SgrTenantConfigMap k8sconfig_map
 type SgrTenantConfigMap struct {
-	ID           int64      `gorm:"primaryKey;column:id;type:bigint;not null" json:"id"`
-	Name         string     `gorm:"column:name;type:varchar(50);not null" json:"name"`
-	TenantID     uint64     `gorm:"column:tenant_id;type:bigint unsigned;not null" json:"tenantId"`
+	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	Name         string     `gorm:"column:name;type:varchar(50);not null" json:"name"`                    // configmap 名称
 	ClusterID    uint64     `gorm:"column:cluster_id;type:bigint unsigned;not null" json:"clusterId"`     // 集群id
 	NamespaceID  uint64     `gorm:"column:namespace_id;type:bigint unsigned;not null" json:"namespaceId"` // 命名空间
-	CreationTime *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
-	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
-	Type         string     `gorm:"column:type;type:char(10);not null" json:"type"` // 文件类型，yaml、properties
-	Data         string     `gorm:"column:data;type:varchar(1000)" json:"data"`     // 配置内容
+	DeploymentID uint64     `gorm:"column:deployment_id;type:bigint unsigned;not null" json:"deploymentId"`
+	AppID        uint64     `gorm:"column:app_id;type:bigint unsigned;not null" json:"appId"`
+	Data         string     `gorm:"column:data;type:text;not null" json:"data"` // 配置内容
+	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"creationTime"`
+	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"updateTime"`
 }
 
 // TableName get sql table name.获取数据库表名
@@ -828,23 +828,23 @@ func (m *SgrTenantConfigMap) TableName() string {
 var SgrTenantConfigMapColumns = struct {
 	ID           string
 	Name         string
-	TenantID     string
 	ClusterID    string
 	NamespaceID  string
+	DeploymentID string
+	AppID        string
+	Data         string
 	CreationTime string
 	UpdateTime   string
-	Type         string
-	Data         string
 }{
 	ID:           "id",
 	Name:         "name",
-	TenantID:     "tenant_id",
 	ClusterID:    "cluster_id",
 	NamespaceID:  "namespace_id",
+	DeploymentID: "deployment_id",
+	AppID:        "app_id",
+	Data:         "data",
 	CreationTime: "creation_time",
 	UpdateTime:   "update_time",
-	Type:         "type",
-	Data:         "data",
 }
 
 // SgrTenantDeploymentRecord 部署发布记录
