@@ -133,6 +133,13 @@ func GetAllNamespaces(client *kubernetes.Clientset) []dto.Namespace {
 	return namespaceList
 }
 
+func getNodeRole(node *v1.Node) string {
+	if _, ok := node.Labels["node-role.kubernetes.io/master"]; ok {
+		return "master"
+	}
+	return "<none>"
+}
+
 func GetNodeList(client *kubernetes.Clientset) []dto.Node {
 	emptyOptions := metav1.ListOptions{}
 	list, _ := client.CoreV1().Nodes().List(context.TODO(), emptyOptions)
@@ -142,11 +149,13 @@ func GetNodeList(client *kubernetes.Clientset) []dto.Node {
 		for _, addr := range nd.Status.Addresses {
 			address = append(address, dto.NodeAddress{Type: string(addr.Type), Address: addr.Address})
 		}
+
 		node := dto.Node{
 			Uid:       string(nd.UID),
 			Name:      nd.Name,
 			PodCIDR:   nd.Spec.PodCIDR,
 			Addresses: address,
+			Role:      getNodeRole(&nd),
 			Capacity: dto.NodeStatus{
 				CPU:     nd.Status.Capacity.Cpu().AsApproximateFloat64(),
 				Memory:  nd.Status.Capacity.Memory().AsApproximateFloat64(),
