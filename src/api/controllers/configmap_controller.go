@@ -48,3 +48,11 @@ func (controller ConfigmapController) GetConfigMap(req *requests.ConfigMapPageRe
 	}
 	return mvc.Success(configmap)
 }
+
+func (controller ConfigmapController) DeleteConfigMap(configmap *requests.ConfigMap) mvc.ApiResult {
+	err := controller.configMapSupervisor.Delete(configmap)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(true)
+}

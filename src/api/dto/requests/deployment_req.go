@@ -135,6 +135,7 @@ type PodTerminalExecRequest struct {
 	PodName       string `json:"podName" uri:"podName"`
 	ContainerName string `json:"containerName" uri:"containerName"`
 	TenantId      uint64 `json:"tenantId" uri:"tenantId"`
+	Shell         string `json:"shell" uri:"shell"`
 }
 
 type ExecDeploymentRequest struct {

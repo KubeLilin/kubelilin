@@ -298,7 +298,7 @@ func GetEvents(client *kubernetes.Clientset, namespace string, deployment string
 	return eventList
 }
 
-func Exec(client *kubernetes.Clientset, cfg *rest.Config, terminal *WebTerminal, namespace string, podName string, containerName string) error {
+func Exec(client *kubernetes.Clientset, cfg *rest.Config, terminal *WebTerminal, shell string, namespace string, podName string, containerName string) error {
 	req := client.CoreV1().RESTClient().Post().
 		Resource("pods").
 		Name(podName).
@@ -307,7 +307,7 @@ func Exec(client *kubernetes.Clientset, cfg *rest.Config, terminal *WebTerminal,
 
 	req.VersionedParams(&v1.PodExecOptions{
 		Container: containerName,
-		Command:   []string{"/bin/bash"},
+		Command:   []string{shell},
 		Stdin:     true,
 		Stdout:    true,
 		Stderr:    true,

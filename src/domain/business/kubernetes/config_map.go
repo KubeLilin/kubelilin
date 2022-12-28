@@ -142,3 +142,21 @@ func (cs *ConfigMapSupervisor) Apply(configmap *requests.ConfigMap) error {
 	}
 	return updateErr
 }
+
+func (cs *ConfigMapSupervisor) Delete(configmap *requests.ConfigMap) error {
+	namespace := &models.SgrTenantNamespace{}
+	dbErr := cs.db.Model(models.SgrTenantNamespace{}).Where("id=?", configmap.NamespaceId).First(namespace)
+	if dbErr.Error != nil {
+		return errors.New("未找到命名空间信息")
+	}
+	clientSet, clientSetErr := cs.clusterService.GetClusterClientByTenantAndId(0, configmap.ClusterId)
+	if clientSetErr != nil {
+		return clientSetErr
+	}
+	configApplyErr := clientSet.CoreV1().ConfigMaps(namespace.Namespace).Delete(context.TODO(), configmap.Name, metav1.DeleteOptions{})
+	if configApplyErr != nil {
+		return configApplyErr
+	}
+	return cs.db.Model(&models.SgrTenantConfigMap{}).
+		Delete("cluster_id=? AND namespace_id=? AND name=?", configmap.ClusterId, configmap.NamespaceId, configmap.Name).Error
+}
