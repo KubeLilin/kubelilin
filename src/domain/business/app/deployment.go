@@ -9,6 +9,7 @@ import (
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
 	"kubelilin/pkg/page"
+	"kubelilin/utils"
 	"strconv"
 	"strings"
 )
@@ -218,4 +219,41 @@ func (deployment *DeploymentService) GetDeploymentByID(id uint64) (dto.Deploymen
 func (deployment *DeploymentService) SetReplicas(id uint64, number int32) error {
 	dpRes := deployment.db.Model(&models.SgrTenantDeployments{}).Where("id = ?", id).Update(models.SgrTenantDeploymentsColumns.Replicas, number)
 	return dpRes.Error
+}
+
+func (deployment *DeploymentService) SaveVolumes(deployVolumes *requests.DeploymentVolume) error {
+	tsRes := deployment.db.Transaction(func(tx *gorm.DB) error {
+		volumeJson := utils.ObjectToString(deployVolumes.Volume)
+		dpRes := deployment.db.Model(&models.SgrTenantDeployments{}).
+			Where("id = ?", deployVolumes.DeploymentID).
+			Update(models.SgrTenantDeploymentsColumns.Volumes, volumeJson)
+		if dpRes.Error != nil {
+			return dpRes.Error
+		}
+		mountJson := utils.ObjectToString(deployVolumes.VolumeMounts)
+		dpRes = deployment.db.Model(&models.SgrTenantDeploymentsContainers{}).
+			Where("deploy_id = ? AND is_main = 1", deployVolumes.DeploymentID).
+			Update(models.SgrTenantDeploymentsContainersColumns.VolumeMounts, mountJson)
+		if dpRes.Error != nil {
+			return dpRes.Error
+		}
+		return nil
+	})
+	return tsRes
+}
+
+func (deployment *DeploymentService) GetVolumesAndMounts(deployId uint64) (requests.DeploymentVolume, error) {
+	result := requests.DeploymentVolume{}
+	var deploy models.SgrTenantDeployments
+	deployment.db.Model(&models.SgrTenantDeployments{}).
+		Where("id = ?", deployId).First(&deploy)
+	var container models.SgrTenantDeploymentsContainers
+	deployment.db.Model(&models.SgrTenantDeploymentsContainers{}).
+		Where("deploy_id = ? AND is_main = 1", deployId).First(&container)
+
+	result.DeploymentID = deployId
+	utils.StringToJson(deploy.Volumes, &result.Volume)
+	utils.StringToJson(container.VolumeMounts, &result.VolumeMounts)
+
+	return result, nil
 }

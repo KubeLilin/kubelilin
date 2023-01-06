@@ -245,7 +245,7 @@ func (controller DeploymentController) PostProbe(request *requests2.ProbeRequest
 	return mvc.SuccessVoid()
 }
 
-// PostProbe 获取POD探针/**
+// GetProbe 获取POD探针/**
 func (controller DeploymentController) GetProbe(ctx *context.HttpContext) mvc.ApiResult {
 	dpIdStr := ctx.Input.Query("dpId")
 	dpId, err := strconv.ParseUint(dpIdStr, 10, 64)
@@ -254,4 +254,23 @@ func (controller DeploymentController) GetProbe(ctx *context.HttpContext) mvc.Ap
 		return mvc.FailWithMsg(nil, err.Error())
 	}
 	return mvc.Success(res)
+}
+
+// PostSaveVolumes 保存部署卷和挂载卷
+func (controller DeploymentController) PostSaveVolumes(request *requests2.DeploymentVolume) mvc.ApiResult {
+	err := controller.deploymentService.SaveVolumes(request)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(true)
+}
+
+// GetVolumes 获取部署卷和挂载点
+func (controller DeploymentController) GetVolumes(ctx *context.HttpContext) mvc.ApiResult {
+	deployId := utils.GetNumberOfParam[uint64](ctx, "deployId")
+	volumes, err := controller.deploymentService.GetVolumesAndMounts(deployId)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(volumes)
 }
