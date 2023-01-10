@@ -81,36 +81,29 @@ func NewScmProvider(vcsType, vcsPath, token string) (*scm.Client, error) {
 		gitRepo := strings.ToLower(vcsType)
 		if "gogs" == gitRepo {
 			client, err = gogs.New(schema + "://" + projectPathSplit[0])
-			client.Client = &http.Client{
-				Transport: &transport.BearerToken{
-					Token: token,
-				},
+			client.Client = &http.Client{}
+			if token != "" {
+				client.Client.Transport = &transport.BearerToken{Token: token}
 			}
 		} else {
 			client, err = gitlab.New(schema + "://" + projectPathSplit[0])
-
-			client.Client = &http.Client{
-				Transport: &transport.PrivateToken{
-					Token: token,
-				},
+			client.Client = &http.Client{}
+			if token != "" {
+				client.Client.Transport = &transport.PrivateToken{Token: token}
 			}
 		}
 	case "github":
 		client = github.NewDefault()
-
-		client.Client = &http.Client{
-			Transport: &transport.BearerToken{
-				Token: token,
-			},
+		client.Client = &http.Client{}
+		if token != "" {
+			client.Client.Transport = &transport.BearerToken{Token: token}
 		}
 
 	case "gitee":
 		client = gitee.NewDefault()
-
-		client.Client = &http.Client{
-			Transport: &transport.BearerToken{
-				Token: token,
-			},
+		client.Client = &http.Client{}
+		if token != "" {
+			client.Client.Transport = &transport.BearerToken{Token: token}
 		}
 
 	default:
@@ -120,7 +113,7 @@ func NewScmProvider(vcsType, vcsPath, token string) (*scm.Client, error) {
 }
 
 func getRepoNames(gitAddr string) (*GitRepoNames, error) {
-	reg := regexp.MustCompile("^http.*/(\\w+)/([a-zA-Z-0-9]+).git")
+	reg := regexp.MustCompile("^http.*/(\\w+)/([a-zA-Z-0-9.]+).git")
 	groups := reg.FindStringSubmatch(gitAddr)
 
 	if len(groups) > 1 {
