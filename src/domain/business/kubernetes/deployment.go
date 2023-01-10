@@ -9,7 +9,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/cli-runtime/pkg/printers"
 	appsapplyv1 "k8s.io/client-go/applyconfigurations/apps/v1"
 	corev1 "k8s.io/client-go/applyconfigurations/core/v1"
@@ -177,12 +176,12 @@ func (ds *DeploymentSupervisor) ApplyDeployment(clientSet *kubernetes.Clientset,
 	replicas := int32(dp.Replicas)
 	spec.Replicas = &replicas
 	//strategy
-	spec.Strategy = &appsapplyv1.DeploymentStrategyApplyConfiguration{
-		RollingUpdate: &appsapplyv1.RollingUpdateDeploymentApplyConfiguration{
-			MaxUnavailable: &intstr.IntOrString{Type: intstr.String, StrVal: "25%"},
-			MaxSurge:       &intstr.IntOrString{Type: intstr.String, StrVal: "25%"},
-		},
-	}
+	//spec.Strategy = &appsapplyv1.DeploymentStrategyApplyConfiguration{
+	//	RollingUpdate: &appsapplyv1.RollingUpdateDeploymentApplyConfiguration{
+	//		MaxUnavailable: &intstr.IntOrString{Type: intstr.String, StrVal: "25%"},
+	//		MaxSurge:       &intstr.IntOrString{Type: intstr.String, StrVal: "25%"},
+	//	},
+	//}
 	//selector
 	//selectorMap := make(map[string]string)
 	//selectorMap["k8s-app"] = dp.Name
@@ -205,8 +204,12 @@ func (ds *DeploymentSupervisor) ApplyDeployment(clientSet *kubernetes.Clientset,
 	spec.Template = &specTemplate
 	//endregion
 	deploymentDatum.Spec = &spec
-	res, err := k8sDeployment.Apply(context.TODO(), deploymentDatum, metav1.ApplyOptions{Force: true, FieldManager: "deployment-apply-fields"})
 
+	for _, deployApplyFunc := range DeploymentApplyFuncList {
+		deployApplyFunc(deploymentDatum, dp, dpc)
+	}
+
+	res, err := k8sDeployment.Apply(context.TODO(), deploymentDatum, metav1.ApplyOptions{Force: true, FieldManager: "deployment-apply-fields"})
 	return res, err
 }
 
@@ -331,6 +334,7 @@ func (ds *DeploymentSupervisor) DeleteDeployment(tenantId, dpId uint64) error {
 	foundDep, _ := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), dpDatum.Name, metav1.GetOptions{})
 	if foundDep.Name != "" {
 		err = clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), foundDep.Name, metav1.DeleteOptions{})
+		_ = clientSet.CoreV1().Services(namespace).Delete(context.TODO(), dpDatum.ServiceName, metav1.DeleteOptions{})
 	}
 	if err == nil {
 		err = ds.db.Delete(&models.SgrTenantDeployments{}, "id=?", dpId).Error

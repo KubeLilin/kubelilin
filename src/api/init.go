@@ -35,4 +35,5 @@ func ConfigureMvc(builder *mvc.ControllerBuilder) {
 	builder.AddController(controllers.NewServiceController)
 	builder.AddController(controllers.NewDevopsController)
 	builder.AddController(controllers.NewApiGatewayController)
+	builder.AddController(controllers.NewConfigmapController)
 }

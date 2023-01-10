@@ -133,6 +133,13 @@ func GetAllNamespaces(client *kubernetes.Clientset) []dto.Namespace {
 	return namespaceList
 }
 
+func getNodeRole(node *v1.Node) string {
+	if _, ok := node.Labels["node-role.kubernetes.io/master"]; ok {
+		return "master"
+	}
+	return "<none>"
+}
+
 func GetNodeList(client *kubernetes.Clientset) []dto.Node {
 	emptyOptions := metav1.ListOptions{}
 	list, _ := client.CoreV1().Nodes().List(context.TODO(), emptyOptions)
@@ -142,11 +149,13 @@ func GetNodeList(client *kubernetes.Clientset) []dto.Node {
 		for _, addr := range nd.Status.Addresses {
 			address = append(address, dto.NodeAddress{Type: string(addr.Type), Address: addr.Address})
 		}
+
 		node := dto.Node{
 			Uid:       string(nd.UID),
 			Name:      nd.Name,
 			PodCIDR:   nd.Spec.PodCIDR,
 			Addresses: address,
+			Role:      getNodeRole(&nd),
 			Capacity: dto.NodeStatus{
 				CPU:     nd.Status.Capacity.Cpu().AsApproximateFloat64(),
 				Memory:  nd.Status.Capacity.Memory().AsApproximateFloat64(),
@@ -289,7 +298,7 @@ func GetEvents(client *kubernetes.Clientset, namespace string, deployment string
 	return eventList
 }
 
-func Exec(client *kubernetes.Clientset, cfg *rest.Config, terminal *WebTerminal, namespace string, podName string, containerName string) error {
+func Exec(client *kubernetes.Clientset, cfg *rest.Config, terminal *WebTerminal, shell string, namespace string, podName string, containerName string) error {
 	req := client.CoreV1().RESTClient().Post().
 		Resource("pods").
 		Name(podName).
@@ -298,7 +307,7 @@ func Exec(client *kubernetes.Clientset, cfg *rest.Config, terminal *WebTerminal,
 
 	req.VersionedParams(&v1.PodExecOptions{
 		Container: containerName,
-		Command:   []string{"/bin/bash"},
+		Command:   []string{shell},
 		Stdin:     true,
 		Stdout:    true,
 		Stderr:    true,

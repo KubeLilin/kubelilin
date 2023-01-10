@@ -105,6 +105,22 @@ func (service *ApiGatewayService) GetRouterListBy(applicationId uint64, deployme
 	return gatewayList, err
 }
 
+func (service *ApiGatewayService) GetRouterByDeployIdAndName(deploymentId uint64, routeName string) (models.ApplicationAPIGatewayRouters, error) {
+	var gatewayRoute models.ApplicationAPIGatewayRouters
+	query := service.db.Model(&models.ApplicationAPIGatewayRouters{})
+
+	if deploymentId > 0 {
+		query.Where("deployment_id=?", deploymentId)
+	}
+
+	if routeName != "" {
+		query.Where("name=?", routeName)
+	}
+
+	err := query.First(&gatewayRoute).Error
+	return gatewayRoute, err
+}
+
 func (service *ApiGatewayService) GetAppList(tenantId uint64) ([]responses.LabelValues, error) {
 	var applist []models.SgrTenantApplication
 	query := service.db.Raw("SELECT id,name FROM sgr_tenant_application WHERE tenant_id = ?", tenantId)

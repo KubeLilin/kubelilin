@@ -10,6 +10,7 @@ type ApplicationAPIGateway struct {
 	Vip         string `gorm:"column:vip;type:varchar(50);not null;default:''" json:"vip"`           // 内网vip
 	ExportIP    string `gorm:"column:export_ip;type:varchar(50);default:''" json:"exportIp"`         // 出口IP
 	ClusterID   uint64 `gorm:"column:cluster_id;type:bigint unsigned;not null" json:"clusterId"`     // 集群ID
+	DefaultHost string `gorm:"column:default_host;type:varchar(255);not null" json:"defaultHost"`    // 默认域名
 	AdminURI    string `gorm:"column:admin_uri;type:varchar(255);not null" json:"adminUri"`          // 网关admin api
 	AccessToken string `gorm:"column:access_token;type:varchar(255);not null" json:"accessToken"`    // 网关 admin api访问token
 	Status      uint8  `gorm:"column:status;type:tinyint unsigned;not null;default:1" json:"status"` // 网关状态
@@ -28,6 +29,7 @@ var ApplicationAPIGatewayColumns = struct {
 	Vip         string
 	ExportIP    string
 	ClusterID   string
+	DefaultHost string
 	AdminURI    string
 	AccessToken string
 	Status      string
@@ -38,6 +40,7 @@ var ApplicationAPIGatewayColumns = struct {
 	Vip:         "vip",
 	ExportIP:    "export_ip",
 	ClusterID:   "cluster_id",
+	DefaultHost: "default_host",
 	AdminURI:    "admin_uri",
 	AccessToken: "access_token",
 	Status:      "status",
@@ -46,7 +49,7 @@ var ApplicationAPIGatewayColumns = struct {
 // ApplicationAPIGatewayRouters 集群网关团队路由
 type ApplicationAPIGatewayRouters struct {
 	ID            uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`                        // 路由ID
-	Name          string `gorm:"column:name;type:varchar(50);not null;default:''" json:"name"`                        // 路由名称
+	Name          string `gorm:"index:name;column:name;type:varchar(50);not null;default:''" json:"name"`             // 路由名称
 	Desc          string `gorm:"column:desc;type:varchar(255);not null;default:''" json:"desc"`                       // 路由描述
 	TeamID        uint64 `gorm:"column:team_id;type:bigint unsigned;not null;default:0" json:"teamId"`                // 团队目录ID
 	Host          string `gorm:"column:host;type:varchar(150);not null;default:''" json:"host"`                       // 路由域名
@@ -805,15 +808,15 @@ var SgrTenantClusterColumns = struct {
 
 // SgrTenantConfigMap k8sconfig_map
 type SgrTenantConfigMap struct {
-	ID           int64      `gorm:"primaryKey;column:id;type:bigint;not null" json:"id"`
-	Name         string     `gorm:"column:name;type:varchar(50);not null" json:"name"`
-	TenantID     uint64     `gorm:"column:tenant_id;type:bigint unsigned;not null" json:"tenantId"`
+	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	Name         string     `gorm:"column:name;type:varchar(50);not null" json:"name"`                    // configmap 名称
 	ClusterID    uint64     `gorm:"column:cluster_id;type:bigint unsigned;not null" json:"clusterId"`     // 集群id
 	NamespaceID  uint64     `gorm:"column:namespace_id;type:bigint unsigned;not null" json:"namespaceId"` // 命名空间
-	CreationTime *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
-	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
-	Type         string     `gorm:"column:type;type:char(10);not null" json:"type"` // 文件类型，yaml、properties
-	Data         string     `gorm:"column:data;type:varchar(1000)" json:"data"`     // 配置内容
+	DeploymentID uint64     `gorm:"column:deployment_id;type:bigint unsigned;not null" json:"deploymentId"`
+	AppID        uint64     `gorm:"column:app_id;type:bigint unsigned;not null" json:"appId"`
+	Data         string     `gorm:"column:data;type:text;not null" json:"data"` // 配置内容
+	CreationTime *time.Time `gorm:"column:creation_time;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"creationTime"`
+	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"updateTime"`
 }
 
 // TableName get sql table name.获取数据库表名
@@ -825,23 +828,23 @@ func (m *SgrTenantConfigMap) TableName() string {
 var SgrTenantConfigMapColumns = struct {
 	ID           string
 	Name         string
-	TenantID     string
 	ClusterID    string
 	NamespaceID  string
+	DeploymentID string
+	AppID        string
+	Data         string
 	CreationTime string
 	UpdateTime   string
-	Type         string
-	Data         string
 }{
 	ID:           "id",
 	Name:         "name",
-	TenantID:     "tenant_id",
 	ClusterID:    "cluster_id",
 	NamespaceID:  "namespace_id",
+	DeploymentID: "deployment_id",
+	AppID:        "app_id",
+	Data:         "data",
 	CreationTime: "creation_time",
 	UpdateTime:   "update_time",
-	Type:         "type",
-	Data:         "data",
 }
 
 // SgrTenantDeploymentRecord 部署发布记录
@@ -902,16 +905,17 @@ type SgrTenantDeployments struct {
 	AppName                       string     `gorm:"column:app_name;type:varchar(50)" json:"appName"`                                                                    // 应用名称
 	WorkloadType                  string     `gorm:"column:workload_type;type:varchar(25);not null;default:''" json:"workloadType"`                                      // 工作负载类型
 	Replicas                      uint       `gorm:"column:replicas;type:int unsigned;not null;default:1" json:"replicas"`                                               // 副本数
-	ServiceEnable                 *uint8     `gorm:"column:service_enable;type:tinyint unsigned" json:"serviceEnable"`                                                   // 是否开启网络服务
+	ServiceEnable                 *uint8     `gorm:"column:service_enable;type:tinyint unsigned;default:1" json:"serviceEnable"`                                         // 是否开启网络服务
 	ServiceName                   string     `gorm:"column:service_name;type:varchar(150);not null;default:''" json:"serviceName"`                                       // 服务名称
 	ServiceAway                   string     `gorm:"column:service_away;type:varchar(30)" json:"serviceAway"`                                                            // 服务类型(clusterIP nodeIP ...)
 	ServicePort                   uint       `gorm:"column:service_port;type:int unsigned;not null;default:0" json:"servicePort"`                                        // 服务端口
 	ServicePortType               string     `gorm:"column:service_port_type;type:varchar(8);not null;default:''" json:"servicePortType"`                                // 服务端口类型 http tcp
 	LastImage                     string     `gorm:"column:last_image;type:varchar(350)" json:"lastImage"`                                                               // 最终部署镜像
 	Level                         string     `gorm:"index:levev_idx;column:level;type:varchar(8)" json:"level"`                                                          // 应用部署级别
-	MaxUnavailable                *int       `gorm:"column:max_unavailable;type:int" json:"maxUnavailable"`                                                              // 最大不可用
-	MaxSurge                      *int       `gorm:"column:max_surge;type:int" json:"maxSurge"`                                                                          // 额外Pod
+	MaxUnavailable                *uint      `gorm:"column:max_unavailable;type:int unsigned;default:25" json:"maxUnavailable"`                                          // 最大不可用
+	MaxSurge                      *uint      `gorm:"column:max_surge;type:int unsigned;default:25" json:"maxSurge"`                                                      // 额外Pod
 	TerminationGracePeriodSeconds uint       `gorm:"column:termination_grace_period_seconds;type:int unsigned;not null;default:30" json:"terminationGracePeriodSeconds"` //  最大容忍pod销毁时间(默认30s)
+	Volumes                       string     `gorm:"column:volumes;type:varchar(255)" json:"volumes"`                                                                    // 卷(json)
 	CreateTime                    *time.Time `gorm:"column:create_time;type:datetime" json:"createTime"`                                                                 // 创建时间
 	UpdateTime                    *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`                                                                 // 更新时间
 }
@@ -945,6 +949,7 @@ var SgrTenantDeploymentsColumns = struct {
 	MaxUnavailable                string
 	MaxSurge                      string
 	TerminationGracePeriodSeconds string
+	Volumes                       string
 	CreateTime                    string
 	UpdateTime                    string
 }{
@@ -970,6 +975,7 @@ var SgrTenantDeploymentsColumns = struct {
 	MaxUnavailable:                "max_unavailable",
 	MaxSurge:                      "max_surge",
 	TerminationGracePeriodSeconds: "termination_grace_period_seconds",
+	Volumes:                       "volumes",
 	CreateTime:                    "create_time",
 	UpdateTime:                    "update_time",
 }
@@ -988,11 +994,13 @@ type SgrTenantDeploymentsContainers struct {
 	LimitCPU          float64 `gorm:"column:limit_cpu;type:decimal(4,2);not null" json:"limitCpu"`                   // 限制CPU
 	LimitMemory       float64 `gorm:"column:limit_memory;type:decimal(5,0);not null" json:"limitMemory"`             // 限制内存
 	Environments      string  `gorm:"column:environments;type:varchar(255);not null;default:''" json:"environments"` // 容器环境变量
+	VolumeMounts      string  `gorm:"column:volume_mounts;type:varchar(255)" json:"volumeMounts"`                    // 卷挂载(json)
 	Workdir           string  `gorm:"column:workdir;type:varchar(200)" json:"workdir"`                               // 工作目录
 	RunCmd            string  `gorm:"column:run_cmd;type:varchar(200)" json:"runCmd"`                                // 启动命令行
 	RunParams         string  `gorm:"column:run_params;type:varchar(100)" json:"runParams"`                          // 启动命令行参数
 	Podstop           string  `gorm:"column:podstop;type:varchar(255)" json:"podstop"`                               // Pod生命周期-销毁前执行命令
 	Poststart         string  `gorm:"column:poststart;type:varchar(255)" json:"poststart"`                           // Pod生命周期-创建前执行命令
+	EnableLife        *uint8  `gorm:"column:enable_life;type:tinyint unsigned;default:0" json:"enableLife"`          // 是否开启生命周期
 }
 
 // TableName get sql table name.获取数据库表名
@@ -1014,11 +1022,13 @@ var SgrTenantDeploymentsContainersColumns = struct {
 	LimitCPU          string
 	LimitMemory       string
 	Environments      string
+	VolumeMounts      string
 	Workdir           string
 	RunCmd            string
 	RunParams         string
 	Podstop           string
 	Poststart         string
+	EnableLife        string
 }{
 	ID:                "id",
 	Name:              "name",
@@ -1032,11 +1042,13 @@ var SgrTenantDeploymentsContainersColumns = struct {
 	LimitCPU:          "limit_cpu",
 	LimitMemory:       "limit_memory",
 	Environments:      "environments",
+	VolumeMounts:      "volume_mounts",
 	Workdir:           "workdir",
 	RunCmd:            "run_cmd",
 	RunParams:         "run_params",
 	Podstop:           "podstop",
 	Poststart:         "poststart",
+	EnableLife:        "enable_life",
 }
 
 // SgrTenantNamespace 集群_命名空间

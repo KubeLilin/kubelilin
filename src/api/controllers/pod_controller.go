@@ -27,7 +27,7 @@ func (controller PodController) GetTerminal(ctx *context.HttpContext) {
 
 	web.Upgrade(ctx, func(conn *websocket.Conn) {
 		terminal := kubernetes.NewWebTerminal(conn)
-		err := kubernetes.Exec(client, config, terminal, request.Namespace, request.PodName, request.ContainerName)
+		err := kubernetes.Exec(client, config, terminal, request.Shell, request.Namespace, request.PodName, request.ContainerName)
 		if err != nil {
 			msg := fmt.Sprintf("Exec to pod error! err: %v", err)
 			_, _ = terminal.Write([]byte(msg))
