@@ -109,7 +109,10 @@ func (pipelineService *PipelineService) GetAppPipelines(appId uint64) ([]dto.Pip
 GetPipelineById 按ID获取流水线
 */
 func (pipelineService *PipelineService) GetPipelineById(id uint64) (dto.PipelineInfo, error) {
-	sql := `SELECT id,appid,name,dsl,taskStatus,lastTaskId FROM sgr_tenant_application_pipelines WHERE id=?`
+	sql := `SELECT pipe.id,pipe.appid,pipe.name,pipe.dsl,pipe.taskStatus,pipe.lastTaskId,lang.name language FROM sgr_tenant_application_pipelines pipe
+INNER JOIN sgr_tenant_application app on app.id = pipe.appid
+INNER JOIN sgr_code_application_language lang on lang.id = app.language
+WHERE pipe.id = ?`
 	var pipelineInfo dto.PipelineInfo
 	err := pipelineService.db.Raw(sql, id).First(&pipelineInfo).Error
 	return pipelineInfo, err
