@@ -74,6 +74,8 @@ func ToString(value interface{}) string {
 		return strconv.FormatInt(v, 10)
 	case uint:
 		return strconv.FormatUint(uint64(v), 10)
+	case *uint:
+		return strconv.FormatUint(uint64(*v), 10)
 	case uint8:
 		return strconv.FormatUint(uint64(v), 10)
 	case uint16:

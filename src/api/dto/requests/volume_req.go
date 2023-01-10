@@ -12,6 +12,7 @@ type VolumeMount struct {
 	Volume      string `json:"volume"`
 	DesPath     string `json:"desPath"`
 	SubPathType string `json:"subPathType"`
+	SubPath     string `json:"subPath"`
 	MountType   string `json:"mountType"`
 }
 
