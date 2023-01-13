@@ -42,6 +42,7 @@ func init() {
 			serviceCollection.AddTransient(devops.NewProjectService)
 			serviceCollection.AddTransient(kubernetes.NewProBeService)
 			serviceCollection.AddTransient(kubernetes.NewConfigMapSupervisor)
+			serviceCollection.AddTransient(kubernetes.NewDynamicResourceSupervisor)
 
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
 			injectionJenkinsBuilder(config, serviceCollection)

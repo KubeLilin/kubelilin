@@ -7,12 +7,19 @@ import (
 	"flag"
 	"fmt"
 	"k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	resourcev1 "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/discovery"
+	memory "k8s.io/client-go/discovery/cached"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/client-go/util/homedir"
@@ -428,4 +435,42 @@ func CreateResourceQuotasByNamespace(client *kubernetes.Clientset, quotas dto.Qu
 	}
 
 	return err
+}
+
+func CreateDynamicResource(ctx context.Context, cfg *rest.Config, codec runtime.Serializer, data []byte) error {
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(cfg)
+	if err != nil {
+		return err
+	}
+	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(discoveryClient))
+	dynamicClient, err := dynamic.NewForConfig(cfg)
+	if err != nil {
+		return err
+	}
+	obj := &unstructured.Unstructured{}
+	_, gvk, err := codec.Decode(data, nil, obj)
+	if err != nil {
+		return err
+	}
+
+	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
+	if err != nil {
+		return err
+	}
+
+	namesapce := ""
+	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
+		namesapce = obj.GetNamespace()
+		if namesapce == "" {
+			namesapce = "default"
+		}
+	}
+
+	var dynamicResource dynamic.ResourceInterface = dynamicClient.Resource(mapping.Resource)
+	dynamicResource = dynamicClient.Resource(mapping.Resource).Namespace(namesapce)
+	if _, err := dynamicResource.Create(ctx, obj, metav1.CreateOptions{}); err != nil {
+		return err
+	}
+
+	return nil
 }
