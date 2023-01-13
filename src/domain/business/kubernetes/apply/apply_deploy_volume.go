@@ -49,5 +49,6 @@ func ApplyVolume(deployConfiguration *appsapplyv1.DeploymentApplyConfiguration, 
 			}
 			containerApplyConfig.WithVolumeMounts(volumeMouteApplyConfigurationList...)
 		}
+		deployConfiguration.Spec.Template.Spec.Containers[0] = containerApplyConfig
 	}
 }
