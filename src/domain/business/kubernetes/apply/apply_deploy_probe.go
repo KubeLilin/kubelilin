@@ -34,30 +34,29 @@ func ApplyProbe(deployConfiguration *appsapplyv1.DeploymentApplyConfiguration, d
 	if len(deployConfiguration.Spec.Template.Spec.Containers) > 0 {
 		containerApplyConfig = deployConfiguration.Spec.Template.Spec.Containers[0]
 	}
-	if dpc.EnableLife != nil && *dpc.EnableLife > 0 {
-		_ = containerApplyConfig
-		if liveness != nil && liveness.Enable > 0 {
-			containerApplyConfig.LivenessProbe = corev1.Probe()
-			containerApplyConfig.LivenessProbe.
-				WithHTTPGet(corev1.HTTPGetAction().WithScheme(v1.URIScheme(liveness.Scheme)).
-					WithPort(intstr.FromInt(int(liveness.Port))).WithPath(liveness.Path)).
-				WithSuccessThreshold(int32(liveness.SuccessThreshold)).
-				WithFailureThreshold(int32(liveness.FailureThreshold)).
-				WithInitialDelaySeconds(int32(liveness.InitialDelaySeconds)).
-				WithPeriodSeconds(int32(liveness.PeriodSeconds)).
-				WithTimeoutSeconds(int32(liveness.TimeoutSeconds))
-		}
-		if readiness != nil && readiness.Enable > 0 {
-			containerApplyConfig.ReadinessProbe = corev1.Probe()
-			containerApplyConfig.ReadinessProbe.
-				WithHTTPGet(corev1.HTTPGetAction().WithScheme(v1.URIScheme(readiness.Scheme)).
-					WithPort(intstr.FromInt(int(readiness.Port))).WithPath(readiness.Path)).
-				WithSuccessThreshold(int32(readiness.SuccessThreshold)).
-				WithFailureThreshold(int32(readiness.FailureThreshold)).
-				WithInitialDelaySeconds(int32(readiness.InitialDelaySeconds)).
-				WithPeriodSeconds(int32(readiness.PeriodSeconds)).
-				WithTimeoutSeconds(int32(readiness.TimeoutSeconds))
-		}
+
+	if liveness != nil && liveness.Enable > 0 {
+		containerApplyConfig.LivenessProbe = corev1.Probe()
+		containerApplyConfig.LivenessProbe.
+			WithHTTPGet(corev1.HTTPGetAction().WithScheme(v1.URIScheme(liveness.Scheme)).
+				WithPort(intstr.FromInt(int(liveness.Port))).WithPath(liveness.Path)).
+			WithSuccessThreshold(int32(liveness.SuccessThreshold)).
+			WithFailureThreshold(int32(liveness.FailureThreshold)).
+			WithInitialDelaySeconds(int32(liveness.InitialDelaySeconds)).
+			WithPeriodSeconds(int32(liveness.PeriodSeconds)).
+			WithTimeoutSeconds(int32(liveness.TimeoutSeconds))
 	}
+	if readiness != nil && readiness.Enable > 0 {
+		containerApplyConfig.ReadinessProbe = corev1.Probe()
+		containerApplyConfig.ReadinessProbe.
+			WithHTTPGet(corev1.HTTPGetAction().WithScheme(v1.URIScheme(readiness.Scheme)).
+				WithPort(intstr.FromInt(int(readiness.Port))).WithPath(readiness.Path)).
+			WithSuccessThreshold(int32(readiness.SuccessThreshold)).
+			WithFailureThreshold(int32(readiness.FailureThreshold)).
+			WithInitialDelaySeconds(int32(readiness.InitialDelaySeconds)).
+			WithPeriodSeconds(int32(readiness.PeriodSeconds)).
+			WithTimeoutSeconds(int32(readiness.TimeoutSeconds))
+	}
+
 	deployConfiguration.Spec.Template.Spec.Containers[0] = containerApplyConfig
 }
