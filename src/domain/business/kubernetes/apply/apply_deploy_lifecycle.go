@@ -8,7 +8,7 @@ import (
 	"kubelilin/utils"
 )
 
-func ApplyLifecycle(deployConfiguration *appsapplyv1.DeploymentApplyConfiguration, dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers) {
+func ApplyLifecycle(deployConfiguration *appsapplyv1.DeploymentApplyConfiguration, dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers, context DeploymentApplyFuncContext) {
 	var terminationGracePeriodSeconds = int64(dp.TerminationGracePeriodSeconds)
 	if terminationGracePeriodSeconds < 30 {
 		terminationGracePeriodSeconds = 30
@@ -36,6 +36,7 @@ func ApplyLifecycle(deployConfiguration *appsapplyv1.DeploymentApplyConfiguratio
 	if len(deployConfiguration.Spec.Template.Spec.Containers) > 0 {
 		containerApplyConfig = deployConfiguration.Spec.Template.Spec.Containers[0]
 	}
+	containerApplyConfig.Lifecycle = corev1.Lifecycle()
 	if dpc.Poststart != "" {
 		containerApplyConfig.Lifecycle.WithPostStart(corev1.Handler().WithExec(corev1.ExecAction().WithCommand(dpc.Poststart)))
 	}

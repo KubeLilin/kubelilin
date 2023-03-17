@@ -16,6 +16,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"kubelilin/api/dto/requests"
 	"kubelilin/api/dto/responses"
+	"kubelilin/domain/business/kubernetes/apply"
 	"kubelilin/domain/database/models"
 	"kubelilin/pkg/page"
 	"strconv"
@@ -206,7 +207,8 @@ func (ds *DeploymentSupervisor) ApplyDeployment(clientSet *kubernetes.Clientset,
 	deploymentDatum.Spec = &spec
 
 	for _, deployApplyFunc := range DeploymentApplyFuncList {
-		deployApplyFunc(deploymentDatum, dp, dpc)
+		applyFuncContext := apply.DeploymentApplyFuncContext{DeployConfiguration: deploymentDatum, DbContext: ds.db}
+		deployApplyFunc(deploymentDatum, dp, dpc, applyFuncContext)
 	}
 
 	res, err := k8sDeployment.Apply(context.TODO(), deploymentDatum, metav1.ApplyOptions{Force: true, FieldManager: "deployment-apply-fields"})

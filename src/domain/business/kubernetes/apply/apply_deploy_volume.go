@@ -8,7 +8,7 @@ import (
 	"kubelilin/utils"
 )
 
-func ApplyVolume(deployConfiguration *appsapplyv1.DeploymentApplyConfiguration, dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers) {
+func ApplyVolume(deployConfiguration *appsapplyv1.DeploymentApplyConfiguration, dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers, context DeploymentApplyFuncContext) {
 	if dp.Volumes != "" {
 		var volumeApplyConfigurationList []*corev1.VolumeApplyConfiguration
 		var volumes []resultV1.Volume

@@ -87,9 +87,9 @@ func (pbs *ProBeService) CreateProBe(proReq *requests.ProbeRequest) error {
 			liveness.PeriodSeconds = proReq.LivenessPeriodSeconds
 			liveness.InitialDelaySeconds = proReq.LivenessInitialDelaySeconds
 			if proReq.EnableLiveness {
-				readiness.Enable = 1
+				liveness.Enable = 1
 			} else {
-				readiness.Enable = 0
+				liveness.Enable = 0
 			}
 			err := tx.Model(models.DeploymentContainerLifecycleCheck{}).Where("id=?", liveness.ID).Updates(&liveness).Error
 			if err != nil {
@@ -125,13 +125,21 @@ func (pbs *ProBeService) GetProBe(dpId uint64) (*requests.ProbeRequest, error) {
 	if dp.ID <= 0 {
 		return nil, errors.New("没有招到对应的deployment")
 	}
-	if dp.MaxUnavailable != nil {
+	if dp.MaxUnavailable != nil && *dp.MaxUnavailable > 0 {
 		res.MaxUnavailable = *dp.MaxUnavailable
+	} else {
+		res.MaxUnavailable = 25
 	}
-	if dp.MaxSurge != nil {
+	if dp.MaxSurge != nil && *dp.MaxSurge > 0 {
 		res.MaxSurge = *dp.MaxSurge
+	} else {
+		res.MaxSurge = 25
 	}
-	res.TerminationGracePeriodSeconds = dp.TerminationGracePeriodSeconds
+	if dp.TerminationGracePeriodSeconds > 0 {
+		res.TerminationGracePeriodSeconds = dp.TerminationGracePeriodSeconds
+	} else {
+		res.TerminationGracePeriodSeconds = 30
+	}
 	mainContainer := &models.SgrTenantDeploymentsContainers{}
 	pbs.db.Model(models.SgrTenantDeploymentsContainers{}).Where("deploy_id=? and is_main=1", dpId).First(mainContainer)
 	if mainContainer != nil {
@@ -156,6 +164,12 @@ func (pbs *ProBeService) GetProBe(dpId uint64) (*requests.ProbeRequest, error) {
 		res.ReadinessInitialDelaySeconds = readiness.InitialDelaySeconds
 		res.EnableReadiness = readiness.Enable == 1
 		res.ReadinessTimeoutSeconds = readiness.TimeoutSeconds
+	} else { // by default
+		res.ReadinessReqScheme = "HTTP"
+		res.ReadinessPort = dp.ServicePort
+		res.ReadinessPeriodSeconds = 10
+		res.ReadinessInitialDelaySeconds = 4
+		res.ReadinessTimeoutSeconds = 3
 	}
 	liveness := models.DeploymentContainerLifecycleCheck{}
 	pbs.db.Model(models.DeploymentContainerLifecycleCheck{}).Where("deployment_id=? and  type=?", dpId, LIVENESS).First(&liveness)
@@ -168,6 +182,12 @@ func (pbs *ProBeService) GetProBe(dpId uint64) (*requests.ProbeRequest, error) {
 		res.LivenessInitialDelaySeconds = liveness.InitialDelaySeconds
 		res.EnableLiveness = liveness.Enable == 1
 		res.LivenessTimeoutSeconds = liveness.TimeoutSeconds
+	} else {
+		res.LivenessReqScheme = "HTTP"
+		res.LivenessPort = dp.ServicePort
+		res.LivenessPeriodSeconds = 10
+		res.LivenessInitialDelaySeconds = 4
+		res.LivenessTimeoutSeconds = 3
 	}
 	return res, nil
 }
