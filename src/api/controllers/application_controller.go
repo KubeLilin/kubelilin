@@ -98,6 +98,15 @@ func (c *ApplicationController) GetProjectDeployLevelCounts(ctx *context.HttpCon
 	return mvc.Success(res)
 }
 
+func (c *ApplicationController) GetTeamDeployLevelCounts(ctx *context.HttpContext) mvc.ApiResult {
+	tenantId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("tenantId", "0"))
+	projectCounts, _ := c.service.GetTenantProjectCountByDeployLevel(tenantId)
+	projectCount, _ := c.service.GetProjectCountByTenantId(tenantId)
+	namespaceCount, _ := c.service.GetNamespaceCountByTenantId(tenantId)
+	appCount, _ := c.service.GetAppCountByTenantId(tenantId)
+	return mvc.Success(context.H{"insCounts": projectCounts, "proCount": projectCount, "namespaceCount": namespaceCount, "appCount": appCount})
+}
+
 // GetGitRepo get git address for application
 func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)

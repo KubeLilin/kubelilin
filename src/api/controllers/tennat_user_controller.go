@@ -71,6 +71,7 @@ func (user *UserController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
 	if userInfo == nil {
 		return user.Fail("fail")
 	}
+	tenantInfo := user.Service.GetTenantById(userInfo.TenantID)
 
 	return mvc.ApiResult{
 		Success: userInfo != nil,
@@ -81,7 +82,7 @@ func (user *UserController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
 			Userid:      strconv.FormatUint(userInfo.ID, 10),
 			Email:       userInfo.Email,
 			Signature:   "",
-			Title:       "",
+			Title:       tenantInfo.TName,
 			Group:       strconv.FormatUint(userInfo.TenantID, 10),
 			Tags:        nil,
 			NotifyCount: 0,

@@ -3,6 +3,7 @@ package devops
 import (
 	"gorm.io/gorm"
 	"kubelilin/domain/dto"
+	"strings"
 )
 
 type ProjectService struct {
@@ -15,14 +16,20 @@ func NewProjectService(db *gorm.DB) *ProjectService {
 
 func (service *ProjectService) GetResourceMetrics(tenantId uint64, projectId uint64) (dto.DevOpsProjectResourceTotals, error) {
 	var resourceList []dto.DevOpsProjectResource
-	sql := `SELECT deploy.level,SUM(deploy.replicas) replicas,SUM(container.limit_cpu * deploy.replicas) sum_cpu,SUM(container.limit_memory * deploy.replicas) sum_memory 
+	sqlbuilder := strings.Builder{}
+	sqlbuilder.WriteString(`SELECT deploy.level,SUM(deploy.replicas) replicas,SUM(container.limit_cpu * deploy.replicas) sum_cpu,SUM(container.limit_memory * deploy.replicas) sum_memory 
 FROM devops_projects dps 
 INNER JOIN devops_projects_apps dpsapp on dpsapp.project_id = dps.id
 INNER JOIN sgr_tenant_deployments deploy on deploy.app_id = dpsapp.application_id
 INNER JOIN sgr_tenant_deployments_containers container on container.deploy_id = deploy.id
-WHERE dps.tenant_id = ? AND dps.id = ?
-GROUP BY deploy.level`
-	err := service.db.Raw(sql, tenantId, projectId).Scan(&resourceList).Error
+WHERE dps.tenant_id = ? `)
+	params := []interface{}{tenantId}
+	if projectId > 0 {
+		sqlbuilder.WriteString(` AND dps.id = ?`)
+		params = append(params, projectId)
+	}
+	sqlbuilder.WriteString(` GROUP BY deploy.level`)
+	err := service.db.Raw(sqlbuilder.String(), tenantId, projectId).Scan(&resourceList).Error
 	return getTotalDetailsInfo(resourceList), err
 }
 
