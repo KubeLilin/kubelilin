@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"k8s.io/api/core/v1"
+	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	resourcev1 "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -435,6 +436,12 @@ func CreateResourceQuotasByNamespace(client *kubernetes.Clientset, quotas dto.Qu
 	}
 
 	return err
+}
+
+func IsInstallDAPRRuntime(client *kubernetes.Clientset) bool {
+	emptyOptions := metav1.GetOptions{}
+	_, err := client.CoreV1().Namespaces().Get(context.TODO(), "dapr-system", emptyOptions)
+	return !k8sErrors.IsNotFound(err)
 }
 
 func CreateDynamicResource(ctx context.Context, cfg *rest.Config, codec runtime.Serializer, data []byte) error {
