@@ -181,6 +181,29 @@ var ApplicationLanguageCompileColumns = struct {
 	Status:       "status",
 }
 
+// ApplicationRuntime [...]
+type ApplicationRuntime struct {
+	ID   uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	Name string `gorm:"column:name;type:varchar(20)" json:"name"`
+	Desc string `gorm:"column:desc;type:varchar(100)" json:"desc"`
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *ApplicationRuntime) TableName() string {
+	return "application_runtime"
+}
+
+// ApplicationRuntimeColumns get sql column name.获取数据库列名
+var ApplicationRuntimeColumns = struct {
+	ID   string
+	Name string
+	Desc string
+}{
+	ID:   "id",
+	Name: "name",
+	Desc: "desc",
+}
+
 // DeploymentContainerLifecycleCheck 容器生命周期健康检查
 type DeploymentContainerLifecycleCheck struct {
 	ID                  uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`                                 // 生命周期
@@ -916,6 +939,7 @@ type SgrTenantDeployments struct {
 	MaxSurge                      *uint      `gorm:"column:max_surge;type:int unsigned;default:25" json:"maxSurge"`                                                      // 额外Pod
 	TerminationGracePeriodSeconds uint       `gorm:"column:termination_grace_period_seconds;type:int unsigned;not null;default:30" json:"terminationGracePeriodSeconds"` //  最大容忍pod销毁时间(默认30s)
 	Volumes                       string     `gorm:"column:volumes;type:varchar(255)" json:"volumes"`                                                                    // 卷(json)
+	RuntimeEngine                 string     `gorm:"column:runtime_engine;type:varchar(20)" json:"runtimeEngine"`                                                        // 运行时引擎 (dapr, istio)
 	CreateTime                    *time.Time `gorm:"column:create_time;type:datetime" json:"createTime"`                                                                 // 创建时间
 	UpdateTime                    *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`                                                                 // 更新时间
 }
@@ -950,6 +974,7 @@ var SgrTenantDeploymentsColumns = struct {
 	MaxSurge                      string
 	TerminationGracePeriodSeconds string
 	Volumes                       string
+	RuntimeEngine                 string
 	CreateTime                    string
 	UpdateTime                    string
 }{
@@ -976,6 +1001,7 @@ var SgrTenantDeploymentsColumns = struct {
 	MaxSurge:                      "max_surge",
 	TerminationGracePeriodSeconds: "termination_grace_period_seconds",
 	Volumes:                       "volumes",
+	RuntimeEngine:                 "runtime_engine",
 	CreateTime:                    "create_time",
 	UpdateTime:                    "update_time",
 }
@@ -1053,13 +1079,15 @@ var SgrTenantDeploymentsContainersColumns = struct {
 
 // SgrTenantNamespace 集群_命名空间
 type SgrTenantNamespace struct {
-	ID         uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
-	TenantID   uint64     `gorm:"column:tenant_id;type:bigint unsigned;not null" json:"tenantId"`   // 租户ID
-	ClusterID  uint64     `gorm:"column:cluster_id;type:bigint unsigned;not null" json:"clusterId"` // 集群ID
-	Namespace  string     `gorm:"column:namespace;type:varchar(50);not null" json:"namespace"`      // 命名空间名称
-	CreateTime *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"`      // 创建时间
-	UpdateTime *time.Time `gorm:"column:update_time;type:datetime;not null" json:"updateTime"`      // 更新时间
-	Status     int8       `gorm:"column:status;type:tinyint;not null" json:"status"`                // 状态
+	ID            uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	TenantID      uint64     `gorm:"column:tenant_id;type:bigint unsigned;not null" json:"tenantId"`   // 租户ID
+	ClusterID     uint64     `gorm:"column:cluster_id;type:bigint unsigned;not null" json:"clusterId"` // 集群ID
+	Namespace     string     `gorm:"column:namespace;type:varchar(50);not null" json:"namespace"`      // 命名空间名称
+	Status        int8       `gorm:"column:status;type:tinyint;not null;default:1" json:"status"`      // 状态
+	EnableRuntime uint8      `gorm:"column:enable_runtime;type:tinyint unsigned;not null;default:0" json:"enableRuntime"`
+	RuntimeName   string     `gorm:"column:runtime_name;type:varchar(20);default:''" json:"runtimeName"`
+	CreateTime    *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"` // 创建时间
+	UpdateTime    *time.Time `gorm:"column:update_time;type:datetime;not null" json:"updateTime"` // 更新时间
 }
 
 // TableName get sql table name.获取数据库表名
@@ -1069,21 +1097,25 @@ func (m *SgrTenantNamespace) TableName() string {
 
 // SgrTenantNamespaceColumns get sql column name.获取数据库列名
 var SgrTenantNamespaceColumns = struct {
-	ID         string
-	TenantID   string
-	ClusterID  string
-	Namespace  string
-	CreateTime string
-	UpdateTime string
-	Status     string
+	ID            string
+	TenantID      string
+	ClusterID     string
+	Namespace     string
+	Status        string
+	EnableRuntime string
+	RuntimeName   string
+	CreateTime    string
+	UpdateTime    string
 }{
-	ID:         "id",
-	TenantID:   "tenant_id",
-	ClusterID:  "cluster_id",
-	Namespace:  "namespace",
-	CreateTime: "create_time",
-	UpdateTime: "update_time",
-	Status:     "status",
+	ID:            "id",
+	TenantID:      "tenant_id",
+	ClusterID:     "cluster_id",
+	Namespace:     "namespace",
+	Status:        "status",
+	EnableRuntime: "enable_runtime",
+	RuntimeName:   "runtime_name",
+	CreateTime:    "create_time",
+	UpdateTime:    "update_time",
 }
 
 // SgrTenantRole 租户角色

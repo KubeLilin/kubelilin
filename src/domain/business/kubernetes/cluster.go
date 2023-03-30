@@ -54,6 +54,12 @@ func (cluster *ClusterService) GetNameSpacesFromDB(tenantId uint64, clusterId in
 	return res
 }
 
+func (cluster *ClusterService) GetNameSpacesById(namespaceId uint64) *models.SgrTenantNamespace {
+	var res models.SgrTenantNamespace
+	cluster.db.Model(&models.SgrTenantNamespace{}).First(&res, " id=?", namespaceId)
+	return &res
+}
+
 func (cluster *ClusterService) GetNameSpacesListForTenantId(clusterId uint64, tenantId uint64, PageIndex int, PageSize int) (error, *page.Page) {
 	var res []dto.NamespaceInfo
 	sqlBuilder := strings.Builder{}

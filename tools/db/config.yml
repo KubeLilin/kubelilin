@@ -1,10 +1,10 @@
 base:
     is_dev: true
 db_info:
-    host: 47.100.213.49
-    port: 3306
+    host: rds.kubelilin.com
+    port: 18081
     username: root
-    password: P@ssW0rd
+    password: 1234abcd@
     database: sgr_pass
     type: 0
 out_dir: ../../src/domain/database/models/

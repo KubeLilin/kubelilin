@@ -62,7 +62,10 @@ func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *requests
 		//	return errors.New("已经存在相同的服务端口"), nil
 		//}
 		dbRes := deployment.db.Model(&models.SgrTenantDeployments{}).Where("id=?", deployModel.ID).Updates(map[string]interface{}{models.SgrTenantDeploymentsColumns.Nickname: deployModel.Nickname,
-			models.SgrTenantDeploymentsColumns.ServiceEnable: deployModel.ServiceEnable, models.SgrTenantDeploymentsColumns.ServicePort: deployModel.ServicePort})
+			models.SgrTenantDeploymentsColumns.ServiceEnable: deployModel.ServiceEnable,
+			models.SgrTenantDeploymentsColumns.ServicePort:   deployModel.ServicePort,
+			models.SgrTenantDeploymentsColumns.RuntimeEngine: deployModel.Runtime,
+		})
 		return dbRes.Error, dpModel
 	} else {
 		var existCount int64
@@ -187,7 +190,7 @@ func (deployment *DeploymentService) GetDeploymentForm(id uint64) (error, *reque
 	res := &requests.DeploymentStepRequest{}
 	sql := strings.Builder{}
 	sql.WriteString(`select dp.id,dpc.id as dpc_id , dp.name,dp.nickname,dp.tenant_id,dp.cluster_id,dp.namespace_id,dp.app_id,dp.app_name,
-       dp.level,dp.replicas,dp.service_away,dp.service_enable,dp.service_port,dp.service_port_type,
+       dp.level,dp.replicas,dp.service_away,dp.service_enable,dp.service_port,dp.service_port_type,dp.runtime_engine runtime,
        dpc.request_cpu,dpc.limit_cpu,dpc.request_memory,dpc.limit_memory,dpc.environments as env_json
        from sgr_tenant_deployments as dp
 left join sgr_tenant_deployments_containers as dpc on dp.id=dpc.deploy_id
