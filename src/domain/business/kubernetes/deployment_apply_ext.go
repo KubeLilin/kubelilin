@@ -11,5 +11,5 @@ type DeploymentApplyFunc func(deployConfiguration *appsapplyv1.DeploymentApplyCo
 var DeploymentApplyFuncList []DeploymentApplyFunc
 
 func init() {
-	DeploymentApplyFuncList = []DeploymentApplyFunc{apply.ApplyLifecycle, apply.ApplyVolume, apply.ApplyProbe}
+	DeploymentApplyFuncList = []DeploymentApplyFunc{apply.ApplyLifecycle, apply.ApplyVolume, apply.ApplyProbe, apply.ApplyRuntime}
 }
