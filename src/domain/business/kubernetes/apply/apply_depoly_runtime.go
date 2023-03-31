@@ -39,17 +39,11 @@ func ApplyRuntime(deployConfiguration *appsapplyv1.DeploymentApplyConfiguration,
 			//	dapr.io/sidecar-memory-limit
 			//	dapr.io/sidecar-cpu-request
 			//	dapr.io/sidecar-memory-request
-			if dp.Level == "dev" || dp.Level == "test" { // dev/test
-				deployConfiguration.Spec.Template.Annotations["dapr.io/sidecar-cpu-limit"] = "100m"
-				deployConfiguration.Spec.Template.Annotations["dapr.io/sidecar-memory-limit"] = "100Mi"
-				deployConfiguration.Spec.Template.Annotations["dapr.io/sidecar-cpu-request"] = "50m"
-				deployConfiguration.Spec.Template.Annotations["dapr.io/sidecar-memory-request"] = "50Mi"
-			} else { // prod
-				deployConfiguration.Spec.Template.Annotations["dapr.io/sidecar-cpu-limit"] = "300m"
-				deployConfiguration.Spec.Template.Annotations["dapr.io/sidecar-memory-limit"] = "1000Mi"
-				deployConfiguration.Spec.Template.Annotations["dapr.io/sidecar-cpu-request"] = "100m"
-				deployConfiguration.Spec.Template.Annotations["dapr.io/sidecar-memory-request"] = "250Mi"
-			}
+			deployConfiguration.Spec.Template.Annotations["dapr.io/sidecar-cpu-limit"] = "300m"
+			deployConfiguration.Spec.Template.Annotations["dapr.io/sidecar-memory-limit"] = "1000Mi"
+			deployConfiguration.Spec.Template.Annotations["dapr.io/sidecar-cpu-request"] = "100m"
+			deployConfiguration.Spec.Template.Annotations["dapr.io/sidecar-memory-request"] = "250Mi"
+
 		}
 	}
 }
