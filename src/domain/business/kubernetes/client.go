@@ -14,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
 	memory "k8s.io/client-go/discovery/cached"
 	"k8s.io/client-go/dynamic"
@@ -480,4 +481,27 @@ func CreateDynamicResource(ctx context.Context, cfg *rest.Config, codec runtime.
 	}
 
 	return nil
+}
+
+func GetDaprComponentResource(cfg *rest.Config, namespace string) (any, error) {
+	dynamicClient, err := dynamic.NewForConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+	dynamicResource := dynamicClient.Resource(schema.GroupVersionResource{
+		Group:    "dapr.io",
+		Version:  "v1alpha1",
+		Resource: "components",
+	})
+	componentList, err := dynamicResource.Namespace(namespace).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, component := range componentList.Items {
+		fmt.Printf("component name=%s\n", component.GetName())
+		fmt.Printf("component spec=%+v\n", component.Object["spec"])
+		fmt.Println("=====================================")
+	}
+	return componentList.Items, nil
 }

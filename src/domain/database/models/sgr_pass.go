@@ -149,6 +149,41 @@ var ApplicationAPIGatewayTeamsColumns = struct {
 	Status:    "status",
 }
 
+// ApplicationDaprCoponentsTemplete Dapr 运行时组件模板
+type ApplicationDaprCoponentsTemplete struct {
+	ID            uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`         // 组件模板ID
+	Name          string     `gorm:"column:name;type:varchar(30);not null" json:"name"`                    // 组件模板名称
+	ComponentType string     `gorm:"column:component_type;type:varchar(20);not null" json:"componentType"` // 组件模板类型
+	Doc           string     `gorm:"column:doc;type:varchar(150);not null;default:''" json:"doc"`          // 组件文档
+	Template      string     `gorm:"column:template;type:text;not null" json:"template"`                   // 组件模板yaml
+	CreateTime    *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"`          // 创建时间
+	UpdateTime    *time.Time `gorm:"column:update_time;type:datetime;not null" json:"updateTime"`          // 更新时间,
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *ApplicationDaprCoponentsTemplete) TableName() string {
+	return "application_dapr_coponents_templete"
+}
+
+// ApplicationDaprCoponentsTempleteColumns get sql column name.获取数据库列名
+var ApplicationDaprCoponentsTempleteColumns = struct {
+	ID            string
+	Name          string
+	ComponentType string
+	Doc           string
+	Template      string
+	CreateTime    string
+	UpdateTime    string
+}{
+	ID:            "id",
+	Name:          "name",
+	ComponentType: "component_type",
+	Doc:           "doc",
+	Template:      "template",
+	CreateTime:    "create_time",
+	UpdateTime:    "update_time",
+}
+
 // ApplicationLanguageCompile CI流水线编译环境容器镜像
 type ApplicationLanguageCompile struct {
 	ID           uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`         // 编译环境ID
@@ -181,20 +216,20 @@ var ApplicationLanguageCompileColumns = struct {
 	Status:       "status",
 }
 
-// ApplicationRuntime [...]
-type ApplicationRuntime struct {
+// CodeApplicationRuntime 运行时字典
+type CodeApplicationRuntime struct {
 	ID   uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
 	Name string `gorm:"column:name;type:varchar(20)" json:"name"`
 	Desc string `gorm:"column:desc;type:varchar(100)" json:"desc"`
 }
 
 // TableName get sql table name.获取数据库表名
-func (m *ApplicationRuntime) TableName() string {
-	return "application_runtime"
+func (m *CodeApplicationRuntime) TableName() string {
+	return "code_application_runtime"
 }
 
-// ApplicationRuntimeColumns get sql column name.获取数据库列名
-var ApplicationRuntimeColumns = struct {
+// CodeApplicationRuntimeColumns get sql column name.获取数据库列名
+var CodeApplicationRuntimeColumns = struct {
 	ID   string
 	Name string
 	Desc string
