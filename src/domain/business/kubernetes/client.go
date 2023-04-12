@@ -498,10 +498,50 @@ func GetDaprComponentResource(cfg *rest.Config, namespace string) (any, error) {
 		return nil, err
 	}
 
-	for _, component := range componentList.Items {
-		fmt.Printf("component name=%s\n", component.GetName())
-		fmt.Printf("component spec=%+v\n", component.Object["spec"])
-		fmt.Println("=====================================")
-	}
+	//for _, component := range componentList.Items {
+	//	fmt.Printf("component name=%s\n", component.GetName())
+	//	fmt.Printf("component spec=%+v\n", component.Object["spec"])
+	//	fmt.Println("=====================================")
+	//}
 	return componentList.Items, nil
+}
+
+// CreateOrUpdateDaprComponentResource create or update dapr component resource
+func CreateOrUpdateDaprComponentResource(cfg *rest.Config, namespace string, component *unstructured.Unstructured) error {
+	dynamicClient, err := dynamic.NewForConfig(cfg)
+	if err != nil {
+		return err
+	}
+	daprGVR := schema.GroupVersionResource{
+		Group:    "dapr.io",
+		Version:  "v1alpha1",
+		Resource: "components",
+	}
+
+	existingComponent, err := dynamicClient.Resource(daprGVR).Namespace("default").Get(context.Background(), "<NAME>", metav1.GetOptions{})
+	// if the resource doesn't exist, we'll create it
+	if k8sErrors.IsNotFound(err) {
+		_, err = dynamicClient.Resource(daprGVR).Namespace(namespace).Create(context.Background(), component, metav1.CreateOptions{})
+		return err
+	} else {
+		// if the resource exists, we'll update it
+		existingComponent.Object["spec"] = component.Object["spec"]
+		_, err = dynamicClient.Resource(daprGVR).Namespace(namespace).Update(context.Background(), existingComponent, metav1.UpdateOptions{})
+		return err
+	}
+}
+
+// DeleteDaprComponentResource delete dapr component resource
+func DeleteDaprComponentResource(cfg *rest.Config, namespace string, componentName string) error {
+	dynamicClient, err := dynamic.NewForConfig(cfg)
+	if err != nil {
+		return err
+	}
+	dynamicResource := dynamicClient.Resource(schema.GroupVersionResource{
+		Group:    "dapr.io",
+		Version:  "v1alpha1",
+		Resource: "components",
+	})
+	err = dynamicResource.Namespace(namespace).Delete(context.TODO(), componentName, metav1.DeleteOptions{})
+	return err
 }

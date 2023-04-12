@@ -2,8 +2,8 @@
 An Cloud-Native application platform for Kubernetes.
 ![](https://mnur-prod-public.oss-cn-beijing.aliyuncs.com/0/tech/physical_architecture.png)
 ![](https://mnur-prod-public.oss-cn-beijing.aliyuncs.com/0/tech/functional_architecture.png)
-
-# Kubelilin ApiServer
+## Dapr运行时支持
+![](https://mnur-prod-public.oss-cn-beijing.aliyuncs.com/0/tech/20230411143436.png)# Kubelilin ApiServer
 Kubelilin cloud native backend .
 
 ## PaaS 平台运行
@@ -41,10 +41,10 @@ npm run start
 2. [] 应用配置：部署绑定数据卷(卷、configmap,环境变量 )
 
 ## v0.1.6
-1[] 应用配置：部署绑定数据卷(卷、configmap,环境变量 )
-
+1. [x] 应用配置：部署绑定数据卷(卷、configmap,环境变量 )
+2. [x] Dapr运行时集成
 ## v0.1.5
-1. [] 部署编辑改版使用tab展示配置
-2. [] 部署环境的健康检查功能
+1. [x] 部署编辑改版使用tab展示配置
+2. [x] 部署环境的健康检查功能
 3. [x] 项目中创建及修改应用
 

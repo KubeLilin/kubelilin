@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"errors"
+	"gopkg.in/yaml.v3"
 	"strconv"
 )
 
@@ -95,4 +96,24 @@ func ObjectToString(obj interface{}) string {
 
 func StringToJson(jsonStr string, obj any) {
 	_ = json.Unmarshal([]byte(jsonStr), obj)
+}
+
+// yaml to json
+func YamlToJson(yamlString string) (string, error) {
+	var data map[string]interface{}
+	err := yaml.Unmarshal([]byte(yamlString), &data)
+	if err != nil {
+		return "", err
+	}
+	jsonString, _ := json.Marshal(data)
+	return string(jsonString), nil
+}
+
+// yaml to object
+func YamlToObject(yamlString string, obj any) error {
+	err := yaml.Unmarshal([]byte(yamlString), obj)
+	if err != nil {
+		return err
+	}
+	return nil
 }
