@@ -11,6 +11,7 @@ import (
 	"github.com/drone/go-scm/scm/driver/gogs"
 	"github.com/drone/go-scm/scm/transport"
 	"net/http"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -45,7 +46,7 @@ func GetGitBranches(gitAddr string, sourceType string, gitToken string) ([]strin
 		Page: 1,
 		Size: 100,
 	}
-	repoRes, err := getRepoNames(gitAddr)
+	repoRes, err := GetRepoNames(gitAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -61,6 +62,20 @@ func GetGitBranches(gitAddr string, sourceType string, gitToken string) ([]strin
 		branchesNameList = append(branchesNameList, branch.Name)
 	}
 	return branchesNameList, nil
+}
+
+func FindFiles(gitAddr string, sourceType string, gitToken string, ref string, findFile string) ([]string, error) {
+	var list []string
+	client, err := NewScmProvider(sourceType, gitAddr, gitToken)
+	repoRes, err := GetRepoNames(gitAddr)
+	if err != nil {
+		return nil, err
+	}
+	err = FindFileByRepo(context.Background(), client, repoRes, ref, "/", findFile, &list)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
 }
 
 // NewScmProvider ..
@@ -112,7 +127,7 @@ func NewScmProvider(vcsType, vcsPath, token string) (*scm.Client, error) {
 	return client, err
 }
 
-func getRepoNames(gitAddr string) (*GitRepoNames, error) {
+func GetRepoNames(gitAddr string) (*GitRepoNames, error) {
 	reg := regexp.MustCompile("^http.*/(\\w+)/([a-zA-Z-0-9.]+).git")
 	groups := reg.FindStringSubmatch(gitAddr)
 
@@ -129,4 +144,27 @@ func getRepoNames(gitAddr string) (*GitRepoNames, error) {
 type GitRepoNames struct {
 	OrganizationName string
 	RepositoryName   string
+}
+
+func FindFileByRepo(ctx context.Context, client *scm.Client, repoRes *GitRepoNames, ref string, path string, findFile string, outList *[]string) error {
+	files, _, err := client.Contents.List(ctx, fmt.Sprintf("%s/%s", repoRes.OrganizationName, repoRes.RepositoryName), path, ref, scm.ListOptions{Size: 1000})
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if file.Kind == scm.ContentKindDirectory {
+			err := FindFileByRepo(ctx, client, repoRes, ref, file.Path, findFile, outList)
+			if err != nil {
+				return err
+			}
+		} else {
+			filePath := filepath.Base(file.Path)
+			if filePath == findFile {
+				*outList = append(*outList, file.Path)
+			}
+		}
+
+	}
+	return nil
 }
