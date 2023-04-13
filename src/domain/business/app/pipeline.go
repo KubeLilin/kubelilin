@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/drone/go-scm/scm"
 	"github.com/yoyofx/yoyogo/abstractions"
 	"gorm.io/gorm"
 	"kubelilin/api/dto/requests"
@@ -19,11 +20,12 @@ type PipelineService struct {
 	db                *gorm.DB
 	jenkinsBuilder    *pipelineV1.Builder
 	serviceConnection *ServiceConnectionService
+	appservice        *ApplicationService
 	config            abstractions.IConfiguration
 	onReady           bool
 }
 
-func NewPipelineService(db *gorm.DB, jenkins *pipelineV1.Builder, sc *ServiceConnectionService, config abstractions.IConfiguration) *PipelineService {
+func NewPipelineService(db *gorm.DB, jenkins *pipelineV1.Builder, sc *ServiceConnectionService, appService *ApplicationService, config abstractions.IConfiguration) *PipelineService {
 	// set pipeline config
 	peSC, err := sc.GetPipelineEngine()
 	onReady := err == nil
@@ -32,7 +34,7 @@ func NewPipelineService(db *gorm.DB, jenkins *pipelineV1.Builder, sc *ServiceCon
 	} else {
 		panic("not found pipeline settings. Pipeline be can't run.")
 	}
-	return &PipelineService{db: db, jenkinsBuilder: jenkins, serviceConnection: sc, onReady: onReady, config: config}
+	return &PipelineService{db: db, jenkinsBuilder: jenkins, serviceConnection: sc, appservice: appService, onReady: onReady, config: config}
 }
 
 func (pipelineService *PipelineService) GetBuildImageByLanguageId(languageId uint64) ([]models.ApplicationLanguageCompile, error) {
@@ -99,7 +101,7 @@ func (pipelineService *PipelineService) NewPipeline(req *requests.AppNewPipeline
 GetAppPipelines 获取流水线列表
 */
 func (pipelineService *PipelineService) GetAppPipelines(appId uint64) ([]dto.PipelineInfo, error) {
-	sql := `SELECT id,appid,name,dsl,taskStatus,lastTaskId FROM sgr_tenant_application_pipelines WHERE status=1 AND appid=?`
+	sql := `SELECT id,appid,name,dsl,taskStatus,lastTaskId,last_commit lastCommit FROM sgr_tenant_application_pipelines WHERE status=1 AND appid=?`
 	var pipelineInfoList []dto.PipelineInfo
 	err := pipelineService.db.Raw(sql, appId).Find(&pipelineInfoList).Error
 	return pipelineInfoList, err
@@ -308,6 +310,19 @@ func (pipelineService *PipelineService) RunPipeline(request *requests.RunPipelin
 	pipeline, _ := builder.Build()
 	taskId, err := pipeline.RunJob(pipelineName)
 
+	//get git last commit
+	appInfo, _ := pipelineService.appservice.GetAppInfo(request.AppId)
+	token := ""
+	if appInfo.SCID > 0 {
+		scInfo, _ := pipelineService.appservice.GetServiceConnectionById(appInfo.SCID)
+		var detail dto.ServiceConnectionDetails
+		_ = json.Unmarshal([]byte(scInfo.Detail), &detail)
+		token = detail.Token
+	}
+	var commit *scm.Commit
+	if appInfo.Git != "" {
+		commit, _ = GetLastCommit(appInfo.Git, appInfo.SourceType, token)
+	}
 	// update databse
 	var pipelineInfo models.SgrTenantApplicationPipelines
 	_ = pipelineService.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).First(&pipelineInfo)
@@ -316,6 +331,10 @@ func (pipelineService *PipelineService) RunPipeline(request *requests.RunPipelin
 	pipelineInfo.LastTaskID = strconv.FormatInt(taskId, 10)
 	taskStatus := uint(1)
 	pipelineInfo.TaskStatus = &taskStatus
+	if commit != nil {
+		commitMessage, _ := json.Marshal(commit)
+		pipelineInfo.LastCommit = string(commitMessage)
+	}
 	_ = pipelineService.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).Updates(pipelineInfo)
 
 	return taskId, err

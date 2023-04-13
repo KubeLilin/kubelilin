@@ -151,13 +151,13 @@ var ApplicationAPIGatewayTeamsColumns = struct {
 
 // ApplicationDaprCoponentsTemplete Dapr 运行时组件模板
 type ApplicationDaprCoponentsTemplete struct {
-	ID            uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`         // 组件模板ID
-	Name          string     `gorm:"column:name;type:varchar(30);not null" json:"name"`                    // 组件模板名称
-	ComponentType string     `gorm:"column:component_type;type:varchar(20);not null" json:"componentType"` // 组件模板类型
-	Doc           string     `gorm:"column:doc;type:varchar(150);not null;default:''" json:"doc"`          // 组件文档
-	Template      string     `gorm:"column:template;type:text;not null" json:"template"`                   // 组件模板yaml
-	CreateTime    *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"`          // 创建时间
-	UpdateTime    *time.Time `gorm:"column:update_time;type:datetime;not null" json:"updateTime"`          // 更新时间,
+	ID            uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`                          // 组件模板ID
+	Name          string     `gorm:"column:name;type:varchar(30);not null" json:"name"`                                     // 组件模板名称
+	ComponentType string     `gorm:"column:component_type;type:varchar(20);not null" json:"componentType"`                  // 组件模板类型
+	Doc           string     `gorm:"column:doc;type:varchar(150);not null;default:''" json:"doc"`                           // 组件文档
+	Template      string     `gorm:"column:template;type:text;not null" json:"template"`                                    // 组件模板yaml
+	CreateTime    *time.Time `gorm:"column:create_time;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"createTime"` // 创建时间
+	UpdateTime    *time.Time `gorm:"column:update_time;type:datetime;not null" json:"updateTime"`                           // 更新时间,
 }
 
 // TableName get sql table name.获取数据库表名
@@ -784,6 +784,7 @@ type SgrTenantApplicationPipelines struct {
 	Dsl          string     `gorm:"column:dsl;type:text;not null" json:"dsl"`                                 // 流水线DSL
 	TaskStatus   *uint      `gorm:"column:taskStatus;type:int unsigned" json:"taskStatus"`                    // 流水线任务状态( ready=0 , running=1, success=2, fail=3,  )
 	LastTaskID   string     `gorm:"column:lastTaskId;type:varchar(15);not null;default:''" json:"lastTaskId"` // 最后一次任务执行ID
+	LastCommit   string     `gorm:"column:last_commit;type:varchar(200)" json:"lastCommit"`                   // git最后一次提交记录
 	Status       uint8      `gorm:"column:status;type:tinyint unsigned;not null" json:"status"`
 	CreationTime *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
 	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
@@ -802,6 +803,7 @@ var SgrTenantApplicationPipelinesColumns = struct {
 	Dsl          string
 	TaskStatus   string
 	LastTaskID   string
+	LastCommit   string
 	Status       string
 	CreationTime string
 	UpdateTime   string
@@ -812,6 +814,7 @@ var SgrTenantApplicationPipelinesColumns = struct {
 	Dsl:          "dsl",
 	TaskStatus:   "taskStatus",
 	LastTaskID:   "lastTaskId",
+	LastCommit:   "last_commit",
 	Status:       "status",
 	CreationTime: "creation_time",
 	UpdateTime:   "update_time",

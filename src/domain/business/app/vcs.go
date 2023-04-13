@@ -39,6 +39,17 @@ type VcsRepository struct {
 	Updated     time.Time `json:"updated_at"`
 }
 
+func GetLastCommit(gitAddr string, sourceType string, gitToken string) (*scm.Commit, error) {
+	client, err := NewScmProvider(sourceType, gitAddr, gitToken)
+	repoRes, err := GetRepoNames(gitAddr)
+	if err != nil {
+		return nil, err
+	}
+	commits, _, _ := client.Git.ListCommits(context.Background(), fmt.Sprintf("%s/%s", repoRes.OrganizationName, repoRes.RepositoryName), scm.CommitListOptions{Size: 1})
+	latestCommit := commits[0]
+	return latestCommit, nil
+}
+
 func GetGitBranches(gitAddr string, sourceType string, gitToken string) ([]string, error) {
 	client, err := NewScmProvider(sourceType, gitAddr, gitToken)
 	branchList := []*scm.Reference{}
