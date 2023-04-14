@@ -91,6 +91,15 @@ func (controller DeploymentController) GetDeploymentFormInfo(ctx *context.HttpCo
 	return mvc.Success(res)
 }
 
+func (controller *DeploymentController) GetDeploymentById(ctx *context.HttpContext) mvc.ApiResult {
+	dpId := utils.GetNumberOfParam[uint64](ctx, "dpId")
+	res, resErr := controller.deploymentService.GetDeploymentByID(dpId)
+	if resErr != nil {
+		return mvc.FailWithMsg(nil, resErr.Error())
+	}
+	return mvc.Success(res)
+}
+
 func (controller DeploymentController) DeleteDeployment(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	deploymentId, err := utils.StringToUInt64(ctx.Input.QueryDefault("dpId", "0"))
