@@ -22,6 +22,25 @@ type AppReq struct {
 	ProjectID  uint64 `json:"pid" uri:"pid"`
 }
 
+type ImportAppReq struct {
+	mvc.RequestBody
+	TenantID    uint64 `json:"tenantId" uri:"tenantId"`
+	Name        string `json:"name" uri:"name"`
+	Git         string `json:"git" uri:"git"`
+	Level       uint16 `json:"level" uri:"level"`
+	Language    uint16 `json:"language" uri:"language"`
+	SourceType  string `json:"sourceType" uri:"sourceType"`
+	SCID        uint64 `json:"sources" uri:"sources"`
+	ProjectID   uint64 `json:"projectId" uri:"projectId"`
+	ClusterID   uint64 `json:"clusterId" uri:"clusterId"`
+	NamespaceId uint64 `json:"namespaceId" uri:"namespaceId"`
+
+	DeployList []struct {
+		DeployName string `json:"deployName"`
+		Dockerfile string `json:"dockerfile"`
+	} `json:"deployList"`
+}
+
 type AppNewPipelineReq struct {
 	mvc.RequestBody
 	AppId uint64 `json:"appid" uri:"appid"`
