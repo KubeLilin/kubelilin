@@ -27,6 +27,7 @@ type ImportAppReq struct {
 	TenantID    uint64 `json:"tenantId" uri:"tenantId"`
 	Name        string `json:"name" uri:"name"`
 	Git         string `json:"git" uri:"git"`
+	Ref         string `json:"ref" uri:"ref"`
 	Level       uint16 `json:"level" uri:"level"`
 	Language    uint16 `json:"language" uri:"language"`
 	SourceType  string `json:"sourceType" uri:"sourceType"`

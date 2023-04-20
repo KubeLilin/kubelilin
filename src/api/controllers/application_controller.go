@@ -20,8 +20,8 @@ type ApplicationController struct {
 	pipelineService   *app.PipelineService
 }
 
-func NewApplicationController(service *app.ApplicationService, pipelineService *app.PipelineService) *ApplicationController {
-	return &ApplicationController{service: service, pipelineService: pipelineService}
+func NewApplicationController(service *app.ApplicationService, deploymentService *app.DeploymentService, pipelineService *app.PipelineService) *ApplicationController {
+	return &ApplicationController{service: service, deploymentService: deploymentService, pipelineService: pipelineService}
 }
 
 // PostCreateApp new application.
@@ -51,6 +51,7 @@ func (c *ApplicationController) PostImportApp(ctx *context.HttpContext, request 
 		SCID:       request.SCID,
 		ProjectID:  request.ProjectID,
 	}
+	// create application
 	err, app := c.service.CreateApp(&appreq)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
@@ -81,7 +82,62 @@ func (c *ApplicationController) PostImportApp(ctx *context.HttpContext, request 
 			Runtime:         "",
 		}
 		_ = deployModel
-
+		// create deployment
+		err, dinfo := c.deploymentService.CreateDeploymentStep1(deployModel)
+		if err == nil {
+			deployModel.ID = dinfo.ID
+			// create container
+			err, _ = c.deploymentService.CreateDeploymentStep2(deployModel)
+		}
+		// create pipeline by dsl
+		pipelineReq := &requests2.AppNewPipelineReq{
+			AppId: app.ID,
+			Name:  "default-pipeline-" + deployItem.DeployName,
+		}
+		perr, pipelineInfo := c.pipelineService.NewPipeline(pipelineReq)
+		if perr == nil {
+			dsl := []dto.StageInfo{
+				{
+					Name: "代码",
+					Steps: []dto.StepInfo{
+						{
+							Name: "拉取代码", Key: "git_pull",
+							Content: map[string]interface{}{"git": request.Git, "branch": request.Ref},
+						},
+					},
+				},
+				{
+					Name: "编译构建",
+					Steps: []dto.StepInfo{
+						{
+							Name: "编译命令", Key: "code_build",
+							Content: map[string]interface{}{"buildEnv": "golang", "buildImage": "golang:1.16.15", "buildScript": "# 编译命令，注：当前已在代码根路径下\n",
+								"buildFile": "./" + deployItem.Dockerfile},
+						},
+					},
+				},
+				{
+					Name: "部署",
+					Steps: []dto.StepInfo{
+						{
+							Name: "应用部署", Key: "app_deploy",
+							Content: map[string]interface{}{"depolyment": dinfo.ID},
+						},
+					},
+				},
+			}
+			dslStr := utils.ObjectToString(dsl)
+			editPipeline := &requests2.EditPipelineReq{
+				Id:    pipelineInfo.ID,
+				AppId: app.ID,
+				Name:  "default-pipeline-" + deployItem.DeployName,
+				DSL:   dslStr,
+			}
+			perr = c.pipelineService.UpdatePipeline(editPipeline)
+			if perr == nil {
+				_ = c.pipelineService.UpdateDSL(editPipeline)
+			}
+		}
 	}
 
 	return mvc.Success(true)

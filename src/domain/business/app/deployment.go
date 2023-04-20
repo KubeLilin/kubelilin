@@ -88,10 +88,12 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *requests
 	requestMemory, _ := strconv.ParseFloat(deployModel.RequestMemory, 64)
 	limitCPU, _ := strconv.ParseFloat(deployModel.LimitCPU, 64)
 	limitMemory, _ := strconv.ParseFloat(deployModel.LimitMemory, 64)*/
-
+	env := ""
 	envJson, jsonErr := json.Marshal(deployModel.Environments)
 	if jsonErr != nil {
-		return jsonErr, nil
+		env = ""
+	} else {
+		env = string(envJson)
 	}
 	dpcModel := models.SgrTenantDeploymentsContainers{
 		DeployID:      deployModel.ID,
@@ -100,7 +102,7 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *requests
 		RequestMemory: deployModel.RequestMemory,
 		LimitCPU:      deployModel.LimitCPU,
 		LimitMemory:   deployModel.LimitMemory,
-		Environments:  string(envJson),
+		Environments:  env,
 	}
 	deployment.db.Model(&models.SgrTenantDeployments{}).Where("id = ?", deployModel.ID).First(&dpModel)
 	if dpModel.AppID == 0 {
