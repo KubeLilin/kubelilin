@@ -7,12 +7,21 @@ import (
 	"flag"
 	"fmt"
 	"k8s.io/api/core/v1"
+	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	resourcev1 "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/discovery"
+	memory "k8s.io/client-go/discovery/cached"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/client-go/util/homedir"
@@ -427,5 +436,112 @@ func CreateResourceQuotasByNamespace(client *kubernetes.Clientset, quotas dto.Qu
 		_, err = quotaClient.Update(context.TODO(), resourceQuotas, metav1.UpdateOptions{})
 	}
 
+	return err
+}
+
+func IsInstallDAPRRuntime(client *kubernetes.Clientset) bool {
+	emptyOptions := metav1.GetOptions{}
+	_, err := client.CoreV1().Namespaces().Get(context.TODO(), "dapr-system", emptyOptions)
+	return !k8sErrors.IsNotFound(err)
+}
+
+func CreateDynamicResource(ctx context.Context, cfg *rest.Config, codec runtime.Serializer, data []byte) error {
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(cfg)
+	if err != nil {
+		return err
+	}
+	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(discoveryClient))
+	dynamicClient, err := dynamic.NewForConfig(cfg)
+	if err != nil {
+		return err
+	}
+	obj := &unstructured.Unstructured{}
+	_, gvk, err := codec.Decode(data, nil, obj)
+	if err != nil {
+		return err
+	}
+
+	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
+	if err != nil {
+		return err
+	}
+
+	namesapce := ""
+	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
+		namesapce = obj.GetNamespace()
+		if namesapce == "" {
+			namesapce = "default"
+		}
+	}
+
+	var dynamicResource dynamic.ResourceInterface = dynamicClient.Resource(mapping.Resource)
+	dynamicResource = dynamicClient.Resource(mapping.Resource).Namespace(namesapce)
+	if _, err := dynamicResource.Create(ctx, obj, metav1.CreateOptions{}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetDaprComponentResource(cfg *rest.Config, namespace string) (any, error) {
+	dynamicClient, err := dynamic.NewForConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+	dynamicResource := dynamicClient.Resource(schema.GroupVersionResource{
+		Group:    "dapr.io",
+		Version:  "v1alpha1",
+		Resource: "components",
+	})
+	componentList, err := dynamicResource.Namespace(namespace).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	//for _, component := range componentList.Items {
+	//	fmt.Printf("component name=%s\n", component.GetName())
+	//	fmt.Printf("component spec=%+v\n", component.Object["spec"])
+	//	fmt.Println("=====================================")
+	//}
+	return componentList.Items, nil
+}
+
+// CreateOrUpdateDaprComponentResource create or update dapr component resource
+func CreateOrUpdateDaprComponentResource(cfg *rest.Config, namespace string, component *unstructured.Unstructured) error {
+	dynamicClient, err := dynamic.NewForConfig(cfg)
+	if err != nil {
+		return err
+	}
+	daprGVR := schema.GroupVersionResource{
+		Group:    "dapr.io",
+		Version:  "v1alpha1",
+		Resource: "components",
+	}
+
+	existingComponent, err := dynamicClient.Resource(daprGVR).Namespace("default").Get(context.Background(), "<NAME>", metav1.GetOptions{})
+	// if the resource doesn't exist, we'll create it
+	if k8sErrors.IsNotFound(err) {
+		_, err = dynamicClient.Resource(daprGVR).Namespace(namespace).Create(context.Background(), component, metav1.CreateOptions{})
+		return err
+	} else {
+		// if the resource exists, we'll update it
+		existingComponent.Object["spec"] = component.Object["spec"]
+		_, err = dynamicClient.Resource(daprGVR).Namespace(namespace).Update(context.Background(), existingComponent, metav1.UpdateOptions{})
+		return err
+	}
+}
+
+// DeleteDaprComponentResource delete dapr component resource
+func DeleteDaprComponentResource(cfg *rest.Config, namespace string, componentName string) error {
+	dynamicClient, err := dynamic.NewForConfig(cfg)
+	if err != nil {
+		return err
+	}
+	dynamicResource := dynamicClient.Resource(schema.GroupVersionResource{
+		Group:    "dapr.io",
+		Version:  "v1alpha1",
+		Resource: "components",
+	})
+	err = dynamicResource.Namespace(namespace).Delete(context.TODO(), componentName, metav1.DeleteOptions{})
 	return err
 }

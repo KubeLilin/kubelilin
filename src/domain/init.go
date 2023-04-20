@@ -38,11 +38,13 @@ func init() {
 			serviceCollection.AddSingleton(app.NewPipelineService)
 			serviceCollection.AddTransient(app.NewServiceConnectionService)
 			serviceCollection.AddTransient(app.NewDevopsService)
+			serviceCollection.AddTransient(app.NewRuntimeService)
+
 			serviceCollection.AddTransient(networks.NewApiGatewayService)
 			serviceCollection.AddTransient(devops.NewProjectService)
 			serviceCollection.AddTransient(kubernetes.NewProBeService)
 			serviceCollection.AddTransient(kubernetes.NewConfigMapSupervisor)
-
+			serviceCollection.AddTransient(kubernetes.NewDynamicResourceSupervisor)
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
 			injectionJenkinsBuilder(config, serviceCollection)
 

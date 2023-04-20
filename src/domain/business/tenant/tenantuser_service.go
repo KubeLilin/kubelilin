@@ -33,6 +33,15 @@ func (user *UserService) GetUserByName(name string) *dbmodels.SgrTenantUser {
 	return tenantUser
 }
 
+func (user *UserService) GetTenantById(tenantId uint64) *dbmodels.SgrTenant {
+	var tenant *dbmodels.SgrTenant
+	res := user.db.First(&tenant, "id = ?", tenantId)
+	if res.Error != nil {
+		return nil
+	}
+	return tenant
+}
+
 func (user *UserService) GetUserByNameAndPassword(name string, password string) *dbmodels.SgrTenantUser {
 	var tenantUser *dbmodels.SgrTenantUser
 	res := user.db.First(&tenantUser, "user_name = ? AND  password = ? AND  status = ?", name, password, 1)

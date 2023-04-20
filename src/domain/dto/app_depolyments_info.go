@@ -19,6 +19,7 @@ type DeploymentItemDto struct {
 	ServicePort int    `gorm:"column:servicePort" json:"servicePort"`
 	AppName     string `gorm:"column:appName" json:"appName"`
 	Level       string `gorm:"column:level" json:"level"`
+	Runtime     string `gorm:"column:runtime" json:"runtime"`
 }
 
 type EventItemDto struct {

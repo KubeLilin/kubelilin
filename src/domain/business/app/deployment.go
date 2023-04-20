@@ -62,7 +62,10 @@ func (deployment *DeploymentService) CreateDeploymentStep1(deployModel *requests
 		//	return errors.New("已经存在相同的服务端口"), nil
 		//}
 		dbRes := deployment.db.Model(&models.SgrTenantDeployments{}).Where("id=?", deployModel.ID).Updates(map[string]interface{}{models.SgrTenantDeploymentsColumns.Nickname: deployModel.Nickname,
-			models.SgrTenantDeploymentsColumns.ServiceEnable: deployModel.ServiceEnable, models.SgrTenantDeploymentsColumns.ServicePort: deployModel.ServicePort})
+			models.SgrTenantDeploymentsColumns.ServiceEnable: deployModel.ServiceEnable,
+			models.SgrTenantDeploymentsColumns.ServicePort:   deployModel.ServicePort,
+			models.SgrTenantDeploymentsColumns.RuntimeEngine: deployModel.Runtime,
+		})
 		return dbRes.Error, dpModel
 	} else {
 		var existCount int64
@@ -85,10 +88,12 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *requests
 	requestMemory, _ := strconv.ParseFloat(deployModel.RequestMemory, 64)
 	limitCPU, _ := strconv.ParseFloat(deployModel.LimitCPU, 64)
 	limitMemory, _ := strconv.ParseFloat(deployModel.LimitMemory, 64)*/
-
+	env := ""
 	envJson, jsonErr := json.Marshal(deployModel.Environments)
 	if jsonErr != nil {
-		return jsonErr, nil
+		env = ""
+	} else {
+		env = string(envJson)
 	}
 	dpcModel := models.SgrTenantDeploymentsContainers{
 		DeployID:      deployModel.ID,
@@ -97,7 +102,7 @@ func (deployment *DeploymentService) CreateDeploymentStep2(deployModel *requests
 		RequestMemory: deployModel.RequestMemory,
 		LimitCPU:      deployModel.LimitCPU,
 		LimitMemory:   deployModel.LimitMemory,
-		Environments:  string(envJson),
+		Environments:  env,
 	}
 	deployment.db.Model(&models.SgrTenantDeployments{}).Where("id = ?", deployModel.ID).First(&dpModel)
 	if dpModel.AppID == 0 {
@@ -138,7 +143,7 @@ func (deployment *DeploymentService) GetDeployments(profile string, appId uint64
 
 	dataSql := strings.Builder{}
 	dataSql.WriteString(`SELECT d.id, d.nickname ,d.name,lev.name level, c.name  as 'clusterName' ,app.name as 'appName',
-  d.cluster_id as 'clusterId' , n.namespace ,d.last_image as 'lastImage', 0 'running' , 
+  d.cluster_id as 'clusterId' , n.namespace ,d.last_image as 'lastImage', 0 'running' , d.runtime_engine as 'runtime',
   d.replicas 'expected', '0.0.0.0' as 'serviceIP', d.service_name as 'serviceName',d.service_Port as 'servicePort'
   FROM sgr_tenant_deployments d
   INNER JOIN sgr_tenant_cluster c on c.id = d.cluster_id
@@ -187,7 +192,7 @@ func (deployment *DeploymentService) GetDeploymentForm(id uint64) (error, *reque
 	res := &requests.DeploymentStepRequest{}
 	sql := strings.Builder{}
 	sql.WriteString(`select dp.id,dpc.id as dpc_id , dp.name,dp.nickname,dp.tenant_id,dp.cluster_id,dp.namespace_id,dp.app_id,dp.app_name,
-       dp.level,dp.replicas,dp.service_away,dp.service_enable,dp.service_port,dp.service_port_type,
+       dp.level,dp.replicas,dp.service_away,dp.service_enable,dp.service_port,dp.service_port_type,dp.runtime_engine runtime,
        dpc.request_cpu,dpc.limit_cpu,dpc.request_memory,dpc.limit_memory,dpc.environments as env_json
        from sgr_tenant_deployments as dp
 left join sgr_tenant_deployments_containers as dpc on dp.id=dpc.deploy_id

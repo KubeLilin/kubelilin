@@ -15,12 +15,13 @@ import (
 
 type ApplicationController struct {
 	mvc.ApiController
-	service         *app.ApplicationService
-	pipelineService *app.PipelineService
+	service           *app.ApplicationService
+	deploymentService *app.DeploymentService
+	pipelineService   *app.PipelineService
 }
 
-func NewApplicationController(service *app.ApplicationService, pipelineService *app.PipelineService) *ApplicationController {
-	return &ApplicationController{service: service, pipelineService: pipelineService}
+func NewApplicationController(service *app.ApplicationService, deploymentService *app.DeploymentService, pipelineService *app.PipelineService) *ApplicationController {
+	return &ApplicationController{service: service, deploymentService: deploymentService, pipelineService: pipelineService}
 }
 
 // PostCreateApp new application.
@@ -32,6 +33,114 @@ func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request 
 		return mvc.FailWithMsg(nil, err.Error())
 	}
 	return mvc.Success(res)
+}
+
+func (c *ApplicationController) PostImportApp(ctx *context.HttpContext, request *requests2.ImportAppReq) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
+	request.TenantID = userInfo.TenantID
+	appreq := requests2.AppReq{
+		TenantID:   request.TenantID,
+		Name:       request.Name,
+		Labels:     request.Name,
+		Remarks:    request.Name,
+		Git:        request.Git,
+		Level:      request.Level,
+		Language:   request.Language,
+		Status:     1,
+		SourceType: request.SourceType,
+		SCID:       request.SCID,
+		ProjectID:  request.ProjectID,
+	}
+	// create application
+	err, app := c.service.CreateApp(&appreq)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	for _, deployItem := range request.DeployList {
+		deployModel := &requests2.DeploymentStepRequest{
+			Name:            deployItem.DeployName,
+			Nickname:        deployItem.DeployName,
+			TenantID:        request.TenantID,
+			ClusterID:       request.ClusterID,
+			NamespaceID:     request.NamespaceId,
+			AppID:           app.ID,
+			AppName:         app.Name,
+			Level:           "dev",
+			ImageHub:        "",
+			Status:          1,
+			Replicas:        1,
+			ServiceEnable:   true,
+			ServiceAway:     "ClusterPort",
+			ServicePortType: "TCP",
+			ServicePort:     "8080",
+			RequestCPU:      0.1,
+			RequestMemory:   128,
+			LimitCPU:        1,
+			LimitMemory:     768,
+			Environments:    nil,
+			EnvJson:         "",
+			Runtime:         "",
+		}
+		_ = deployModel
+		// create deployment
+		err, dinfo := c.deploymentService.CreateDeploymentStep1(deployModel)
+		if err == nil {
+			deployModel.ID = dinfo.ID
+			// create container
+			err, _ = c.deploymentService.CreateDeploymentStep2(deployModel)
+		}
+		// create pipeline by dsl
+		pipelineReq := &requests2.AppNewPipelineReq{
+			AppId: app.ID,
+			Name:  "default-pipeline-" + deployItem.DeployName,
+		}
+		perr, pipelineInfo := c.pipelineService.NewPipeline(pipelineReq)
+		if perr == nil {
+			dsl := []dto.StageInfo{
+				{
+					Name: "代码",
+					Steps: []dto.StepInfo{
+						{
+							Name: "拉取代码", Key: "git_pull",
+							Content: map[string]interface{}{"git": request.Git, "branch": request.Ref},
+						},
+					},
+				},
+				{
+					Name: "编译构建",
+					Steps: []dto.StepInfo{
+						{
+							Name: "编译命令", Key: "code_build",
+							Content: map[string]interface{}{"buildEnv": "golang", "buildImage": "golang:1.16.15", "buildScript": "# 编译命令，注：当前已在代码根路径下\n",
+								"buildFile": "./" + deployItem.Dockerfile},
+						},
+					},
+				},
+				{
+					Name: "部署",
+					Steps: []dto.StepInfo{
+						{
+							Name: "应用部署", Key: "app_deploy",
+							Content: map[string]interface{}{"depolyment": dinfo.ID},
+						},
+					},
+				},
+			}
+			dslStr := utils.ObjectToString(dsl)
+			editPipeline := &requests2.EditPipelineReq{
+				Id:    pipelineInfo.ID,
+				AppId: app.ID,
+				Name:  "default-pipeline-" + deployItem.DeployName,
+				DSL:   dslStr,
+			}
+			perr = c.pipelineService.UpdatePipeline(editPipeline)
+			if perr == nil {
+				_ = c.pipelineService.UpdateDSL(editPipeline)
+			}
+		}
+	}
+
+	return mvc.Success(true)
 }
 
 // PutEditApp edit application information.
@@ -98,6 +207,15 @@ func (c *ApplicationController) GetProjectDeployLevelCounts(ctx *context.HttpCon
 	return mvc.Success(res)
 }
 
+func (c *ApplicationController) GetTeamDeployLevelCounts(ctx *context.HttpContext) mvc.ApiResult {
+	tenantId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("tenantId", "0"))
+	projectCounts, _ := c.service.GetTenantProjectCountByDeployLevel(tenantId)
+	projectCount, _ := c.service.GetProjectCountByTenantId(tenantId)
+	namespaceCount, _ := c.service.GetNamespaceCountByTenantId(tenantId)
+	appCount, _ := c.service.GetAppCountByTenantId(tenantId)
+	return mvc.Success(context.H{"insCounts": projectCounts, "proCount": projectCount, "namespaceCount": namespaceCount, "appCount": appCount})
+}
+
 // GetGitRepo get git address for application
 func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
@@ -122,24 +240,58 @@ func (c *ApplicationController) GetInfo(ctx *context.HttpContext) mvc.ApiResult 
 // GetGitBranches get git addresses & branches for pipeline
 func (c *ApplicationController) GetGitBranches(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
-	appInfo, _ := c.service.GetAppInfo(appId)
+	gitAddr := ctx.Input.QueryDefault("git", "")
+	gitType := ctx.Input.QueryDefault("gitType", "")
+
+	appInfo, err := c.service.GetAppInfo(appId)
+	scId := appInfo.SCID
+	if err != nil {
+		if appInfo.SCID <= 0 {
+			scId = utils.GetNumberOfParam[uint64](ctx, "scid")
+		}
+	}
 	token := ""
-	if appInfo.SCID > 0 {
-		scInfo, _ := c.service.GetServiceConnectionById(appInfo.SCID)
+	if scId > 0 {
+		scInfo, _ := c.service.GetServiceConnectionById(scId)
 		var detail dto.ServiceConnectionDetails
 		_ = json.Unmarshal([]byte(scInfo.Detail), &detail)
 		token = detail.Token
 	}
 
-	if appInfo.Git != "" {
-		names, _ := app.GetGitBranches(appInfo.Git, appInfo.SourceType, token)
-		return mvc.Success(context.H{
-			"git":      appInfo.Git,
-			"branches": names,
-		})
+	if appInfo.SourceType != "" {
+		gitType = appInfo.SourceType
 	}
-	// appInfo.Git
-	return mvc.Fail("no data")
+	if appInfo.Git != "" {
+		gitAddr = appInfo.Git
+	}
+
+	names, _ := app.GetGitBranches(gitAddr, gitType, token)
+	return mvc.Success(context.H{
+		"git":      gitAddr,
+		"branches": names,
+	})
+}
+
+func (c *ApplicationController) GetSearchDockerfile(ctx *context.HttpContext) mvc.ApiResult {
+	scid, _ := utils.StringToUInt64(ctx.Input.QueryDefault("scid", "0"))
+	gitAddr := ctx.Input.QueryDefault("git", "")
+	ref := ctx.Input.QueryDefault("ref", "")
+	if gitAddr == "" {
+		return mvc.Fail("git address is empty")
+	}
+	gitType := ctx.Input.QueryDefault("gitType", "")
+	token := ""
+	if scid > 0 {
+		scInfo, _ := c.service.GetServiceConnectionById(scid)
+		var detail dto.ServiceConnectionDetails
+		_ = json.Unmarshal([]byte(scInfo.Detail), &detail)
+		token = detail.Token
+	}
+	dockerPaths, err := app.FindFiles(gitAddr, gitType, token, ref, "Dockerfile")
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(dockerPaths)
 }
 
 func (c *ApplicationController) GetBuildImageByLanguageId(ctx *context.HttpContext) mvc.ApiResult {

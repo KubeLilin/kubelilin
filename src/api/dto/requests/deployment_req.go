@@ -43,6 +43,7 @@ type DeploymentStepRequest struct {
 	LimitMemory     float64         `json:"limitMemory" gorm:"column:limit_memory;type:decimal(5,0) unsigned;not null"` // 内存限制MiB
 	Environments    []DeploymentEnv `json:"environments" gorm:"column:environments;type:varchar(255)"`
 	EnvJson         string          `gorm:"column:env_json;type:varchar(255)"`
+	Runtime         string          `json:"runtime" gorm:"column:runtime;type:varchar(50);not null" ` // 运行时
 }
 
 type ProbeRequest struct {

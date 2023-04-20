@@ -89,6 +89,15 @@ func (controller ClusterController) GetNamespacesFromDB(ctx *context.HttpContext
 	return controller.OK(res)
 }
 
+func (controller ClusterController) GetNamespacesByTenantId(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
+	cid := utils.GetNumberOfParam[uint64](ctx, "cid")
+	pageIndex := utils.GetNumberOfParam[int](ctx, "current")
+	pageSize := utils.GetNumberOfParam[int](ctx, "pageSize")
+	_, res := controller.clusterService.GetNameSpacesListForTenantId(cid, userInfo.TenantID, pageIndex, pageSize)
+	return controller.OK(res)
+}
+
 func (controller ClusterController) GetNamespaceList(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	cid, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
@@ -209,6 +218,17 @@ func (controller ClusterController) PutNewK8sNamespace(ctx *context.HttpContext)
 	return controller.OK(err == nil)
 }
 
+func (controller ClusterController) PutUpdateRuntime(ctx *context.HttpContext) mvc.ApiResult {
+	namespaceId := utils.GetNumberOfParam[uint64](ctx, "namespaceId")
+	enableRuntime, _ := utils.StringToBool(ctx.Input.QueryDefault("enableRuntime", "false"))
+	runtimeName := ctx.Input.QueryDefault("runtimeName", "")
+	err := controller.clusterService.UpdateRuntimeForNamespace(namespaceId, enableRuntime, runtimeName)
+	if err != nil {
+		return controller.Fail(err.Error())
+	}
+	return controller.OK(err == nil)
+}
+
 func (controller ClusterController) GetResourceQuota(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
 	namespace := ctx.Input.QueryDefault("namespace", "")
@@ -230,4 +250,14 @@ func (controller ClusterController) PostResourceQuota(ctx *context.HttpContext) 
 		return controller.Fail(err.Error())
 	}
 	return controller.OK(true)
+}
+
+func (controller ClusterController) GetIsInstalledDapr(ctx *context.HttpContext) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
+	strCid := ctx.Input.QueryDefault("cid", "0")
+	cid, _ := strconv.ParseUint(strCid, 10, 64)
+	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
+
+	installed := kubernetes.IsInstallDAPRRuntime(client)
+	return controller.OK(installed)
 }

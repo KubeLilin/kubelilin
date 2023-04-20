@@ -54,6 +54,38 @@ func (cluster *ClusterService) GetNameSpacesFromDB(tenantId uint64, clusterId in
 	return res
 }
 
+func (cluster *ClusterService) GetNameSpacesById(namespaceId uint64) *models.SgrTenantNamespace {
+	var res models.SgrTenantNamespace
+	cluster.db.Model(&models.SgrTenantNamespace{}).First(&res, " id=?", namespaceId)
+	return &res
+}
+
+func (cluster *ClusterService) GetNameSpacesListForTenantId(clusterId uint64, tenantId uint64, PageIndex int, PageSize int) (error, *page.Page) {
+	var res []dto.NamespaceInfo
+	sqlBuilder := strings.Builder{}
+	sqlBuilder.WriteString(`SELECT ns.id,ns.tenant_id tenantId,ns.cluster_id clusterId,ns.namespace , clr.name clusterName ,
+tt.t_code tenantCode, tt.t_name tenantName, ns.enable_runtime enableRuntime,ns.runtime_name runtimeName,
+(SELECT count(1) FROM sgr_tenant_deployments WHERE namespace_id = ns.id) deployCount,
+(SELECT sum(replicas) FROM sgr_tenant_deployments WHERE namespace_id = ns.id) insCount
+FROM sgr_tenant_namespace ns 
+INNER JOIN sgr_tenant_cluster clr on clr.id = ns.cluster_id
+INNER JOIN sgr_tenant tt on tt.id = ns.tenant_id WHERE 1=1  `)
+	var params []interface{}
+	if clusterId > 0 {
+		sqlBuilder.WriteString(" AND ns.cluster_id=?")
+		params = append(params, clusterId)
+	}
+
+	if tenantId > 0 {
+		sqlBuilder.WriteString(" AND ns.tenant_id = ?")
+		params = append(params, tenantId)
+	}
+
+	//err := cluster.db.Raw(sqlBuilder.String(), params...).Scan(&responses).Error
+	sqlBuilder.WriteString(" ORDER BY ns.cluster_id")
+	return page.StartPage(cluster.db, PageIndex, PageSize).DoScan(&res, sqlBuilder.String(), params...)
+}
+
 func (cluster *ClusterService) GetNameSpacesListForDB(clusterId uint64, tenantName string, PageIndex int, PageSize int) (error, *page.Page) {
 	var res []dto.NamespaceInfo
 	sqlBuilder := strings.Builder{}
@@ -74,6 +106,12 @@ INNER JOIN sgr_tenant tt on tt.id = ns.tenant_id WHERE 1=1 `)
 	//err := cluster.db.Raw(sqlBuilder.String(), params...).Scan(&responses).Error
 
 	return page.StartPage(cluster.db, PageIndex, PageSize).DoScan(&res, sqlBuilder.String(), params...)
+}
+
+func (cluster *ClusterService) UpdateRuntimeForNamespace(namespaceId uint64, enable bool, runtimeName string) error {
+	dbRes := cluster.db.Model(&models.SgrTenantNamespace{}).Where("id=?", namespaceId).
+		Updates(map[string]interface{}{"enable_runtime": enable, "runtime_name": runtimeName})
+	return dbRes.Error
 }
 
 func (cluster *ClusterService) CreateNamespace(tenantID uint64, clusterId uint64, namespace string) (bool, error) {

@@ -13,4 +13,5 @@ type ProjectPipelines struct {
 	Status       uint8      `gorm:"column:status;type:tinyint unsigned;not null" json:"status"`
 	CreationTime *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
 	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`
+	LastCommit   string     `gorm:"column:last_commit;type:varchar(50);not null;default:''" json:"lastCommit"` // 最后一次提交的commit
 }

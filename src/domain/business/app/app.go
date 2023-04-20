@@ -195,3 +195,33 @@ LEFT JOIN (
 	err := s.db.Raw(sql, projectId).Find(&list).Error
 	return list, err
 }
+
+func (s *ApplicationService) GetTenantProjectCountByDeployLevel(tenantId uint64) ([]dto.TeamLeveLCountInfo, error) {
+	sql := `SELECT lev.name label,lev.code  value,IFNULL(dep.count,0) count FROM sgr_code_deployment_level lev
+LEFT JOIN (
+   SELECT  level,COUNT(level) count FROM sgr_tenant_deployments 
+	 WHERE app_id in (SELECT application_id from devops_projects_apps sdpa INNER JOIN devops_projects sdp on sdpa.project_id = sdp.id  WHERE sdp.tenant_id = ?)
+	 GROUP BY level
+) dep on dep.level = lev.code`
+	var list []dto.TeamLeveLCountInfo
+	err := s.db.Raw(sql, tenantId).Find(&list).Error
+	return list, err
+}
+
+func (s *ApplicationService) GetProjectCountByTenantId(tenantId uint64) (int64, error) {
+	var count int64
+	res := s.db.Model(&models.DevopsProjects{}).Where("tenant_id=?", tenantId).Count(&count)
+	return count, res.Error
+}
+
+func (s *ApplicationService) GetNamespaceCountByTenantId(tenantId uint64) (int64, error) {
+	var count int64
+	res := s.db.Model(&models.SgrTenantNamespace{}).Where("tenant_id=?", tenantId).Count(&count)
+	return count, res.Error
+}
+
+func (s *ApplicationService) GetAppCountByTenantId(tenantId uint64) (int64, error) {
+	var count int64
+	res := s.db.Model(&models.SgrTenantApplication{}).Where("tenant_id=?", tenantId).Count(&count)
+	return count, res.Error
+}

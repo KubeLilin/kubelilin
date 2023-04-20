@@ -6,10 +6,10 @@ import (
 	"kubelilin/domain/database/models"
 )
 
-type DeploymentApplyFunc func(deployConfiguration *appsapplyv1.DeploymentApplyConfiguration, dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers)
+type DeploymentApplyFunc func(deployConfiguration *appsapplyv1.DeploymentApplyConfiguration, dp *models.SgrTenantDeployments, dpc *models.SgrTenantDeploymentsContainers, context apply.DeploymentApplyFuncContext)
 
 var DeploymentApplyFuncList []DeploymentApplyFunc
 
 func init() {
-	DeploymentApplyFuncList = []DeploymentApplyFunc{apply.ApplyLifecycle, apply.ApplyVolume, apply.ApplyProbe}
+	DeploymentApplyFuncList = []DeploymentApplyFunc{apply.ApplyLifecycle, apply.ApplyVolume, apply.ApplyProbe, apply.ApplyRuntime}
 }
