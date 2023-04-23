@@ -11,6 +11,7 @@ import (
 	"kubelilin/domain/dto"
 	"kubelilin/utils"
 	"strconv"
+	"strings"
 )
 
 type ClusterController struct {
@@ -128,6 +129,26 @@ func (controller ClusterController) GetDeployments(ctx *context.HttpContext) mvc
 
 	list := kubernetes.GetDeploymentList(client, namespace)
 	return controller.OK(list)
+}
+
+func (controller ClusterController) GetWorkloads(ctx *context.HttpContext) mvc.ApiResult {
+	namespace := ctx.Input.QueryDefault("namespace", "")
+	workload := ctx.Input.QueryDefault("workload", "")
+
+	userInfo := requests2.GetUserInfo(ctx)
+	strCid := ctx.Input.QueryDefault("cid", "0")
+	cid, _ := strconv.ParseUint(strCid, 10, 64)
+	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
+	var wordloads []dto.Workload
+	switch strings.ToLower(workload) {
+	case "deployment":
+		wordloads = kubernetes.GetDeploymentList(client, namespace)
+	case "statefulset":
+		wordloads = kubernetes.GetStatefulSetList(client, namespace)
+	case "daemonset":
+		wordloads = kubernetes.GetDaemonSetList(client, namespace)
+	}
+	return controller.OK(wordloads)
 }
 
 func (controller ClusterController) GetNodes(ctx *context.HttpContext) mvc.ApiResult {
