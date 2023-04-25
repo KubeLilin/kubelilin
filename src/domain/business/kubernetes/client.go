@@ -15,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/discovery"
 	memory "k8s.io/client-go/discovery/cached"
 	"k8s.io/client-go/dynamic"
@@ -78,7 +79,18 @@ func GetPodList(client *kubernetes.Clientset, namespace string, node string, app
 	}
 
 	list, _ := client.CoreV1().Pods(namespace).List(context.TODO(), emptyOptions)
+	if len(list.Items) == 0 {
+		deployResource, _ := client.AppsV1().Deployments(namespace).Get(context.TODO(), app, metav1.GetOptions{})
 
+		labelSelector := labels.NewSelector()
+		for key, value := range deployResource.Spec.Selector.MatchLabels {
+			requirement, _ := labels.NewRequirement(key, selection.Equals, []string{value})
+			labelSelector = labelSelector.Add(*requirement)
+		}
+		emptyOptionsV1 := metav1.ListOptions{}
+		emptyOptionsV1.LabelSelector = labelSelector.String()
+		list, _ = client.CoreV1().Pods(namespace).List(context.TODO(), emptyOptionsV1)
+	}
 	var podList []dto.Pod
 	for _, item := range list.Items {
 		podCount := len(item.Status.ContainerStatuses)

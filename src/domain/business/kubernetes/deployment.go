@@ -361,26 +361,42 @@ func (ds *DeploymentSupervisor) DeleteDeploymentWithOutDb(tenantId, dpId uint64)
 	return clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), dpDatum.Name, metav1.DeleteOptions{})
 }
 
-func (ds *DeploymentSupervisor) GetDeploymentYaml(tenantId, dpId uint64) (string, error) {
-	dpDatum := models.SgrTenantDeployments{}
-	dbErr := ds.db.Model(&models.SgrTenantDeployments{}).Where("id=?", dpId).First(&dpDatum)
-	if dbErr.Error != nil {
-		return "", errors.New("未找到相应的部署")
+func (ds *DeploymentSupervisor) DeleteDeploymentByK8s(clusterId uint64, namespace string, dpName string) error {
+	clientSet, clientSetErr := ds.clusterService.GetClusterClientByTenantAndId(0, clusterId)
+	if clientSetErr != nil {
+		return clientSetErr
 	}
-	namespace, err := ds.GetNameSpaceByDpId(dpId)
-	if err != nil {
-		return "", err
+	return clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+}
+
+func (ds *DeploymentSupervisor) GetDeploymentYaml(tenantId, dpId uint64, clusterId uint64, ns string, dpName string) (string, error) {
+	mClusterId := uint64(0)
+	namespace := ""
+	deploymentName := ""
+	if dpId > 0 {
+		dpDatum := models.SgrTenantDeployments{}
+		dbErr := ds.db.Model(&models.SgrTenantDeployments{}).Where("id=?", dpId).First(&dpDatum)
+		if dbErr.Error != nil {
+			return "", errors.New("未找到相应的部署")
+		}
+		namespace, _ = ds.GetNameSpaceByDpId(dpId)
+		clusterInfo := &models.SgrTenantCluster{}
+		dbErr = ds.db.Model(&models.SgrTenantCluster{}).Where("id=? ", dpDatum.ClusterID).First(clusterInfo)
+		if dbErr.Error != nil {
+			return "", errors.New("未找到集群信息")
+		}
+		mClusterId = clusterInfo.ID
+		deploymentName = dpDatum.Name
+	} else {
+		namespace = ns
+		deploymentName = dpName
+		mClusterId = clusterId
 	}
-	clusterInfo := &models.SgrTenantCluster{}
-	dbErr = ds.db.Model(&models.SgrTenantCluster{}).Where("id=? ", dpDatum.ClusterID).First(clusterInfo)
-	if dbErr.Error != nil {
-		return "", errors.New("未找到集群信息")
-	}
-	clientSet, clientSetErr := ds.clusterService.GetClusterClientByTenantAndId(tenantId, clusterInfo.ID)
+	clientSet, clientSetErr := ds.clusterService.GetClusterClientByTenantAndId(tenantId, mClusterId)
 	if clientSetErr != nil {
 		return "", clientSetErr
 	}
-	k8sDeployment, err := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), dpDatum.Name, metav1.GetOptions{})
+	k8sDeployment, err := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 	if err != nil {
 		return "", err
 	}
