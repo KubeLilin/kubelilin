@@ -546,6 +546,11 @@ func CreateDynamicResource(ctx context.Context, cfg *rest.Config, codec runtime.
 	var dynamicResource dynamic.ResourceInterface = dynamicClient.Resource(mapping.Resource)
 	dynamicResource = dynamicClient.Resource(mapping.Resource).Namespace(namesapce)
 	if _, err := dynamicResource.Create(ctx, obj, metav1.CreateOptions{}); err != nil {
+		if k8sErrors.IsAlreadyExists(err) {
+			if _, err := dynamicResource.Update(ctx, obj, metav1.UpdateOptions{}); err != nil {
+				return err
+			}
+		}
 		return err
 	}
 
