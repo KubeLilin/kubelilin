@@ -7,6 +7,7 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	v1 "k8s.io/api/core/v1"
+	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -377,7 +378,11 @@ func (ds *DeploymentSupervisor) DeleteWorkloadByK8s(workload string, clusterId u
 	case "job":
 		return clientSet.BatchV1().Jobs(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
 	case "cronjob":
-		return clientSet.BatchV1beta1().CronJobs(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+		err := clientSet.BatchV1().CronJobs(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+		if k8sErrors.IsNotFound(err) {
+			return clientSet.BatchV1beta1().CronJobs(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+		}
+		return err
 	default:
 		return clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
 	}
@@ -441,10 +446,16 @@ func (ds *DeploymentSupervisor) GetWorkloadYaml(tenantId, dpId uint64, clusterId
 		k8sJob.APIVersion = "batch/v1"
 		runtimeWorkload = k8sJob
 	case "cronjob":
-		k8sCronJob, _ := clientSet.BatchV1beta1().CronJobs(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
-		k8sCronJob.Kind = "CronJob"
-		k8sCronJob.APIVersion = "batch/v1beta1"
-		runtimeWorkload = k8sCronJob
+		k8sCronJobV1, err := clientSet.BatchV1().CronJobs(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+		k8sCronJobV1.Kind = "CronJob"
+		k8sCronJobV1.APIVersion = "batch/v1"
+		runtimeWorkload = k8sCronJobV1
+		if k8sErrors.IsNotFound(err) {
+			k8sCronJobV1beta1, _ := clientSet.BatchV1beta1().CronJobs(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+			k8sCronJobV1beta1.Kind = "CronJob"
+			k8sCronJobV1beta1.APIVersion = "batch/v1beta1"
+			runtimeWorkload = k8sCronJobV1beta1
+		}
 	}
 	if err != nil {
 		return "", err

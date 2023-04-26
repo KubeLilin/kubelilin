@@ -20,4 +20,13 @@ type Workload struct {
 	UpdatedReplicas     int32 `json:"updatedReplicas"`
 	ReadyReplicas       int32 `json:"readyReplicas"`
 	UnavailableReplicas int32 `json:"unavailableReplicas"`
+
+	// job
+	JobSchedule           string `json:"jobSchedule"`
+	JobParallelism        int32  `json:"jobParallelism"`
+	JobCompletions        int32  `json:"jobCompletions"`
+	JobBackoffLimit       int32  `json:"jobBackoffLimit"`
+	JobActive             int    `json:"jobActive"`
+	JobLastScheduleTime   string `json:"lastScheduleTime"`
+	JobLastSuccessfulTime string `json:"lastSuccessfulTime"`
 }

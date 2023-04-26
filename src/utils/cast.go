@@ -5,11 +5,26 @@ import (
 	"errors"
 	"gopkg.in/yaml.v3"
 	"strconv"
+	"time"
 )
 
 // Int32Ptr convert int32 value to a pointer.
 func Int32Ptr(i int32) *int32 {
 	return &i
+}
+
+func PtrToInt32(i *int32) int32 {
+	if i == nil {
+		return 0
+	}
+	return *i
+}
+
+func PtrToInt64(i *int64) int64 {
+	if i == nil {
+		return 0
+	}
+	return *i
 }
 
 // Int64Ptr convert int64 value to a pointer.
@@ -116,4 +131,8 @@ func YamlToObject(yamlString string, obj any) error {
 		return err
 	}
 	return nil
+}
+
+func TimeFormat(time time.Time) string {
+	return time.Format("2006-01-02 15:04:05")
 }

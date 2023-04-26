@@ -4,6 +4,7 @@ import (
 	contextV1 "context"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
+	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	metricsv "k8s.io/metrics/pkg/client/clientset/versioned"
 	requests2 "kubelilin/api/dto/requests"
@@ -147,7 +148,14 @@ func (controller ClusterController) GetWorkloads(ctx *context.HttpContext) mvc.A
 		wordloads = kubernetes.GetStatefulSetList(client, namespace)
 	case "daemonset":
 		wordloads = kubernetes.GetDaemonSetList(client, namespace)
+	case "cronjob":
+		var err error
+		wordloads, err = kubernetes.GetCronJobV1List(client, namespace)
+		if k8sErrors.IsNotFound(err) {
+			wordloads, err = kubernetes.GetCronJobBetaV1List(client, namespace)
+		}
 	}
+
 	return controller.OK(wordloads)
 }
 
