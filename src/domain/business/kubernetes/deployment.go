@@ -9,6 +9,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/cli-runtime/pkg/printers"
 	appsapplyv1 "k8s.io/client-go/applyconfigurations/apps/v1"
 	corev1 "k8s.io/client-go/applyconfigurations/core/v1"
@@ -361,15 +362,28 @@ func (ds *DeploymentSupervisor) DeleteDeploymentWithOutDb(tenantId, dpId uint64)
 	return clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), dpDatum.Name, metav1.DeleteOptions{})
 }
 
-func (ds *DeploymentSupervisor) DeleteDeploymentByK8s(clusterId uint64, namespace string, dpName string) error {
+func (ds *DeploymentSupervisor) DeleteWorkloadByK8s(workload string, clusterId uint64, namespace string, dpName string) error {
 	clientSet, clientSetErr := ds.clusterService.GetClusterClientByTenantAndId(0, clusterId)
 	if clientSetErr != nil {
 		return clientSetErr
 	}
-	return clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+	switch strings.ToLower(workload) {
+	case "deployment":
+		return clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+	case "statefulset":
+		return clientSet.AppsV1().StatefulSets(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+	case "daemonset":
+		return clientSet.AppsV1().DaemonSets(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+	case "job":
+		return clientSet.BatchV1().Jobs(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+	case "cronjob":
+		return clientSet.BatchV1beta1().CronJobs(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+	default:
+		return clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+	}
 }
 
-func (ds *DeploymentSupervisor) GetDeploymentYaml(tenantId, dpId uint64, clusterId uint64, ns string, dpName string) (string, error) {
+func (ds *DeploymentSupervisor) GetWorkloadYaml(tenantId, dpId uint64, clusterId uint64, ns string, dpName string, workload string) (string, error) {
 	mClusterId := uint64(0)
 	namespace := ""
 	deploymentName := ""
@@ -387,6 +401,8 @@ func (ds *DeploymentSupervisor) GetDeploymentYaml(tenantId, dpId uint64, cluster
 		}
 		mClusterId = clusterInfo.ID
 		deploymentName = dpDatum.Name
+
+		workload = "deployment"
 	} else {
 		namespace = ns
 		deploymentName = dpName
@@ -396,17 +412,47 @@ func (ds *DeploymentSupervisor) GetDeploymentYaml(tenantId, dpId uint64, cluster
 	if clientSetErr != nil {
 		return "", clientSetErr
 	}
-	k8sDeployment, err := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+
+	var err error
+	var runtimeWorkload runtime.Object
+	if workload == "" || workload == "undefined" {
+		workload = "deployment"
+	}
+
+	switch strings.ToLower(workload) {
+	case "deployment":
+		k8sDeployment, _ := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+		k8sDeployment.Kind = "Deployment"
+		k8sDeployment.APIVersion = "apps/v1"
+		runtimeWorkload = k8sDeployment
+	case "statefulset":
+		k8sStatefulSet, _ := clientSet.AppsV1().StatefulSets(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+		k8sStatefulSet.Kind = "StatefulSet"
+		k8sStatefulSet.APIVersion = "apps/v1"
+		runtimeWorkload = k8sStatefulSet
+	case "daemonset":
+		k8sDaemonSet, _ := clientSet.AppsV1().DaemonSets(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+		k8sDaemonSet.Kind = "DaemonSet"
+		k8sDaemonSet.APIVersion = "apps/v1"
+		runtimeWorkload = k8sDaemonSet
+	case "job":
+		k8sJob, _ := clientSet.BatchV1().Jobs(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+		k8sJob.Kind = "Job"
+		k8sJob.APIVersion = "batch/v1"
+		runtimeWorkload = k8sJob
+	case "cronjob":
+		k8sCronJob, _ := clientSet.BatchV1beta1().CronJobs(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+		k8sCronJob.Kind = "CronJob"
+		k8sCronJob.APIVersion = "batch/v1beta1"
+		runtimeWorkload = k8sCronJob
+	}
 	if err != nil {
 		return "", err
 	}
 	//yamlBytes, yamlErr := yaml.Marshal(k8sDeployment)
 	yamlPrinter := printers.YAMLPrinter{}
 	buffers := bytes.NewBufferString("")
-	k8sDeployment.Kind = "Deployment"
-	k8sDeployment.APIVersion = "apps/v1"
-	yamlErr := yamlPrinter.PrintObj(k8sDeployment, buffers)
-
+	yamlErr := yamlPrinter.PrintObj(runtimeWorkload, buffers)
 	return buffers.String(), yamlErr
 }
 

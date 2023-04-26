@@ -119,12 +119,12 @@ func (controller DeploymentController) DeleteDeploymentWithOutDB(ctx *context.Ht
 	dpId := utils.GetNumberOfParam[uint64](ctx, "dpId")
 	namespace := ctx.Input.QueryDefault("namespace", "")
 	dpName := ctx.Input.QueryDefault("dpName", "")
-
+	workload := ctx.Input.QueryDefault("workload", "deployment")
 	var err error
 	if dpId > 0 {
 		err = controller.deploymentSupervisor.DeleteDeploymentWithOutDb(userInfo.TenantID, dpId)
 	} else {
-		err = controller.deploymentSupervisor.DeleteDeploymentByK8s(cid, namespace, dpName)
+		err = controller.deploymentSupervisor.DeleteWorkloadByK8s(workload, cid, namespace, dpName)
 	}
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
@@ -196,8 +196,9 @@ func (controller DeploymentController) GetYaml(ctx *context.HttpContext) mvc.Api
 	dpId := utils.GetNumberOfParam[uint64](ctx, "dpId")
 	namespace := ctx.Input.QueryDefault("namespace", "")
 	dpName := ctx.Input.QueryDefault("dpName", "")
+	workload := ctx.Input.QueryDefault("workload", "deployment")
 
-	yamlStr, err := controller.deploymentSupervisor.GetDeploymentYaml(userInfo.TenantID, dpId, cid, namespace, dpName)
+	yamlStr, err := controller.deploymentSupervisor.GetWorkloadYaml(userInfo.TenantID, dpId, cid, namespace, dpName, workload)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}

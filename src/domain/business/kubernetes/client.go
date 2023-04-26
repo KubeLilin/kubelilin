@@ -30,6 +30,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -68,7 +69,7 @@ func NewClientSetWithFileContent(fileContent string) (*kubernetes.Clientset, err
 	return client, err
 }
 
-func GetPodList(client *kubernetes.Clientset, namespace string, node string, app string) []dto.Pod {
+func GetPodList(client *kubernetes.Clientset, workload string, namespace string, node string, app string) []dto.Pod {
 	emptyOptions := metav1.ListOptions{}
 
 	if app != "" {
@@ -80,15 +81,36 @@ func GetPodList(client *kubernetes.Clientset, namespace string, node string, app
 
 	list, _ := client.CoreV1().Pods(namespace).List(context.TODO(), emptyOptions)
 	if len(list.Items) == 0 {
-		deployResource, _ := client.AppsV1().Deployments(namespace).Get(context.TODO(), app, metav1.GetOptions{})
+		var labelSelector *metav1.LabelSelector
+		// get matchLabels from workload
+		switch strings.ToLower(workload) {
+		case "deployment":
+			deployResource, _ := client.AppsV1().Deployments(namespace).Get(context.TODO(), app, metav1.GetOptions{})
+			labelSelector = deployResource.Spec.Selector
+		case "statefulset":
+			statefulSetResource, _ := client.AppsV1().StatefulSets(namespace).Get(context.TODO(), app, metav1.GetOptions{})
+			labelSelector = statefulSetResource.Spec.Selector
+		case "daemonset":
+			daemonSetResource, _ := client.AppsV1().DaemonSets(namespace).Get(context.TODO(), app, metav1.GetOptions{})
+			labelSelector = daemonSetResource.Spec.Selector
+		case "job":
+			jobResource, _ := client.BatchV1().Jobs(namespace).Get(context.TODO(), app, metav1.GetOptions{})
+			labelSelector = jobResource.Spec.Selector
+		case "cronjob":
+			cronJobResource, _ := client.BatchV1beta1().CronJobs(namespace).Get(context.TODO(), app, metav1.GetOptions{})
+			labelSelector = cronJobResource.Spec.JobTemplate.Spec.Selector
+		default:
+			deployResource, _ := client.AppsV1().Deployments(namespace).Get(context.TODO(), app, metav1.GetOptions{})
+			labelSelector = deployResource.Spec.Selector
+		}
 
-		labelSelector := labels.NewSelector()
-		for key, value := range deployResource.Spec.Selector.MatchLabels {
+		labelSelectorV1 := labels.NewSelector()
+		for key, value := range labelSelector.MatchLabels {
 			requirement, _ := labels.NewRequirement(key, selection.Equals, []string{value})
-			labelSelector = labelSelector.Add(*requirement)
+			labelSelectorV1 = labelSelectorV1.Add(*requirement)
 		}
 		emptyOptionsV1 := metav1.ListOptions{}
-		emptyOptionsV1.LabelSelector = labelSelector.String()
+		emptyOptionsV1.LabelSelector = labelSelectorV1.String()
 		list, _ = client.CoreV1().Pods(namespace).List(context.TODO(), emptyOptionsV1)
 	}
 	var podList []dto.Pod

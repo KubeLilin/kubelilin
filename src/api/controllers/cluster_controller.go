@@ -27,14 +27,14 @@ func (controller ClusterController) GetPods(ctx *context.HttpContext) mvc.ApiRes
 	namespace := ctx.Input.QueryDefault("namespace", "")
 	k8sapp := ctx.Input.QueryDefault("app", "")
 	k8snode := ctx.Input.QueryDefault("node", "")
-
+	workload := ctx.Input.QueryDefault("workload", "deployment")
 	userInfo := requests2.GetUserInfo(ctx)
 	cid, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
 	client, clientErr := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
 	if clientErr != nil {
 		return mvc.FailWithMsg(nil, "Can't create cluster client")
 	}
-	podList := kubernetes.GetPodList(client, namespace, k8snode, k8sapp)
+	podList := kubernetes.GetPodList(client, workload, namespace, k8snode, k8sapp)
 
 	config, err1 := controller.clusterService.GetClusterConfig(0, cid)
 	if err1 == nil {
