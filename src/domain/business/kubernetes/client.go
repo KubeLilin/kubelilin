@@ -111,6 +111,8 @@ func GetPodList(client *kubernetes.Clientset, workload string, namespace string,
 				requirement, _ := labels.NewRequirement(key, selection.Equals, []string{value})
 				labelSelectorV1 = labelSelectorV1.Add(*requirement)
 			}
+		} else {
+			return nil
 		}
 		emptyOptionsV1 := metav1.ListOptions{}
 		emptyOptionsV1.LabelSelector = labelSelectorV1.String()
