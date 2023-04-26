@@ -154,6 +154,8 @@ func (controller ClusterController) GetWorkloads(ctx *context.HttpContext) mvc.A
 		if k8sErrors.IsNotFound(err) {
 			wordloads, err = kubernetes.GetCronJobBetaV1List(client, namespace)
 		}
+	case "job":
+		wordloads, _ = kubernetes.GetJobV1List(client, namespace)
 	}
 
 	return controller.OK(wordloads)

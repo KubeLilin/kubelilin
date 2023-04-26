@@ -396,6 +396,43 @@ func GetCronJobBetaV1List(client *kubernetes.Clientset, namespace string) ([]dto
 	return deploymentList, nil
 }
 
+func GetJobV1List(client *kubernetes.Clientset, namespace string) ([]dto.Workload, error) {
+	emptyOptions := metav1.ListOptions{}
+	var deploymentList []dto.Workload
+	list, err := client.BatchV1().Jobs(namespace).List(context.TODO(), emptyOptions)
+	if err != nil {
+		return nil, err
+	}
+	for _, deploy := range list.Items {
+		item := dto.Workload{
+			Name:                  deploy.Name,
+			Namespace:             deploy.Namespace,
+			Labels:                deploy.Labels,
+			Selectors:             nil,
+			JobBackoffLimit:       utils.PtrToInt32(deploy.Spec.BackoffLimit),
+			JobCompletions:        utils.PtrToInt32(deploy.Spec.Completions),
+			JobParallelism:        utils.PtrToInt32(deploy.Spec.Parallelism),
+			JobActive:             int(deploy.Status.Active),
+			JobLastSuccessfulTime: utils.TimeFormat(deploy.Status.CompletionTime.Time),
+			JobLastScheduleTime:   utils.TimeFormat(deploy.Status.StartTime.Time),
+			Replicas:              1,
+			AvailableReplicas:     1,
+			UpdatedReplicas:       1,
+			ReadyReplicas:         1,
+		}
+
+		if len(deploy.Spec.Template.Spec.Containers) > 0 {
+			item.Image = deploy.Spec.Template.Spec.Containers[0].Image
+			item.RequestCPU = deploy.Spec.Template.Spec.Containers[0].Resources.Requests.Cpu().AsApproximateFloat64()
+			item.RequestMemory = deploy.Spec.Template.Spec.Containers[0].Resources.Requests.Memory().AsApproximateFloat64()
+			item.LimitsCPU = deploy.Spec.Template.Spec.Containers[0].Resources.Limits.Cpu().AsApproximateFloat64()
+			item.LimitsMemory = deploy.Spec.Template.Spec.Containers[0].Resources.Limits.Memory().AsApproximateFloat64()
+		}
+		deploymentList = append(deploymentList, item)
+	}
+	return deploymentList, nil
+}
+
 func SetReplicasNumber(client *kubernetes.Clientset, namespace string, deploymentName string, number int32) (bool, error) {
 	emptyOptions := metav1.GetOptions{}
 	deployment, getErr := client.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, emptyOptions)
