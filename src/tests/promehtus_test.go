@@ -9,7 +9,7 @@ import (
 )
 
 func TestQueryNodeCpuUtilisation(t *testing.T) {
-	provider := metrics.NewPrometheusMetrics("http://49.232.111.253:39090")
+	provider := metrics.NewPrometheusMetrics("http://localhost:39090")
 	chart := metrics.NewChart(provider)
 	chartDataset, _ := chart.QueryNodeCpuUtilisation(time.Now().Add(-time.Hour), time.Now())
 	fmt.Println(chartDataset)
@@ -17,7 +17,7 @@ func TestQueryNodeCpuUtilisation(t *testing.T) {
 }
 
 func TestQueryPodCPUUsage(t *testing.T) {
-	provider := metrics.NewPrometheusMetrics("http://49.232.111.253:39090")
+	provider := metrics.NewPrometheusMetrics("http://localhost:39090")
 	namespace := "klns-administration"
 	workload := "dev-yoyogodemo-kind-kind"
 	chart := metrics.NewChart(provider)
@@ -32,7 +32,7 @@ func TestQueryPodCPUUsage(t *testing.T) {
 }
 
 func TestQueryPodMemoryUsage(t *testing.T) {
-	metrics := metrics.NewPrometheusMetrics("http://49.232.111.253:39090")
+	metrics := metrics.NewPrometheusMetrics("http://localhost:39090")
 	namespace := "klns-administration"
 	workload := "dev-yoyogodemo-kind-kind"
 	pql := `sum(
