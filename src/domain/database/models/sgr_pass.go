@@ -350,6 +350,29 @@ var DevopsProjectsAppsColumns = struct {
 	ApplicationID: "application_id",
 }
 
+// PromethusClusterConfig Promethus 集群配置
+type PromethusClusterConfig struct {
+	ID        uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	ClusterID int64  `gorm:"column:cluster_id;type:bigint;not null" json:"clusterId"` // 集群ID
+	URL       string `gorm:"column:url;type:varchar(255)" json:"url"`                 // Promethus访问地址
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *PromethusClusterConfig) TableName() string {
+	return "promethus_cluster_config"
+}
+
+// PromethusClusterConfigColumns get sql column name.获取数据库列名
+var PromethusClusterConfigColumns = struct {
+	ID        string
+	ClusterID string
+	URL       string
+}{
+	ID:        "id",
+	ClusterID: "cluster_id",
+	URL:       "url",
+}
+
 // ServiceConnection 用于保存其他服务或者第三方组件所依赖的资源，例如连接字符串，ssh秘钥，git连接等等
 type ServiceConnection struct {
 	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
@@ -784,7 +807,7 @@ type SgrTenantApplicationPipelines struct {
 	Dsl          string     `gorm:"column:dsl;type:text;not null" json:"dsl"`                                 // 流水线DSL
 	TaskStatus   *uint      `gorm:"column:taskStatus;type:int unsigned" json:"taskStatus"`                    // 流水线任务状态( ready=0 , running=1, success=2, fail=3,  )
 	LastTaskID   string     `gorm:"column:lastTaskId;type:varchar(15);not null;default:''" json:"lastTaskId"` // 最后一次任务执行ID
-	LastCommit   string     `gorm:"column:last_commit;type:varchar(200)" json:"lastCommit"`                   // git最后一次提交记录
+	LastCommit   string     `gorm:"column:last_commit;type:text" json:"lastCommit"`                           // git最后一次提交记录
 	Status       uint8      `gorm:"column:status;type:tinyint unsigned;not null" json:"status"`
 	CreationTime *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
 	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`

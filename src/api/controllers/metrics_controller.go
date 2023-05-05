@@ -70,7 +70,7 @@ func (controller MetricsController) GetPodCPUUsage(ctx *context.HttpContext) mvc
 }
 
 func (controller MetricsController) GetPodMemoryUsage(ctx *context.HttpContext) mvc.ApiResult {
-	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
+	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
 	startTime := utils.GetNumberOfParam[uint64](ctx, "startTime")
 	endTime := utils.GetNumberOfParam[uint64](ctx, "endTime")
 	namespace := ctx.Input.QueryDefault("namespace", "")
@@ -87,7 +87,7 @@ func (controller MetricsController) GetPodMemoryUsage(ctx *context.HttpContext) 
 
 // QueryPodMemoryRss
 func (controller MetricsController) GetPodMemoryRss(ctx *context.HttpContext) mvc.ApiResult {
-	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
+	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
 	startTime := utils.GetNumberOfParam[uint64](ctx, "startTime")
 	endTime := utils.GetNumberOfParam[uint64](ctx, "endTime")
 	namespace := ctx.Input.QueryDefault("namespace", "")
@@ -104,7 +104,7 @@ func (controller MetricsController) GetPodMemoryRss(ctx *context.HttpContext) mv
 
 //QueryPodMemorySwap
 func (controller MetricsController) GetPodMemorySwap(ctx *context.HttpContext) mvc.ApiResult {
-	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
+	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
 	startTime := utils.GetNumberOfParam[uint64](ctx, "startTime")
 	endTime := utils.GetNumberOfParam[uint64](ctx, "endTime")
 	namespace := ctx.Input.QueryDefault("namespace", "")
@@ -121,7 +121,7 @@ func (controller MetricsController) GetPodMemorySwap(ctx *context.HttpContext) m
 
 // QueryPodNetworkReceiveBytes
 func (controller MetricsController) GetPodNetworkReceiveBytes(ctx *context.HttpContext) mvc.ApiResult {
-	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
+	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
 	startTime := utils.GetNumberOfParam[uint64](ctx, "startTime")
 	endTime := utils.GetNumberOfParam[uint64](ctx, "endTime")
 	namespace := ctx.Input.QueryDefault("namespace", "")
@@ -138,7 +138,7 @@ func (controller MetricsController) GetPodNetworkReceiveBytes(ctx *context.HttpC
 
 // QueryPodNetworkTransmitBytes
 func (controller MetricsController) GetPodNetworkTransmitBytes(ctx *context.HttpContext) mvc.ApiResult {
-	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
+	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
 	startTime := utils.GetNumberOfParam[uint64](ctx, "startTime")
 	endTime := utils.GetNumberOfParam[uint64](ctx, "endTime")
 	namespace := ctx.Input.QueryDefault("namespace", "")

@@ -3,6 +3,7 @@ package metrics
 import (
 	"fmt"
 	"gorm.io/gorm"
+	"kubelilin/domain/database/models"
 	"time"
 )
 
@@ -25,10 +26,11 @@ func NewChart(metricsProvider *PrometheusMetrics) *Chart {
 
 func (chart *Chart) Get(clusterId uint64) *Chart {
 	// get from db with clusterId,that is the dataSource of prometheus client api provider
-	dataSource := "http://49.232.111.253:39090"
+	//dataSource := "http://49.232.111.253:39090"
 	// db.table("").where("cluster_id = ?", clusterId).first(&dataSource)
-
-	chart.metricsProvider = NewPrometheusMetrics(dataSource)
+	var config models.PromethusClusterConfig
+	chart.db.Model(&models.PromethusClusterConfig{}).First(&config, "cluster_id = ?", clusterId)
+	chart.metricsProvider = NewPrometheusMetrics(config.URL)
 	return chart
 }
 
