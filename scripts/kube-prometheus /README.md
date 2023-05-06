@@ -162,10 +162,13 @@ services is forbidden: User "system:serviceaccount:monitoring:prometheus-k8s" ca
     ```
 * 检查端口设置,端口port字段，需要指定为pod定义中spec.containers[i].ports[i].name，或services定义中spec.ports[i].name字段的值。
 
-## 最后
-目前正在将Prometheus Operator集成到PaaS项目中，后续会将集成过程中遇到的问题和解决方案分享出来。
+## 配置Grafana
+导入grafana_go_metrics.json 到Grafana面板。 修改数据源为Prometheus，修改Prometheus数据源地址为：prometheus-k8s.monitoring.svc:9090 或映射出的地址。
+![grafana.png](grafana.png)
 
-kubelilin 多云 PaaS 开源项目: https://github.com/KubeLilin/kubelilin
-
-![](https://mnur-prod-public.oss-cn-beijing.aliyuncs.com/0/tech/functional_architecture.png)
-
+## 二次开发
+如上图，第一个GC图表，可以通过如下 PromQL 查询语句获取数据：
+```sql
+sum(go_gc_duration_seconds{namespace="klns-administration", service="dev-yoyogodemo-kind-kind-svc-cluster-sgr"}) by (instance)
+```
+实际应用中将namespace和service替换为变量，即可实现多个服务的GC图表。
