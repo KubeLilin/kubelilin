@@ -48,6 +48,11 @@ func (svc *ServiceSupervisor) ApplyService(client corev1.CoreV1Interface, dp *mo
 	serviceInfo.Name = &svcName
 	serviceInfo.APIVersion = &apiVersion
 	serviceInfo.Kind = &kind
+	//构造label
+	serviceInfo.Labels = map[string]string{
+		"kubelilin-default": "true",
+		"k8s-app":           dp.Name,
+	}
 	//匹配dp的label
 	//metaLabel := make(map[string]string)
 	//metaLabel["k8s-app"] = dp.Name
