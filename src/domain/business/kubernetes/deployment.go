@@ -429,31 +429,37 @@ func (ds *DeploymentSupervisor) GetWorkloadYaml(tenantId, dpId uint64, clusterId
 		k8sDeployment, _ := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 		k8sDeployment.Kind = "Deployment"
 		k8sDeployment.APIVersion = "apps/v1"
+		k8sDeployment.SetManagedFields(nil)
 		runtimeWorkload = k8sDeployment
 	case "statefulset":
 		k8sStatefulSet, _ := clientSet.AppsV1().StatefulSets(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 		k8sStatefulSet.Kind = "StatefulSet"
 		k8sStatefulSet.APIVersion = "apps/v1"
+		k8sStatefulSet.SetManagedFields(nil)
 		runtimeWorkload = k8sStatefulSet
 	case "daemonset":
 		k8sDaemonSet, _ := clientSet.AppsV1().DaemonSets(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 		k8sDaemonSet.Kind = "DaemonSet"
 		k8sDaemonSet.APIVersion = "apps/v1"
+		k8sDaemonSet.SetManagedFields(nil)
 		runtimeWorkload = k8sDaemonSet
 	case "job":
 		k8sJob, _ := clientSet.BatchV1().Jobs(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 		k8sJob.Kind = "Job"
 		k8sJob.APIVersion = "batch/v1"
+		k8sJob.SetManagedFields(nil)
 		runtimeWorkload = k8sJob
 	case "cronjob":
 		k8sCronJobV1, err := clientSet.BatchV1().CronJobs(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 		k8sCronJobV1.Kind = "CronJob"
 		k8sCronJobV1.APIVersion = "batch/v1"
+		k8sCronJobV1.SetManagedFields(nil)
 		runtimeWorkload = k8sCronJobV1
 		if k8sErrors.IsNotFound(err) {
 			k8sCronJobV1beta1, _ := clientSet.BatchV1beta1().CronJobs(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 			k8sCronJobV1beta1.Kind = "CronJob"
 			k8sCronJobV1beta1.APIVersion = "batch/v1beta1"
+			k8sCronJobV1beta1.SetManagedFields(nil)
 			runtimeWorkload = k8sCronJobV1beta1
 		}
 	}
