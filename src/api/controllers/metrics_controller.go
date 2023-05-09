@@ -39,6 +39,20 @@ func (controller MetricsController) GetProjects(ctx *context.HttpContext) mvc.Ap
 	return mvc.Success(controller.metricsService.GetProjectsMetrics())
 }
 
+func (controller MetricsController) GetCustomMetrics(ctx *context.HttpContext) mvc.ApiResult {
+	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
+	pql := ctx.Input.QueryDefault("pql", "")
+	startTime := utils.GetNumberOfParam[uint64](ctx, "startTime")
+	endTime := utils.GetNumberOfParam[uint64](ctx, "endTime")
+	start := time.Unix(int64(startTime), 0)
+	end := time.Unix(int64(endTime), 0)
+	chartData, err := controller.chartService.Get(clusterId).QueryMetrics(pql, start, end)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(chartData)
+}
+
 func (controller MetricsController) GetNodeCpuUtilisation(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
 	startTime := utils.GetNumberOfParam[uint64](ctx, "startTime")

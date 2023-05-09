@@ -34,6 +34,10 @@ func (chart *Chart) Get(clusterId uint64) *Chart {
 	return chart
 }
 
+func (chart *Chart) QueryMetrics(pql string, startTime time.Time, endTime time.Time) (string, error) {
+	return chart.metricsProvider.Query(pql, startTime, endTime)
+}
+
 func (chart *Chart) QueryNodeCpuUtilisation(startTime time.Time, endTime time.Time) (string, error) {
 	query, err := chart.metricsProvider.Query(`(( instance:node_cpu_utilisation:rate5m{job="node-exporter", cluster=""} * instance:node_num_cpu:sum{job="node-exporter", cluster=""}) != 0 )
 			/ scalar(sum(instance:node_num_cpu:sum{job="node-exporter", cluster=""}))`, startTime, endTime)
