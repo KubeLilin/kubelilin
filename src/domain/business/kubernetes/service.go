@@ -264,3 +264,24 @@ func (svc *ServiceSupervisor) ChangeService(svcReq *requests.ServiceInfoReq) err
 	_, err = services.Apply(context.TODO(), serviceInfo, metav1.ApplyOptions{Force: true, FieldManager: "service-apply-fields"})
 	return err
 }
+
+func (svc *ServiceSupervisor) QueryServiceByLabel(clusterId uint64, namespace string, label string) (*dto.ServicePort, error) {
+	client, err := svc.clusterService.GetClusterClientByTenantAndId(0, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	// get service by label
+	options := metav1.ListOptions{}
+	options.LabelSelector = label // "k8s-app= deployment name"
+	services, _ := client.CoreV1().Services(namespace).List(context.TODO(), options)
+	if len(services.Items) > 0 {
+		if len(services.Items[0].Spec.Ports) > 0 {
+			return &dto.ServicePort{
+				ServiceName: services.Items[0].Name,
+				PortName:    services.Items[0].Spec.Ports[0].Name,
+				Success:     true,
+			}, nil
+		}
+	}
+	return nil, errors.New("未找到服务")
+}

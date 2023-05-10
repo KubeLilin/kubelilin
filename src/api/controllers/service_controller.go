@@ -68,3 +68,16 @@ func (c *ServiceController) PostChangeService(ctx *context.HttpContext, svcReq *
 	}
 	return mvc.Success(nil)
 }
+
+// get service by label
+func (c *ServiceController) GetServiceByLabel(ctx *context.HttpContext) mvc.ApiResult {
+	clusterId := utils.GetNumberOfParam[uint64](ctx, "clusterId")
+	namespace := ctx.Input.QueryDefault("namespace", "")
+	label := ctx.Input.QueryDefault("label", "")
+
+	servicePortInfo, err := c.svcSupervisor.QueryServiceByLabel(clusterId, namespace, label)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(servicePortInfo)
+}
