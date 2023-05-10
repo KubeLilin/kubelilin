@@ -25,7 +25,8 @@ yoyogo:
           "/v1/deployment/notify",
           "/actuator/health/liveness",
           "/actuator/health/readiness",
-          "/actuator/health/detail"
+          "/actuator/health/detail",
+          "/actuator/metrics",
         ]
   datasource:
     pool:
