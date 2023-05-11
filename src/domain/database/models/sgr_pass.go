@@ -216,6 +216,50 @@ var ApplicationLanguageCompileColumns = struct {
 	Status:       "status",
 }
 
+// ApplicationServiceMonitor [...]
+type ApplicationServiceMonitor struct {
+	ID             uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	Name           string `gorm:"column:name;type:varchar(50);not null" json:"name"`                       // ServiceMonitor名称
+	AppID          int64  `gorm:"column:app_id;type:bigint;not null" json:"appId"`                         // 应用ID
+	ClusterID      int64  `gorm:"column:cluster_id;type:bigint;not null" json:"clusterId"`                 // 集群ID
+	Namesapce      string `gorm:"column:namesapce;type:varchar(50);not null" json:"namesapce"`             // 目标命名空间
+	DeploymentID   int64  `gorm:"column:deployment_id;type:bigint;not null" json:"deploymentId"`           // 部署ID
+	DeploymentName string `gorm:"column:deployment_name;type:varchar(100);not null" json:"deploymentName"` // 部署名称
+	Interval       uint   `gorm:"column:interval;type:int unsigned;not null" json:"interval"`              // 采集间隔时间
+	Port           string `gorm:"column:port;type:varchar(50);not null" json:"port"`                       // 采集服务端口名称,
+	Path           string `gorm:"column:path;type:varchar(200);not null" json:"path"`                      // 采集指标端点
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *ApplicationServiceMonitor) TableName() string {
+	return "application_service_monitor"
+}
+
+// ApplicationServiceMonitorColumns get sql column name.获取数据库列名
+var ApplicationServiceMonitorColumns = struct {
+	ID             string
+	Name           string
+	AppID          string
+	ClusterID      string
+	Namesapce      string
+	DeploymentID   string
+	DeploymentName string
+	Interval       string
+	Port           string
+	Path           string
+}{
+	ID:             "id",
+	Name:           "name",
+	AppID:          "app_id",
+	ClusterID:      "cluster_id",
+	Namesapce:      "namesapce",
+	DeploymentID:   "deployment_id",
+	DeploymentName: "deployment_name",
+	Interval:       "interval",
+	Port:           "port",
+	Path:           "path",
+}
+
 // CodeApplicationRuntime 运行时字典
 type CodeApplicationRuntime struct {
 	ID   uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
