@@ -7,14 +7,18 @@ import (
 	"gorm.io/gorm"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	applycorev1 "k8s.io/client-go/applyconfigurations/core/v1"
+	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"kubelilin/api/dto/requests"
 	"kubelilin/api/dto/responses"
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
 	"kubelilin/pkg/page"
+	"kubelilin/utils"
 	"strconv"
 	"strings"
 )
@@ -279,9 +283,85 @@ func (svc *ServiceSupervisor) QueryServiceByLabel(clusterId uint64, namespace st
 			return &dto.ServicePort{
 				ServiceName: services.Items[0].Name,
 				PortName:    services.Items[0].Spec.Ports[0].Name,
+				Port:        services.Items[0].Spec.Ports[0].Port,
 				Success:     true,
 			}, nil
 		}
 	}
 	return nil, errors.New("未找到服务")
+}
+
+func (svc *ServiceSupervisor) CreateOrUpdateServiceMonitorByK8sCluster(model models.ApplicationServiceMonitor) error {
+	config, err := svc.clusterService.GetClusterConfig(0, model.ClusterID)
+	if err != nil {
+		return err
+	}
+	// Create a dynamic client
+	dynamicClient, err := dynamic.NewForConfig(config)
+	if err != nil {
+		return err
+	}
+	// Define the GVR for ServiceMonitor resources
+	gvr := schema.GroupVersionResource{
+		Group:    "monitoring.coreos.com",
+		Version:  "v1",
+		Resource: "servicemonitors",
+	}
+	// Create a ServiceMonitor resource object
+	serviceMonitor := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "monitoring.coreos.com/v1",
+			"kind":       "ServiceMonitor",
+			"metadata": map[string]interface{}{
+				"name":      model.Name,
+				"namespace": model.Namespace,
+				"labels": map[string]interface{}{
+					"k8s-app": model.DeploymentName,
+				},
+			},
+			"spec": map[string]interface{}{
+				"endpoints": []map[string]interface{}{
+					{
+						"path":     model.Path,
+						"port":     model.Port,
+						"interval": utils.ToString(model.Interval) + "s",
+					},
+				},
+				"namespaceSelector": map[string]interface{}{
+					"matchNames": []string{model.Namespace},
+				},
+				"selector": map[string]interface{}{
+					"matchLabels": map[string]interface{}{
+						"k8s-app": model.DeploymentName,
+					},
+				},
+			},
+		},
+	}
+
+	// Create or update the ServiceMonitor resource
+	_, err = dynamicClient.Resource(gvr).Namespace(model.Namespace).Create(context.Background(), serviceMonitor, metav1.CreateOptions{})
+	return err
+}
+
+// CreateServiceMonitor create service monitor
+func (svc *ServiceSupervisor) CreateServiceMonitor(model models.ApplicationServiceMonitor) error {
+	err := svc.db.Transaction(func(tx *gorm.DB) error {
+		err := tx.Create(&model).Error
+		if err != nil {
+			return err
+		}
+		if err = svc.CreateOrUpdateServiceMonitorByK8sCluster(model); err != nil {
+			tx.Rollback()
+		}
+		return err
+	})
+	return err
+}
+
+// query service monitor
+func (svc *ServiceSupervisor) QueryServiceMonitorByAppId(appId uint64) ([]models.ApplicationServiceMonitor, error) {
+	var monitors []models.ApplicationServiceMonitor
+	err := svc.db.Model(&models.ApplicationServiceMonitor{}).Where("app_id = ?", appId).Find(&monitors).Error
+	return monitors, err
 }

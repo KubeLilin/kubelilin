@@ -720,7 +720,7 @@ func GetDaprComponentResource(cfg *rest.Config, namespace string) (any, error) {
 }
 
 // CreateOrUpdateDaprComponentResource create or update dapr component resource
-func CreateOrUpdateDaprComponentResource(cfg *rest.Config, namespace string, component *unstructured.Unstructured) error {
+func CreateOrUpdateDaprComponentResource(cfg *rest.Config, namespace string, name string, component *unstructured.Unstructured) error {
 	dynamicClient, err := dynamic.NewForConfig(cfg)
 	if err != nil {
 		return err
@@ -731,7 +731,7 @@ func CreateOrUpdateDaprComponentResource(cfg *rest.Config, namespace string, com
 		Resource: "components",
 	}
 
-	existingComponent, err := dynamicClient.Resource(daprGVR).Namespace("default").Get(context.Background(), "<NAME>", metav1.GetOptions{})
+	existingComponent, err := dynamicClient.Resource(daprGVR).Namespace("default").Get(context.Background(), name, metav1.GetOptions{})
 	// if the resource doesn't exist, we'll create it
 	if k8sErrors.IsNotFound(err) {
 		_, err = dynamicClient.Resource(daprGVR).Namespace(namespace).Create(context.Background(), component, metav1.CreateOptions{})

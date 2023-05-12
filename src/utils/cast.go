@@ -3,10 +3,15 @@ package utils
 import (
 	"encoding/json"
 	"errors"
+	"github.com/jinzhu/copier"
 	"gopkg.in/yaml.v3"
 	"strconv"
 	"time"
 )
+
+func CopyStruct(src, dst interface{}) error {
+	return copier.Copy(dst, src)
+}
 
 // Int32Ptr convert int32 value to a pointer.
 func Int32Ptr(i int32) *int32 {

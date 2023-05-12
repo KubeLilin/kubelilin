@@ -5,6 +5,7 @@ import (
 	"github.com/yoyofx/yoyogo/web/mvc"
 	requests2 "kubelilin/api/dto/requests"
 	"kubelilin/domain/business/kubernetes"
+	"kubelilin/domain/database/models"
 	"kubelilin/utils"
 )
 
@@ -80,4 +81,28 @@ func (c *ServiceController) GetServiceByLabel(ctx *context.HttpContext) mvc.ApiR
 		return mvc.FailWithMsg(nil, err.Error())
 	}
 	return mvc.Success(servicePortInfo)
+}
+
+func (c *ServiceController) PostCreateOrUpdateServiceMonitor(request *requests2.ServiceMonitorRequest) mvc.ApiResult {
+	var serviceMonitorDb models.ApplicationServiceMonitor
+	err := utils.CopyStruct(request, &serviceMonitorDb)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+
+	err = c.svcSupervisor.CreateServiceMonitor(serviceMonitorDb)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+
+	return mvc.Success(nil)
+}
+
+func (c *ServiceController) GetServiceMonitorList(ctx *context.HttpContext) mvc.ApiResult {
+	appid := utils.GetNumberOfParam[uint64](ctx, "appId")
+	list, err := c.svcSupervisor.QueryServiceMonitorByAppId(appid)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(list)
 }

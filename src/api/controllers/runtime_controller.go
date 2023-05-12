@@ -128,7 +128,7 @@ func (controller RuntimeController) PostCreateOrUpdateDaprComponent(request *req
 		},
 	}
 
-	err = kubernetes.CreateOrUpdateDaprComponentResource(restConfig, request.Namespace, component)
+	err = kubernetes.CreateOrUpdateDaprComponentResource(restConfig, request.Namespace, request.Name, component)
 	if err != nil {
 		return mvc.Fail(err.Error())
 	}
