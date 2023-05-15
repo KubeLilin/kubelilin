@@ -307,6 +307,17 @@ func (svc *ServiceSupervisor) CreateOrUpdateServiceMonitorByK8sCluster(model mod
 		Version:  "v1",
 		Resource: "servicemonitors",
 	}
+
+	endpoint := map[string]interface{}{
+		"path":     model.Path,
+		"interval": utils.ToString(model.Interval) + "s",
+	}
+	// model.Port is number ?
+	if utils.IsNumeric(model.Port) {
+		endpoint["targetPort"] = utils.ToInt(model.Port)
+	} else {
+		endpoint["port"] = model.Port
+	}
 	// Create a ServiceMonitor resource object
 	serviceMonitor := &unstructured.Unstructured{
 		Object: map[string]interface{}{

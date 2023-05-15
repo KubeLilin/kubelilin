@@ -13,6 +13,11 @@ func CopyStruct(src, dst interface{}) error {
 	return copier.Copy(dst, src)
 }
 
+func IsNumeric(s string) bool {
+	_, err := strconv.Atoi(s)
+	return err == nil
+}
+
 // Int32Ptr convert int32 value to a pointer.
 func Int32Ptr(i int32) *int32 {
 	return &i
@@ -48,6 +53,11 @@ func StringToInt64(s string) (int64, error) {
 
 func StringToUInt64(s string) (uint64, error) {
 	return strconv.ParseUint(s, 10, 64)
+}
+
+func ToInt(s string) int {
+	i, _ := strconv.Atoi(s)
+	return i
 }
 
 func StringToInt(s string) (int, error) {
