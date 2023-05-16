@@ -332,11 +332,7 @@ func (svc *ServiceSupervisor) CreateOrUpdateServiceMonitorByK8sCluster(model mod
 			},
 			"spec": map[string]interface{}{
 				"endpoints": []map[string]interface{}{
-					{
-						"path":     model.Path,
-						"port":     model.Port,
-						"interval": utils.ToString(model.Interval) + "s",
-					},
+					endpoint,
 				},
 				"namespaceSelector": map[string]interface{}{
 					"matchNames": []string{model.Namespace},
