@@ -1,4 +1,6 @@
 ## 采集Java程序JVM信息
+## 本文实例代码
+https://github.com/yoyofx/java-metric-prometheus
 
 ## 创建 Spring Boot Application 应用程序
 进行 https://start.spring.io 使用版本 Spring Boot v2.7.11和JDK 17，并创建一个具有以下依赖项的简单JAVA应用程序。 
