@@ -1,5 +1,8 @@
 # ASP.NET Core Prometheus 集成&采集&展示
 
+## 本文实例代码
+https://github.com/yoyofx/dotnet-metric-prometheus
+
 ## 创建 ASP.NET Core Web API
 此项目在.NET 7 环境创建
 ```bash
