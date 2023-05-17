@@ -7,6 +7,7 @@ import (
 	"kubelilin/domain/business/app"
 	"kubelilin/domain/business/devops"
 	"kubelilin/domain/business/kubernetes"
+	"kubelilin/domain/business/metrics"
 	"kubelilin/domain/business/networks"
 	"kubelilin/domain/business/tenant"
 	"kubelilin/domain/conf"
@@ -39,6 +40,7 @@ func init() {
 			serviceCollection.AddTransient(app.NewServiceConnectionService)
 			serviceCollection.AddTransient(app.NewDevopsService)
 			serviceCollection.AddTransient(app.NewRuntimeService)
+			serviceCollection.AddTransient(metrics.NewChartWithDb)
 
 			serviceCollection.AddTransient(networks.NewApiGatewayService)
 			serviceCollection.AddTransient(devops.NewProjectService)

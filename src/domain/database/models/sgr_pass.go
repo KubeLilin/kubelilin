@@ -216,6 +216,59 @@ var ApplicationLanguageCompileColumns = struct {
 	Status:       "status",
 }
 
+// ApplicationServiceMonitor [...]
+type ApplicationServiceMonitor struct {
+	ID             uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	Name           string     `gorm:"column:name;type:varchar(50);not null" json:"name"`                       // ServiceMonitor名称
+	AppID          uint64     `gorm:"column:app_id;type:bigint unsigned;not null" json:"appId"`                // 应用ID
+	ClusterID      uint64     `gorm:"column:cluster_id;type:bigint unsigned;not null" json:"clusterId"`        // 集群ID
+	Namespace      string     `gorm:"column:namespace;type:varchar(50);not null" json:"namespace"`             // 目标命名空间
+	DeploymentID   uint64     `gorm:"column:deployment_id;type:bigint unsigned;not null" json:"deploymentId"`  // 部署ID
+	DeploymentName string     `gorm:"column:deployment_name;type:varchar(100);not null" json:"deploymentName"` // 部署名称
+	Interval       uint       `gorm:"column:interval;type:int unsigned;not null" json:"interval"`              // 采集间隔时间
+	Port           string     `gorm:"column:port;type:varchar(50);not null" json:"port"`                       // 采集服务端口名称,
+	Path           string     `gorm:"column:path;type:varchar(200);not null" json:"path"`                      // 采集指标端点
+	CreateTime     *time.Time `gorm:"column:create_time;type:datetime" json:"createTime"`                      // 创建时间
+	UpdateTime     *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`                      // 更新时间
+	Status         uint8      `gorm:"column:status;type:tinyint unsigned;not null;default:1" json:"status"`    // 状态
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *ApplicationServiceMonitor) TableName() string {
+	return "application_service_monitor"
+}
+
+// ApplicationServiceMonitorColumns get sql column name.获取数据库列名
+var ApplicationServiceMonitorColumns = struct {
+	ID             string
+	Name           string
+	AppID          string
+	ClusterID      string
+	Namespace      string
+	DeploymentID   string
+	DeploymentName string
+	Interval       string
+	Port           string
+	Path           string
+	CreateTime     string
+	UpdateTime     string
+	Status         string
+}{
+	ID:             "id",
+	Name:           "name",
+	AppID:          "app_id",
+	ClusterID:      "cluster_id",
+	Namespace:      "namespace",
+	DeploymentID:   "deployment_id",
+	DeploymentName: "deployment_name",
+	Interval:       "interval",
+	Port:           "port",
+	Path:           "path",
+	CreateTime:     "create_time",
+	UpdateTime:     "update_time",
+	Status:         "status",
+}
+
 // CodeApplicationRuntime 运行时字典
 type CodeApplicationRuntime struct {
 	ID   uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
@@ -348,6 +401,29 @@ var DevopsProjectsAppsColumns = struct {
 	ID:            "id",
 	ProjectID:     "project_id",
 	ApplicationID: "application_id",
+}
+
+// PromethusClusterConfig Promethus 集群配置
+type PromethusClusterConfig struct {
+	ID        uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	ClusterID int64  `gorm:"column:cluster_id;type:bigint;not null" json:"clusterId"` // 集群ID
+	URL       string `gorm:"column:url;type:varchar(255)" json:"url"`                 // Promethus访问地址
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *PromethusClusterConfig) TableName() string {
+	return "promethus_cluster_config"
+}
+
+// PromethusClusterConfigColumns get sql column name.获取数据库列名
+var PromethusClusterConfigColumns = struct {
+	ID        string
+	ClusterID string
+	URL       string
+}{
+	ID:        "id",
+	ClusterID: "cluster_id",
+	URL:       "url",
 }
 
 // ServiceConnection 用于保存其他服务或者第三方组件所依赖的资源，例如连接字符串，ssh秘钥，git连接等等
@@ -784,7 +860,7 @@ type SgrTenantApplicationPipelines struct {
 	Dsl          string     `gorm:"column:dsl;type:text;not null" json:"dsl"`                                 // 流水线DSL
 	TaskStatus   *uint      `gorm:"column:taskStatus;type:int unsigned" json:"taskStatus"`                    // 流水线任务状态( ready=0 , running=1, success=2, fail=3,  )
 	LastTaskID   string     `gorm:"column:lastTaskId;type:varchar(15);not null;default:''" json:"lastTaskId"` // 最后一次任务执行ID
-	LastCommit   string     `gorm:"column:last_commit;type:varchar(200)" json:"lastCommit"`                   // git最后一次提交记录
+	LastCommit   string     `gorm:"column:last_commit;type:text" json:"lastCommit"`                           // git最后一次提交记录
 	Status       uint8      `gorm:"column:status;type:tinyint unsigned;not null" json:"status"`
 	CreationTime *time.Time `gorm:"column:creation_time;type:datetime" json:"creationTime"`
 	UpdateTime   *time.Time `gorm:"column:update_time;type:datetime" json:"updateTime"`

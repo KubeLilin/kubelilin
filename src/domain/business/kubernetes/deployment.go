@@ -7,8 +7,10 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	v1 "k8s.io/api/core/v1"
+	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/cli-runtime/pkg/printers"
 	appsapplyv1 "k8s.io/client-go/applyconfigurations/apps/v1"
 	corev1 "k8s.io/client-go/applyconfigurations/core/v1"
@@ -361,36 +363,113 @@ func (ds *DeploymentSupervisor) DeleteDeploymentWithOutDb(tenantId, dpId uint64)
 	return clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), dpDatum.Name, metav1.DeleteOptions{})
 }
 
-func (ds *DeploymentSupervisor) GetDeploymentYaml(tenantId, dpId uint64) (string, error) {
-	dpDatum := models.SgrTenantDeployments{}
-	dbErr := ds.db.Model(&models.SgrTenantDeployments{}).Where("id=?", dpId).First(&dpDatum)
-	if dbErr.Error != nil {
-		return "", errors.New("未找到相应的部署")
+func (ds *DeploymentSupervisor) DeleteWorkloadByK8s(workload string, clusterId uint64, namespace string, dpName string) error {
+	clientSet, clientSetErr := ds.clusterService.GetClusterClientByTenantAndId(0, clusterId)
+	if clientSetErr != nil {
+		return clientSetErr
 	}
-	namespace, err := ds.GetNameSpaceByDpId(dpId)
-	if err != nil {
-		return "", err
+	switch strings.ToLower(workload) {
+	case "deployment":
+		return clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+	case "statefulset":
+		return clientSet.AppsV1().StatefulSets(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+	case "daemonset":
+		return clientSet.AppsV1().DaemonSets(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+	case "job":
+		return clientSet.BatchV1().Jobs(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+	case "cronjob":
+		err := clientSet.BatchV1().CronJobs(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+		if k8sErrors.IsNotFound(err) {
+			return clientSet.BatchV1beta1().CronJobs(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
+		}
+		return err
+	default:
+		return clientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), dpName, metav1.DeleteOptions{})
 	}
-	clusterInfo := &models.SgrTenantCluster{}
-	dbErr = ds.db.Model(&models.SgrTenantCluster{}).Where("id=? ", dpDatum.ClusterID).First(clusterInfo)
-	if dbErr.Error != nil {
-		return "", errors.New("未找到集群信息")
+}
+
+func (ds *DeploymentSupervisor) GetWorkloadYaml(tenantId, dpId uint64, clusterId uint64, ns string, dpName string, workload string) (string, error) {
+	mClusterId := uint64(0)
+	namespace := ""
+	deploymentName := ""
+	if dpId > 0 {
+		dpDatum := models.SgrTenantDeployments{}
+		dbErr := ds.db.Model(&models.SgrTenantDeployments{}).Where("id=?", dpId).First(&dpDatum)
+		if dbErr.Error != nil {
+			return "", errors.New("未找到相应的部署")
+		}
+		namespace, _ = ds.GetNameSpaceByDpId(dpId)
+		clusterInfo := &models.SgrTenantCluster{}
+		dbErr = ds.db.Model(&models.SgrTenantCluster{}).Where("id=? ", dpDatum.ClusterID).First(clusterInfo)
+		if dbErr.Error != nil {
+			return "", errors.New("未找到集群信息")
+		}
+		mClusterId = clusterInfo.ID
+		deploymentName = dpDatum.Name
+
+		workload = "deployment"
+	} else {
+		namespace = ns
+		deploymentName = dpName
+		mClusterId = clusterId
 	}
-	clientSet, clientSetErr := ds.clusterService.GetClusterClientByTenantAndId(tenantId, clusterInfo.ID)
+	clientSet, clientSetErr := ds.clusterService.GetClusterClientByTenantAndId(tenantId, mClusterId)
 	if clientSetErr != nil {
 		return "", clientSetErr
 	}
-	k8sDeployment, err := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), dpDatum.Name, metav1.GetOptions{})
+
+	var err error
+	var runtimeWorkload runtime.Object
+	if workload == "" || workload == "undefined" {
+		workload = "deployment"
+	}
+
+	switch strings.ToLower(workload) {
+	case "deployment":
+		k8sDeployment, _ := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+		k8sDeployment.Kind = "Deployment"
+		k8sDeployment.APIVersion = "apps/v1"
+		k8sDeployment.SetManagedFields(nil)
+		runtimeWorkload = k8sDeployment
+	case "statefulset":
+		k8sStatefulSet, _ := clientSet.AppsV1().StatefulSets(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+		k8sStatefulSet.Kind = "StatefulSet"
+		k8sStatefulSet.APIVersion = "apps/v1"
+		k8sStatefulSet.SetManagedFields(nil)
+		runtimeWorkload = k8sStatefulSet
+	case "daemonset":
+		k8sDaemonSet, _ := clientSet.AppsV1().DaemonSets(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+		k8sDaemonSet.Kind = "DaemonSet"
+		k8sDaemonSet.APIVersion = "apps/v1"
+		k8sDaemonSet.SetManagedFields(nil)
+		runtimeWorkload = k8sDaemonSet
+	case "job":
+		k8sJob, _ := clientSet.BatchV1().Jobs(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+		k8sJob.Kind = "Job"
+		k8sJob.APIVersion = "batch/v1"
+		k8sJob.SetManagedFields(nil)
+		runtimeWorkload = k8sJob
+	case "cronjob":
+		k8sCronJobV1, err := clientSet.BatchV1().CronJobs(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+		k8sCronJobV1.Kind = "CronJob"
+		k8sCronJobV1.APIVersion = "batch/v1"
+		k8sCronJobV1.SetManagedFields(nil)
+		runtimeWorkload = k8sCronJobV1
+		if k8sErrors.IsNotFound(err) {
+			k8sCronJobV1beta1, _ := clientSet.BatchV1beta1().CronJobs(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+			k8sCronJobV1beta1.Kind = "CronJob"
+			k8sCronJobV1beta1.APIVersion = "batch/v1beta1"
+			k8sCronJobV1beta1.SetManagedFields(nil)
+			runtimeWorkload = k8sCronJobV1beta1
+		}
+	}
 	if err != nil {
 		return "", err
 	}
 	//yamlBytes, yamlErr := yaml.Marshal(k8sDeployment)
 	yamlPrinter := printers.YAMLPrinter{}
 	buffers := bytes.NewBufferString("")
-	k8sDeployment.Kind = "Deployment"
-	k8sDeployment.APIVersion = "apps/v1"
-	yamlErr := yamlPrinter.PrintObj(k8sDeployment, buffers)
-
+	yamlErr := yamlPrinter.PrintObj(runtimeWorkload, buffers)
 	return buffers.String(), yamlErr
 }
 

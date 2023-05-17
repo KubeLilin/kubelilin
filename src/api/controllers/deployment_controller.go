@@ -115,11 +115,17 @@ func (controller DeploymentController) DeleteDeployment(ctx *context.HttpContext
 
 func (controller DeploymentController) DeleteDeploymentWithOutDB(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
-	deploymentId, err := utils.StringToUInt64(ctx.Input.QueryDefault("dpId", "0"))
-	if err != nil {
-		return mvc.FailWithMsg(nil, "部署id无效或者未接收到部署id")
+	cid := utils.GetNumberOfParam[uint64](ctx, "cid")
+	dpId := utils.GetNumberOfParam[uint64](ctx, "dpId")
+	namespace := ctx.Input.QueryDefault("namespace", "")
+	dpName := ctx.Input.QueryDefault("dpName", "")
+	workload := ctx.Input.QueryDefault("workload", "deployment")
+	var err error
+	if dpId > 0 {
+		err = controller.deploymentSupervisor.DeleteDeploymentWithOutDb(userInfo.TenantID, dpId)
+	} else {
+		err = controller.deploymentSupervisor.DeleteWorkloadByK8s(workload, cid, namespace, dpName)
 	}
-	err = controller.deploymentSupervisor.DeleteDeploymentWithOutDb(userInfo.TenantID, deploymentId)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}
@@ -186,9 +192,13 @@ func (controller DeploymentController) GetEvents(ctx *context.HttpContext) mvc.A
 
 func (controller DeploymentController) GetYaml(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
-	dpIdStr := ctx.Input.Query("dpId")
-	dpId, _ := strconv.ParseUint(dpIdStr, 10, 64)
-	yamlStr, err := controller.deploymentSupervisor.GetDeploymentYaml(userInfo.TenantID, dpId)
+	cid := utils.GetNumberOfParam[uint64](ctx, "cid")
+	dpId := utils.GetNumberOfParam[uint64](ctx, "dpId")
+	namespace := ctx.Input.QueryDefault("namespace", "")
+	dpName := ctx.Input.QueryDefault("dpName", "")
+	workload := ctx.Input.QueryDefault("workload", "deployment")
+
+	yamlStr, err := controller.deploymentSupervisor.GetWorkloadYaml(userInfo.TenantID, dpId, cid, namespace, dpName, workload)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}

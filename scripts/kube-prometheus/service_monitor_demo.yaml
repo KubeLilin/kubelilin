@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: dev-yoyogodemo-kind-kind-servicemontor
+  namespace: klns-administration
+  labels:
+    k8s-app: dev-yoyogodemo-kind-kind
+spec:
+  endpoints:
+    - interval: 15s
+      path: /app/actuator/metrics
+      port: default-tcp
+  namespaceSelector:
+    matchNames:
+      - klns-administration
+  selector:
+    matchLabels:
+      k8s-app: dev-yoyogodemo-kind-kind

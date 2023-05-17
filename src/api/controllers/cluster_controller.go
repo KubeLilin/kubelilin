@@ -4,6 +4,7 @@ import (
 	contextV1 "context"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
+	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	metricsv "k8s.io/metrics/pkg/client/clientset/versioned"
 	requests2 "kubelilin/api/dto/requests"
@@ -11,6 +12,7 @@ import (
 	"kubelilin/domain/dto"
 	"kubelilin/utils"
 	"strconv"
+	"strings"
 )
 
 type ClusterController struct {
@@ -26,14 +28,14 @@ func (controller ClusterController) GetPods(ctx *context.HttpContext) mvc.ApiRes
 	namespace := ctx.Input.QueryDefault("namespace", "")
 	k8sapp := ctx.Input.QueryDefault("app", "")
 	k8snode := ctx.Input.QueryDefault("node", "")
-
+	workload := ctx.Input.QueryDefault("workload", "deployment")
 	userInfo := requests2.GetUserInfo(ctx)
 	cid, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
 	client, clientErr := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
 	if clientErr != nil {
 		return mvc.FailWithMsg(nil, "Can't create cluster client")
 	}
-	podList := kubernetes.GetPodList(client, namespace, k8snode, k8sapp)
+	podList := kubernetes.GetPodList(client, workload, namespace, k8snode, k8sapp)
 
 	config, err1 := controller.clusterService.GetClusterConfig(0, cid)
 	if err1 == nil {
@@ -128,6 +130,35 @@ func (controller ClusterController) GetDeployments(ctx *context.HttpContext) mvc
 
 	list := kubernetes.GetDeploymentList(client, namespace)
 	return controller.OK(list)
+}
+
+func (controller ClusterController) GetWorkloads(ctx *context.HttpContext) mvc.ApiResult {
+	namespace := ctx.Input.QueryDefault("namespace", "")
+	workload := ctx.Input.QueryDefault("workload", "")
+
+	userInfo := requests2.GetUserInfo(ctx)
+	strCid := ctx.Input.QueryDefault("cid", "0")
+	cid, _ := strconv.ParseUint(strCid, 10, 64)
+	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
+	var wordloads []dto.Workload
+	switch strings.ToLower(workload) {
+	case "deployment":
+		wordloads = kubernetes.GetDeploymentList(client, namespace)
+	case "statefulset":
+		wordloads = kubernetes.GetStatefulSetList(client, namespace)
+	case "daemonset":
+		wordloads = kubernetes.GetDaemonSetList(client, namespace)
+	case "cronjob":
+		var err error
+		wordloads, err = kubernetes.GetCronJobV1List(client, namespace)
+		if k8sErrors.IsNotFound(err) {
+			wordloads, err = kubernetes.GetCronJobBetaV1List(client, namespace)
+		}
+	case "job":
+		wordloads, _ = kubernetes.GetJobV1List(client, namespace)
+	}
+
+	return controller.OK(wordloads)
 }
 
 func (controller ClusterController) GetNodes(ctx *context.HttpContext) mvc.ApiResult {

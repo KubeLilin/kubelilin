@@ -5,6 +5,7 @@ import (
 	"github.com/yoyofx/yoyogo/web/mvc"
 	requests2 "kubelilin/api/dto/requests"
 	"kubelilin/domain/business/kubernetes"
+	"kubelilin/domain/database/models"
 	"kubelilin/utils"
 )
 
@@ -67,4 +68,50 @@ func (c *ServiceController) PostChangeService(ctx *context.HttpContext, svcReq *
 		return mvc.FailWithMsg(nil, err.Error())
 	}
 	return mvc.Success(nil)
+}
+
+// get service by label
+func (c *ServiceController) GetServiceByLabel(ctx *context.HttpContext) mvc.ApiResult {
+	clusterId := utils.GetNumberOfParam[uint64](ctx, "clusterId")
+	namespace := ctx.Input.QueryDefault("namespace", "")
+	label := ctx.Input.QueryDefault("label", "")
+
+	servicePortInfo, err := c.svcSupervisor.QueryServiceByLabel(clusterId, namespace, label)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(servicePortInfo)
+}
+
+func (c *ServiceController) PostCreateOrUpdateServiceMonitor(request *requests2.ServiceMonitorRequest) mvc.ApiResult {
+	var serviceMonitorDb models.ApplicationServiceMonitor
+	err := utils.CopyStruct(request, &serviceMonitorDb)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+
+	err = c.svcSupervisor.CreateServiceMonitor(serviceMonitorDb)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+
+	return mvc.Success(nil)
+}
+
+func (c *ServiceController) DeleteServiceMonitor(ctx *context.HttpContext) mvc.ApiResult {
+	smId := utils.GetNumberOfParam[uint64](ctx, "id")
+	err := c.svcSupervisor.DeleteServiceMonitor(smId)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success("ok")
+}
+
+func (c *ServiceController) GetServiceMonitorList(ctx *context.HttpContext) mvc.ApiResult {
+	appid := utils.GetNumberOfParam[uint64](ctx, "appId")
+	list, err := c.svcSupervisor.QueryServiceMonitorByAppId(appid)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success(list)
 }

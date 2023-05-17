@@ -15,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/discovery"
 	memory "k8s.io/client-go/discovery/cached"
 	"k8s.io/client-go/dynamic"
@@ -26,9 +27,11 @@ import (
 	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/client-go/util/homedir"
 	"kubelilin/domain/dto"
+	"kubelilin/utils"
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -67,7 +70,7 @@ func NewClientSetWithFileContent(fileContent string) (*kubernetes.Clientset, err
 	return client, err
 }
 
-func GetPodList(client *kubernetes.Clientset, namespace string, node string, app string) []dto.Pod {
+func GetPodList(client *kubernetes.Clientset, workload string, namespace string, node string, app string) []dto.Pod {
 	emptyOptions := metav1.ListOptions{}
 
 	if app != "" {
@@ -78,7 +81,43 @@ func GetPodList(client *kubernetes.Clientset, namespace string, node string, app
 	}
 
 	list, _ := client.CoreV1().Pods(namespace).List(context.TODO(), emptyOptions)
+	if len(list.Items) == 0 {
+		var labelSelector *metav1.LabelSelector
+		// get matchLabels from workload
+		switch strings.ToLower(workload) {
+		case "deployment":
+			deployResource, _ := client.AppsV1().Deployments(namespace).Get(context.TODO(), app, metav1.GetOptions{})
+			labelSelector = deployResource.Spec.Selector
+		case "statefulset":
+			statefulSetResource, _ := client.AppsV1().StatefulSets(namespace).Get(context.TODO(), app, metav1.GetOptions{})
+			labelSelector = statefulSetResource.Spec.Selector
+		case "daemonset":
+			daemonSetResource, _ := client.AppsV1().DaemonSets(namespace).Get(context.TODO(), app, metav1.GetOptions{})
+			labelSelector = daemonSetResource.Spec.Selector
+		case "job":
+			jobResource, _ := client.BatchV1().Jobs(namespace).Get(context.TODO(), app, metav1.GetOptions{})
+			labelSelector = jobResource.Spec.Selector
+		case "cronjob":
+			cronJobResource, _ := client.BatchV1().CronJobs(namespace).Get(context.TODO(), app, metav1.GetOptions{})
+			labelSelector = cronJobResource.Spec.JobTemplate.Spec.Selector
+		default:
+			deployResource, _ := client.AppsV1().Deployments(namespace).Get(context.TODO(), app, metav1.GetOptions{})
+			labelSelector = deployResource.Spec.Selector
+		}
 
+		labelSelectorV1 := labels.NewSelector()
+		if labelSelector != nil {
+			for key, value := range labelSelector.MatchLabels {
+				requirement, _ := labels.NewRequirement(key, selection.Equals, []string{value})
+				labelSelectorV1 = labelSelectorV1.Add(*requirement)
+			}
+		} else {
+			return nil
+		}
+		emptyOptionsV1 := metav1.ListOptions{}
+		emptyOptionsV1.LabelSelector = labelSelectorV1.String()
+		list, _ = client.CoreV1().Pods(namespace).List(context.TODO(), emptyOptionsV1)
+	}
 	var podList []dto.Pod
 	for _, item := range list.Items {
 		podCount := len(item.Status.ContainerStatuses)
@@ -197,16 +236,17 @@ func GetNodeList(client *kubernetes.Clientset) []dto.Node {
 	return nodeList
 }
 
-func GetDeploymentList(client *kubernetes.Clientset, namespace string) []dto.Deployment {
+func GetDeploymentList(client *kubernetes.Clientset, namespace string) []dto.Workload {
 	emptyOptions := metav1.ListOptions{}
-	var deploymentList []dto.Deployment
+	var deploymentList []dto.Workload
 	list, _ := client.AppsV1().Deployments(namespace).List(context.TODO(), emptyOptions)
 
 	for _, deploy := range list.Items {
-		item := dto.Deployment{
+		item := dto.Workload{
 			Name:                deploy.Name,
 			Namespace:           deploy.Namespace,
 			Labels:              deploy.Labels,
+			Selectors:           deploy.Spec.Selector.MatchLabels,
 			Replicas:            deploy.Status.Replicas,
 			AvailableReplicas:   deploy.Status.AvailableReplicas,
 			UpdatedReplicas:     deploy.Status.UpdatedReplicas,
@@ -223,6 +263,174 @@ func GetDeploymentList(client *kubernetes.Clientset, namespace string) []dto.Dep
 		deploymentList = append(deploymentList, item)
 	}
 	return deploymentList
+}
+
+func GetStatefulSetList(client *kubernetes.Clientset, namespace string) []dto.Workload {
+	emptyOptions := metav1.ListOptions{}
+	var deploymentList []dto.Workload
+	list, _ := client.AppsV1().StatefulSets(namespace).List(context.TODO(), emptyOptions)
+
+	for _, deploy := range list.Items {
+		item := dto.Workload{
+			Name:              deploy.Name,
+			Namespace:         deploy.Namespace,
+			Labels:            deploy.Labels,
+			Selectors:         deploy.Spec.Selector.MatchLabels,
+			Replicas:          deploy.Status.Replicas,
+			AvailableReplicas: deploy.Status.AvailableReplicas,
+			UpdatedReplicas:   deploy.Status.UpdatedReplicas,
+			ReadyReplicas:     deploy.Status.ReadyReplicas,
+		}
+		if len(deploy.Spec.Template.Spec.Containers) > 0 {
+			item.Image = deploy.Spec.Template.Spec.Containers[0].Image
+			item.RequestCPU = deploy.Spec.Template.Spec.Containers[0].Resources.Requests.Cpu().AsApproximateFloat64()
+			item.RequestMemory = deploy.Spec.Template.Spec.Containers[0].Resources.Requests.Memory().AsApproximateFloat64()
+			item.LimitsCPU = deploy.Spec.Template.Spec.Containers[0].Resources.Limits.Cpu().AsApproximateFloat64()
+			item.LimitsMemory = deploy.Spec.Template.Spec.Containers[0].Resources.Limits.Memory().AsApproximateFloat64()
+		}
+		deploymentList = append(deploymentList, item)
+	}
+	return deploymentList
+}
+
+func GetDaemonSetList(client *kubernetes.Clientset, namespace string) []dto.Workload {
+	emptyOptions := metav1.ListOptions{}
+	var deploymentList []dto.Workload
+	list, _ := client.AppsV1().DaemonSets(namespace).List(context.TODO(), emptyOptions)
+
+	for _, deploy := range list.Items {
+		item := dto.Workload{
+			Name:              deploy.Name,
+			Namespace:         deploy.Namespace,
+			Labels:            deploy.Labels,
+			Selectors:         deploy.Spec.Selector.MatchLabels,
+			Replicas:          deploy.Status.NumberAvailable,
+			AvailableReplicas: deploy.Status.CurrentNumberScheduled,
+			UpdatedReplicas:   deploy.Status.UpdatedNumberScheduled,
+			ReadyReplicas:     deploy.Status.NumberReady,
+		}
+		if len(deploy.Spec.Template.Spec.Containers) > 0 {
+			item.Image = deploy.Spec.Template.Spec.Containers[0].Image
+			item.RequestCPU = deploy.Spec.Template.Spec.Containers[0].Resources.Requests.Cpu().AsApproximateFloat64()
+			item.RequestMemory = deploy.Spec.Template.Spec.Containers[0].Resources.Requests.Memory().AsApproximateFloat64()
+			item.LimitsCPU = deploy.Spec.Template.Spec.Containers[0].Resources.Limits.Cpu().AsApproximateFloat64()
+			item.LimitsMemory = deploy.Spec.Template.Spec.Containers[0].Resources.Limits.Memory().AsApproximateFloat64()
+		}
+		deploymentList = append(deploymentList, item)
+	}
+	return deploymentList
+}
+
+func GetCronJobV1List(client *kubernetes.Clientset, namespace string) ([]dto.Workload, error) {
+	emptyOptions := metav1.ListOptions{}
+	var deploymentList []dto.Workload
+	list, err := client.BatchV1().CronJobs(namespace).List(context.TODO(), emptyOptions)
+	if err != nil {
+		return nil, err
+	}
+	for _, deploy := range list.Items {
+		item := dto.Workload{
+			Name:                  deploy.Name,
+			Namespace:             deploy.Namespace,
+			Labels:                deploy.Labels,
+			Selectors:             nil,
+			JobSchedule:           deploy.Spec.Schedule,
+			JobBackoffLimit:       utils.PtrToInt32(deploy.Spec.JobTemplate.Spec.BackoffLimit),
+			JobCompletions:        utils.PtrToInt32(deploy.Spec.JobTemplate.Spec.Completions),
+			JobParallelism:        utils.PtrToInt32(deploy.Spec.JobTemplate.Spec.Parallelism),
+			JobActive:             len(deploy.Status.Active),
+			JobLastSuccessfulTime: utils.TimeFormat(deploy.Status.LastSuccessfulTime.Time),
+			JobLastScheduleTime:   utils.TimeFormat(deploy.Status.LastScheduleTime.Time),
+			Replicas:              1,
+			AvailableReplicas:     1,
+			UpdatedReplicas:       1,
+			ReadyReplicas:         1,
+		}
+
+		if len(deploy.Spec.JobTemplate.Spec.Template.Spec.Containers) > 0 {
+			item.Image = deploy.Spec.JobTemplate.Spec.Template.Spec.Containers[0].Image
+			item.RequestCPU = deploy.Spec.JobTemplate.Spec.Template.Spec.Containers[0].Resources.Requests.Cpu().AsApproximateFloat64()
+			item.RequestMemory = deploy.Spec.JobTemplate.Spec.Template.Spec.Containers[0].Resources.Requests.Memory().AsApproximateFloat64()
+			item.LimitsCPU = deploy.Spec.JobTemplate.Spec.Template.Spec.Containers[0].Resources.Limits.Cpu().AsApproximateFloat64()
+			item.LimitsMemory = deploy.Spec.JobTemplate.Spec.Template.Spec.Containers[0].Resources.Limits.Memory().AsApproximateFloat64()
+		}
+		deploymentList = append(deploymentList, item)
+	}
+	return deploymentList, nil
+}
+
+func GetCronJobBetaV1List(client *kubernetes.Clientset, namespace string) ([]dto.Workload, error) {
+	emptyOptions := metav1.ListOptions{}
+	var deploymentList []dto.Workload
+	list, err := client.BatchV1beta1().CronJobs(namespace).List(context.TODO(), emptyOptions)
+	if err != nil {
+		return nil, err
+	}
+	for _, deploy := range list.Items {
+		item := dto.Workload{
+			Name:                deploy.Name,
+			Namespace:           deploy.Namespace,
+			Labels:              deploy.Labels,
+			Selectors:           nil,
+			JobSchedule:         deploy.Spec.Schedule,
+			JobBackoffLimit:     utils.PtrToInt32(deploy.Spec.JobTemplate.Spec.BackoffLimit),
+			JobCompletions:      utils.PtrToInt32(deploy.Spec.JobTemplate.Spec.Completions),
+			JobParallelism:      utils.PtrToInt32(deploy.Spec.JobTemplate.Spec.Parallelism),
+			JobActive:           len(deploy.Status.Active),
+			JobLastScheduleTime: utils.TimeFormat(deploy.Status.LastScheduleTime.Time),
+			Replicas:            1,
+			AvailableReplicas:   1,
+			UpdatedReplicas:     1,
+			ReadyReplicas:       1,
+		}
+
+		if len(deploy.Spec.JobTemplate.Spec.Template.Spec.Containers) > 0 {
+			item.Image = deploy.Spec.JobTemplate.Spec.Template.Spec.Containers[0].Image
+			item.RequestCPU = deploy.Spec.JobTemplate.Spec.Template.Spec.Containers[0].Resources.Requests.Cpu().AsApproximateFloat64()
+			item.RequestMemory = deploy.Spec.JobTemplate.Spec.Template.Spec.Containers[0].Resources.Requests.Memory().AsApproximateFloat64()
+			item.LimitsCPU = deploy.Spec.JobTemplate.Spec.Template.Spec.Containers[0].Resources.Limits.Cpu().AsApproximateFloat64()
+			item.LimitsMemory = deploy.Spec.JobTemplate.Spec.Template.Spec.Containers[0].Resources.Limits.Memory().AsApproximateFloat64()
+		}
+		deploymentList = append(deploymentList, item)
+	}
+	return deploymentList, nil
+}
+
+func GetJobV1List(client *kubernetes.Clientset, namespace string) ([]dto.Workload, error) {
+	emptyOptions := metav1.ListOptions{}
+	var deploymentList []dto.Workload
+	list, err := client.BatchV1().Jobs(namespace).List(context.TODO(), emptyOptions)
+	if err != nil {
+		return nil, err
+	}
+	for _, deploy := range list.Items {
+		item := dto.Workload{
+			Name:                  deploy.Name,
+			Namespace:             deploy.Namespace,
+			Labels:                deploy.Labels,
+			Selectors:             nil,
+			JobBackoffLimit:       utils.PtrToInt32(deploy.Spec.BackoffLimit),
+			JobCompletions:        utils.PtrToInt32(deploy.Spec.Completions),
+			JobParallelism:        utils.PtrToInt32(deploy.Spec.Parallelism),
+			JobActive:             int(deploy.Status.Active),
+			JobLastSuccessfulTime: utils.TimeFormat(deploy.Status.CompletionTime.Time),
+			JobLastScheduleTime:   utils.TimeFormat(deploy.Status.StartTime.Time),
+			Replicas:              1,
+			AvailableReplicas:     1,
+			UpdatedReplicas:       1,
+			ReadyReplicas:         1,
+		}
+
+		if len(deploy.Spec.Template.Spec.Containers) > 0 {
+			item.Image = deploy.Spec.Template.Spec.Containers[0].Image
+			item.RequestCPU = deploy.Spec.Template.Spec.Containers[0].Resources.Requests.Cpu().AsApproximateFloat64()
+			item.RequestMemory = deploy.Spec.Template.Spec.Containers[0].Resources.Requests.Memory().AsApproximateFloat64()
+			item.LimitsCPU = deploy.Spec.Template.Spec.Containers[0].Resources.Limits.Cpu().AsApproximateFloat64()
+			item.LimitsMemory = deploy.Spec.Template.Spec.Containers[0].Resources.Limits.Memory().AsApproximateFloat64()
+		}
+		deploymentList = append(deploymentList, item)
+	}
+	return deploymentList, nil
 }
 
 func SetReplicasNumber(client *kubernetes.Clientset, namespace string, deploymentName string, number int32) (bool, error) {
@@ -477,6 +685,11 @@ func CreateDynamicResource(ctx context.Context, cfg *rest.Config, codec runtime.
 	var dynamicResource dynamic.ResourceInterface = dynamicClient.Resource(mapping.Resource)
 	dynamicResource = dynamicClient.Resource(mapping.Resource).Namespace(namesapce)
 	if _, err := dynamicResource.Create(ctx, obj, metav1.CreateOptions{}); err != nil {
+		if k8sErrors.IsAlreadyExists(err) {
+			if _, err := dynamicResource.Update(ctx, obj, metav1.UpdateOptions{}); err != nil {
+				return err
+			}
+		}
 		return err
 	}
 
@@ -507,7 +720,7 @@ func GetDaprComponentResource(cfg *rest.Config, namespace string) (any, error) {
 }
 
 // CreateOrUpdateDaprComponentResource create or update dapr component resource
-func CreateOrUpdateDaprComponentResource(cfg *rest.Config, namespace string, component *unstructured.Unstructured) error {
+func CreateOrUpdateDaprComponentResource(cfg *rest.Config, namespace string, name string, component *unstructured.Unstructured) error {
 	dynamicClient, err := dynamic.NewForConfig(cfg)
 	if err != nil {
 		return err
@@ -518,7 +731,7 @@ func CreateOrUpdateDaprComponentResource(cfg *rest.Config, namespace string, com
 		Resource: "components",
 	}
 
-	existingComponent, err := dynamicClient.Resource(daprGVR).Namespace("default").Get(context.Background(), "<NAME>", metav1.GetOptions{})
+	existingComponent, err := dynamicClient.Resource(daprGVR).Namespace("default").Get(context.Background(), name, metav1.GetOptions{})
 	// if the resource doesn't exist, we'll create it
 	if k8sErrors.IsNotFound(err) {
 		_, err = dynamicClient.Resource(daprGVR).Namespace(namespace).Create(context.Background(), component, metav1.CreateOptions{})

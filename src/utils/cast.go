@@ -3,13 +3,38 @@ package utils
 import (
 	"encoding/json"
 	"errors"
+	"github.com/jinzhu/copier"
 	"gopkg.in/yaml.v3"
 	"strconv"
+	"time"
 )
+
+func CopyStruct(src, dst interface{}) error {
+	return copier.Copy(dst, src)
+}
+
+func IsNumeric(s string) bool {
+	_, err := strconv.Atoi(s)
+	return err == nil
+}
 
 // Int32Ptr convert int32 value to a pointer.
 func Int32Ptr(i int32) *int32 {
 	return &i
+}
+
+func PtrToInt32(i *int32) int32 {
+	if i == nil {
+		return 0
+	}
+	return *i
+}
+
+func PtrToInt64(i *int64) int64 {
+	if i == nil {
+		return 0
+	}
+	return *i
 }
 
 // Int64Ptr convert int64 value to a pointer.
@@ -28,6 +53,11 @@ func StringToInt64(s string) (int64, error) {
 
 func StringToUInt64(s string) (uint64, error) {
 	return strconv.ParseUint(s, 10, 64)
+}
+
+func ToInt(s string) int {
+	i, _ := strconv.Atoi(s)
+	return i
 }
 
 func StringToInt(s string) (int, error) {
@@ -116,4 +146,8 @@ func YamlToObject(yamlString string, obj any) error {
 		return err
 	}
 	return nil
+}
+
+func TimeFormat(time time.Time) string {
+	return time.Format("2006-01-02 15:04:05")
 }
