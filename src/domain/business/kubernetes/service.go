@@ -291,6 +291,24 @@ func (svc *ServiceSupervisor) QueryServiceByLabel(clusterId uint64, namespace st
 	return nil, errors.New("未找到服务")
 }
 
+//delete service monitor
+func (svc *ServiceSupervisor) DeleteServiceMonitorByCluster(model models.ApplicationServiceMonitor) error {
+	config, err := svc.clusterService.GetClusterConfig(0, model.ClusterID)
+	if err != nil {
+		return err
+	}
+	dynamicClient, err := dynamic.NewForConfig(config)
+	if err != nil {
+		return err
+	}
+	gvr := schema.GroupVersionResource{
+		Group:    "monitoring.coreos.com",
+		Version:  "v1",
+		Resource: "servicemonitors",
+	}
+	return dynamicClient.Resource(gvr).Namespace(model.Namespace).Delete(context.Background(), model.Name, metav1.DeleteOptions{})
+}
+
 func (svc *ServiceSupervisor) CreateOrUpdateServiceMonitorByK8sCluster(model models.ApplicationServiceMonitor) error {
 	config, err := svc.clusterService.GetClusterConfig(0, model.ClusterID)
 	if err != nil {
@@ -371,4 +389,25 @@ func (svc *ServiceSupervisor) QueryServiceMonitorByAppId(appId uint64) ([]models
 	var monitors []models.ApplicationServiceMonitor
 	err := svc.db.Model(&models.ApplicationServiceMonitor{}).Where("app_id = ?", appId).Find(&monitors).Error
 	return monitors, err
+}
+
+// delete service monitor
+func (svc *ServiceSupervisor) DeleteServiceMonitor(id uint64) error {
+	if id > 0 {
+		err := svc.db.Transaction(func(tx *gorm.DB) error {
+			var model models.ApplicationServiceMonitor
+			tx.Model(&models.ApplicationServiceMonitor{}).First(&model, "id=?", id)
+			err := tx.Delete(&models.ApplicationServiceMonitor{}, "id=?", model.ID).Error
+			if err != nil {
+				return err
+			}
+
+			if err = svc.DeleteServiceMonitorByCluster(model); err != nil {
+				tx.Rollback()
+			}
+			return err
+		})
+		return err
+	}
+	return errors.New("can not found service monitor")
 }

@@ -98,6 +98,15 @@ func (c *ServiceController) PostCreateOrUpdateServiceMonitor(request *requests2.
 	return mvc.Success(nil)
 }
 
+func (c *ServiceController) DeleteServiceMonitor(ctx *context.HttpContext) mvc.ApiResult {
+	smId := utils.GetNumberOfParam[uint64](ctx, "id")
+	err := c.svcSupervisor.DeleteServiceMonitor(smId)
+	if err != nil {
+		return mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success("ok")
+}
+
 func (c *ServiceController) GetServiceMonitorList(ctx *context.HttpContext) mvc.ApiResult {
 	appid := utils.GetNumberOfParam[uint64](ctx, "appId")
 	list, err := c.svcSupervisor.QueryServiceMonitorByAppId(appid)
