@@ -394,6 +394,14 @@ func (c *ApplicationController) PostRunPipeline(request *requests2.RunPipelineRe
 	return mvc.Success(taskId)
 }
 
+func (c *ApplicationController) PostRunPipelineWithBranch(request *requests2.RunPipelineReq) mvc.ApiResult {
+	taskId, err := c.pipelineService.RunPipelineWithParameters(request)
+	if err != nil {
+		return mvc.Fail(err.Error())
+	}
+	return mvc.Success(taskId)
+}
+
 func (c *ApplicationController) PostPipelineStatus(request *requests2.PipelineStatusReq) mvc.ApiResult {
 	err := c.pipelineService.UpdatePipelineStatus(request)
 	if err != nil {

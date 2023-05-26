@@ -29,6 +29,7 @@ type Pipeline interface {
 	GetJobInfo(jobName string, runID int64) (*JobInfo, error)
 	GetJobLogs(jobName string, runID int64) (string, error)
 	RunJob(jobName string) (int64, error)
+	RunJobWithParameters(jobName string, branch string) (int64, error)
 	SaveJob(jobName string, processor FlowProcessor) error
 	//SwitchJobName(jobName string)
 	//Build() (int64, error)

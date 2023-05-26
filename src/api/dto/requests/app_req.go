@@ -58,8 +58,9 @@ type EditPipelineReq struct {
 
 type RunPipelineReq struct {
 	mvc.RequestBody
-	Id    uint64 `json:"id"`
-	AppId uint64 `json:"appid"`
+	Id     uint64 `json:"id"`
+	AppId  uint64 `json:"appid"`
+	Branch string `json:"branch"`
 }
 
 type AbortPipelineReq struct {

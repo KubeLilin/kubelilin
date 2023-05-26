@@ -340,6 +340,42 @@ func (pipelineService *PipelineService) RunPipeline(request *requests.RunPipelin
 	return taskId, err
 }
 
+func (pipelineService *PipelineService) RunPipelineWithParameters(request *requests.RunPipelineReq) (int64, error) {
+	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
+	builder := pipelineService.jenkinsBuilder
+	pipeline, _ := builder.Build()
+	taskId, err := pipeline.RunJobWithParameters(pipelineName, request.Branch)
+
+	//get git last commit
+	appInfo, _ := pipelineService.appservice.GetAppInfo(request.AppId)
+	token := ""
+	if appInfo.SCID > 0 {
+		scInfo, _ := pipelineService.appservice.GetServiceConnectionById(appInfo.SCID)
+		var detail dto.ServiceConnectionDetails
+		_ = json.Unmarshal([]byte(scInfo.Detail), &detail)
+		token = detail.Token
+	}
+	var commit *scm.Commit
+	if appInfo.Git != "" {
+		commit, _ = GetLastCommit(appInfo.Git, appInfo.SourceType, token)
+	}
+	// update databse
+	var pipelineInfo models.SgrTenantApplicationPipelines
+	_ = pipelineService.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).First(&pipelineInfo)
+	now := time.Now()
+	pipelineInfo.UpdateTime = &now
+	pipelineInfo.LastTaskID = strconv.FormatInt(taskId, 10)
+	taskStatus := uint(1)
+	pipelineInfo.TaskStatus = &taskStatus
+	if commit != nil {
+		commitMessage, _ := json.Marshal(commit)
+		pipelineInfo.LastCommit = string(commitMessage)
+	}
+	_ = pipelineService.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).Updates(pipelineInfo)
+
+	return taskId, err
+}
+
 func (pipelineService *PipelineService) UpdatePipelineStatus(request *requests.PipelineStatusReq) error {
 	// update databse
 	var pipelineInfo models.SgrTenantApplicationPipelines

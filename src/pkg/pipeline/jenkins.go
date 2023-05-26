@@ -253,6 +253,26 @@ func (w *Jenkins) RunJob(jobName string) (int64, error) {
 	return buildNow(w.url, w.user, w.token, w.crumbKey, w.crumbValue, jobName, nextBuildNumber)
 }
 
+func (w *Jenkins) RunJobWithParameters(jobName string, branch string) (int64, error) {
+	if err := w.crumbHeaderVerify(); err != nil {
+		return 0, err
+	}
+	jw := jenkinsWorker{
+		url:        w.url,
+		user:       w.user,
+		token:      w.token,
+		crumbKey:   w.crumbKey,
+		crumbValue: w.crumbValue,
+		jobName:    jobName,
+	}
+	jobInfo, err := jw.GetJob()
+	if err != nil {
+		return 0, err
+	}
+	nextBuildNumber := jobInfo.NextBuildNumber
+	return buildWithParameters(w.url, w.user, w.token, w.crumbKey, w.crumbValue, jobName, nextBuildNumber, branch)
+}
+
 func (w *Jenkins) SaveJob(jobName string, processor FlowProcessor) error {
 	if err := w.crumbHeaderVerify(); err != nil {
 		return err
@@ -347,6 +367,15 @@ func (deployflow *DeployContext) Run(addr, user, token, crumbKey, crumbValue, jo
 
 func buildNow(addr, user, token, crumbKey, crumbValue, jobName string, nextBuildNumber int64) (int64, error) {
 	url := fmt.Sprintf("%v/job/%v/build?delay=0sec", strings.TrimSuffix(addr, "/"), jobName)
+	// TODO: add debug log
+	if _, _, err := sentHTTPRequest("POST", user, token, crumbKey, crumbValue, url, nil); err != nil {
+		return 0, err
+	}
+	return nextBuildNumber, nil
+}
+
+func buildWithParameters(addr, user, token, crumbKey, crumbValue, jobName string, nextBuildNumber int64, branch string) (int64, error) {
+	url := fmt.Sprintf("%v/job/%v/buildWithParameters?delay=0sec&BRANCH_NAME=%v&VERSION_NAME=%v", strings.TrimSuffix(addr, "/"), jobName, branch, nextBuildNumber)
 	// TODO: add debug log
 	if _, _, err := sentHTTPRequest("POST", user, token, crumbKey, crumbValue, url, nil); err != nil {
 		return 0, err
