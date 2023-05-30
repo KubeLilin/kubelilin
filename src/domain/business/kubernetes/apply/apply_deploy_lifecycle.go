@@ -39,10 +39,10 @@ func ApplyLifecycle(deployConfiguration *appsapplyv1.DeploymentApplyConfiguratio
 	if dpc.EnableLife != nil && *dpc.EnableLife > 0 {
 		containerApplyConfig.Lifecycle = corev1.Lifecycle()
 		if dpc.Poststart != "" {
-			containerApplyConfig.Lifecycle.WithPostStart(corev1.Handler().WithExec(corev1.ExecAction().WithCommand(dpc.Poststart)))
+			containerApplyConfig.Lifecycle.WithPostStart(corev1.LifecycleHandler().WithExec(corev1.ExecAction().WithCommand(dpc.Poststart)))
 		}
 		if dpc.Podstop != "" {
-			containerApplyConfig.Lifecycle.WithPreStop(corev1.Handler().WithExec(corev1.ExecAction().WithCommand(dpc.Podstop)))
+			containerApplyConfig.Lifecycle.WithPreStop(corev1.LifecycleHandler().WithExec(corev1.ExecAction().WithCommand(dpc.Podstop)))
 		}
 	}
 	deployConfiguration.Spec.Template.Spec.Containers[0] = containerApplyConfig
