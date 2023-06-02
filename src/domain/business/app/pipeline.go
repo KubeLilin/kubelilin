@@ -181,6 +181,8 @@ func (pipelineService *PipelineService) UpdateDSL(request *requests.EditPipeline
 		{Key: "SGR_REGISTRY_ADDR", Value: fmt.Sprintf("https://%s/", context["imageHubAddress"])},
 		{Key: "SGR_REGISTRY_AUTH", Value: context["imageHubToken"]},
 		{Key: "SGR_REGISTRY_CONFIG", Value: "/kaniko/.docker"},
+		{Key: "PID", Value: request.Id},
+		{Key: "APPID", Value: request.AppId},
 	}
 	//var buildImage string
 	//var branch string
@@ -194,10 +196,10 @@ func (pipelineService *PipelineService) UpdateDSL(request *requests.EditPipeline
 				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: step.Name,
 					Command: fmt.Sprintf(`
 					checkout([
-                    	$class: 'GitSCM', branches: [[name: "%s"]],
+                    	$class: 'GitSCM', branches: [[name: "${params.BRANCH_NAME}"]],
                     	doGenerateSubmoduleConfigurations: false,extensions: [[$class:'CheckoutOption',timeout:30],[$class:'CloneOption',depth:0,noTags:false,reference:'',shallow:false,timeout:30]], submoduleCfg: [],
                     	userRemoteConfigs: [[ url: "%s"]]
-                	])`, step.Content["branch"], step.Content["git"])})
+                	])`, step.Content["git"])})
 				context["branch"] = step.Content["branch"].(string)
 				break
 			case "cmd_shell":
@@ -266,15 +268,14 @@ func (pipelineService *PipelineService) UpdateDSL(request *requests.EditPipeline
 	}
 
 	stageItems := map[string]interface{}{"pipelineStages": dslStageList}
-
-	// connect jenkins and save the job
-	//builder := pipelineV1.NewBuilder()
-	//builder.UseJenkins(jenkinsUrl, jenkinsUser, jenkinsToken).
-	//	UseKubernetes(jenkinsNamespace).UseBuildImage(buildImage)
+	parameters := []pipelineV1.ParamItem{
+		{Name: "BRANCH_NAME", DefaultValue: context["branch"], Description: "分支名称"},
+		{Name: "VERSION", DefaultValue: "1.0", Description: "构建序号"},
+	}
 
 	builder := pipelineService.jenkinsBuilder.UseBuildImage(context["buildImage"])
 
-	processor := builder.CICDProcessor(env, stageItems)
+	processor := builder.CICDProcessor(parameters, env, stageItems)
 	pipeline, _ := builder.Build()
 
 	return pipeline.SaveJob(pipelineName, processor)

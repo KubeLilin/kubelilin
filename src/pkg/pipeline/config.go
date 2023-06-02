@@ -24,6 +24,12 @@ type StepItem struct {
 	ContainerName string
 }
 
+type ParamItem struct {
+	Name         string
+	Description  string
+	DefaultValue interface{}
+}
+
 // EnvItem build env
 type EnvItem struct {
 	Key   string
@@ -42,6 +48,7 @@ type ContainerEnv struct {
 // CIContext ..
 type CIContext struct {
 	CommonContext
+	Parameters         []ParamItem
 	Stages             string
 	EnvVars            []EnvItem
 	ContainerTemplates []ContainerEnv

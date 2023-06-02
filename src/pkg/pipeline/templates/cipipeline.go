@@ -30,6 +30,13 @@ spec:
 """          
         }
     }
+
+	parameters {
+		{{- range $i, $item := .Parameters }}
+		string(name: '{{ $item.Name }}', defaultValue: '{{ $item.DefaultValue }}', description: '{{ $item.Description }}')
+		{{- end}}
+	}
+
     environment {
         {{- range $i, $item := .EnvVars }}
         def {{ $item.Key }} = '{{ $item.Value }}'
