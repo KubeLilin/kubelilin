@@ -366,7 +366,7 @@ func (deployflow *DeployContext) Run(addr, user, token, crumbKey, crumbValue, jo
 }
 
 func buildNow(addr, user, token, crumbKey, crumbValue, jobName string, nextBuildNumber int64) (int64, error) {
-	url := fmt.Sprintf("%v/job/%v/build?delay=0sec", strings.TrimSuffix(addr, "/"), jobName)
+	url := fmt.Sprintf("%v/job/%v/build", strings.TrimSuffix(addr, "/"), jobName)
 	// TODO: add debug log
 	if _, _, err := sentHTTPRequest("POST", user, token, crumbKey, crumbValue, url, nil); err != nil {
 		return 0, err
@@ -375,7 +375,8 @@ func buildNow(addr, user, token, crumbKey, crumbValue, jobName string, nextBuild
 }
 
 func buildWithParameters(addr, user, token, crumbKey, crumbValue, jobName string, nextBuildNumber int64, branch string) (int64, error) {
-	url := fmt.Sprintf("%v/job/%v/buildWithParameters?delay=0sec&BRANCH_NAME=%v&VERSION_NAME=%v", strings.TrimSuffix(addr, "/"), jobName, branch, nextBuildNumber)
+
+	url := fmt.Sprintf("%v/job/%v/buildWithParameters?BRANCH_NAME=%v&VERSION_NAME=%v", strings.TrimSuffix(addr, "/"), jobName, branch, nextBuildNumber)
 	// TODO: add debug log
 	if _, _, err := sentHTTPRequest("POST", user, token, crumbKey, crumbValue, url, nil); err != nil {
 		return 0, err

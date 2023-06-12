@@ -248,7 +248,7 @@ func (pipelineService *PipelineService) UpdateDSL(request *requests.EditPipeline
                     		echo '{"auths": {"'$SGR_REGISTRY_ADDR'": {"auth": "'$SGR_REGISTRY_AUTH'"}}}' > $SGR_REGISTRY_CONFIG/config.json
 						"""
 						sh '''#!/busybox/sh
-							/kaniko/executor -f $SGR_DOCKER_FILE -c . --destination=$SGR_REPOSITORY_NAME:v$BUILD_NUMBER  --insecure --skip-tls-verify -v=debug
+							/kaniko/executor -f $SGR_DOCKER_FILE -c . --destination=$SGR_REPOSITORY_NAME:v$BUILD_NUMBER  --insecure --ignore-path=/product_uuid --skip-tls-verify -v=debug
 						''' 
 					}`})
 				break

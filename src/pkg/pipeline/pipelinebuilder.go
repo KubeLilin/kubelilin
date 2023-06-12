@@ -120,7 +120,7 @@ func (builder *Builder) CICDProcessor(inputParams []ParamItem, envs []EnvItem, s
 		},
 		{
 			Name:       "docker",
-			Image:      "kubelilin/kaniko-executor:v1.9.0-debug",
+			Image:      "kubelilin/kaniko-executor:v1.10.0-debug",
 			WorkingDir: "/home/jenkins/agent",
 			CommandArr: []string{"cat"},
 		},
