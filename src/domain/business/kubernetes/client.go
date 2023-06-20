@@ -124,6 +124,7 @@ func GetPodList(client *kubernetes.Clientset, workload string, namespace string,
 		podReadyCount := 0
 		podRestartCount := 0
 		var containerList []dto.Container
+
 		for _, containerStatus := range item.Status.ContainerStatuses {
 			// add container list to pod item;
 			containerInfo := dto.Container{
@@ -134,6 +135,16 @@ func GetPodList(client *kubernetes.Clientset, workload string, namespace string,
 				Ready:        containerStatus.Ready,
 				RestartCount: containerStatus.RestartCount,
 				Started:      containerStatus.Started,
+			}
+			for _, container := range item.Spec.Containers {
+				if container.Name == containerStatus.Name {
+					// add container resource
+					containerInfo.RequestCpu = container.Resources.Requests.Cpu().AsApproximateFloat64()
+					containerInfo.RequestMemory = container.Resources.Requests.Memory().AsApproximateFloat64()
+					containerInfo.LimitCpu = container.Resources.Limits.Cpu().AsApproximateFloat64()
+					containerInfo.LimitMemory = container.Resources.Limits.Memory().AsApproximateFloat64()
+					break
+				}
 			}
 			containerList = append(containerList, containerInfo)
 			// add pod status
@@ -181,10 +192,12 @@ func GetAllNamespaces(client *kubernetes.Clientset) []dto.Namespace {
 }
 
 func getNodeRole(node *v1.Node) string {
-	if _, ok := node.Labels["node-role.kubernetes.io/master"]; ok {
-		return "master"
+	for label, _ := range node.Labels {
+		if strings.HasPrefix(label, "node-role.kubernetes.io/") {
+			return strings.TrimPrefix(label, "node-role.kubernetes.io/")
+		}
 	}
-	return "<none>"
+	return "worker"
 }
 
 func GetNodeList(client *kubernetes.Clientset) []dto.Node {
