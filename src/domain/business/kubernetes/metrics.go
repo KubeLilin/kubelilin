@@ -7,6 +7,8 @@ import (
 	metricsv "k8s.io/metrics/pkg/client/clientset/versioned"
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
+	"kubelilin/pkg/global"
+	"kubelilin/utils"
 )
 
 type MetricsServer struct {
@@ -84,6 +86,8 @@ func (metrics *MetricsServer) GetStatistics(clusterId uint64) dto.ClusterMetrics
 		}
 
 	}
+
+	global.GlobalLogger.Info(utils.ObjectToString(clusterMetrics))
 	return clusterMetrics
 }
 
