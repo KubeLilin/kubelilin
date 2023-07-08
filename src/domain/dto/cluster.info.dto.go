@@ -58,6 +58,8 @@ type Node struct {
 	Capacity                NodeStatus    `json:"capacity"`
 	Allocatable             NodeStatus    `json:"allocatable"`
 	Usage                   NodeStatus    `json:"usage"`
+	Requests                NodeStatus    `json:"request"`
+	Limits                  NodeStatus    `json:"limit"`
 	OSImage                 string        `json:"osImage"`
 	ContainerRuntimeVersion string        `json:"containerRuntimeVersion"`
 	KubeletVersion          string        `json:"kubeletVersion"`

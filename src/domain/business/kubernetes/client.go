@@ -235,6 +235,30 @@ func GetNodeList(client *kubernetes.Clientset) []dto.Node {
 			Architecture:            nd.Status.NodeInfo.Architecture,
 			Status:                  string(nd.Status.Phase),
 		}
+		pods, _ := client.CoreV1().Pods("").List(context.Background(), metav1.ListOptions{
+			FieldSelector: "spec.nodeName=" + node.Name,
+		})
+		cpuRequestsTotal := 0.0
+		cpuLimitsTotal := 0.0
+		memoryRequestsTotal := 0.0
+		memoryLimitsTotal := 0.0
+		for _, pod := range pods.Items {
+			for _, container := range pod.Spec.Containers {
+				cpuRequestsTotal += container.Resources.Requests.Cpu().AsApproximateFloat64()
+				cpuLimitsTotal += container.Resources.Limits.Cpu().AsApproximateFloat64()
+				memoryRequestsTotal += container.Resources.Requests.Memory().AsApproximateFloat64()
+				memoryLimitsTotal += container.Resources.Limits.Memory().AsApproximateFloat64()
+			}
+		}
+		node.Requests = dto.NodeStatus{
+			CPU:    cpuRequestsTotal,
+			Memory: memoryRequestsTotal,
+		}
+		node.Limits = dto.NodeStatus{
+			CPU:    cpuLimitsTotal,
+			Memory: memoryLimitsTotal,
+		}
+
 		node.Status = "notready"
 		for _, condition := range nd.Status.Conditions {
 			if condition.Type == v1.NodeReady && condition.Status == v1.ConditionTrue {
