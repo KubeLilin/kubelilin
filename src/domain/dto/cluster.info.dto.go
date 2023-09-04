@@ -37,6 +37,11 @@ type Container struct {
 	Ready        bool   `json:"ready"`
 	RestartCount int32  `json:"restartCount"`
 	Started      *bool  `json:"started,omitempty"`
+
+	RequestCpu    float64 `json:"requestCpu"`
+	RequestMemory float64 `json:"requestMemory"`
+	LimitCpu      float64 `json:"limitCpu"`
+	LimitMemory   float64 `json:"limitMemory"`
 }
 
 type Namespace struct {
@@ -53,6 +58,8 @@ type Node struct {
 	Capacity                NodeStatus    `json:"capacity"`
 	Allocatable             NodeStatus    `json:"allocatable"`
 	Usage                   NodeStatus    `json:"usage"`
+	Requests                NodeStatus    `json:"request"`
+	Limits                  NodeStatus    `json:"limit"`
 	OSImage                 string        `json:"osImage"`
 	ContainerRuntimeVersion string        `json:"containerRuntimeVersion"`
 	KubeletVersion          string        `json:"kubeletVersion"`

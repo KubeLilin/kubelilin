@@ -181,6 +181,8 @@ func (pipelineService *PipelineService) UpdateDSL(request *requests.EditPipeline
 		{Key: "SGR_REGISTRY_ADDR", Value: fmt.Sprintf("https://%s/", context["imageHubAddress"])},
 		{Key: "SGR_REGISTRY_AUTH", Value: context["imageHubToken"]},
 		{Key: "SGR_REGISTRY_CONFIG", Value: "/kaniko/.docker"},
+		{Key: "PID", Value: request.Id},
+		{Key: "APPID", Value: request.AppId},
 	}
 	//var buildImage string
 	//var branch string
@@ -194,10 +196,10 @@ func (pipelineService *PipelineService) UpdateDSL(request *requests.EditPipeline
 				dslStageItem.Steps = append(dslStageItem.Steps, pipelineV1.StepItem{Name: step.Name,
 					Command: fmt.Sprintf(`
 					checkout([
-                    	$class: 'GitSCM', branches: [[name: "%s"]],
+                    	$class: 'GitSCM', branches: [[name: "${params.BRANCH_NAME}"]],
                     	doGenerateSubmoduleConfigurations: false,extensions: [[$class:'CheckoutOption',timeout:30],[$class:'CloneOption',depth:0,noTags:false,reference:'',shallow:false,timeout:30]], submoduleCfg: [],
                     	userRemoteConfigs: [[ url: "%s"]]
-                	])`, step.Content["branch"], step.Content["git"])})
+                	])`, step.Content["git"])})
 				context["branch"] = step.Content["branch"].(string)
 				break
 			case "cmd_shell":
@@ -246,7 +248,7 @@ func (pipelineService *PipelineService) UpdateDSL(request *requests.EditPipeline
                     		echo '{"auths": {"'$SGR_REGISTRY_ADDR'": {"auth": "'$SGR_REGISTRY_AUTH'"}}}' > $SGR_REGISTRY_CONFIG/config.json
 						"""
 						sh '''#!/busybox/sh
-							/kaniko/executor -f $SGR_DOCKER_FILE -c . --destination=$SGR_REPOSITORY_NAME:v$BUILD_NUMBER  --insecure --skip-tls-verify -v=debug
+							/kaniko/executor -f $SGR_DOCKER_FILE -c . --destination=$SGR_REPOSITORY_NAME:v$BUILD_NUMBER  --insecure --ignore-path=/product_uuid --skip-tls-verify -v=debug
 						''' 
 					}`})
 				break
@@ -266,15 +268,14 @@ func (pipelineService *PipelineService) UpdateDSL(request *requests.EditPipeline
 	}
 
 	stageItems := map[string]interface{}{"pipelineStages": dslStageList}
-
-	// connect jenkins and save the job
-	//builder := pipelineV1.NewBuilder()
-	//builder.UseJenkins(jenkinsUrl, jenkinsUser, jenkinsToken).
-	//	UseKubernetes(jenkinsNamespace).UseBuildImage(buildImage)
+	parameters := []pipelineV1.ParamItem{
+		{Name: "BRANCH_NAME", DefaultValue: context["branch"], Description: "分支名称"},
+		{Name: "VERSION", DefaultValue: "1.0", Description: "构建序号"},
+	}
 
 	builder := pipelineService.jenkinsBuilder.UseBuildImage(context["buildImage"])
 
-	processor := builder.CICDProcessor(env, stageItems)
+	processor := builder.CICDProcessor(parameters, env, stageItems)
 	pipeline, _ := builder.Build()
 
 	return pipeline.SaveJob(pipelineName, processor)
@@ -309,6 +310,42 @@ func (pipelineService *PipelineService) RunPipeline(request *requests.RunPipelin
 	builder := pipelineService.jenkinsBuilder
 	pipeline, _ := builder.Build()
 	taskId, err := pipeline.RunJob(pipelineName)
+
+	//get git last commit
+	appInfo, _ := pipelineService.appservice.GetAppInfo(request.AppId)
+	token := ""
+	if appInfo.SCID > 0 {
+		scInfo, _ := pipelineService.appservice.GetServiceConnectionById(appInfo.SCID)
+		var detail dto.ServiceConnectionDetails
+		_ = json.Unmarshal([]byte(scInfo.Detail), &detail)
+		token = detail.Token
+	}
+	var commit *scm.Commit
+	if appInfo.Git != "" {
+		commit, _ = GetLastCommit(appInfo.Git, appInfo.SourceType, token)
+	}
+	// update databse
+	var pipelineInfo models.SgrTenantApplicationPipelines
+	_ = pipelineService.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).First(&pipelineInfo)
+	now := time.Now()
+	pipelineInfo.UpdateTime = &now
+	pipelineInfo.LastTaskID = strconv.FormatInt(taskId, 10)
+	taskStatus := uint(1)
+	pipelineInfo.TaskStatus = &taskStatus
+	if commit != nil {
+		commitMessage, _ := json.Marshal(commit)
+		pipelineInfo.LastCommit = string(commitMessage)
+	}
+	_ = pipelineService.db.Model(&models.SgrTenantApplicationPipelines{}).Where("id=?", request.Id).Updates(pipelineInfo)
+
+	return taskId, err
+}
+
+func (pipelineService *PipelineService) RunPipelineWithParameters(request *requests.RunPipelineReq) (int64, error) {
+	pipelineName := fmt.Sprintf("pipeline-%v-app-%v", request.Id, request.AppId)
+	builder := pipelineService.jenkinsBuilder
+	pipeline, _ := builder.Build()
+	taskId, err := pipeline.RunJobWithParameters(pipelineName, request.Branch)
 
 	//get git last commit
 	appInfo, _ := pipelineService.appservice.GetAppInfo(request.AppId)

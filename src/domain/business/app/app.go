@@ -78,6 +78,7 @@ func (s *ApplicationService) UpdateApp(req *requests.AppReq) (error, int64) {
 	appModel.ScID = &req.SCID
 	appModel.Git = req.Git
 	appModel.Labels = req.Labels
+	//appModel.Name = req.Name
 	dbRes := s.db.Model(&models.SgrTenantApplication{}).Where("id=?", req.ID).Updates(appModel)
 	if dbRes.Error != nil {
 		return nil, 0
@@ -97,6 +98,10 @@ ON t1.language = t2.id INNER JOIN sgr_code_application_level AS t3 ON t1.LEVEL =
 	if req.Name != "" {
 		sb.WriteString(" AND t1.name like ?")
 		sqlParams = append(sqlParams, "%"+req.Name+"%")
+	}
+	if req.Nickname != "" {
+		sb.WriteString(" AND t1.nickname like ?")
+		sqlParams = append(sqlParams, "%"+req.Nickname+"%")
 	}
 	if req.Labels != "" {
 		sb.WriteString(" AND t1.labels like ?")

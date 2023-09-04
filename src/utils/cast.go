@@ -22,6 +22,9 @@ func IsNumeric(s string) bool {
 func Int32Ptr(i int32) *int32 {
 	return &i
 }
+func UInt8Ptr(i uint8) *uint8 {
+	return &i
+}
 
 func PtrToInt32(i *int32) int32 {
 	if i == nil {

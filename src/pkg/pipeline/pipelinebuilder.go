@@ -99,12 +99,12 @@ func (builder *Builder) Build() (Pipeline, error) {
 //	return flowProcessor
 //}
 
-func (builder *Builder) CICDProcessor(inputParams []EnvItem, stages map[string]interface{}) FlowProcessor {
+func (builder *Builder) CICDProcessor(inputParams []ParamItem, envs []EnvItem, stages map[string]interface{}) FlowProcessor {
 	envVars := []EnvItem{
 		{Key: "JENKINS_SLAVE_WORKSPACE", Value: "/home/jenkins/agent"},
 		{Key: "ACCESS_TOKEN", Value: builder.Options.jenkinsUserToken},
 	}
-	envVars = append(envVars, inputParams...)
+	envVars = append(envVars, envs...)
 
 	containerTemplates := []ContainerEnv{
 		{
@@ -120,13 +120,14 @@ func (builder *Builder) CICDProcessor(inputParams []EnvItem, stages map[string]i
 		},
 		{
 			Name:       "docker",
-			Image:      "kubelilin/kaniko-executor:v1.9.0-debug",
+			Image:      "kubelilin/kaniko-executor:v1.10.0-debug",
 			WorkingDir: "/home/jenkins/agent",
 			CommandArr: []string{"cat"},
 		},
 	}
 	pipelineDSL, _ := GeneratePipelineXMLStr(templates.CICD, stages)
 	flowProcessor := &CIContext{
+		Parameters:         inputParams,
 		EnvVars:            envVars,
 		ContainerTemplates: containerTemplates,
 		Stages:             pipelineDSL,

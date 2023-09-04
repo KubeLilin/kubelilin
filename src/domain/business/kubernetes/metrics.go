@@ -7,6 +7,8 @@ import (
 	metricsv "k8s.io/metrics/pkg/client/clientset/versioned"
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
+	"kubelilin/pkg/global"
+	"kubelilin/utils"
 )
 
 type MetricsServer struct {
@@ -25,13 +27,16 @@ func (metrics *MetricsServer) GetNodeMetrics(clusterId uint64) []dto.Node {
 	metricsClient, _ := metricsv.NewForConfig(config)
 	nodeMetricsList, err := metricsClient.MetricsV1beta1().NodeMetricses().List(context.TODO(), v1.ListOptions{})
 	for index, node := range nodeList {
+		pods, _ := clientSet.CoreV1().Pods("").List(context.Background(), v1.ListOptions{
+			FieldSelector: "spec.nodeName=" + node.Name,
+		})
 		if err == nil {
 			for _, nodeMetrics := range nodeMetricsList.Items {
 				if node.Name == nodeMetrics.Name {
 					nodeList[index].Usage = dto.NodeStatus{
 						CPU:     nodeMetrics.Usage.Cpu().AsApproximateFloat64(),
 						Memory:  nodeMetrics.Usage.Memory().AsApproximateFloat64(),
-						Pods:    nodeMetrics.Usage.Pods().Value(),
+						Pods:    int64(len(pods.Items)),
 						Storage: nodeMetrics.Usage.StorageEphemeral().AsApproximateFloat64(),
 					}
 				}
@@ -68,6 +73,12 @@ func (metrics *MetricsServer) GetStatistics(clusterId uint64) dto.ClusterMetrics
 		clusterMetrics.Capacity.Memory += node.Capacity.Memory
 		clusterMetrics.Capacity.Pods += node.Capacity.Pods
 		clusterMetrics.Capacity.Storage += node.Capacity.Storage
+		// Requests
+		clusterMetrics.Requests.CPU += node.Requests.CPU
+		clusterMetrics.Requests.Memory += node.Requests.Memory
+		// Limits
+		clusterMetrics.Limits.CPU += node.Limits.CPU
+		clusterMetrics.Limits.Memory += node.Limits.Memory
 
 		clusterMetrics.Nodes.Count++
 		if node.Status == "ready" {
@@ -75,6 +86,8 @@ func (metrics *MetricsServer) GetStatistics(clusterId uint64) dto.ClusterMetrics
 		}
 
 	}
+
+	global.GlobalLogger.Info(utils.ObjectToString(clusterMetrics))
 	return clusterMetrics
 }
 

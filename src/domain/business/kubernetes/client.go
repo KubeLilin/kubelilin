@@ -124,6 +124,7 @@ func GetPodList(client *kubernetes.Clientset, workload string, namespace string,
 		podReadyCount := 0
 		podRestartCount := 0
 		var containerList []dto.Container
+
 		for _, containerStatus := range item.Status.ContainerStatuses {
 			// add container list to pod item;
 			containerInfo := dto.Container{
@@ -134,6 +135,16 @@ func GetPodList(client *kubernetes.Clientset, workload string, namespace string,
 				Ready:        containerStatus.Ready,
 				RestartCount: containerStatus.RestartCount,
 				Started:      containerStatus.Started,
+			}
+			for _, container := range item.Spec.Containers {
+				if container.Name == containerStatus.Name {
+					// add container resource
+					containerInfo.RequestCpu = container.Resources.Requests.Cpu().AsApproximateFloat64()
+					containerInfo.RequestMemory = container.Resources.Requests.Memory().AsApproximateFloat64()
+					containerInfo.LimitCpu = container.Resources.Limits.Cpu().AsApproximateFloat64()
+					containerInfo.LimitMemory = container.Resources.Limits.Memory().AsApproximateFloat64()
+					break
+				}
 			}
 			containerList = append(containerList, containerInfo)
 			// add pod status
@@ -153,7 +164,6 @@ func GetPodList(client *kubernetes.Clientset, workload string, namespace string,
 			PodName:       item.Name,
 			PodIP:         item.Status.PodIP,
 			HostIP:        item.Status.HostIP,
-			ClusterName:   item.ClusterName,
 			Count:         podCount,
 			Ready:         podReadyCount,
 			StartTime:     st,
@@ -182,10 +192,12 @@ func GetAllNamespaces(client *kubernetes.Clientset) []dto.Namespace {
 }
 
 func getNodeRole(node *v1.Node) string {
-	if _, ok := node.Labels["node-role.kubernetes.io/master"]; ok {
-		return "master"
+	for label, _ := range node.Labels {
+		if strings.HasPrefix(label, "node-role.kubernetes.io/") {
+			return strings.TrimPrefix(label, "node-role.kubernetes.io/")
+		}
 	}
-	return "<none>"
+	return "worker"
 }
 
 func GetNodeList(client *kubernetes.Clientset) []dto.Node {
@@ -223,6 +235,30 @@ func GetNodeList(client *kubernetes.Clientset) []dto.Node {
 			Architecture:            nd.Status.NodeInfo.Architecture,
 			Status:                  string(nd.Status.Phase),
 		}
+		pods, _ := client.CoreV1().Pods("").List(context.Background(), metav1.ListOptions{
+			FieldSelector: "spec.nodeName=" + node.Name,
+		})
+		cpuRequestsTotal := 0.0
+		cpuLimitsTotal := 0.0
+		memoryRequestsTotal := 0.0
+		memoryLimitsTotal := 0.0
+		for _, pod := range pods.Items {
+			for _, container := range pod.Spec.Containers {
+				cpuRequestsTotal += container.Resources.Requests.Cpu().AsApproximateFloat64()
+				cpuLimitsTotal += container.Resources.Limits.Cpu().AsApproximateFloat64()
+				memoryRequestsTotal += container.Resources.Requests.Memory().AsApproximateFloat64()
+				memoryLimitsTotal += container.Resources.Limits.Memory().AsApproximateFloat64()
+			}
+		}
+		node.Requests = dto.NodeStatus{
+			CPU:    cpuRequestsTotal,
+			Memory: memoryRequestsTotal,
+		}
+		node.Limits = dto.NodeStatus{
+			CPU:    cpuLimitsTotal,
+			Memory: memoryLimitsTotal,
+		}
+
 		node.Status = "notready"
 		for _, condition := range nd.Status.Conditions {
 			if condition.Type == v1.NodeReady && condition.Status == v1.ConditionTrue {

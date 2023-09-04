@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 	"kubelilin/api/dto/requests"
 	"kubelilin/domain/database/models"
+	"kubelilin/utils"
 )
 
 type ProBeService struct {
@@ -53,7 +54,7 @@ func (pbs *ProBeService) CreateProBe(proReq *requests.ProbeRequest) error {
 			} else {
 				readiness.Enable = 0
 			}
-			err := tx.Model(models.DeploymentContainerLifecycleCheck{}).Where("id=?", readiness.ID).Updates(&readiness).Error
+			err := tx.Save(readiness).Error
 			if err != nil {
 				return err
 			}
@@ -91,26 +92,30 @@ func (pbs *ProBeService) CreateProBe(proReq *requests.ProbeRequest) error {
 			} else {
 				liveness.Enable = 0
 			}
-			err := tx.Model(models.DeploymentContainerLifecycleCheck{}).Where("id=?", liveness.ID).Updates(&liveness).Error
+			err := tx.Save(liveness).Error
 			if err != nil {
 				return err
 			}
 		}
+
+		tx.Model(models.SgrTenantDeployments{}).Where("id=?", proReq.DpId).Updates(models.SgrTenantDeployments{TerminationGracePeriodSeconds: proReq.TerminationGracePeriodSeconds, MaxUnavailable: &proReq.MaxUnavailable, MaxSurge: &proReq.MaxSurge})
+
 		mainContainer := &models.SgrTenantDeploymentsContainers{}
 		tx.Model(models.SgrTenantDeploymentsContainers{}).Where("deploy_id=? and is_main=1", proReq.DpId).First(mainContainer)
 		if mainContainer == nil {
 			return errors.New("can't find the sole container of development ")
 		}
-		tx.Model(models.SgrTenantDeployments{}).Where("id=?", proReq.DpId).Updates(models.SgrTenantDeployments{TerminationGracePeriodSeconds: proReq.TerminationGracePeriodSeconds, MaxUnavailable: &proReq.MaxUnavailable, MaxSurge: &proReq.MaxSurge})
-		updateDatum := models.SgrTenantDeploymentsContainers{Poststart: proReq.LifecyclePreStart, Podstop: proReq.LifecyclePreStop}
-		y := uint8(1)
-		n := uint8(0)
+		//Poststart: proReq.LifecyclePreStart, Podstop: proReq.LifecyclePreStop
 		if proReq.EnableLifecycle {
-			updateDatum.EnableLife = &y
+			mainContainer.EnableLife = utils.UInt8Ptr(1)
 		} else {
-			updateDatum.EnableLife = &n
+			mainContainer.EnableLife = utils.UInt8Ptr(0)
 		}
-		tx.Model(models.SgrTenantDeploymentsContainers{}).Where("deploy_id=? and is_main=1", proReq.DpId).Updates(updateDatum)
+		mainContainer.Poststart = proReq.LifecyclePreStart
+		mainContainer.Podstop = proReq.LifecyclePreStop
+		tx.Model(models.SgrTenantDeploymentsContainers{}).Where("deploy_id=? and is_main=1", proReq.DpId).Updates(mainContainer)
+
+		tx.Commit()
 		return nil
 	})
 	return res
