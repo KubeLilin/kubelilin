@@ -11,6 +11,7 @@ type AppReq struct {
 	ID         uint64 `json:"id" uri:"id"`
 	TenantID   uint64 `json:"tenantId" uri:"tenantId"`
 	Name       string `json:"name" uri:"name"`
+	Nickname   string `json:"nickname" uri:"nickname"`
 	Labels     string `json:"labels" uri:"labels"`
 	Remarks    string `json:"remarks" uri:"remarks"`
 	Git        string `json:"git" uri:"git"`

@@ -99,6 +99,10 @@ ON t1.language = t2.id INNER JOIN sgr_code_application_level AS t3 ON t1.LEVEL =
 		sb.WriteString(" AND t1.name like ?")
 		sqlParams = append(sqlParams, "%"+req.Name+"%")
 	}
+	if req.Nickname != "" {
+		sb.WriteString(" AND t1.nickname like ?")
+		sqlParams = append(sqlParams, "%"+req.Nickname+"%")
+	}
 	if req.Labels != "" {
 		sb.WriteString(" AND t1.labels like ?")
 		sqlParams = append(sqlParams, "%"+req.Labels+"%")

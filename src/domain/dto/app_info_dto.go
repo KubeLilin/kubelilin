@@ -5,6 +5,7 @@ import "time"
 type ApplicationInfoDTO struct {
 	Id           uint64     `gorm:"primaryKey;column:id;type:bigint(20) unsigned;not null"`
 	Name         string     `gorm:"column:name;type:varchar(50);not null" `           // 集群应用名称(英文唯一)
+	Nickname     string     `gorm:"column:nickname;type:varchar(50);not null" `       // 集群应用中文名称
 	TenantID     uint64     `gorm:"column:tenant_id;type:bigint(11);not null" `       // 租户
 	Labels       string     `gorm:"column:labels;type:varchar(50);not null" `         // 应用中文名称
 	Remarks      string     `gorm:"column:remarks;type:varchar(200);not null" `       // 集群应用备注
