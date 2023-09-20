@@ -44,19 +44,29 @@ spec:
     }
     stages {
         {{ .Stages }}
-
-  		{{if .CallBack }}
-        stage('Callback') {
-            steps {
-                retry(count: 5) {
-                    httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', customHeaders: [[maskValue: true, name: 'Authorization', value: 'Bearer {{ .CallBack.Token }}']], httpMode: 'POST', requestBody: '''{{ .CallBack.Body }}''', responseHandle: 'NONE', timeout: 10, url: '{{ .CallBack.URL }}'
-                }
-            }
-        }
-        {{ else }}
-
-    	{{ end }}
     }
+	{{if .CallBack }}
+	post {
+		always {
+			script {
+				httpRequest httpMode: 'POST', url: ' {{ .CallBack.URL }}', contentType: 'APPLICATION_JSON', requestBody: '''
+                {
+					"pid": "${PID}",
+					"appid": "${APPID}",
+					"branch": "${params.BRANCH_NAME}",
+					"image": "${env.SGR_REPOSITORY_NAME}:v${env.BUILD_NUMBER}",
+					"buildNumber": "${env.BUILD_NUMBER}",
+                    "message": "Pipeline completed",
+                    "status": "${currentBuild.currentResult}",
+                    "timestamp": "${new Date().toString()}"
+                }
+                '''
+			}
+		}
+	}
+	{{ else }}
+
+	{{ end }}
 }
 `
 
