@@ -49,18 +49,8 @@ spec:
 	post {
 		always {
 			script {
-				httpRequest httpMode: 'POST', url: ' {{ .CallBack.URL }}', contentType: 'APPLICATION_JSON', requestBody: '''
-                {
-					"pid": "${PID}",
-					"appid": "${APPID}",
-					"branch": "${params.BRANCH_NAME}",
-					"image": "${env.SGR_REPOSITORY_NAME}:v${env.BUILD_NUMBER}",
-					"buildNumber": "${env.BUILD_NUMBER}",
-                    "message": "Pipeline completed",
-                    "status": "${currentBuild.currentResult}",
-                    "timestamp": "${new Date().toString()}"
-                }
-                '''
+ 				def rbody = "{\"pid\": \"${PID}\",  \"appid\": \"${APPID}\", \"branch\": \"${params.BRANCH_NAME}\" , \"image\": \"${env.SGR_REPOSITORY_NAME}:v${env.BUILD_NUMBER}\" , \"buildNumber\": \"${env.BUILD_NUMBER}\",\"status\": \"${currentBuild.currentResult}\" ,\"timestamp\": \"${new Date().toString()}\" }"
+				httpRequest httpMode: 'POST', url: ' {{ .CallBack.URL }}', contentType: 'APPLICATION_JSON', requestBody: rbody , responseHandle: 'NONE', timeout: 30
 			}
 		}
 	}
