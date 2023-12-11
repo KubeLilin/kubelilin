@@ -9,7 +9,7 @@ import (
 
 type ArtifactController struct {
 	mvc.ApiController
-	projectService deliverables.TenantArtifactsProjectService
+	projectService deliverables.TenantDeliverablesProjectService
 }
 
 func (c *ArtifactController) CreateTenantDeliverablesProject(ctx *context.HttpContext, reqData requests.CreateTenantDeliverablesProjectReq) mvc.ApiResult {
