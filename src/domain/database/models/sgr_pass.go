@@ -1342,3 +1342,29 @@ var SgrTenantUserRoleColumns = struct {
 	CreationTime: "creation_time",
 	UpdateTime:   "update_time",
 }
+
+// TeantArtifactsProject 租户CI制品分类
+type TeantArtifactsProject struct {
+	ID              uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	TeantID         int64      `gorm:"column:teant_id;type:bigint;not null" json:"teantId"`                  // 租户id
+	HarborProjectID int64      `gorm:"column:harbor_project_id;type:bigint;not null" json:"harborProjectId"` // harbor项目id
+	CreateTime      *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"`          // 创建时间
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *TeantArtifactsProject) TableName() string {
+	return "teant_artifacts_project"
+}
+
+// TeantArtifactsProjectColumns get sql column name.获取数据库列名
+var TeantArtifactsProjectColumns = struct {
+	ID              string
+	TeantID         string
+	HarborProjectID string
+	CreateTime      string
+}{
+	ID:              "id",
+	TeantID:         "teant_id",
+	HarborProjectID: "harbor_project_id",
+	CreateTime:      "create_time",
+}
