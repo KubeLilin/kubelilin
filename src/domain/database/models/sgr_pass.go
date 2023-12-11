@@ -1346,7 +1346,8 @@ var SgrTenantUserRoleColumns = struct {
 // TenantArtifactsProject 租户CI制品分类
 type TenantArtifactsProject struct {
 	ID              uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
-	TenantID        int64      `gorm:"column:tenant_id;type:bigint;not null" json:"tenantId"`                         // 租户id
+	TenantID        uint64     `gorm:"column:tenant_id;type:bigint unsigned;not null" json:"tenantId"`                // 租户id
+	ProjectName     string     `gorm:"column:project_name;type:varchar(50);not null" json:"projectName"`              // 项目名称
 	HarborProjectID uint64     `gorm:"column:harbor_project_id;type:bigint unsigned;not null" json:"harborProjectId"` // harbor项目id
 	CreateTime      *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"`                   // 创建时间
 }
@@ -1360,11 +1361,13 @@ func (m *TenantArtifactsProject) TableName() string {
 var TenantArtifactsProjectColumns = struct {
 	ID              string
 	TenantID        string
+	ProjectName     string
 	HarborProjectID string
 	CreateTime      string
 }{
 	ID:              "id",
 	TenantID:        "tenant_id",
+	ProjectName:     "project_name",
 	HarborProjectID: "harbor_project_id",
 	CreateTime:      "create_time",
 }
