@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 // ApplicationAPIGateway 集群网关(APISIX)
 type ApplicationAPIGateway struct {
 	ID          uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`         // 网关ID
@@ -1344,9 +1346,9 @@ var SgrTenantUserRoleColumns = struct {
 // TenantArtifactsProject 租户CI制品分类
 type TenantArtifactsProject struct {
 	ID              uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
-	TeantID         int64      `gorm:"column:teant_id;type:bigint;not null" json:"teantId"`                  // 租户id
-	HarborProjectID int64      `gorm:"column:harbor_project_id;type:bigint;not null" json:"harborProjectId"` // harbor项目id
-	CreateTime      *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"`          // 创建时间
+	TenantID        int64      `gorm:"column:tenant_id;type:bigint;not null" json:"tenantId"`                         // 租户id
+	HarborProjectID uint64     `gorm:"column:harbor_project_id;type:bigint unsigned;not null" json:"harborProjectId"` // harbor项目id
+	CreateTime      *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"`                   // 创建时间
 }
 
 // TableName get sql table name.获取数据库表名
@@ -1357,12 +1359,12 @@ func (m *TenantArtifactsProject) TableName() string {
 // TenantArtifactsProjectColumns get sql column name.获取数据库列名
 var TenantArtifactsProjectColumns = struct {
 	ID              string
-	TeantID         string
+	TenantID        string
 	HarborProjectID string
 	CreateTime      string
 }{
 	ID:              "id",
-	TeantID:         "teant_id",
+	TenantID:        "tenant_id",
 	HarborProjectID: "harbor_project_id",
 	CreateTime:      "create_time",
 }
