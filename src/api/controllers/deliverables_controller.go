@@ -7,19 +7,25 @@ import (
 	"kubelilin/domain/business/deliverables"
 )
 
-type ArtifactController struct {
-	mvc.ApiController
-	projectService deliverables.TenantDeliverablesProjectService
+func NewDeliverablesController(projectService *deliverables.TenantDeliverablesProjectService) *DeliverablesController {
+	return &DeliverablesController{
+		projectService: projectService,
+	}
 }
 
-func (c *ArtifactController) CreateTenantDeliverablesProject(ctx *context.HttpContext, reqData requests.CreateTenantDeliverablesProjectReq) mvc.ApiResult {
+type DeliverablesController struct {
+	mvc.ApiController
+	projectService *deliverables.TenantDeliverablesProjectService
+}
+
+func (c *DeliverablesController) CreateTenantDeliverablesProject(ctx *context.HttpContext, reqData *requests.CreateTenantDeliverablesProjectReq) mvc.ApiResult {
 	userInfo := requests.GetUserInfo(ctx)
 	reqData.TenantId = userInfo.TenantID
 	c.projectService.CreateTenantDeliverablesProject(reqData)
 	return mvc.Success(reqData.Id)
 }
 
-func (c *ArtifactController) QueryTenantDeliverablesProject(ctx *context.HttpContext, reqData requests.QueryTenantDeliverablesProjectReq) mvc.ApiResult {
+func (c *DeliverablesController) QueryTenantDeliverablesProject(ctx *context.HttpContext, reqData *requests.QueryTenantDeliverablesProjectReq) mvc.ApiResult {
 	userInfo := requests.GetUserInfo(ctx)
 	reqData.TenantId = userInfo.TenantID
 	err, res := c.projectService.QueryTenantDeliverablesProject(reqData)

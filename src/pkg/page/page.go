@@ -1,7 +1,6 @@
 package page
 
 import (
-	"fmt"
 	"github.com/yoyofx/yoyogo/web/context"
 	"gorm.io/gorm"
 	"strconv"
@@ -80,7 +79,7 @@ func (ph *PageHelper) DoScan(data interface{}, sql string, values ...interface{}
 	sb.WriteString(",")
 	sb.WriteString(strconv.Itoa(ph.pageInfo.PageSize))
 	dataSql = sb.String()
-	fmt.Println(dataSql)
+	//fmt.Println(dataSql)
 	countRes := ph.db.Raw(countSql, values...).Scan(&count)
 	dataRes := ph.db.Raw(dataSql, values...).Scan(data)
 	if countRes.Error != nil {

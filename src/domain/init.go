@@ -5,6 +5,7 @@ import (
 	"github.com/yoyofx/yoyogo/pkg/configuration"
 	"github.com/yoyofxteam/dependencyinjection"
 	"kubelilin/domain/business/app"
+	"kubelilin/domain/business/deliverables"
 	"kubelilin/domain/business/devops"
 	"kubelilin/domain/business/kubernetes"
 	"kubelilin/domain/business/metrics"
@@ -47,6 +48,8 @@ func init() {
 			serviceCollection.AddTransient(kubernetes.NewProBeService)
 			serviceCollection.AddTransient(kubernetes.NewConfigMapSupervisor)
 			serviceCollection.AddTransient(kubernetes.NewDynamicResourceSupervisor)
+
+			serviceCollection.AddTransient(deliverables.NewTenantDeliverablesProjectService)
 			configuration.AddConfiguration(serviceCollection, conf.NewDbConfig)
 			injectionJenkinsBuilder(config, serviceCollection)
 

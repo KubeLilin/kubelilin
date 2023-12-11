@@ -20,7 +20,7 @@ func NewTenantDeliverablesProjectService(db *gorm.DB) *TenantDeliverablesProject
 }
 
 // CreateTenantArtifactsProject 创建租户制品项目/**
-func (svc *TenantDeliverablesProjectService) CreateTenantDeliverablesProject(reqData requests.CreateTenantDeliverablesProjectReq) {
+func (svc *TenantDeliverablesProjectService) CreateTenantDeliverablesProject(reqData *requests.CreateTenantDeliverablesProjectReq) {
 	var now = time.Now()
 	dbData := models.TenantDeliverablesProject{
 		TenantID:        reqData.TenantId,
@@ -32,15 +32,17 @@ func (svc *TenantDeliverablesProjectService) CreateTenantDeliverablesProject(req
 }
 
 // CreateTenantArtifactsProject 分页查询租户制品项目/**
-func (svc *TenantDeliverablesProjectService) QueryTenantDeliverablesProject(req requests.QueryTenantDeliverablesProjectReq) (err error, pageRes *page.Page) {
+func (svc *TenantDeliverablesProjectService) QueryTenantDeliverablesProject(req *requests.QueryTenantDeliverablesProjectReq) (err error, pageRes *page.Page) {
 	sql := strings.Builder{}
 	var res []models.TenantDeliverablesProject
 	var sqlParams []interface{}
 	sqlParams = append(sqlParams, req.TenantId)
-	sql.WriteString("select * from tenant_artifacts_project where 1=1 and tenant_id=? ")
+	sql.WriteString("select * from tenant_deliverables_project where 1=1 and tenant_id=? ")
 	if req.ProjectName != "" {
-		sql.WriteString(" and project_name like '%?%'")
+		sql.WriteString(" and project_name like '%")
+		sql.WriteString(req.ProjectName)
+		sql.WriteString("%'")
 		sqlParams = append(sqlParams, req.ProjectName)
 	}
-	return page.StartPage(svc.db, req.PageIndex, req.PageSize).DoScan(res, sql.String(), sqlParams...)
+	return page.StartPage(svc.db, req.CurrentPage, req.PageSize).DoScan(res, sql.String(), sqlParams...)
 }
