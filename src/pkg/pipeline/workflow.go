@@ -44,7 +44,7 @@ var (
 
 // JobInfo ...
 type JobInfo struct {
-	Artifacts         []interface{} `json:"artifacts"`
+	Artifacts         []interface{} `json:"deliverables"`
 	Building          bool          `json:"building"`
 	Description       interface{}   `json:"description"`
 	DisplayName       string        `json:"displayName"`

@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 // ApplicationAPIGateway 集群网关(APISIX)
 type ApplicationAPIGateway struct {
 	ID          uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`         // 网关ID
@@ -1343,8 +1341,8 @@ var SgrTenantUserRoleColumns = struct {
 	UpdateTime:   "update_time",
 }
 
-// TenantArtifactsProject 租户CI制品分类
-type TenantArtifactsProject struct {
+// TenantDeliverablesProject 租户CI可交付物项目
+type TenantDeliverablesProject struct {
 	ID              uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
 	TenantID        uint64     `gorm:"column:tenant_id;type:bigint unsigned;not null" json:"tenantId"`                // 租户id
 	ProjectName     string     `gorm:"column:project_name;type:varchar(50);not null" json:"projectName"`              // 项目名称
@@ -1353,12 +1351,12 @@ type TenantArtifactsProject struct {
 }
 
 // TableName get sql table name.获取数据库表名
-func (m *TenantArtifactsProject) TableName() string {
-	return "tenant_artifacts_project"
+func (m *TenantDeliverablesProject) TableName() string {
+	return "tenant_deliverables_project"
 }
 
-// TenantArtifactsProjectColumns get sql column name.获取数据库列名
-var TenantArtifactsProjectColumns = struct {
+// TenantDeliverablesProjectColumns get sql column name.获取数据库列名
+var TenantDeliverablesProjectColumns = struct {
 	ID              string
 	TenantID        string
 	ProjectName     string

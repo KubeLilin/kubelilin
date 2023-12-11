@@ -5,7 +5,7 @@ import (
 	"kubelilin/pkg/page"
 )
 
-type CreateTenantArtifactsProjectReq struct {
+type CreateTenantDeliverablesProjectReq struct {
 	mvc.RequestBody
 	Id              uint64 `json:"id"`
 	TenantId        uint64 `json:"tenantId"`
@@ -13,7 +13,7 @@ type CreateTenantArtifactsProjectReq struct {
 	HarborProjectId uint64 `json:"projectId"`
 }
 
-type QueryTenantArtifactsProjectReq struct {
+type QueryTenantDeliverablesProjectReq struct {
 	mvc.RequestBody
 	page.PageRequest
 	ProjectName string `json:"projectName" uri:"projectName" `

@@ -1,4 +1,4 @@
-package artifacts
+package deliverables
 
 import (
 	"gorm.io/gorm"
@@ -9,20 +9,20 @@ import (
 	"time"
 )
 
-type TenantArtifactsProjectService struct {
+type TenantDeliverablesProjectService struct {
 	db *gorm.DB
 }
 
-func NewTenantArtifactsProjectService(db *gorm.DB) *TenantArtifactsProjectService {
-	return &TenantArtifactsProjectService{
+func NewTenantDeliverablesProjectService(db *gorm.DB) *TenantDeliverablesProjectService {
+	return &TenantDeliverablesProjectService{
 		db: db,
 	}
 }
 
 // CreateTenantArtifactsProject 创建租户制品项目/**
-func (svc *TenantArtifactsProjectService) CreateTenantArtifactsProject(reqData requests.CreateTenantArtifactsProjectReq) {
+func (svc *TenantDeliverablesProjectService) CreateTenantDeliverablesProject(reqData requests.CreateTenantDeliverablesProjectReq) {
 	var now = time.Now()
-	dbData := models.TenantArtifactsProject{
+	dbData := models.TenantDeliverablesProject{
 		TenantID:        reqData.TenantId,
 		HarborProjectID: reqData.HarborProjectId,
 		ProjectName:     reqData.ProjectName,
@@ -32,9 +32,9 @@ func (svc *TenantArtifactsProjectService) CreateTenantArtifactsProject(reqData r
 }
 
 // CreateTenantArtifactsProject 分页查询租户制品项目/**
-func (svc *TenantArtifactsProjectService) QueryTenantArtifactsProject(req requests.QueryTenantArtifactsProjectReq) (err error, pageRes *page.Page) {
+func (svc *TenantDeliverablesProjectService) QueryTenantDeliverablesProject(req requests.QueryTenantDeliverablesProjectReq) (err error, pageRes *page.Page) {
 	sql := strings.Builder{}
-	var res []models.TenantArtifactsProject
+	var res []models.TenantDeliverablesProject
 	var sqlParams []interface{}
 	sqlParams = append(sqlParams, req.TenantId)
 	sql.WriteString("select * from tenant_artifacts_project where 1=1 and tenant_id=? ")

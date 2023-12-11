@@ -118,7 +118,7 @@ type JobBaseInfo struct {
 			UserName         string `json:"userName"`
 		} `json:"causes,omitempty"`
 	} `json:"actions"`
-	Artifacts         []interface{} `json:"artifacts"`
+	Artifacts         []interface{} `json:"deliverables"`
 	Building          bool          `json:"building"`
 	Description       interface{}   `json:"description"`
 	DisplayName       string        `json:"displayName"`
