@@ -28,6 +28,10 @@ func (svc *TenantDeliverablesProjectService) CreateTenantDeliverablesProject(req
 		ServiceConnectionID: reqData.ServiceConnectionId,
 		CreateTime:          &now,
 	}
+	// 获取habor连接
+	var serviceConnectionDatum models.ServiceConnectionDetails
+	svc.db.Model(&models.ServiceConnectionDetails{}).Where("main_id=?", reqData.ServiceConnectionId).First(&serviceConnectionDatum)
+
 	svc.db.Save(dbData)
 }
 
