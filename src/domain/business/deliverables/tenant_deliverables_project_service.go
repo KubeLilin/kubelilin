@@ -23,10 +23,10 @@ func NewTenantDeliverablesProjectService(db *gorm.DB) *TenantDeliverablesProject
 func (svc *TenantDeliverablesProjectService) CreateTenantDeliverablesProject(reqData *requests.CreateTenantDeliverablesProjectReq) {
 	var now = time.Now()
 	dbData := models.TenantDeliverablesProject{
-		TenantID:        reqData.TenantId,
-		HarborProjectID: reqData.HarborProjectId,
-		ProjectName:     reqData.ProjectName,
-		CreateTime:      &now,
+		TenantID:            reqData.TenantId,
+		ProjectName:         reqData.ProjectName,
+		ServiceConnectionID: reqData.ServiceConnectionId,
+		CreateTime:          &now,
 	}
 	svc.db.Save(dbData)
 }

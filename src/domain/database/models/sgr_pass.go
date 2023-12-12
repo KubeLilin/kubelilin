@@ -1345,11 +1345,12 @@ var SgrTenantUserRoleColumns = struct {
 
 // TenantDeliverablesProject 租户CI可交付物项目
 type TenantDeliverablesProject struct {
-	ID              uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
-	TenantID        uint64     `gorm:"column:tenant_id;type:bigint unsigned;not null" json:"tenantId"`                // 租户id
-	ProjectName     string     `gorm:"column:project_name;type:varchar(50);not null" json:"projectName"`              // 项目名称
-	HarborProjectID uint64     `gorm:"column:harbor_project_id;type:bigint unsigned;not null" json:"harborProjectId"` // harbor项目id
-	CreateTime      *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"`                   // 创建时间
+	ID                  uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	TenantID            uint64     `gorm:"column:tenant_id;type:bigint unsigned;not null" json:"tenantId"`                        // 租户id
+	ProjectName         string     `gorm:"column:project_name;type:varchar(50);not null" json:"projectName"`                      // 项目名称
+	ServiceConnectionID uint64     `gorm:"column:service_connection_id;type:bigint unsigned;not null" json:"serviceConnectionId"` // 连接id
+	HarborProjectID     uint64     `gorm:"column:harbor_project_id;type:bigint unsigned;not null" json:"harborProjectId"`         // harbor项目id
+	CreateTime          *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"`                           // 创建时间
 }
 
 // TableName get sql table name.获取数据库表名
@@ -1359,15 +1360,17 @@ func (m *TenantDeliverablesProject) TableName() string {
 
 // TenantDeliverablesProjectColumns get sql column name.获取数据库列名
 var TenantDeliverablesProjectColumns = struct {
-	ID              string
-	TenantID        string
-	ProjectName     string
-	HarborProjectID string
-	CreateTime      string
+	ID                  string
+	TenantID            string
+	ProjectName         string
+	ServiceConnectionID string
+	HarborProjectID     string
+	CreateTime          string
 }{
-	ID:              "id",
-	TenantID:        "tenant_id",
-	ProjectName:     "project_name",
-	HarborProjectID: "harbor_project_id",
-	CreateTime:      "create_time",
+	ID:                  "id",
+	TenantID:            "tenant_id",
+	ProjectName:         "project_name",
+	ServiceConnectionID: "service_connection_id",
+	HarborProjectID:     "harbor_project_id",
+	CreateTime:          "create_time",
 }

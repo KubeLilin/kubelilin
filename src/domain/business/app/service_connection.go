@@ -3,7 +3,6 @@ package app
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/yoyofx/glinq"
 	"gorm.io/gorm"
 	"kubelilin/api/dto/requests"
@@ -124,8 +123,22 @@ func (svc *ServiceConnectionService) QueryServiceConnections(req *requests.Servi
 	}
 
 	err, pageRes := page.StartPage(svc.db, req.PageIndex, req.PageSize).DoScan(&data, sql.String(), params...)
-	fmt.Println(pageRes.Data)
 	return pageRes, err
+}
+
+func (svc *ServiceConnectionService) QueryServiceConnectionList(req *requests.ServiceConnectionPageReq) *[]responses.ServiceConnectionRes {
+	data := &[]responses.ServiceConnectionRes{}
+	var params []interface{}
+	sql := strings.Builder{}
+	sql.WriteString("select * from service_connection")
+	sql.WriteString(" where 1=1 ")
+
+	if req.ServiceType > 0 {
+		sql.WriteString(" and service_type=? ")
+		params = append(params, req.ServiceType)
+	}
+	svc.db.Raw(sql.String(), params).Scan(data)
+	return data
 }
 
 func (svc *ServiceConnectionService) QueryServiceConnectionInfo(id int64) (*responses.ServiceConnectionRes, error) {

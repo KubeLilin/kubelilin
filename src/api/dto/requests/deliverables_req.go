@@ -7,10 +7,10 @@ import (
 
 type CreateTenantDeliverablesProjectReq struct {
 	mvc.RequestBody
-	Id              uint64 `json:"id"`
-	TenantId        uint64 `json:"tenantId"`
-	ProjectName     string `json:"projectName"`
-	HarborProjectId uint64 `json:"projectId"`
+	Id                  uint64 `json:"id"`
+	TenantId            uint64 `json:"tenantId"`
+	ProjectName         string `json:"projectName"`
+	ServiceConnectionId uint64 `json:"serviceConnectionId"`
 }
 
 type QueryTenantDeliverablesProjectReq struct {
