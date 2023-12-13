@@ -3,6 +3,7 @@ package deliverables
 import (
 	"gorm.io/gorm"
 	"kubelilin/api/dto/requests"
+	"kubelilin/domain/business/harbor"
 	"kubelilin/domain/database/models"
 	"kubelilin/pkg/page"
 	"strings"
@@ -31,7 +32,7 @@ func (svc *TenantDeliverablesProjectService) CreateTenantDeliverablesProject(req
 	// 获取habor连接
 	var serviceConnectionDatum models.ServiceConnectionDetails
 	svc.db.Model(&models.ServiceConnectionDetails{}).Where("main_id=?", reqData.ServiceConnectionId).First(&serviceConnectionDatum)
-
+	harbor.CreateProject(reqData.ProjectName, serviceConnectionDatum)
 	svc.db.Save(dbData)
 }
 

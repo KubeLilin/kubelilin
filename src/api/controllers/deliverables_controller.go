@@ -3,7 +3,7 @@ package controllers
 import (
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
-	"kubelilin/api/dto/requests"
+	requests2 "kubelilin/api/dto/requests"
 	"kubelilin/domain/business/deliverables"
 )
 
@@ -18,15 +18,15 @@ type DeliverablesController struct {
 	projectService *deliverables.TenantDeliverablesProjectService
 }
 
-func (c *DeliverablesController) CreateTenantDeliverablesProject(ctx *context.HttpContext, reqData *requests.CreateTenantDeliverablesProjectReq) mvc.ApiResult {
-	userInfo := requests.GetUserInfo(ctx)
+func (c DeliverablesController) PostTenantDeliverablesProject(ctx *context.HttpContext, reqData *requests2.CreateTenantDeliverablesProjectReq) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	reqData.TenantId = userInfo.TenantID
 	c.projectService.CreateTenantDeliverablesProject(reqData)
 	return mvc.Success(reqData.Id)
 }
 
-func (c *DeliverablesController) QueryTenantDeliverablesProject(ctx *context.HttpContext, reqData *requests.QueryTenantDeliverablesProjectReq) mvc.ApiResult {
-	userInfo := requests.GetUserInfo(ctx)
+func (c DeliverablesController) GetTenantDeliverablesProject(ctx *context.HttpContext, reqData *requests2.QueryTenantDeliverablesProjectReq) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
 	reqData.TenantId = userInfo.TenantID
 	err, res := c.projectService.QueryTenantDeliverablesProject(reqData)
 	if err != nil {
