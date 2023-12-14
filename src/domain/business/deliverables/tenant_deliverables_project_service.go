@@ -21,7 +21,7 @@ func NewTenantDeliverablesProjectService(db *gorm.DB) *TenantDeliverablesProject
 }
 
 // CreateTenantArtifactsProject 创建租户制品项目/**
-func (svc *TenantDeliverablesProjectService) CreateTenantDeliverablesProject(reqData *requests.CreateTenantDeliverablesProjectReq) {
+func (svc *TenantDeliverablesProjectService) CreateTenantDeliverablesProject(reqData *requests.CreateTenantDeliverablesProjectReq) error {
 	var now = time.Now()
 	dbData := models.TenantDeliverablesProject{
 		TenantID:            reqData.TenantId,
@@ -32,11 +32,26 @@ func (svc *TenantDeliverablesProjectService) CreateTenantDeliverablesProject(req
 	// 获取habor连接
 	var serviceConnectionDatum models.ServiceConnectionDetails
 	svc.db.Model(&models.ServiceConnectionDetails{}).Where("main_id=?", reqData.ServiceConnectionId).First(&serviceConnectionDatum)
-	harbor.CreateProject(reqData.ProjectName, serviceConnectionDatum)
-	svc.db.Save(dbData)
+	// 调用harborapi创建项目
+	err := harbor.CreateProject(reqData.ProjectName, serviceConnectionDatum)
+	if err != nil {
+		return err
+	}
+	// 查询harbor项目
+	err, dtos := harbor.QueryProjectPage(reqData.ProjectName, serviceConnectionDatum)
+	if err != nil {
+		return err
+	}
+	for _, dto := range dtos {
+		if dto.Name == reqData.ProjectName {
+			dbData.HarborProjectID = uint64(dto.ProjectId)
+		}
+	}
+	svc.db.Save(&dbData)
+	return nil
 }
 
-// CreateTenantArtifactsProject 分页查询租户制品项目/**
+// CreateTenantArtifactsProject 分页查询租户制品项目
 func (svc *TenantDeliverablesProjectService) QueryTenantDeliverablesProject(req *requests.QueryTenantDeliverablesProjectReq) (err error, pageRes *page.Page) {
 	sql := strings.Builder{}
 	var res []models.TenantDeliverablesProject
@@ -49,5 +64,5 @@ func (svc *TenantDeliverablesProjectService) QueryTenantDeliverablesProject(req 
 		sql.WriteString("%'")
 		sqlParams = append(sqlParams, req.ProjectName)
 	}
-	return page.StartPage(svc.db, req.CurrentPage, req.PageSize).DoScan(res, sql.String(), sqlParams...)
+	return page.StartPage(svc.db, req.CurrentPage, req.PageSize).DoScan(&res, sql.String(), sqlParams...)
 }

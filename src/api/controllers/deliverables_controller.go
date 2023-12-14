@@ -21,7 +21,10 @@ type DeliverablesController struct {
 func (c DeliverablesController) PostTenantDeliverablesProject(ctx *context.HttpContext, reqData *requests2.CreateTenantDeliverablesProjectReq) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	reqData.TenantId = userInfo.TenantID
-	c.projectService.CreateTenantDeliverablesProject(reqData)
+	err := c.projectService.CreateTenantDeliverablesProject(reqData)
+	if err != nil {
+		mvc.Fail(err)
+	}
 	return mvc.Success(reqData.Id)
 }
 
