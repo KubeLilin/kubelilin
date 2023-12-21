@@ -1343,11 +1343,76 @@ var SgrTenantUserRoleColumns = struct {
 	UpdateTime:   "update_time",
 }
 
+// TenantDeliverables [...]
+type TenantDeliverables struct {
+	ID           uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`      // 交付物ID
+	Name         string     `gorm:"column:name;type:varchar(255);not null" json:"name"`                // 交付物名称
+	ProjectID    uint64     `gorm:"column:project_id;type:bigint unsigned;not null" json:"projectId"`  // 项目ID
+	TreeID       uint       `gorm:"column:tree_id;type:int unsigned;not null;default:0" json:"treeId"` // 目录ID 默认 0
+	DeploymentID *int64     `gorm:"column:deployment_id;type:bigint" json:"deploymentId"`              // 应用部署ID,用于拉模式
+	CreateTime   *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"`       // 创建时间
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *TenantDeliverables) TableName() string {
+	return "tenant_deliverables"
+}
+
+// TenantDeliverablesColumns get sql column name.获取数据库列名
+var TenantDeliverablesColumns = struct {
+	ID           string
+	Name         string
+	ProjectID    string
+	TreeID       string
+	DeploymentID string
+	CreateTime   string
+}{
+	ID:           "id",
+	Name:         "name",
+	ProjectID:    "project_id",
+	TreeID:       "tree_id",
+	DeploymentID: "deployment_id",
+	CreateTime:   "create_time",
+}
+
+// TenantDeliverablesMvp [...]
+type TenantDeliverablesMvp struct {
+	ID         uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"` // 交付物MVP ID
+	DelivID    uint64     `gorm:"column:deliv_id;type:bigint unsigned;not null" json:"delivId"` // 交付物ID
+	Image      string     `gorm:"column:image;type:varchar(255);not null" json:"image"`         // MVP镜像地址
+	Version    string     `gorm:"column:version;type:varchar(100);not null" json:"version"`     // MVP版本号
+	Hash       string     `gorm:"column:hash;type:varchar(255);not null" json:"hash"`           // MVP HASH值
+	CreateTime *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"`  // 创建时间
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *TenantDeliverablesMvp) TableName() string {
+	return "tenant_deliverables_mvp"
+}
+
+// TenantDeliverablesMvpColumns get sql column name.获取数据库列名
+var TenantDeliverablesMvpColumns = struct {
+	ID         string
+	DelivID    string
+	Image      string
+	Version    string
+	Hash       string
+	CreateTime string
+}{
+	ID:         "id",
+	DelivID:    "deliv_id",
+	Image:      "image",
+	Version:    "version",
+	Hash:       "hash",
+	CreateTime: "create_time",
+}
+
 // TenantDeliverablesProject 租户CI可交付物项目
 type TenantDeliverablesProject struct {
 	ID                  uint64     `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
 	TenantID            uint64     `gorm:"column:tenant_id;type:bigint unsigned;not null" json:"tenantId"`                        // 租户id
 	ProjectName         string     `gorm:"column:project_name;type:varchar(50);not null" json:"projectName"`                      // 项目名称
+	Mode                string     `gorm:"column:mode;type:varchar(10);not null" json:"mode"`                                     // 项目模式 push/pull 推 / 拉
 	ServiceConnectionID uint64     `gorm:"column:service_connection_id;type:bigint unsigned;not null" json:"serviceConnectionId"` // 连接id
 	HarborProjectID     uint64     `gorm:"column:harbor_project_id;type:bigint unsigned;not null" json:"harborProjectId"`         // harbor项目id
 	CreateTime          *time.Time `gorm:"column:create_time;type:datetime;not null" json:"createTime"`                           // 创建时间
@@ -1363,6 +1428,7 @@ var TenantDeliverablesProjectColumns = struct {
 	ID                  string
 	TenantID            string
 	ProjectName         string
+	Mode                string
 	ServiceConnectionID string
 	HarborProjectID     string
 	CreateTime          string
@@ -1370,7 +1436,34 @@ var TenantDeliverablesProjectColumns = struct {
 	ID:                  "id",
 	TenantID:            "tenant_id",
 	ProjectName:         "project_name",
+	Mode:                "mode",
 	ServiceConnectionID: "service_connection_id",
 	HarborProjectID:     "harbor_project_id",
 	CreateTime:          "create_time",
+}
+
+// TenantDeliverablesTree [...]
+type TenantDeliverablesTree struct {
+	ID       uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	ParentID uint64 `gorm:"column:parent_id;type:bigint unsigned;not null;default:0" json:"parentId"` // 父节点ID, 根为0
+	Name     string `gorm:"column:name;type:varchar(100);not null" json:"name"`                       // 树名称
+	Icon     string `gorm:"column:icon;type:varchar(255)" json:"icon"`                                // 图标,可选
+}
+
+// TableName get sql table name.获取数据库表名
+func (m *TenantDeliverablesTree) TableName() string {
+	return "tenant_deliverables_tree"
+}
+
+// TenantDeliverablesTreeColumns get sql column name.获取数据库列名
+var TenantDeliverablesTreeColumns = struct {
+	ID       string
+	ParentID string
+	Name     string
+	Icon     string
+}{
+	ID:       "id",
+	ParentID: "parent_id",
+	Name:     "name",
+	Icon:     "icon",
 }
