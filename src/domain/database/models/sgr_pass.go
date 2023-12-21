@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 // ApplicationAPIGateway 集群网关(APISIX)
 type ApplicationAPIGateway struct {
 	ID          uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`         // 网关ID
@@ -1444,10 +1442,11 @@ var TenantDeliverablesProjectColumns = struct {
 
 // TenantDeliverablesTree [...]
 type TenantDeliverablesTree struct {
-	ID       uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
-	ParentID uint64 `gorm:"column:parent_id;type:bigint unsigned;not null;default:0" json:"parentId"` // 父节点ID, 根为0
-	Name     string `gorm:"column:name;type:varchar(100);not null" json:"name"`                       // 树名称
-	Icon     string `gorm:"column:icon;type:varchar(255)" json:"icon"`                                // 图标,可选
+	ID        uint64 `gorm:"primaryKey;column:id;type:bigint unsigned;not null" json:"id"`
+	ParentID  uint64 `gorm:"column:parent_id;type:bigint unsigned;not null;default:0" json:"parentId"` // 父节点ID, 根为0
+	Name      string `gorm:"column:name;type:varchar(100);not null" json:"name"`                       // 树名称
+	Icon      string `gorm:"column:icon;type:varchar(255)" json:"icon"`                                // 图标,可选
+	ProjectID uint64 `gorm:"column:project_id;type:bigint unsigned;not null" json:"projectId"`         // 项目id
 }
 
 // TableName get sql table name.获取数据库表名
@@ -1457,13 +1456,15 @@ func (m *TenantDeliverablesTree) TableName() string {
 
 // TenantDeliverablesTreeColumns get sql column name.获取数据库列名
 var TenantDeliverablesTreeColumns = struct {
-	ID       string
-	ParentID string
-	Name     string
-	Icon     string
+	ID        string
+	ParentID  string
+	Name      string
+	Icon      string
+	ProjectID string
 }{
-	ID:       "id",
-	ParentID: "parent_id",
-	Name:     "name",
-	Icon:     "icon",
+	ID:        "id",
+	ParentID:  "parent_id",
+	Name:      "name",
+	Icon:      "icon",
+	ProjectID: "project_id",
 }
