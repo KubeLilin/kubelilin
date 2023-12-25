@@ -19,3 +19,12 @@ type QueryTenantDeliverablesProjectReq struct {
 	ProjectName string `json:"projectName" uri:"projectName" `
 	TenantId    uint64 `json:"tenantId"`
 }
+
+type EditTenantDeliverablesTreeReq struct {
+	mvc.RequestBody
+	Id        uint64 `json:"id"`
+	TenantId  uint64 `json:"tenantId"`
+	Name      string `json:"name"`
+	ProjectId uint64 `json:"projectId"`
+	ParentID  uint64 `json:"parentId"`
+}
