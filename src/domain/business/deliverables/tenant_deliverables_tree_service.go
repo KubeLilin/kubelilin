@@ -5,6 +5,7 @@ import (
 	"kubelilin/api/dto/requests"
 	"kubelilin/domain/database/models"
 	"kubelilin/domain/dto"
+	"strconv"
 )
 
 type TenantDeliverablesTreeService struct {
@@ -31,7 +32,7 @@ func (s *TenantDeliverablesTreeService) EditTree(req requests.EditTenantDelivera
 }
 
 func (s *TenantDeliverablesTreeService) queryTreeByProject(projectId uint64) []dto.DeliverablesTreeDTO {
-	treeData := make([]dto.DeliverablesTreeDTO, 1)
+	treeData := make([]dto.DeliverablesTreeDTO, 0)
 	var dbData []models.TenantDeliverablesTree
 	s.db.Model(models.TenantDeliverablesTree{}).Where("project_id=?", projectId).Scan(&dbData)
 	if len(dbData) <= 0 {
@@ -45,12 +46,22 @@ func (s *TenantDeliverablesTreeService) queryTreeByProject(projectId uint64) []d
 			break
 		}
 	}
+	treeData = s.recursionTreeData(treeRoot)
+	return treeData
 }
 
-func (s *TenantDeliverablesTreeService) recursionTreeData(node models.TenantDeliverablesTree) {
+func (s *TenantDeliverablesTreeService) recursionTreeData(node models.TenantDeliverablesTree) []dto.DeliverablesTreeDTO {
 	var dbData []models.TenantDeliverablesTree
+	var resData []dto.DeliverablesTreeDTO
+	treeNode := dto.DeliverablesTreeDTO{Key: strconv.FormatUint(node.ID, 10), Title: node.Name, Children: make([]dto.DeliverablesTreeDTO, 0)}
+	resData = append(resData, treeNode)
 	s.db.Model(models.TenantDeliverablesTree{}).Where("parent_id=?", node.ID).Scan(&dbData)
 	if len(dbData) > 0 {
-
+		for _, nodeItem := range dbData {
+			childrenData := s.recursionTreeData(nodeItem)
+			treeNode.Children = append(treeNode.Children, childrenData...)
+		}
 	}
+	return resData
+
 }
