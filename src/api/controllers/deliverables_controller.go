@@ -7,15 +7,17 @@ import (
 	"kubelilin/domain/business/deliverables"
 )
 
-func NewDeliverablesController(projectService *deliverables.TenantDeliverablesProjectService) *DeliverablesController {
+func NewDeliverablesController(projectService *deliverables.TenantDeliverablesProjectService, deliverablesTreeService *deliverables.TenantDeliverablesTreeService) *DeliverablesController {
 	return &DeliverablesController{
-		projectService: projectService,
+		projectService:          projectService,
+		deliverablesTreeService: deliverablesTreeService,
 	}
 }
 
 type DeliverablesController struct {
 	mvc.ApiController
-	projectService *deliverables.TenantDeliverablesProjectService
+	projectService          *deliverables.TenantDeliverablesProjectService
+	deliverablesTreeService *deliverables.TenantDeliverablesTreeService
 }
 
 func (c DeliverablesController) PostTenantDeliverablesProject(ctx *context.HttpContext, reqData *requests2.CreateTenantDeliverablesProjectReq) mvc.ApiResult {
@@ -33,7 +35,17 @@ func (c DeliverablesController) GetTenantDeliverablesProject(ctx *context.HttpCo
 	reqData.TenantId = userInfo.TenantID
 	err, res := c.projectService.QueryTenantDeliverablesProject(reqData)
 	if err != nil {
-		panic(err)
+		mvc.FailWithMsg(nil, err.Error())
 	}
 	return mvc.Success(res)
+}
+
+func (c DeliverablesController) EditDeliverableTree(ctx *context.HttpContext, reqData *requests2.EditTenantDeliverablesTreeReq) mvc.ApiResult {
+	userInfo := requests2.GetUserInfo(ctx)
+	reqData.TenantId = userInfo.TenantID
+	err := c.deliverablesTreeService.EditTree(reqData)
+	if err != nil {
+		mvc.FailWithMsg(nil, err.Error())
+	}
+	return mvc.Success("")
 }

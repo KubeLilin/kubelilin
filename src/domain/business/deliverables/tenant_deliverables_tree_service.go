@@ -18,7 +18,7 @@ func NewTenantDeliverablesTree(db *gorm.DB) *TenantDeliverablesTreeService {
 	}
 }
 
-func (s *TenantDeliverablesTreeService) EditTree(req requests.EditTenantDeliverablesTreeReq) error {
+func (s *TenantDeliverablesTreeService) EditTree(req *requests.EditTenantDeliverablesTreeReq) error {
 	treeData := models.TenantDeliverablesTree{
 		ProjectID: req.ProjectId,
 		Name:      req.Name,
