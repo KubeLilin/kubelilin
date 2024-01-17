@@ -13,5 +13,59 @@
       "url": "https://api.gigantic-server.com/v1",
       "description": "生产环境"
     }
-  ]
+  ],
+  "info": {
+    "title": "小崔的swagger项目",
+    "description": "丢你螺母",
+    "termsOfService": "http://example.com/terms/",
+    "contact": {
+      "name": "API Support",
+      "url": "http://www.example.com/support",
+      "email": "support@example.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.1"
+  },
+  "paths": {
+    "/pets": {
+      "get": {
+        "description": "丢一个螺母给你",
+        "summary": "吃屎了你",
+        "operationId": "getPetsById",
+        "responses": {
+          "200": {
+            "description": "pet response",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Pet"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "ID of pet to use",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "style": "simple"
+        }
+      ]
+    }
+  }
 }
