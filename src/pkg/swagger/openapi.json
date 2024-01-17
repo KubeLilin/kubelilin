@@ -1,0 +1,17 @@
+{
+  "openapi": "3.0.3",
+  "servers": [
+    {
+      "url": "https://development.gigantic-server.com/v1",
+      "description": "开发环境"
+    },
+    {
+      "url": "https://staging.gigantic-server.com/v1",
+      "description": "测试环境"
+    },
+    {
+      "url": "https://api.gigantic-server.com/v1",
+      "description": "生产环境"
+    }
+  ]
+}
