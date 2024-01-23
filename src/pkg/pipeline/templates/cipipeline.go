@@ -44,19 +44,19 @@ spec:
     }
     stages {
         {{ .Stages }}
-
-  		{{if .CallBack }}
-        stage('Callback') {
-            steps {
-                retry(count: 5) {
-                    httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', customHeaders: [[maskValue: true, name: 'Authorization', value: 'Bearer {{ .CallBack.Token }}']], httpMode: 'POST', requestBody: '''{{ .CallBack.Body }}''', responseHandle: 'NONE', timeout: 10, url: '{{ .CallBack.URL }}'
-                }
-            }
-        }
-        {{ else }}
-
-    	{{ end }}
     }
+	{{if .CallBack }}
+	post {
+		always {
+			script {
+ 				def rbody = "{\"pid\": \"${PID}\",  \"appid\": \"${APPID}\", \"branch\": \"${params.BRANCH_NAME}\" , \"image\": \"${env.SGR_REPOSITORY_NAME}:v${env.BUILD_NUMBER}\" , \"buildNumber\": \"${env.BUILD_NUMBER}\",\"status\": \"${currentBuild.currentResult}\" ,\"timestamp\": \"${new Date().toString()}\" }"
+				httpRequest httpMode: 'POST', url: ' {{ .CallBack.URL }}', contentType: 'APPLICATION_JSON', requestBody: rbody , responseHandle: 'NONE', timeout: 30
+			}
+		}
+	}
+	{{ else }}
+
+	{{ end }}
 }
 `
 

@@ -22,6 +22,7 @@ yoyogo:
           "/v1/user/login",
           "/v1/pod/terminal",
           "/v1/deployment/executedeployment",
+          "/v1/pipeline/webhook",
           "/v1/deployment/notify",
           "/actuator/health/liveness",
           "/actuator/health/readiness",
@@ -40,5 +41,4 @@ yoyogo:
       username: ${PAAS_DB_USER:root}
       password: ${PAAS_DB_PWD:root}
       debug: true
-
 

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/yoyofx/yoyogo/web/binding"
 	"github.com/yoyofx/yoyogo/web/context"
 	"github.com/yoyofx/yoyogo/web/mvc"
@@ -171,7 +170,7 @@ func (c *ApplicationController) GetAppList(ctx *context.HttpContext) mvc.ApiResu
 	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
 	err, res := c.service.QueryAppList(&request)
-	fmt.Println(res.Data)
+	//fmt.Println(res.Data)
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}

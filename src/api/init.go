@@ -38,4 +38,6 @@ func ConfigureMvc(builder *mvc.ControllerBuilder) {
 	builder.AddController(controllers.NewConfigmapController)
 	builder.AddController(controllers.NewDynamicController)
 	builder.AddController(controllers.NewRuntimeController)
+	builder.AddController(controllers.NewPipelineController)
+	builder.AddController(controllers.NewDeliverablesController)
 }

@@ -275,7 +275,7 @@ func (pipelineService *PipelineService) UpdateDSL(request *requests.EditPipeline
 
 	builder := pipelineService.jenkinsBuilder.UseBuildImage(context["buildImage"])
 
-	processor := builder.CICDProcessor(parameters, env, stageItems)
+	processor := builder.CICDProcessor(parameters, env, stageItems, &pipelineV1.DeployRequest{URL: context["deployUrl"] + "/v1/pipeline/webhook"})
 	pipeline, _ := builder.Build()
 
 	return pipeline.SaveJob(pipelineName, processor)

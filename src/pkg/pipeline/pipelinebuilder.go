@@ -99,7 +99,7 @@ func (builder *Builder) Build() (Pipeline, error) {
 //	return flowProcessor
 //}
 
-func (builder *Builder) CICDProcessor(inputParams []ParamItem, envs []EnvItem, stages map[string]interface{}) FlowProcessor {
+func (builder *Builder) CICDProcessor(inputParams []ParamItem, envs []EnvItem, stages map[string]interface{}, callBack *DeployRequest) FlowProcessor {
 	envVars := []EnvItem{
 		{Key: "JENKINS_SLAVE_WORKSPACE", Value: "/home/jenkins/agent"},
 		{Key: "ACCESS_TOKEN", Value: builder.Options.jenkinsUserToken},
@@ -134,7 +134,7 @@ func (builder *Builder) CICDProcessor(inputParams []ParamItem, envs []EnvItem, s
 		CommonContext: CommonContext{
 			Namespace: builder.Options.k8sNamespace,
 		},
-		CallBack: nil,
+		CallBack: callBack,
 	}
 	return flowProcessor
 }

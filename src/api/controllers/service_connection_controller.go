@@ -50,6 +50,15 @@ func (controller *ServiceConnectionController) GetQueryServiceConnections(ctx *c
 	return mvc.Success(res)
 }
 
+func (controller *ServiceConnectionController) GetQueryServiceConnectionList(ctx *context.HttpContext) mvc.ApiResult {
+	var pageReq requests2.ServiceConnectionPageReq
+	userInfo := requests2.GetUserInfo(ctx)
+	ctx.BindWithUri(&pageReq)
+	pageReq.TenantID = userInfo.TenantID
+	res := controller.svc.QueryServiceConnectionList(&pageReq)
+	return mvc.Success(res)
+}
+
 func (controller *ServiceConnectionController) GetServiceConnectionInfo(ctx *context.HttpContext) mvc.ApiResult {
 	id, _ := strconv.ParseInt(ctx.Input.Query("id"), 10, 64)
 	res, err := controller.svc.QueryServiceConnectionInfo(id)
