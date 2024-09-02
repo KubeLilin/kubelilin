@@ -15,6 +15,7 @@ import (
 	"strings"
 )
 
+// ClusterController /*K8S集群控制器，负责管理 pass平台中所管理的所有 K8S集群信息：例如 POD SERVICE 等*/
 type ClusterController struct {
 	mvc.ApiController
 	clusterService *kubernetes.ClusterService
@@ -24,6 +25,7 @@ func NewClusterController(clusterService *kubernetes.ClusterService) *ClusterCon
 	return &ClusterController{clusterService: clusterService}
 }
 
+// GetPods /*根据 namsespace 和所选集群获取当前集群下所有 POD的列表并且根据集群 API获取 POD的物理信息*/
 func (controller ClusterController) GetPods(ctx *context.HttpContext) mvc.ApiResult {
 	namespace := ctx.Input.QueryDefault("namespace", "")
 	k8sapp := ctx.Input.QueryDefault("app", "")
@@ -50,6 +52,7 @@ func (controller ClusterController) GetPods(ctx *context.HttpContext) mvc.ApiRes
 		if namespace == "" {
 			emptyOptions.Limit = 500
 		}
+		// 获取 POD的物理信息例如 CPU的使用情况，内存的使用情况等信息，用于在列表页面进行展示
 		podsMetricsList, err := metricsClient.MetricsV1beta1().PodMetricses(namespace).List(contextV1.TODO(), emptyOptions)
 		if err == nil {
 			for _, podsMetricsItem := range podsMetricsList.Items {
@@ -57,6 +60,7 @@ func (controller ClusterController) GetPods(ctx *context.HttpContext) mvc.ApiRes
 					if podsMetricsItem.Name == podItem.PodName {
 						podList[podindex].Usage = dto.NodeStatus{}
 						for _, cmst := range podsMetricsItem.Containers {
+							// 读取 CPU和内存的占用信息
 							podList[podindex].Usage.CPU += cmst.Usage.Cpu().AsApproximateFloat64()
 							podList[podindex].Usage.Memory += cmst.Usage.Memory().AsApproximateFloat64()
 						}
@@ -69,18 +73,21 @@ func (controller ClusterController) GetPods(ctx *context.HttpContext) mvc.ApiRes
 	return controller.OK(podList)
 }
 
+// GetNamespaces 获取当前 K8S集群下所有的 NAMESPACE 信息
 func (controller ClusterController) GetNamespaces(ctx *context.HttpContext) mvc.ApiResult {
 	//tenantId := ctx.Input.QueryDefault("tid","")
 	// get k8s cluster client by tenant id
 	userInfo := requests2.GetUserInfo(ctx)
 	strCid := ctx.Input.QueryDefault("cid", "0")
 	cid, _ := strconv.ParseUint(strCid, 10, 64)
+	// 根据当前租户获取集群客户端
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, cid)
-
+	// 获取当前集群下的 Namespace
 	namespaces := kubernetes.GetAllNamespaces(client)
 	return controller.OK(namespaces)
 }
 
+// GetNamespacesFromDB 从数据库持久层中获取上一次已经缓存下来的 NAMESPACE信息用来加快查询速度
 func (controller ClusterController) GetNamespacesFromDB(ctx *context.HttpContext) mvc.ApiResult {
 	//tenantId := ctx.Input.QueryDefault("tid","")
 	// get k8s cluster client by tenant id
@@ -91,15 +98,18 @@ func (controller ClusterController) GetNamespacesFromDB(ctx *context.HttpContext
 	return controller.OK(res)
 }
 
+// GetNamespacesByTenantId 根据租户 ID获取当前租户下所有的命名空间信息
 func (controller ClusterController) GetNamespacesByTenantId(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	cid := utils.GetNumberOfParam[uint64](ctx, "cid")
 	pageIndex := utils.GetNumberOfParam[int](ctx, "current")
 	pageSize := utils.GetNumberOfParam[int](ctx, "pageSize")
+	// 根据当前组合查询数据库中的的明明空间信息
 	_, res := controller.clusterService.GetNameSpacesListForTenantId(cid, userInfo.TenantID, pageIndex, pageSize)
 	return controller.OK(res)
 }
 
+// GetNamespaceList 根据租户和集群获取明明空间的全部列表，用于做前端下拉列表的数据源
 func (controller ClusterController) GetNamespaceList(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	cid, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
@@ -121,6 +131,7 @@ func (controller ClusterController) GetNamespaceList(ctx *context.HttpContext) m
 	return controller.OK(res)
 }
 
+// GetDeployments 获取当前集群和租户名下的所有Deployment用作前端下拉数据源
 func (controller ClusterController) GetDeployments(ctx *context.HttpContext) mvc.ApiResult {
 	namespace := ctx.Input.QueryDefault("namespace", "")
 	userInfo := requests2.GetUserInfo(ctx)
@@ -132,6 +143,7 @@ func (controller ClusterController) GetDeployments(ctx *context.HttpContext) mvc
 	return controller.OK(list)
 }
 
+// GetWorkloads 根据当前租户和集群获取Workloads列表
 func (controller ClusterController) GetWorkloads(ctx *context.HttpContext) mvc.ApiResult {
 	namespace := ctx.Input.QueryDefault("namespace", "")
 	workload := ctx.Input.QueryDefault("workload", "")
