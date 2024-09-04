@@ -17,6 +17,7 @@ type ApiGatewayController struct {
 	deploymentService *app.DeploymentService
 }
 
+/*API网关构造幻术*/
 func NewApiGatewayController(service *networks.ApiGatewayService, deploymentService *app.DeploymentService) *ApiGatewayController {
 	return &ApiGatewayController{service: service, deploymentService: deploymentService}
 }
