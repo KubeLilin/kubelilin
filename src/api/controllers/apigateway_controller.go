@@ -17,11 +17,12 @@ type ApiGatewayController struct {
 	deploymentService *app.DeploymentService
 }
 
-/*API网关构造幻术*/
+/*API网关构造函数*/
 func NewApiGatewayController(service *networks.ApiGatewayService, deploymentService *app.DeploymentService) *ApiGatewayController {
 	return &ApiGatewayController{service: service, deploymentService: deploymentService}
 }
 
+// GetList 获取网关列表/**/
 func (controller *ApiGatewayController) GetList(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("adminUri", "0"))
 	list, err := controller.service.GetAllGatewayList(clusterId)
@@ -31,6 +32,7 @@ func (controller *ApiGatewayController) GetList(ctx *context.HttpContext) mvc.Ap
 	return mvc.Success(list)
 }
 
+// GetTeamList 获取团队列表/**/
 func (controller *ApiGatewayController) GetTeamList(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests.GetUserInfo(ctx)
 	tenantID := userInfo.TenantID
@@ -42,6 +44,7 @@ func (controller *ApiGatewayController) GetTeamList(ctx *context.HttpContext) mv
 	return mvc.Success(list)
 }
 
+// PostCreateOrEditTeam 更新或者创建当前租户下的团队/**/
 func (controller *ApiGatewayController) PostCreateOrEditTeam(ctx *context.HttpContext, request *requests.GatewayTeamRequest) mvc.ApiResult {
 	userInfo := requests.GetUserInfo(ctx)
 	tenantID := userInfo.TenantID
@@ -59,6 +62,7 @@ func (controller *ApiGatewayController) PostCreateOrEditTeam(ctx *context.HttpCo
 	return mvc.Success(true)
 }
 
+// GetRouterList 获取当前网关瞎的路由列表/**/
 func (controller *ApiGatewayController) GetRouterList(request *requests.GatewayRouterListRequest) mvc.ApiResult {
 	list, err := controller.service.GetRouterList(request)
 	if err != nil {
@@ -67,6 +71,7 @@ func (controller *ApiGatewayController) GetRouterList(request *requests.GatewayR
 	return mvc.Success(list)
 }
 
+// GetRouterListBy 根据当前 deploy 和 APP获取路由列表
 func (controller *ApiGatewayController) GetRouterListBy(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appId", "0"))
 	deployId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("deployId", "0"))
@@ -78,6 +83,7 @@ func (controller *ApiGatewayController) GetRouterListBy(ctx *context.HttpContext
 	return mvc.Success(list)
 }
 
+// 根据当前depoly 一级路由名称查询路由信息
 func (controller *ApiGatewayController) GetRouterByName(ctx *context.HttpContext) mvc.ApiResult {
 	deployId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("deployId", "0"))
 	routeName := ctx.Input.QueryDefault("routeName", "")
@@ -104,6 +110,7 @@ func (controller *ApiGatewayController) GetRouterByName(ctx *context.HttpContext
 	return mvc.Success(gatewayRouter)
 }
 
+// GetAppList 根据当前租户获取 app 列表
 func (controller *ApiGatewayController) GetAppList(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests.GetUserInfo(ctx)
 	tenantID := userInfo.TenantID
@@ -114,6 +121,7 @@ func (controller *ApiGatewayController) GetAppList(ctx *context.HttpContext) mvc
 	return mvc.Success(list)
 }
 
+// GetDeploymentList 根据当前登录用户以及集群信息获取相关的Deploy列表
 func (controller *ApiGatewayController) GetDeploymentList(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests.GetUserInfo(ctx)
 	tenantID := userInfo.TenantID
@@ -127,6 +135,7 @@ func (controller *ApiGatewayController) GetDeploymentList(ctx *context.HttpConte
 	return mvc.Success(list)
 }
 
+// PostCreateOrEditRouter 根据当前部署
 func (controller *ApiGatewayController) PostCreateOrEditRouter(request *requests.GatewayRouterRequest) mvc.ApiResult {
 	deployment, err := controller.deploymentService.GetDeploymentByID(uint64(request.DeploymentID))
 	if err != nil {
@@ -152,6 +161,7 @@ func (controller *ApiGatewayController) PostCreateOrEditRouter(request *requests
 	return mvc.Success(true)
 }
 
+// DeleteRoute 删除相关路由
 func (controller *ApiGatewayController) DeleteRoute(ctx *context.HttpContext) mvc.ApiResult {
 	id, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
 	gatewayId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("gatewayId", "0"))

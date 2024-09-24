@@ -12,6 +12,7 @@ import (
 	"kubelilin/utils"
 )
 
+// ApplicationController 应用构造
 type ApplicationController struct {
 	mvc.ApiController
 	service           *app.ApplicationService
@@ -19,11 +20,12 @@ type ApplicationController struct {
 	pipelineService   *app.PipelineService
 }
 
+// NewApplicationController 应用管理器构造函数
 func NewApplicationController(service *app.ApplicationService, deploymentService *app.DeploymentService, pipelineService *app.PipelineService) *ApplicationController {
 	return &ApplicationController{service: service, deploymentService: deploymentService, pipelineService: pipelineService}
 }
 
-// PostCreateApp new application.
+// PostCreateApp 根据当前登录用户所述租户创建应用
 func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request *requests2.AppReq) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
@@ -34,9 +36,11 @@ func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request 
 	return mvc.Success(res)
 }
 
+// PostImportApp 当前登录用户根据 yaml 文件直接导入一个应用
 func (c *ApplicationController) PostImportApp(ctx *context.HttpContext, request *requests2.ImportAppReq) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
+	// 解析传入的参数
 	appreq := requests2.AppReq{
 		TenantID:   request.TenantID,
 		Name:       request.Name,
@@ -55,6 +59,7 @@ func (c *ApplicationController) PostImportApp(ctx *context.HttpContext, request 
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}
+	//便利导入的部署，顺道激发流水线
 	for _, deployItem := range request.DeployList {
 		deployModel := &requests2.DeploymentStepRequest{
 			Name:            deployItem.DeployName,
@@ -142,7 +147,7 @@ func (c *ApplicationController) PostImportApp(ctx *context.HttpContext, request 
 	return mvc.Success(true)
 }
 
-// PutEditApp edit application information.
+// PutEditApp 更新当前 app的基础信息
 func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *requests2.AppReq) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
@@ -153,6 +158,7 @@ func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *re
 	return mvc.Success(res)
 }
 
+// DeleteApp 删除当前所操作的 APP
 func (c *ApplicationController) DeleteApp(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appId", "0"))
 	err := c.service.DeleteApp(appId)
@@ -162,7 +168,7 @@ func (c *ApplicationController) DeleteApp(ctx *context.HttpContext) mvc.ApiResul
 	return mvc.Success(true)
 }
 
-// GetAppList get application list by tenant id.
+// GetAppList 根据当前登录用户的所属租户，获取 APP列表
 func (c *ApplicationController) GetAppList(ctx *context.HttpContext) mvc.ApiResult {
 	request := requests2.AppReq{}
 	_ = ctx.BindWithUri(&request)
@@ -177,23 +183,25 @@ func (c *ApplicationController) GetAppList(ctx *context.HttpContext) mvc.ApiResu
 	return mvc.Success(res)
 }
 
-// GetAppLanguage get language for application
+// GetAppLanguage 获取 APP所支持的开发语言列表
 func (c *ApplicationController) GetAppLanguage() mvc.ApiResult {
 	res := c.service.QueryAppCodeLanguage()
 	return mvc.Success(res)
 }
 
-// GetAppLevel get level for application
+// GetAppLevel 获取 APP所属等级
 func (c *ApplicationController) GetAppLevel() mvc.ApiResult {
 	res := c.service.QueryAppLevel()
 	return mvc.Success(res)
 }
 
+// GetDeployLevel 获取部署等级，用于下拉列表
 func (c *ApplicationController) GetDeployLevel() mvc.ApiResult {
 	res := c.service.QueryDeployLevel()
 	return mvc.Success(res)
 }
 
+// GetDeployLevelCounts 统计不同等级的Deploy数量
 func (c *ApplicationController) GetDeployLevelCounts(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	res, _ := c.service.GetAppCountByDeployLevel(appId)
