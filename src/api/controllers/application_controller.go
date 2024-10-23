@@ -208,12 +208,14 @@ func (c *ApplicationController) GetDeployLevelCounts(ctx *context.HttpContext) m
 	return mvc.Success(res)
 }
 
+// GetProjectDeployLevelCounts 统计各个项目瞎不同等级的Deploy数量进行显示，用于填充表格顶部状态栏
 func (c *ApplicationController) GetProjectDeployLevelCounts(ctx *context.HttpContext) mvc.ApiResult {
 	projectId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("projectId", "0"))
 	res, _ := c.service.GetProjectCountByDeployLevel(projectId)
 	return mvc.Success(res)
 }
 
+// GetTeamDeployLevelCounts 统计当前租户下不同等级的Deploy用于进行抬头状态 Tab 的显示
 func (c *ApplicationController) GetTeamDeployLevelCounts(ctx *context.HttpContext) mvc.ApiResult {
 	tenantId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("tenantId", "0"))
 	projectCounts, _ := c.service.GetTenantProjectCountByDeployLevel(tenantId)
@@ -279,6 +281,7 @@ func (c *ApplicationController) GetGitBranches(ctx *context.HttpContext) mvc.Api
 	})
 }
 
+// GetSearchDockerfile 根据所选择的 SVC地址，在地址内搜索目录下的 Dockerfile文件列表
 func (c *ApplicationController) GetSearchDockerfile(ctx *context.HttpContext) mvc.ApiResult {
 	scid, _ := utils.StringToUInt64(ctx.Input.QueryDefault("scid", "0"))
 	gitAddr := ctx.Input.QueryDefault("git", "")
@@ -301,6 +304,7 @@ func (c *ApplicationController) GetSearchDockerfile(ctx *context.HttpContext) mv
 	return mvc.Success(dockerPaths)
 }
 
+// GetBuildImageByLanguageId 根据页面所选择的开发语言出发流水线进行镜像的打包操作
 func (c *ApplicationController) GetBuildImageByLanguageId(ctx *context.HttpContext) mvc.ApiResult {
 	languageId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("languageId", "0"))
 	list, err := c.pipelineService.GetBuildImageByLanguageId(languageId)
@@ -310,6 +314,7 @@ func (c *ApplicationController) GetBuildImageByLanguageId(ctx *context.HttpConte
 	return mvc.Success(list)
 }
 
+// GetBuildImageByLanguages 根据多种开发开发进行镜像的编译
 func (c *ApplicationController) GetBuildImageByLanguages(ctx *context.HttpContext) mvc.ApiResult {
 	languageId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("languageId", "0"))
 	aliasName := ctx.Input.QueryDefault("aliasName", "")
@@ -320,6 +325,7 @@ func (c *ApplicationController) GetBuildImageByLanguages(ctx *context.HttpContex
 	return mvc.Success(list)
 }
 
+// PostBuildImage 触发流水线进行镜像的编译
 func (c *ApplicationController) PostBuildImage(ctx *context.HttpContext) mvc.ApiResult {
 	var request models.ApplicationLanguageCompile
 	_ = ctx.BindWith(&request, binding.JSON)
@@ -331,6 +337,7 @@ func (c *ApplicationController) PostBuildImage(ctx *context.HttpContext) mvc.Api
 	return mvc.Success(true)
 }
 
+// DeleteBuildImage 删除已经编译好的镜像
 func (c *ApplicationController) DeleteBuildImage(ctx *context.HttpContext) mvc.ApiResult {
 	id, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
 	err := c.pipelineService.DeleteBuildImage(id)
