@@ -225,7 +225,7 @@ func (c *ApplicationController) GetTeamDeployLevelCounts(ctx *context.HttpContex
 	return mvc.Success(context.H{"insCounts": projectCounts, "proCount": projectCount, "namespaceCount": namespaceCount, "appCount": appCount})
 }
 
-// GetGitRepo get git address for application
+// GetGitRepo get git address for application 获取当前所选应用的 GIT仓库地址
 func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	appName := ctx.Input.Query("appName")
@@ -236,7 +236,7 @@ func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResu
 	return mvc.Success(cvsRes)
 }
 
-// GetInfo get application information
+// GetInfo get application information 获取当前所选应用的基础信息
 func (c *ApplicationController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	info, err := c.service.GetAppInfo(appId)
@@ -246,7 +246,7 @@ func (c *ApplicationController) GetInfo(ctx *context.HttpContext) mvc.ApiResult 
 	return mvc.Success(info)
 }
 
-// GetGitBranches get git addresses & branches for pipeline
+// GetGitBranches get git addresses & branches for pipeline 获取当前 git 仓库下的所有分支和所对应的流水线
 func (c *ApplicationController) GetGitBranches(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	gitAddr := ctx.Input.QueryDefault("git", "")
@@ -347,7 +347,7 @@ func (c *ApplicationController) DeleteBuildImage(ctx *context.HttpContext) mvc.A
 	return mvc.Success(true)
 }
 
-// PostNewPipeline new pipeline only by name & id
+// PostNewPipeline new pipeline only by name & id 根据所填写的名称创建一条新的流水线
 func (c *ApplicationController) PostNewPipeline(req *requests2.AppNewPipelineReq) mvc.ApiResult {
 	err, pipeline := c.pipelineService.NewPipeline(req)
 	if err != nil {
@@ -356,7 +356,7 @@ func (c *ApplicationController) PostNewPipeline(req *requests2.AppNewPipelineReq
 	return mvc.Success(pipeline.ID)
 }
 
-// GetPipelines get pipeline list by application id.
+// GetPipelines get pipeline list by application id. 根据当前所选的应用，获取应用下的流水线
 func (c *ApplicationController) GetPipelines(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	if appId == 0 {
@@ -369,7 +369,7 @@ func (c *ApplicationController) GetPipelines(ctx *context.HttpContext) mvc.ApiRe
 	return mvc.Success(pipelines)
 }
 
-// PostEditPipeline Save pipeline information and DSL.
+// PostEditPipeline Save pipeline information and DSL. 保存流水线的信息和流程设计
 func (c *ApplicationController) PostEditPipeline(request *requests2.EditPipelineReq) mvc.ApiResult {
 	err := c.pipelineService.UpdatePipeline(request)
 	if err == nil {
@@ -382,7 +382,7 @@ func (c *ApplicationController) PostEditPipeline(request *requests2.EditPipeline
 	return mvc.Success(true)
 }
 
-// GetPipeline get pipeline frontend json by id.
+// GetPipeline get pipeline frontend json by id. 根据流水线的 id 获取流水线的 JSON数据结构描述信息
 func (c *ApplicationController) GetPipeline(ctx *context.HttpContext) mvc.ApiResult {
 	pipelineId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
 	pipeline, err := c.pipelineService.GetPipelineById(pipelineId)
@@ -392,6 +392,7 @@ func (c *ApplicationController) GetPipeline(ctx *context.HttpContext) mvc.ApiRes
 	return mvc.Success(pipeline)
 }
 
+// PostAbortPipeline 终止当前所选的正在运行的流水线
 func (c *ApplicationController) PostAbortPipeline(request *requests2.AbortPipelineReq) mvc.ApiResult {
 	err := c.pipelineService.AbortPipeline(request)
 	if err != nil {
@@ -400,6 +401,7 @@ func (c *ApplicationController) PostAbortPipeline(request *requests2.AbortPipeli
 	return mvc.Success(true)
 }
 
+// PostRunPipeline 执行当前所选的流水线的内容
 func (c *ApplicationController) PostRunPipeline(request *requests2.RunPipelineReq) mvc.ApiResult {
 	taskId, err := c.pipelineService.RunPipeline(request)
 	if err != nil {
@@ -408,6 +410,7 @@ func (c *ApplicationController) PostRunPipeline(request *requests2.RunPipelineRe
 	return mvc.Success(taskId)
 }
 
+// PostRunPipelineWithBranch 使用指定的 SVC分支来运行流水线
 func (c *ApplicationController) PostRunPipelineWithBranch(request *requests2.RunPipelineReq) mvc.ApiResult {
 	taskId, err := c.pipelineService.RunPipelineWithParameters(request)
 	if err != nil {
@@ -416,6 +419,7 @@ func (c *ApplicationController) PostRunPipelineWithBranch(request *requests2.Run
 	return mvc.Success(taskId)
 }
 
+// PostPipelineStatus 变更流水线的状态
 func (c *ApplicationController) PostPipelineStatus(request *requests2.PipelineStatusReq) mvc.ApiResult {
 	err := c.pipelineService.UpdatePipelineStatus(request)
 	if err != nil {
@@ -424,6 +428,7 @@ func (c *ApplicationController) PostPipelineStatus(request *requests2.PipelineSt
 	return mvc.Success(true)
 }
 
+// DeletePipeline 删除当前所选流水线
 func (c *ApplicationController) DeletePipeline(ctx *context.HttpContext) mvc.ApiResult {
 	pipelineId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
 	err := c.pipelineService.DeletePipeline(pipelineId)
@@ -433,6 +438,7 @@ func (c *ApplicationController) DeletePipeline(ctx *context.HttpContext) mvc.Api
 	return mvc.Success(true)
 }
 
+// GetPipelineDetails 获取当前流水线的明细信息
 func (c *ApplicationController) GetPipelineDetails(httpContext *context.HttpContext) mvc.ApiResult {
 	var request requests2.PipelineDetailsReq
 	_ = httpContext.BindWithUri(&request)
@@ -443,6 +449,7 @@ func (c *ApplicationController) GetPipelineDetails(httpContext *context.HttpCont
 	return mvc.Success(job)
 }
 
+// GetPipelineLogs 获取当前流水线的执行日志
 func (c *ApplicationController) GetPipelineLogs(httpContext *context.HttpContext) mvc.ApiResult {
 	var request requests2.PipelineDetailsReq
 	_ = httpContext.BindWithUri(&request)
