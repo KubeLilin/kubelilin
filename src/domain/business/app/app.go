@@ -22,8 +22,10 @@ func NewApplicationService(db *gorm.DB, config abstractions.IConfiguration) *App
 	return &ApplicationService{db: db, config: config}
 }
 
+// CreateApp 根据当前登录用户的所属租户创建一个应用模板
 func (s *ApplicationService) CreateApp(req *requests.AppReq) (error, *models.SgrTenantApplication) {
 	var exitCount int64
+	//应用名称重复性校验
 	s.db.Model(&models.SgrTenantApplication{}).Where("tenant_id=? and name=?", req.TenantID, req.Name).Count(&exitCount)
 	if exitCount > 0 {
 		return errors.New("already have the same name application"), nil
@@ -52,6 +54,7 @@ func (s *ApplicationService) CreateApp(req *requests.AppReq) (error, *models.Sgr
 	return nil, appModel
 }
 
+// DeleteApp 删除当前租户下的应用模板
 func (s *ApplicationService) DeleteApp(appId uint64) error {
 	dbErr := s.db.Transaction(func(tx *gorm.DB) error {
 		var count int64
@@ -68,6 +71,7 @@ func (s *ApplicationService) DeleteApp(appId uint64) error {
 	return dbErr
 }
 
+// UpdateApp 更新当前操作的应用模板
 func (s *ApplicationService) UpdateApp(req *requests.AppReq) (error, int64) {
 	appModel := models.SgrTenantApplication{}
 	appModel.Level = req.Level
@@ -87,6 +91,7 @@ func (s *ApplicationService) UpdateApp(req *requests.AppReq) (error, int64) {
 	return nil, dbRes.RowsAffected
 }
 
+// QueryAppList 根据当前登录用户，查询用户名下可以查看的应用模板列表
 func (s *ApplicationService) QueryAppList(req *requests.AppReq) (error, *page.Page) {
 	res := &[]dto.ApplicationInfoDTO{}
 	var sqlParams []interface{}
@@ -125,24 +130,28 @@ ON t1.language = t2.id INNER JOIN sgr_code_application_level AS t3 ON t1.LEVEL =
 	return page.StartPage(s.db, req.PageIndex, req.PageSize).DoScan(res, sb.String(), sqlParams...)
 }
 
+// QueryAppCodeLanguage 查询当前 APP可配置的开发语言列表
 func (s *ApplicationService) QueryAppCodeLanguage() []models.SgrCodeApplicationLanguage {
 	var languageList []models.SgrCodeApplicationLanguage
 	s.db.Model(&models.SgrCodeApplicationLanguage{}).Find(&languageList)
 	return languageList
 }
 
+// QueryAppLevel 查询当前 APP可以配置的应用等级
 func (s *ApplicationService) QueryAppLevel() []models.SgrCodeApplicationLevel {
 	var levelList []models.SgrCodeApplicationLevel
 	s.db.Model(&models.SgrCodeApplicationLevel{}).Find(&levelList)
 	return levelList
 }
 
+// QueryDeployLevel 获取当前部署可使用的等级
 func (s *ApplicationService) QueryDeployLevel() []models.SgrCodeDeploymentLevel {
 	var levelList []models.SgrCodeDeploymentLevel
 	s.db.Model(&models.SgrCodeDeploymentLevel{}).Find(&levelList)
 	return levelList
 }
 
+// InitGitRepository SVC仓库初始化
 func (s *ApplicationService) InitGitRepository(tenantId uint64, appName string) (string, error) {
 	tenant := models.SgrTenant{}
 	dberr := s.db.Model(models.SgrTenant{}).Where("id=?", tenantId).First(&tenant)
@@ -160,6 +169,7 @@ func (s *ApplicationService) InitGitRepository(tenantId uint64, appName string) 
 	return gitUrl, nil
 }
 
+// GetAppInfo 查询当前操作的 APP的详细信息
 func (s *ApplicationService) GetAppInfo(appId uint64) (dto.ApplicationDisplayDTO, error) {
 	sql := `
 SELECT t.t_name tenantName,app.name appName,app.labels,app.git,app.imagehub hub,lev.name level ,app.git_type ,app.sc_id, lang.name language ,app.status 
@@ -174,12 +184,14 @@ WHERE app.id = ?
 	return appInfo, err
 }
 
+// GetServiceConnectionById 根据 ID获取连接管道信息
 func (s *ApplicationService) GetServiceConnectionById(Id uint64) (models.ServiceConnectionDetails, error) {
 	var model models.ServiceConnectionDetails
 	res := s.db.Model(&models.ServiceConnectionDetails{}).Where("main_id=?", Id).First(&model)
 	return model, res.Error
 }
 
+// GetAppCountByDeployLevel 获取当前 APP不同等级 DEPLOY的数量
 func (s *ApplicationService) GetAppCountByDeployLevel(appId uint64) ([]dto.DeployLeveLCountInfo, error) {
 	sql := `SELECT lev.name label,lev.code  value,IFNULL(dep.count,0) count FROM sgr_code_deployment_level lev
 LEFT JOIN (
@@ -191,6 +203,7 @@ LEFT JOIN (
 	return list, err
 }
 
+// GetProjectCountByDeployLevel 根据DEPLOY的等级聚合对应的项目的数量
 func (s *ApplicationService) GetProjectCountByDeployLevel(projectId uint64) ([]dto.DeployLeveLCountInfo, error) {
 	sql := `SELECT lev.name label,lev.code  value,IFNULL(dep.count,0) count FROM sgr_code_deployment_level lev
 LEFT JOIN (
@@ -202,6 +215,7 @@ LEFT JOIN (
 	return list, err
 }
 
+// GetTenantProjectCountByDeployLevel 获取当前租户下不同等级的Deploy对应的项目数量
 func (s *ApplicationService) GetTenantProjectCountByDeployLevel(tenantId uint64) ([]dto.TeamLeveLCountInfo, error) {
 	sql := `SELECT lev.name label,lev.code  value,IFNULL(dep.count,0) count FROM sgr_code_deployment_level lev
 LEFT JOIN (
@@ -214,18 +228,21 @@ LEFT JOIN (
 	return list, err
 }
 
+// GetProjectCountByTenantId 获取当前租户名下的项目
 func (s *ApplicationService) GetProjectCountByTenantId(tenantId uint64) (int64, error) {
 	var count int64
 	res := s.db.Model(&models.DevopsProjects{}).Where("tenant_id=?", tenantId).Count(&count)
 	return count, res.Error
 }
 
+// GetNamespaceCountByTenantId 获取当前租户名下的命名空间列表
 func (s *ApplicationService) GetNamespaceCountByTenantId(tenantId uint64) (int64, error) {
 	var count int64
 	res := s.db.Model(&models.SgrTenantNamespace{}).Where("tenant_id=?", tenantId).Count(&count)
 	return count, res.Error
 }
 
+// GetAppCountByTenantId 获取当前租户名下的 APP的数量
 func (s *ApplicationService) GetAppCountByTenantId(tenantId uint64) (int64, error) {
 	var count int64
 	res := s.db.Model(&models.SgrTenantApplication{}).Where("tenant_id=?", tenantId).Count(&count)

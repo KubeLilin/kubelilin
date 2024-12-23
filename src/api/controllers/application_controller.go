@@ -12,6 +12,7 @@ import (
 	"kubelilin/utils"
 )
 
+// ApplicationController 应用构造
 type ApplicationController struct {
 	mvc.ApiController
 	service           *app.ApplicationService
@@ -19,11 +20,12 @@ type ApplicationController struct {
 	pipelineService   *app.PipelineService
 }
 
+// NewApplicationController 应用管理器构造函数
 func NewApplicationController(service *app.ApplicationService, deploymentService *app.DeploymentService, pipelineService *app.PipelineService) *ApplicationController {
 	return &ApplicationController{service: service, deploymentService: deploymentService, pipelineService: pipelineService}
 }
 
-// PostCreateApp new application.
+// PostCreateApp 根据当前登录用户所述租户创建应用
 func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request *requests2.AppReq) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
@@ -34,9 +36,11 @@ func (c *ApplicationController) PostCreateApp(ctx *context.HttpContext, request 
 	return mvc.Success(res)
 }
 
+// PostImportApp 当前登录用户根据 yaml 文件直接导入一个应用
 func (c *ApplicationController) PostImportApp(ctx *context.HttpContext, request *requests2.ImportAppReq) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
+	// 解析传入的参数
 	appreq := requests2.AppReq{
 		TenantID:   request.TenantID,
 		Name:       request.Name,
@@ -55,6 +59,7 @@ func (c *ApplicationController) PostImportApp(ctx *context.HttpContext, request 
 	if err != nil {
 		return mvc.FailWithMsg(nil, err.Error())
 	}
+	//便利导入的部署，顺道激发流水线
 	for _, deployItem := range request.DeployList {
 		deployModel := &requests2.DeploymentStepRequest{
 			Name:            deployItem.DeployName,
@@ -142,7 +147,7 @@ func (c *ApplicationController) PostImportApp(ctx *context.HttpContext, request 
 	return mvc.Success(true)
 }
 
-// PutEditApp edit application information.
+// PutEditApp 更新当前 app的基础信息
 func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *requests2.AppReq) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
@@ -153,6 +158,7 @@ func (c *ApplicationController) PutEditApp(ctx *context.HttpContext, request *re
 	return mvc.Success(res)
 }
 
+// DeleteApp 删除当前所操作的 APP
 func (c *ApplicationController) DeleteApp(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appId", "0"))
 	err := c.service.DeleteApp(appId)
@@ -162,7 +168,7 @@ func (c *ApplicationController) DeleteApp(ctx *context.HttpContext) mvc.ApiResul
 	return mvc.Success(true)
 }
 
-// GetAppList get application list by tenant id.
+// GetAppList 根据当前登录用户的所属租户，获取 APP列表
 func (c *ApplicationController) GetAppList(ctx *context.HttpContext) mvc.ApiResult {
 	request := requests2.AppReq{}
 	_ = ctx.BindWithUri(&request)
@@ -177,35 +183,39 @@ func (c *ApplicationController) GetAppList(ctx *context.HttpContext) mvc.ApiResu
 	return mvc.Success(res)
 }
 
-// GetAppLanguage get language for application
+// GetAppLanguage 获取 APP所支持的开发语言列表
 func (c *ApplicationController) GetAppLanguage() mvc.ApiResult {
 	res := c.service.QueryAppCodeLanguage()
 	return mvc.Success(res)
 }
 
-// GetAppLevel get level for application
+// GetAppLevel 获取 APP所属等级
 func (c *ApplicationController) GetAppLevel() mvc.ApiResult {
 	res := c.service.QueryAppLevel()
 	return mvc.Success(res)
 }
 
+// GetDeployLevel 获取部署等级，用于下拉列表
 func (c *ApplicationController) GetDeployLevel() mvc.ApiResult {
 	res := c.service.QueryDeployLevel()
 	return mvc.Success(res)
 }
 
+// GetDeployLevelCounts 统计不同等级的Deploy数量
 func (c *ApplicationController) GetDeployLevelCounts(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	res, _ := c.service.GetAppCountByDeployLevel(appId)
 	return mvc.Success(res)
 }
 
+// GetProjectDeployLevelCounts 统计各个项目瞎不同等级的Deploy数量进行显示，用于填充表格顶部状态栏
 func (c *ApplicationController) GetProjectDeployLevelCounts(ctx *context.HttpContext) mvc.ApiResult {
 	projectId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("projectId", "0"))
 	res, _ := c.service.GetProjectCountByDeployLevel(projectId)
 	return mvc.Success(res)
 }
 
+// GetTeamDeployLevelCounts 统计当前租户下不同等级的Deploy用于进行抬头状态 Tab 的显示
 func (c *ApplicationController) GetTeamDeployLevelCounts(ctx *context.HttpContext) mvc.ApiResult {
 	tenantId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("tenantId", "0"))
 	projectCounts, _ := c.service.GetTenantProjectCountByDeployLevel(tenantId)
@@ -215,7 +225,7 @@ func (c *ApplicationController) GetTeamDeployLevelCounts(ctx *context.HttpContex
 	return mvc.Success(context.H{"insCounts": projectCounts, "proCount": projectCount, "namespaceCount": namespaceCount, "appCount": appCount})
 }
 
-// GetGitRepo get git address for application
+// GetGitRepo get git address for application 获取当前所选应用的 GIT仓库地址
 func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	appName := ctx.Input.Query("appName")
@@ -226,7 +236,7 @@ func (c *ApplicationController) GetGitRepo(ctx *context.HttpContext) mvc.ApiResu
 	return mvc.Success(cvsRes)
 }
 
-// GetInfo get application information
+// GetInfo get application information 获取当前所选应用的基础信息
 func (c *ApplicationController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	info, err := c.service.GetAppInfo(appId)
@@ -236,7 +246,7 @@ func (c *ApplicationController) GetInfo(ctx *context.HttpContext) mvc.ApiResult 
 	return mvc.Success(info)
 }
 
-// GetGitBranches get git addresses & branches for pipeline
+// GetGitBranches get git addresses & branches for pipeline 获取当前 git 仓库下的所有分支和所对应的流水线
 func (c *ApplicationController) GetGitBranches(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	gitAddr := ctx.Input.QueryDefault("git", "")
@@ -271,6 +281,7 @@ func (c *ApplicationController) GetGitBranches(ctx *context.HttpContext) mvc.Api
 	})
 }
 
+// GetSearchDockerfile 根据所选择的 SVC地址，在地址内搜索目录下的 Dockerfile文件列表
 func (c *ApplicationController) GetSearchDockerfile(ctx *context.HttpContext) mvc.ApiResult {
 	scid, _ := utils.StringToUInt64(ctx.Input.QueryDefault("scid", "0"))
 	gitAddr := ctx.Input.QueryDefault("git", "")
@@ -293,6 +304,7 @@ func (c *ApplicationController) GetSearchDockerfile(ctx *context.HttpContext) mv
 	return mvc.Success(dockerPaths)
 }
 
+// GetBuildImageByLanguageId 根据页面所选择的开发语言出发流水线进行镜像的打包操作
 func (c *ApplicationController) GetBuildImageByLanguageId(ctx *context.HttpContext) mvc.ApiResult {
 	languageId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("languageId", "0"))
 	list, err := c.pipelineService.GetBuildImageByLanguageId(languageId)
@@ -302,6 +314,7 @@ func (c *ApplicationController) GetBuildImageByLanguageId(ctx *context.HttpConte
 	return mvc.Success(list)
 }
 
+// GetBuildImageByLanguages 根据多种开发开发进行镜像的编译
 func (c *ApplicationController) GetBuildImageByLanguages(ctx *context.HttpContext) mvc.ApiResult {
 	languageId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("languageId", "0"))
 	aliasName := ctx.Input.QueryDefault("aliasName", "")
@@ -312,6 +325,7 @@ func (c *ApplicationController) GetBuildImageByLanguages(ctx *context.HttpContex
 	return mvc.Success(list)
 }
 
+// PostBuildImage 触发流水线进行镜像的编译
 func (c *ApplicationController) PostBuildImage(ctx *context.HttpContext) mvc.ApiResult {
 	var request models.ApplicationLanguageCompile
 	_ = ctx.BindWith(&request, binding.JSON)
@@ -323,6 +337,7 @@ func (c *ApplicationController) PostBuildImage(ctx *context.HttpContext) mvc.Api
 	return mvc.Success(true)
 }
 
+// DeleteBuildImage 删除已经编译好的镜像
 func (c *ApplicationController) DeleteBuildImage(ctx *context.HttpContext) mvc.ApiResult {
 	id, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
 	err := c.pipelineService.DeleteBuildImage(id)
@@ -332,7 +347,7 @@ func (c *ApplicationController) DeleteBuildImage(ctx *context.HttpContext) mvc.A
 	return mvc.Success(true)
 }
 
-// PostNewPipeline new pipeline only by name & id
+// PostNewPipeline new pipeline only by name & id 根据所填写的名称创建一条新的流水线
 func (c *ApplicationController) PostNewPipeline(req *requests2.AppNewPipelineReq) mvc.ApiResult {
 	err, pipeline := c.pipelineService.NewPipeline(req)
 	if err != nil {
@@ -341,7 +356,7 @@ func (c *ApplicationController) PostNewPipeline(req *requests2.AppNewPipelineReq
 	return mvc.Success(pipeline.ID)
 }
 
-// GetPipelines get pipeline list by application id.
+// GetPipelines get pipeline list by application id. 根据当前所选的应用，获取应用下的流水线
 func (c *ApplicationController) GetPipelines(ctx *context.HttpContext) mvc.ApiResult {
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appid", "0"))
 	if appId == 0 {
@@ -354,7 +369,7 @@ func (c *ApplicationController) GetPipelines(ctx *context.HttpContext) mvc.ApiRe
 	return mvc.Success(pipelines)
 }
 
-// PostEditPipeline Save pipeline information and DSL.
+// PostEditPipeline Save pipeline information and DSL. 保存流水线的信息和流程设计
 func (c *ApplicationController) PostEditPipeline(request *requests2.EditPipelineReq) mvc.ApiResult {
 	err := c.pipelineService.UpdatePipeline(request)
 	if err == nil {
@@ -367,7 +382,7 @@ func (c *ApplicationController) PostEditPipeline(request *requests2.EditPipeline
 	return mvc.Success(true)
 }
 
-// GetPipeline get pipeline frontend json by id.
+// GetPipeline get pipeline frontend json by id. 根据流水线的 id 获取流水线的 JSON数据结构描述信息
 func (c *ApplicationController) GetPipeline(ctx *context.HttpContext) mvc.ApiResult {
 	pipelineId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
 	pipeline, err := c.pipelineService.GetPipelineById(pipelineId)
@@ -377,6 +392,7 @@ func (c *ApplicationController) GetPipeline(ctx *context.HttpContext) mvc.ApiRes
 	return mvc.Success(pipeline)
 }
 
+// PostAbortPipeline 终止当前所选的正在运行的流水线
 func (c *ApplicationController) PostAbortPipeline(request *requests2.AbortPipelineReq) mvc.ApiResult {
 	err := c.pipelineService.AbortPipeline(request)
 	if err != nil {
@@ -385,6 +401,7 @@ func (c *ApplicationController) PostAbortPipeline(request *requests2.AbortPipeli
 	return mvc.Success(true)
 }
 
+// PostRunPipeline 执行当前所选的流水线的内容
 func (c *ApplicationController) PostRunPipeline(request *requests2.RunPipelineReq) mvc.ApiResult {
 	taskId, err := c.pipelineService.RunPipeline(request)
 	if err != nil {
@@ -393,6 +410,7 @@ func (c *ApplicationController) PostRunPipeline(request *requests2.RunPipelineRe
 	return mvc.Success(taskId)
 }
 
+// PostRunPipelineWithBranch 使用指定的 SVC分支来运行流水线
 func (c *ApplicationController) PostRunPipelineWithBranch(request *requests2.RunPipelineReq) mvc.ApiResult {
 	taskId, err := c.pipelineService.RunPipelineWithParameters(request)
 	if err != nil {
@@ -401,6 +419,7 @@ func (c *ApplicationController) PostRunPipelineWithBranch(request *requests2.Run
 	return mvc.Success(taskId)
 }
 
+// PostPipelineStatus 变更流水线的状态
 func (c *ApplicationController) PostPipelineStatus(request *requests2.PipelineStatusReq) mvc.ApiResult {
 	err := c.pipelineService.UpdatePipelineStatus(request)
 	if err != nil {
@@ -409,6 +428,7 @@ func (c *ApplicationController) PostPipelineStatus(request *requests2.PipelineSt
 	return mvc.Success(true)
 }
 
+// DeletePipeline 删除当前所选流水线
 func (c *ApplicationController) DeletePipeline(ctx *context.HttpContext) mvc.ApiResult {
 	pipelineId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
 	err := c.pipelineService.DeletePipeline(pipelineId)
@@ -418,6 +438,7 @@ func (c *ApplicationController) DeletePipeline(ctx *context.HttpContext) mvc.Api
 	return mvc.Success(true)
 }
 
+// GetPipelineDetails 获取当前流水线的明细信息
 func (c *ApplicationController) GetPipelineDetails(httpContext *context.HttpContext) mvc.ApiResult {
 	var request requests2.PipelineDetailsReq
 	_ = httpContext.BindWithUri(&request)
@@ -428,6 +449,7 @@ func (c *ApplicationController) GetPipelineDetails(httpContext *context.HttpCont
 	return mvc.Success(job)
 }
 
+// GetPipelineLogs 获取当前流水线的执行日志
 func (c *ApplicationController) GetPipelineLogs(httpContext *context.HttpContext) mvc.ApiResult {
 	var request requests2.PipelineDetailsReq
 	_ = httpContext.BindWithUri(&request)

@@ -173,6 +173,7 @@ func (controller ClusterController) GetWorkloads(ctx *context.HttpContext) mvc.A
 	return controller.OK(wordloads)
 }
 
+// GetNodes 根据当前所登录的用户以及要操作的集群获取当前集群下所有 POD
 func (controller ClusterController) GetNodes(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	strCid := ctx.Input.QueryDefault("cid", "0")
@@ -183,6 +184,7 @@ func (controller ClusterController) GetNodes(ctx *context.HttpContext) mvc.ApiRe
 	return controller.OK(nodeList)
 }
 
+// GetList 根据当前登录的用户以及所属的租户，获取当前用户可查看的所有的集群列表
 func (controller ClusterController) GetList(ctx *context.HttpContext) mvc.ApiResult {
 	//userInfo := requests2.GetUserInfo(ctx)
 	clusterName := ctx.Input.Query("name")
@@ -190,6 +192,7 @@ func (controller ClusterController) GetList(ctx *context.HttpContext) mvc.ApiRes
 	return controller.OK(tenantClusterList)
 }
 
+// PostClusterByConfig 是用 K8S配置文件，解析配置文件内容，添加可管理的 K8S集群信息
 func (controller ClusterController) PostClusterByConfig(ctx *context.HttpContext, request *requests2.ImportClusterReq) mvc.ApiResult {
 	_, k8sFile, err := ctx.Input.FormFile("file1")
 	if err != nil {
@@ -206,6 +209,7 @@ func (controller ClusterController) PostClusterByConfig(ctx *context.HttpContext
 	return controller.Fail(err.Error())
 }
 
+// DeleteDelClusterInfo 删除 K8S集群信息，从 PASS中移除集群
 func (controller ClusterController) DeleteDelClusterInfo(ctx *context.HttpContext) mvc.ApiResult {
 	id := ctx.Input.Query("id")
 	clusterId, err := strconv.ParseInt(id, 10, 64)
@@ -217,6 +221,7 @@ func (controller ClusterController) DeleteDelClusterInfo(ctx *context.HttpContex
 
 }
 
+// PutNewNamespace  根据当前登录用户以及操作的集群信息，创建一个新的命名空间
 func (controller ClusterController) PutNewNamespace(ctx *context.HttpContext) mvc.ApiResult {
 	//userInfo := requests.GetUserInfo(ctx)
 	cid := ctx.Input.QueryDefault("cid", "0")
@@ -242,6 +247,7 @@ func (controller ClusterController) PutNewNamespace(ctx *context.HttpContext) mv
 	return controller.Fail(err.Error())
 }
 
+// PutNewK8sNamespace 在 K8S集群中创建一个的明明空间
 func (controller ClusterController) PutNewK8sNamespace(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
@@ -261,6 +267,7 @@ func (controller ClusterController) PutNewK8sNamespace(ctx *context.HttpContext)
 	return controller.OK(err == nil)
 }
 
+// PutUpdateRuntime 为当前操作的命名空间添加运行时参数
 func (controller ClusterController) PutUpdateRuntime(ctx *context.HttpContext) mvc.ApiResult {
 	namespaceId := utils.GetNumberOfParam[uint64](ctx, "namespaceId")
 	enableRuntime, _ := utils.StringToBool(ctx.Input.QueryDefault("enableRuntime", "false"))
@@ -272,6 +279,7 @@ func (controller ClusterController) PutUpdateRuntime(ctx *context.HttpContext) m
 	return controller.OK(err == nil)
 }
 
+// GetResourceQuota 根据集群信息和获取当前操作的命名空间的原信息
 func (controller ClusterController) GetResourceQuota(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
 	namespace := ctx.Input.QueryDefault("namespace", "")
@@ -280,6 +288,7 @@ func (controller ClusterController) GetResourceQuota(ctx *context.HttpContext) m
 	return controller.OK(req)
 }
 
+// PostResourceQuota 创建当前命名空间的配额
 func (controller ClusterController) PostResourceQuota(ctx *context.HttpContext) mvc.ApiResult {
 	var quotas dto.QuotasSpec
 	err := ctx.Bind(&quotas)
@@ -295,6 +304,7 @@ func (controller ClusterController) PostResourceQuota(ctx *context.HttpContext) 
 	return controller.OK(true)
 }
 
+// GetIsInstalledDapr 判断当前集群是否启用的 Dapr
 func (controller ClusterController) GetIsInstalledDapr(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	strCid := ctx.Input.QueryDefault("cid", "0")
