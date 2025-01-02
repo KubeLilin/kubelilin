@@ -15,6 +15,7 @@ import (
 	"time"
 )
 
+// DeploymentController K8S部署 deploy管理
 type DeploymentController struct {
 	mvc.ApiController
 	deploymentService    *app.DeploymentService
@@ -27,6 +28,7 @@ func NewDeploymentController(deploymentService *app.DeploymentService, clusterSe
 	return &DeploymentController{deploymentService: deploymentService, clusterService: clusterService, deploymentSupervisor: deploymentSupervisor, proBeService: probeService}
 }
 
+// PostExecuteDeployment 根据预先填好的 deploy信息执行k8s部署应用操作
 func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpContext, execReq *requests2.ExecDeploymentRequest) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	execReq.TenantId = userInfo.TenantID
@@ -38,6 +40,7 @@ func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpCo
 	return controller.ApiResult().StatusCode(500).Build()
 }
 
+// PostCreateDeploymentStep1 配置部署配置项的第一步，保存 deploy的基础信息，例如镜像地址等
 func (controller *DeploymentController) PostCreateDeploymentStep1(ctx *context.HttpContext, deployModel *requests2.DeploymentStepRequest) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	var tenantID uint64 = 0
@@ -52,6 +55,7 @@ func (controller *DeploymentController) PostCreateDeploymentStep1(ctx *context.H
 	return mvc.Success(res)
 }
 
+// PostCreateDeploymentStep2 配置部署配置项的第二步，保存 deploy的运维信息，例如 cpu/内存
 func (controller *DeploymentController) PostCreateDeploymentStep2(deployModel *requests2.DeploymentStepRequest) mvc.ApiResult {
 	fmt.Println(deployModel)
 	err, res := controller.deploymentService.CreateDeploymentStep2(deployModel)
@@ -61,6 +65,7 @@ func (controller *DeploymentController) PostCreateDeploymentStep2(deployModel *r
 	return mvc.Success(res)
 }
 
+// GetList 获取已经添加的 deploy列表
 func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.ApiResult {
 	var request requests2.DeploymentGetListRequest
 	_ = ctx.BindWithUri(&request)
@@ -77,6 +82,7 @@ func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.Api
 	return mvc.Success(deploymentList)
 }
 
+// GetDeploymentFormInfo 获取已经创建的 deploy的配置项信息
 func (controller DeploymentController) GetDeploymentFormInfo(ctx *context.HttpContext) mvc.ApiResult {
 	strDpId := ctx.Input.Query("dpId")
 	fmt.Println(strDpId)

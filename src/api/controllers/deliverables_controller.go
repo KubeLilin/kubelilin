@@ -14,12 +14,14 @@ func NewDeliverablesController(projectService *deliverables.TenantDeliverablesPr
 	}
 }
 
+// DeliverablesController 租户制品管理
 type DeliverablesController struct {
 	mvc.ApiController
 	projectService          *deliverables.TenantDeliverablesProjectService
 	deliverablesTreeService *deliverables.TenantDeliverablesTreeService
 }
 
+// PostTenantDeliverablesProject 根据当前登录用户的所属租户，创建制品
 func (c DeliverablesController) PostTenantDeliverablesProject(ctx *context.HttpContext, reqData *requests2.CreateTenantDeliverablesProjectReq) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	reqData.TenantId = userInfo.TenantID
@@ -30,6 +32,7 @@ func (c DeliverablesController) PostTenantDeliverablesProject(ctx *context.HttpC
 	return mvc.Success(reqData.Id)
 }
 
+// GetTenantDeliverablesProject 获取当前租户下的制品项目
 func (c DeliverablesController) GetTenantDeliverablesProject(ctx *context.HttpContext, reqData *requests2.QueryTenantDeliverablesProjectReq) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	reqData.TenantId = userInfo.TenantID
@@ -40,6 +43,7 @@ func (c DeliverablesController) GetTenantDeliverablesProject(ctx *context.HttpCo
 	return mvc.Success(res)
 }
 
+// EditDeliverableTree 修改制品仓库的树形结构
 func (c DeliverablesController) EditDeliverableTree(ctx *context.HttpContext, reqData *requests2.EditTenantDeliverablesTreeReq) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	reqData.TenantId = userInfo.TenantID
