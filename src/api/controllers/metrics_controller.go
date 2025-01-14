@@ -19,26 +19,31 @@ func NewMetricsController(metricsServer *kubernetes.MetricsServer, chartService 
 	return &MetricsController{metricsService: metricsServer, chartService: chartService}
 }
 
+// GetNodes 获取所有的节点信息
 func (controller MetricsController) GetNodes(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
 	list := controller.metricsService.GetNodeMetrics(clusterId)
 	return mvc.Success(list)
 }
 
+// GetStatistics 获取集群的各项指标统计信息
 func (controller MetricsController) GetStatistics(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
 	return mvc.Success(controller.metricsService.GetStatistics(clusterId))
 }
 
+// GetWorkloads 获取工作看板
 func (controller MetricsController) GetWorkloads(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
 	return mvc.Success(controller.metricsService.GetResourceMetrics(clusterId))
 }
 
+// GetProjects 获取项目
 func (controller MetricsController) GetProjects(ctx *context.HttpContext) mvc.ApiResult {
 	return mvc.Success(controller.metricsService.GetProjectsMetrics())
 }
 
+// GetCustomMetrics 获取用户的各项指标
 func (controller MetricsController) GetCustomMetrics(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
 	pql := ctx.Input.QueryDefault("pql", "")
@@ -53,6 +58,7 @@ func (controller MetricsController) GetCustomMetrics(ctx *context.HttpContext) m
 	return mvc.Success(chartData)
 }
 
+// GetNodeCpuUtilisation 获取 CPU的各项指标信息
 func (controller MetricsController) GetNodeCpuUtilisation(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("cid", "0"))
 	startTime := utils.GetNumberOfParam[uint64](ctx, "startTime")
@@ -67,6 +73,7 @@ func (controller MetricsController) GetNodeCpuUtilisation(ctx *context.HttpConte
 	return mvc.Success(chartData)
 }
 
+// GetPodCPUUsage 获取当前集群所选 POD 的 CPU使用率
 func (controller MetricsController) GetPodCPUUsage(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
 	startTime := utils.GetNumberOfParam[uint64](ctx, "startTime")
@@ -83,6 +90,7 @@ func (controller MetricsController) GetPodCPUUsage(ctx *context.HttpContext) mvc
 	return mvc.Success(chartData)
 }
 
+// GetPodMemoryUsage 获取当前集群所选 POD 的内存使用使用率
 func (controller MetricsController) GetPodMemoryUsage(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
 	startTime := utils.GetNumberOfParam[uint64](ctx, "startTime")
@@ -99,7 +107,7 @@ func (controller MetricsController) GetPodMemoryUsage(ctx *context.HttpContext) 
 	return mvc.Success(chartData)
 }
 
-// QueryPodMemoryRss
+// QueryPodMemoryRss 获取当前 POD的内存交换
 func (controller MetricsController) GetPodMemoryRss(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
 	startTime := utils.GetNumberOfParam[uint64](ctx, "startTime")
@@ -116,7 +124,7 @@ func (controller MetricsController) GetPodMemoryRss(ctx *context.HttpContext) mv
 	return mvc.Success(chartData)
 }
 
-//QueryPodMemorySwap
+// QueryPodMemorySwap 货权当前 POD 的内存 SWAP
 func (controller MetricsController) GetPodMemorySwap(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
 	startTime := utils.GetNumberOfParam[uint64](ctx, "startTime")
@@ -133,7 +141,7 @@ func (controller MetricsController) GetPodMemorySwap(ctx *context.HttpContext) m
 	return mvc.Success(chartData)
 }
 
-// QueryPodNetworkReceiveBytes
+// QueryPodNetworkReceiveBytes 获取当前 POD的网络流量流入
 func (controller MetricsController) GetPodNetworkReceiveBytes(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
 	startTime := utils.GetNumberOfParam[uint64](ctx, "startTime")
@@ -150,7 +158,7 @@ func (controller MetricsController) GetPodNetworkReceiveBytes(ctx *context.HttpC
 	return mvc.Success(chartData)
 }
 
-// QueryPodNetworkTransmitBytes
+// QueryPodNetworkTransmitBytes 获取当前 POD的的网络交货流量
 func (controller MetricsController) GetPodNetworkTransmitBytes(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("clusterId", "0"))
 	startTime := utils.GetNumberOfParam[uint64](ctx, "startTime")
