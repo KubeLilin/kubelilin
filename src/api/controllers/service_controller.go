@@ -22,6 +22,7 @@ func NewServiceController(clusterService *kubernetes.ClusterService, svcSupervis
 	}
 }
 
+// GetServiceList 获取 K8S SERVICE列表
 func (c *ServiceController) GetServiceList(ctx *context.HttpContext) mvc.ApiResult {
 	reqParam := requests2.ServiceRequest{}
 	_ = ctx.BindWithUri(&reqParam)
@@ -34,6 +35,7 @@ func (c *ServiceController) GetServiceList(ctx *context.HttpContext) mvc.ApiResu
 	return mvc.Success(list)
 }
 
+// GetInfo 获取K8S SERVICE 详情
 func (c *ServiceController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
 	reqParam := requests2.ServiceRequest{}
 	_ = ctx.BindWithUri(&reqParam)
@@ -47,6 +49,7 @@ func (c *ServiceController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
 	return mvc.Success(list)
 }
 
+// GetNamespaceByTenant 根据租户获取 K8S namespace
 func (c *ServiceController) GetNamespaceByTenant(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	clusterId := utils.GetNumberOfParam[uint64](ctx, "clusterId")
