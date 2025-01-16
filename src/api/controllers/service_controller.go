@@ -57,12 +57,15 @@ func (c *ServiceController) GetNamespaceByTenant(ctx *context.HttpContext) mvc.A
 	return mvc.Success(list)
 }
 
+// GetNamespaceList 获取与当前租户下的K8SNamespace 列表
 func (c *ServiceController) GetNamespaceList(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	clusterId := utils.GetNumberOfParam[uint64](ctx, "clusterId")
 	list, _ := c.svcSupervisor.QueryNamespaceList(userInfo.TenantID, clusterId)
 	return mvc.Success(list)
 }
+
+// PostChangeService 变更 SERVICE配置
 func (c *ServiceController) PostChangeService(ctx *context.HttpContext, svcReq *requests2.ServiceInfoReq) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	svcReq.TenantId = userInfo.TenantID
@@ -73,7 +76,7 @@ func (c *ServiceController) PostChangeService(ctx *context.HttpContext, svcReq *
 	return mvc.Success(nil)
 }
 
-// get service by label
+// GetServiceByLabel 根据标签获取 K8S 的 SERVICE列表
 func (c *ServiceController) GetServiceByLabel(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId := utils.GetNumberOfParam[uint64](ctx, "clusterId")
 	namespace := ctx.Input.QueryDefault("namespace", "")
@@ -86,6 +89,7 @@ func (c *ServiceController) GetServiceByLabel(ctx *context.HttpContext) mvc.ApiR
 	return mvc.Success(servicePortInfo)
 }
 
+// PostCreateOrUpdateServiceMonitor 创建或者更新 K8S SERVICE的监控指标
 func (c *ServiceController) PostCreateOrUpdateServiceMonitor(request *requests2.ServiceMonitorRequest) mvc.ApiResult {
 	var serviceMonitorDb models.ApplicationServiceMonitor
 	err := utils.CopyStruct(request, &serviceMonitorDb)
@@ -101,6 +105,7 @@ func (c *ServiceController) PostCreateOrUpdateServiceMonitor(request *requests2.
 	return mvc.Success(nil)
 }
 
+// DeleteServiceMonitor 删除 K8S SERVICE 的监控指标
 func (c *ServiceController) DeleteServiceMonitor(ctx *context.HttpContext) mvc.ApiResult {
 	smId := utils.GetNumberOfParam[uint64](ctx, "id")
 	err := c.svcSupervisor.DeleteServiceMonitor(smId)
@@ -110,6 +115,7 @@ func (c *ServiceController) DeleteServiceMonitor(ctx *context.HttpContext) mvc.A
 	return mvc.Success("ok")
 }
 
+// GetServiceMonitorList 获取 K8S SERVICE 的监控列表
 func (c *ServiceController) GetServiceMonitorList(ctx *context.HttpContext) mvc.ApiResult {
 	appid := utils.GetNumberOfParam[uint64](ctx, "appId")
 	list, err := c.svcSupervisor.QueryServiceMonitorByAppId(appid)
