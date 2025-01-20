@@ -17,6 +17,7 @@ func NewTenantRoleController(service *tenant.TenantRoleService) *TenantRoleContr
 	return &TenantRoleController{service: service}
 }
 
+// PostTenantRole 尾当前租户创建角色
 func (c *TenantRoleController) PostTenantRole(req *requests.TenantRoleReq) mvc.ApiResult {
 	req.Status = 1
 	success, res := c.service.CreateTenantRole(req)
@@ -27,6 +28,7 @@ func (c *TenantRoleController) PostTenantRole(req *requests.TenantRoleReq) mvc.A
 	}
 }
 
+// PostUpdateTenantRole 更新当前租户的角色
 func (c *TenantRoleController) PostUpdateTenantRole(req *requests.TenantRoleReq) mvc.ApiResult {
 	req.Status = 1
 	success, res := c.service.UpdateTenantRole(req)
@@ -37,6 +39,7 @@ func (c *TenantRoleController) PostUpdateTenantRole(req *requests.TenantRoleReq)
 	}
 }
 
+// DeleteTenantRole 删除当前租户的角色
 func (c *TenantRoleController) DeleteTenantRole(ctx *context.HttpContext) mvc.ApiResult {
 	id := ctx.Input.Param("id")
 	success := c.service.DeleteTenantRole(id)
@@ -47,6 +50,7 @@ func (c *TenantRoleController) DeleteTenantRole(ctx *context.HttpContext) mvc.Ap
 	}
 }
 
+// GetTenantRoleList 获取租户的角色列表
 func (c *TenantRoleController) GetTenantRoleList(ctx *context.HttpContext) mvc.ApiResult {
 	roleId := ctx.Input.QueryDefault("keyword", "")
 	strTenantId := ctx.Input.QueryDefault("tenantId", "")

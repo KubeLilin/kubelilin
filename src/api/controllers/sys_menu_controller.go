@@ -21,6 +21,7 @@ func NewSysMenuController(service *tenant.SysMenuService) *SysMenuController {
 	return &SysMenuController{service: service}
 }
 
+// PostCreateOrUpdateMenu 创建或者更新 PASS平台的菜单
 func (c *SysMenuController) PostCreateOrUpdateMenu(ctx *context.HttpContext) mvc.ApiResult {
 	var menuDto *dto.SysMenuRoutes
 	err := ctx.Bind(&menuDto)
@@ -70,6 +71,7 @@ func (c *SysMenuController) PostCreateOrUpdateMenu(ctx *context.HttpContext) mvc
 	}
 }
 
+// DeleteMenu 删除已经创建的 PASS平台的菜单
 func (c *SysMenuController) DeleteMenu(ctx *context.HttpContext) mvc.ApiResult {
 	strId := ctx.Input.Query("id")
 	id, _ := strconv.ParseInt(strId, 10, 64)
@@ -81,6 +83,7 @@ func (c *SysMenuController) DeleteMenu(ctx *context.HttpContext) mvc.ApiResult {
 	}
 }
 
+// GetMenuList 获取PASS菜单列表
 func (c *SysMenuController) GetMenuList(ctx *context.HttpContext) mvc.ApiResult {
 	var sysReq = &requests.SysMenuReq{}
 	err := ctx.BindWithUri(sysReq)
@@ -95,6 +98,7 @@ func (c *SysMenuController) GetMenuList(ctx *context.HttpContext) mvc.ApiResult 
 	}
 }
 
+// GetUserMenuTree 根据当前登录的用户，获取用户菜单组织树
 func (c *SysMenuController) GetUserMenuTree(ctx *context.HttpContext) mvc.ApiResult {
 	var userId string
 	userId = ctx.Input.Param("userId")
@@ -106,6 +110,7 @@ func (c *SysMenuController) GetUserMenuTree(ctx *context.HttpContext) mvc.ApiRes
 	}
 }
 
+// GetRoleMenuList 获取不同角色的菜单列表
 func (c *SysMenuController) GetRoleMenuList(ctx *context.HttpContext) mvc.ApiResult {
 	var strRoleId string
 	strRoleId = ctx.Input.QueryDefault("roleId", "")

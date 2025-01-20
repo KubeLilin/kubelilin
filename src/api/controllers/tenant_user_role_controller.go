@@ -18,6 +18,7 @@ func NewTenantUserRoleController(sc *tenant.TenantUserRoleService) *TenantUserRo
 	}
 }
 
+// PostUserRole 创建用户的角色
 func (c *TenantUserRoleController) PostUserRole(req *requests.UserRoleListReq) mvc.ApiResult {
 	success, res := c.Service.CreateUserRole(req)
 	return mvc.ApiResult{
@@ -27,6 +28,7 @@ func (c *TenantUserRoleController) PostUserRole(req *requests.UserRoleListReq) m
 	}
 }
 
+// DeleteUserRole删除用户角色
 func (c *TenantUserRoleController) DeleteUserRole(ctx *context.HttpContext) mvc.ApiResult {
 	id := ctx.Input.Query("id")
 	res := c.Service.DeleteUserRole(id)
@@ -36,6 +38,7 @@ func (c *TenantUserRoleController) DeleteUserRole(ctx *context.HttpContext) mvc.
 	}
 }
 
+// GetUserRole 获取用户角色
 func (c *TenantUserRoleController) GetUserRole(ctx *context.HttpContext) mvc.ApiResult {
 	req := &requests.UserRoleReq{}
 	err := ctx.BindWithUri(req)
