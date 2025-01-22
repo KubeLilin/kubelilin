@@ -29,6 +29,8 @@ func NewTenantController(service *tenant.TenantService) *TenantController {
 		"status":0
 	}
 */
+
+// PostCreate 创建租户
 func (controller TenantController) PostCreate(tenant *requests.TenantRequest) mvc.ApiResult {
 	if tenant.TCode == "admin" {
 		return mvc.FailWithMsg(nil, "admin为系统预留字段，请使用其他命名")
@@ -47,6 +49,7 @@ func (controller TenantController) PostCreate(tenant *requests.TenantRequest) mv
 	return mvc.ApiResult{Data: res, Success: res, Message: errorMessage}
 }
 
+// PostUpdate 更新租户信息
 func (controller TenantController) PostUpdate(tenant *requests.TenantRequest) mvc.ApiResult {
 	res := controller.Service.UpdateTenant(&models.SgrTenant{
 		TName:  tenant.TName,
@@ -56,11 +59,13 @@ func (controller TenantController) PostUpdate(tenant *requests.TenantRequest) mv
 	return mvc.ApiResult{Data: res}
 }
 
+// PostStatus 更新租户的状态
 func (controller TenantController) PostStatus(tenant *requests.TenantRequest) mvc.ApiResult {
 	res := controller.Service.ChangeStatus(tenant.ID, *tenant.Status)
 	return mvc.ApiResult{Success: res}
 }
 
+// GetTenantList 获取租户列表
 func (controller TenantController) GetTenantList(ctx *context.HttpContext) mvc.ApiResult {
 	var tenantRequest = &requests.TenantRequest{}
 	err := ctx.BindWithUri(tenantRequest)

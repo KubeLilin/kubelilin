@@ -15,6 +15,7 @@ import (
 	"time"
 )
 
+// DeploymentController K8S部署 deploy管理
 type DeploymentController struct {
 	mvc.ApiController
 	deploymentService    *app.DeploymentService
@@ -27,6 +28,7 @@ func NewDeploymentController(deploymentService *app.DeploymentService, clusterSe
 	return &DeploymentController{deploymentService: deploymentService, clusterService: clusterService, deploymentSupervisor: deploymentSupervisor, proBeService: probeService}
 }
 
+// PostExecuteDeployment 根据预先填好的 deploy信息执行k8s部署应用操作
 func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpContext, execReq *requests2.ExecDeploymentRequest) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	execReq.TenantId = userInfo.TenantID
@@ -38,6 +40,7 @@ func (controller DeploymentController) PostExecuteDeployment(ctx *context.HttpCo
 	return controller.ApiResult().StatusCode(500).Build()
 }
 
+// PostCreateDeploymentStep1 配置部署配置项的第一步，保存 deploy的基础信息，例如镜像地址等
 func (controller *DeploymentController) PostCreateDeploymentStep1(ctx *context.HttpContext, deployModel *requests2.DeploymentStepRequest) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	var tenantID uint64 = 0
@@ -52,6 +55,7 @@ func (controller *DeploymentController) PostCreateDeploymentStep1(ctx *context.H
 	return mvc.Success(res)
 }
 
+// PostCreateDeploymentStep2 配置部署配置项的第二步，保存 deploy的运维信息，例如 cpu/内存
 func (controller *DeploymentController) PostCreateDeploymentStep2(deployModel *requests2.DeploymentStepRequest) mvc.ApiResult {
 	fmt.Println(deployModel)
 	err, res := controller.deploymentService.CreateDeploymentStep2(deployModel)
@@ -61,6 +65,7 @@ func (controller *DeploymentController) PostCreateDeploymentStep2(deployModel *r
 	return mvc.Success(res)
 }
 
+// GetList 获取已经添加的 deploy列表
 func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.ApiResult {
 	var request requests2.DeploymentGetListRequest
 	_ = ctx.BindWithUri(&request)
@@ -77,6 +82,7 @@ func (controller DeploymentController) GetList(ctx *context.HttpContext) mvc.Api
 	return mvc.Success(deploymentList)
 }
 
+// GetDeploymentFormInfo 获取已经创建的 deploy的配置项信息
 func (controller DeploymentController) GetDeploymentFormInfo(ctx *context.HttpContext) mvc.ApiResult {
 	strDpId := ctx.Input.Query("dpId")
 	fmt.Println(strDpId)
@@ -91,6 +97,7 @@ func (controller DeploymentController) GetDeploymentFormInfo(ctx *context.HttpCo
 	return mvc.Success(res)
 }
 
+// GetDeploymentById 根据Deployment的 Id 获取部署配置的详情以及各项参数
 func (controller *DeploymentController) GetDeploymentById(ctx *context.HttpContext) mvc.ApiResult {
 	dpId := utils.GetNumberOfParam[uint64](ctx, "dpId")
 	res, resErr := controller.deploymentService.GetDeploymentByID(dpId)
@@ -100,6 +107,7 @@ func (controller *DeploymentController) GetDeploymentById(ctx *context.HttpConte
 	return mvc.Success(res)
 }
 
+// DeleteDeployment 删除配置好的部署，删除时会做部署有效性校验
 func (controller DeploymentController) DeleteDeployment(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	deploymentId, err := utils.StringToUInt64(ctx.Input.QueryDefault("dpId", "0"))
@@ -113,6 +121,7 @@ func (controller DeploymentController) DeleteDeployment(ctx *context.HttpContext
 	return mvc.Success(true)
 }
 
+// DeleteDeploymentWithOutDB 仅仅删除K8S中的Deployment，并不删除 PASS系统中保存好的配置项，这样可以根据 DB中的配置随时重新部署
 func (controller DeploymentController) DeleteDeploymentWithOutDB(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	cid := utils.GetNumberOfParam[uint64](ctx, "cid")
@@ -132,6 +141,7 @@ func (controller DeploymentController) DeleteDeploymentWithOutDB(ctx *context.Ht
 	return mvc.Success(true)
 }
 
+// PostReplicas
 func (controller DeploymentController) PostReplicas(request *requests2.ScaleRequest, ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, request.ClusterId)
@@ -142,6 +152,7 @@ func (controller DeploymentController) PostReplicas(request *requests2.ScaleRequ
 	return mvc.Success(ret)
 }
 
+// PostReplicasById
 func (controller DeploymentController) PostReplicasById(request *requests2.ScaleV1Request, ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	deployment, _ := controller.deploymentService.GetDeploymentByID(request.DeploymentId)
@@ -159,6 +170,7 @@ func (controller DeploymentController) PostReplicasById(request *requests2.Scale
 	return mvc.Success(ret)
 }
 
+// PostDestroyPod 摧毁 POD，让 POD下线
 func (controller DeploymentController) PostDestroyPod(request *requests2.DestroyPodRequest, ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	client, _ := controller.clusterService.GetClusterClientByTenantAndId(userInfo.TenantID, request.ClusterId)
@@ -169,6 +181,7 @@ func (controller DeploymentController) PostDestroyPod(request *requests2.Destroy
 	return mvc.Success(true)
 }
 
+// GetPodLogs 获取 POD中输出的 OUT日志
 func (controller DeploymentController) GetPodLogs(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	var request *requests2.PodLogsRequest
@@ -181,6 +194,7 @@ func (controller DeploymentController) GetPodLogs(ctx *context.HttpContext) mvc.
 	return mvc.Success(logs)
 }
 
+// GetEvents 获取集群中配置的环境变量
 func (controller DeploymentController) GetEvents(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	var request *requests2.EventsRequest
@@ -190,6 +204,7 @@ func (controller DeploymentController) GetEvents(ctx *context.HttpContext) mvc.A
 	return mvc.Success(events)
 }
 
+// GetYaml 把集群的配置信息转换为 YAML文件进行输出
 func (controller DeploymentController) GetYaml(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	cid := utils.GetNumberOfParam[uint64](ctx, "cid")
@@ -205,6 +220,7 @@ func (controller DeploymentController) GetYaml(ctx *context.HttpContext) mvc.Api
 	return mvc.Success(yamlStr)
 }
 
+// GetReleaseRecord 获取部署
 func (controller DeploymentController) GetReleaseRecord(ctx *context.HttpContext) mvc.ApiResult {
 	dpId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("dpId", "0"))
 	appId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("appId", "0"))
@@ -215,8 +231,10 @@ func (controller DeploymentController) GetReleaseRecord(ctx *context.HttpContext
 		return mvc.FailWithMsg(nil, err.Error())
 	}
 	return mvc.Success(res)
+
 }
 
+// PostNotify 发送通知
 func (controller DeploymentController) PostNotify(notifyReq *requests2.DeployNotifyRequest) mvc.ApiResult {
 	notifyPlugin, _ := glinq.From(notice.Plugins).Where(func(item notice.Plugin) bool {
 		return item.Value == notifyReq.NotifyType
@@ -240,6 +258,7 @@ func (controller DeploymentController) PostNotify(notifyReq *requests2.DeployNot
 
 }
 
+// PostRollBackByReleaseRecord 执行部署回滚，回滚到上一个版本
 func (controller DeploymentController) PostRollBackByReleaseRecord(ctx *context.HttpContext, execReq *requests2.ExecDeploymentRequest) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	execReq.TenantId = userInfo.TenantID
@@ -251,6 +270,7 @@ func (controller DeploymentController) PostRollBackByReleaseRecord(ctx *context.
 	return mvc.Fail(err.Error())
 }
 
+// GetNotifications 获取通知
 func (controller DeploymentController) GetNotifications() mvc.ApiResult {
 	return mvc.Success(notice.Plugins)
 }

@@ -33,6 +33,7 @@ func NewUserController(configuration abstractions.IConfiguration, service *tenan
 		}{secretKey: secretKey, expires: expires}}
 }
 
+// PostLogin PASS平台登录
 func (user *UserController) PostLogin(ctx *context.HttpContext, loginRequest *requests.LoginRequest) mvc.ApiResult {
 	if loginRequest.UserName == "" || loginRequest.Password == "" {
 		ctx.Output.SetStatus(401)
@@ -61,6 +62,7 @@ func (user *UserController) PostLogin(ctx *context.HttpContext, loginRequest *re
 	return user.OK(requests.LoginResult{Status: "ok", UserId: queryUser.ID, LoginType: loginRequest.LoginType, Authority: "admin", Token: token, Expires: exp.Unix()})
 }
 
+// GetInfo 获取当前登录人的信息
 func (user *UserController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
 	strId := ctx.Input.QueryDefault("id", "")
 	userId, err := strconv.ParseInt(strId, 10, 32)
@@ -95,6 +97,7 @@ func (user *UserController) GetInfo(ctx *context.HttpContext) mvc.ApiResult {
 	}
 }
 
+// PostRegister PASS平台用户注册
 func (user *UserController) PostRegister(ctx *context.HttpContext) mvc.ApiResult {
 	var registerUser *dbmodels.SgrTenantUser
 	_ = ctx.Bind(&registerUser)
@@ -119,6 +122,7 @@ func (user *UserController) PostRegister(ctx *context.HttpContext) mvc.ApiResult
 	}
 }
 
+// PostUpdate PASS平台用户更新
 func (user *UserController) PostUpdate(ctx *context.HttpContext) mvc.ApiResult {
 	var modifyUser *dbmodels.SgrTenantUser
 	_ = ctx.Bind(&modifyUser)
@@ -138,6 +142,7 @@ func (user *UserController) PostUpdate(ctx *context.HttpContext) mvc.ApiResult {
 	}
 }
 
+// DeleteUnRegister 删除用户注册信息
 func (user *UserController) DeleteUnRegister(ctx *context.HttpContext) mvc.ApiResult {
 	idStr := ctx.Input.QueryDefault("id", "")
 	userId, err := strconv.ParseInt(idStr, 10, 32)
@@ -152,6 +157,7 @@ func (user *UserController) DeleteUnRegister(ctx *context.HttpContext) mvc.ApiRe
 	}
 }
 
+// PutStatus 变更 PASS平台用户状态
 func (user *UserController) PutStatus(ctx *context.HttpContext) mvc.ApiResult {
 	idStr := ctx.Input.QueryDefault("id", "")
 	statusStr := ctx.Input.QueryDefault("status", "")
@@ -164,6 +170,7 @@ func (user *UserController) PutStatus(ctx *context.HttpContext) mvc.ApiResult {
 	}
 }
 
+// 获取PASS平台用户列表
 func (user *UserController) GetList(ctx *context.HttpContext) mvc.ApiResult {
 	request := &requests.QueryUserRequest{}
 	err := ctx.BindWithUri(request)

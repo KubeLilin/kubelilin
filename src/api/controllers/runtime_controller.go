@@ -22,6 +22,7 @@ func NewRuntimeController(clusterService *kubernetes.ClusterService, runtimeServ
 	return &RuntimeController{clusterService: clusterService, runtimeService: runtimeService}
 }
 
+// GetIsInstalledRuntime 获取已经安装的运行时
 func (controller RuntimeController) GetIsInstalledRuntime(ctx *context.HttpContext) mvc.ApiResult {
 	namespaceId := utils.GetNumberOfParam[uint64](ctx, "namespaceId")
 	ns := controller.clusterService.GetNameSpacesById(namespaceId)
@@ -31,6 +32,7 @@ func (controller RuntimeController) GetIsInstalledRuntime(ctx *context.HttpConte
 	return mvc.Fail("namespace not found")
 }
 
+// PostSaveDaprComponent 保存 DAPR组建信息
 func (controller RuntimeController) PostSaveDaprComponent(request *requests.RuntimeReq) mvc.ApiResult {
 	model, err := controller.runtimeService.SaveDaprComponent(request)
 	if err != nil {
@@ -39,6 +41,7 @@ func (controller RuntimeController) PostSaveDaprComponent(request *requests.Runt
 	return mvc.Success(model)
 }
 
+// GetDaprComponentList GetDaprComponentList 获取已经保存的 DAPR组建列表
 func (controller RuntimeController) GetDaprComponentList() mvc.ApiResult {
 	list, err := controller.runtimeService.GetDaprComponentList()
 	if err != nil {
@@ -47,6 +50,7 @@ func (controller RuntimeController) GetDaprComponentList() mvc.ApiResult {
 	return mvc.Success(list)
 }
 
+// DeleteDaprComponent 删除 DAPR组件
 func (controller RuntimeController) DeleteDaprComponent(ctx *context.HttpContext) mvc.ApiResult {
 	id := utils.GetNumberOfParam[uint64](ctx, "id")
 	err := controller.runtimeService.DeleteDaprComponent(id)
@@ -56,6 +60,7 @@ func (controller RuntimeController) DeleteDaprComponent(ctx *context.HttpContext
 	return mvc.Success(nil)
 }
 
+// GetDaprResourceList 获取 Dapr资源列表
 func (controller RuntimeController) GetDaprResourceList(ctx *context.HttpContext) mvc.ApiResult {
 	clusterId := utils.GetNumberOfParam[uint64](ctx, "clusterId")
 	namespace := ctx.Input.QueryDefault("namespace", "")
@@ -70,6 +75,7 @@ func (controller RuntimeController) GetDaprResourceList(ctx *context.HttpContext
 	return mvc.Success(list)
 }
 
+// GetDaprComponentTypeList 获取 Dapr组建类型列表
 func (controller RuntimeController) GetDaprComponentTypeList(ctx *context.HttpContext) mvc.ApiResult {
 	list, err := controller.runtimeService.GetDaprComponentTypes()
 	if err != nil {

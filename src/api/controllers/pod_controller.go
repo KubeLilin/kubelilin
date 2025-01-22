@@ -19,6 +19,7 @@ func NewPodController(clusterService *kubernetes.ClusterService) *PodController 
 	return &PodController{clusterService: clusterService}
 }
 
+// GetTerminal 获取 POD终端
 func (controller PodController) GetTerminal(ctx *context.HttpContext) {
 	var request requests.PodTerminalExecRequest
 	_ = ctx.BindWithUri(&request)

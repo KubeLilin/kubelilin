@@ -15,6 +15,7 @@ func NewDynamicController(service *kubernetes.DynamicResourceSupervisor) *Dynami
 	return &DynamicController{service: service}
 }
 
+// PostApply 从 YAML文件创建服务
 func (controller DynamicController) PostApply(request *requests.ApplyYAML) mvc.ApiResult {
 	err := controller.service.CreateFromYAML(request.ClusterId, request.YAML)
 	if err != nil {

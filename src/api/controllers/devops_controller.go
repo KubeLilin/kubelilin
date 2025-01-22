@@ -20,6 +20,7 @@ func NewDevopsController(devops *app.DevopsService, project *devops.ProjectServi
 	return &DevopsController{devopsService: devops, projectService: project}
 }
 
+// PostCreateProject 创建一个 DEVOPS项目
 func (controller DevopsController) PostCreateProject(ctx *context.HttpContext, request *requests2.NewProject) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
@@ -30,6 +31,7 @@ func (controller DevopsController) PostCreateProject(ctx *context.HttpContext, r
 	return mvc.Success("ok")
 }
 
+// PostEditProject 编辑一个已存在的 DEVOPS项目
 func (controller DevopsController) PostEditProject(ctx *context.HttpContext, request *requests2.NewProject) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
@@ -40,6 +42,7 @@ func (controller DevopsController) PostEditProject(ctx *context.HttpContext, req
 	return mvc.Success("ok")
 }
 
+// DeleteProject 删除一个已存在的 DEVOPS项目
 func (controller DevopsController) DeleteProject(ctx *context.HttpContext) mvc.ApiResult {
 	projectId, _ := utils.StringToUInt64(ctx.Input.QueryDefault("id", "0"))
 	err := controller.devopsService.DeleteProject(projectId)
@@ -49,6 +52,7 @@ func (controller DevopsController) DeleteProject(ctx *context.HttpContext) mvc.A
 	return mvc.Success("ok")
 }
 
+// GetProjectList 获取当前用户已经创建的 DEVOPS项目列表
 func (controller DevopsController) GetProjectList(ctx *context.HttpContext, request *requests2.DevopsProjectReq) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
@@ -59,6 +63,7 @@ func (controller DevopsController) GetProjectList(ctx *context.HttpContext, requ
 	return mvc.Success(res)
 }
 
+// GetAppList获取所有的 APP列表
 func (controller DevopsController) GetAppList(ctx *context.HttpContext, request *requests2.AppReq) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	request.TenantID = userInfo.TenantID
@@ -70,6 +75,7 @@ func (controller DevopsController) GetAppList(ctx *context.HttpContext, request 
 	return mvc.Success(res)
 }
 
+// GetPipelineList 根据当前项目获取所有的流水线列表
 func (controller DevopsController) GetPipelineList(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	projectId := utils.GetNumberOfParam[uint64](ctx, "projectId")
@@ -80,6 +86,7 @@ func (controller DevopsController) GetPipelineList(ctx *context.HttpContext) mvc
 	return mvc.Success(res)
 }
 
+// GetResourceMetrics 根据项目获取所有的元数据信息
 func (controller DevopsController) GetResourceMetrics(ctx *context.HttpContext) mvc.ApiResult {
 	userInfo := requests2.GetUserInfo(ctx)
 	projectId := utils.GetNumberOfParam[uint64](ctx, "projectId")

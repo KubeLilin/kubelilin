@@ -18,6 +18,7 @@ func NewRoleMenuController(service *tenant.RoleMenuService) *RoleMenuController 
 	}
 }
 
+// PostRoleMenuMap 编辑用户菜单
 func (c *RoleMenuController) PostRoleMenuMap(req *requests.RoleMenuListReq) mvc.ApiResult {
 	fmt.Println(req)
 	res := c.service.CreateRoleMenuMap(req)
